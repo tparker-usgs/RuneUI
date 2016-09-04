@@ -1381,6 +1381,36 @@ function net_CidrToNetmask($cidr) {
     return join('.', $netmask);
 }
 
+function wrk_apconfig($redis, $action, $args = null)
+{
+	$return = array();
+    runelog('wrk_apconfig args = ', $args);
+    switch ($action) {
+        case 'writecfg':
+            if (isset($args->{'enabled'})) {
+                $redis->hSet('AccessPoint', 'enabled', $args->{'enabled'});
+            } else {
+                $redis->hSet('AccessPoint', 'enabled', 0);
+            }
+            $redis->hSet('AccessPoint', 'ssid', $args->{'ssid'});
+            $redis->hSet('AccessPoint', 'passphrase', $args->{'passphrase'});
+            $redis->hSet('AccessPoint', 'ip-address', $args->{'ip-address'});
+            $redis->hSet('AccessPoint', 'broadcast', $args->{'broadcast'});
+            $redis->hSet('AccessPoint', 'dhcp-range', $args->{'dhcp-range'});
+            $redis->hSet('AccessPoint', 'dhcp-option-dns', $args->{'dhcp-option-dns'});
+            $redis->hSet('AccessPoint', 'dhcp-option-router', $args->{'dhcp-option-router'});
+            if (isset($args->{'enable-NAT'})) {
+                $redis->hSet('AccessPoint', 'enable-NAT', $args->{'enable-NAT'});
+            } else {
+                $redis->hSet('AccessPoint', 'enable-NAT', 0);
+            }
+            break;
+        case 'reset':
+            break;
+    }
+    return $return;
+}
+
 function wrk_netconfig($redis, $action, $args = null, $configonly = null)
 {
 	$return = array();

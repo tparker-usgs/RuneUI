@@ -593,6 +593,33 @@ $redis->pconnect('/tmp/redis.sock');
                         $redis->sRem('w_lock', $jobID);
                     }
                     break;
+                case 'apcfg':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    runelog('apcfg action: ', $job->action);
+                    runelog('apcfg args: ', $job->args);
+                    $redis->sAdd('w_lock', $jobID);
+                    // reset accesspoint configuration to default
+                    if ($job->action === 'reset') {
+                        // todo
+                        $redis->sRem('w_lock', $jobID);
+                    }
+                    // write network configuration
+                    if ($job->action === 'config') {
+                        // send notfy to UI
+                        ui_notify('AccessPoint configuration', 'it takes some time .....');
+                        $retval = wrk_apconfig($redis, 'writecfg', $job->args);
+                        $redis->sRem('w_lock', $jobID);
+                        // reboot if needed !!!
+                        if ($retval === 'reboot') {
+                            $notification = new stdClass();
+                            $notification->title = 'AccessPoint config';
+                            $notification->text = 'Config changed successfully, reboot reqired';
+                            wrk_notify($redis, 'kernelswitch', $notification, $jobID);
+                            sysCmd('/var/www/command/rune_shutdown reboot');
+                            sysCmdAsync('systemctl reboot');
+                        }
+                    }
+                    break;
                 case 'ntpserver':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);

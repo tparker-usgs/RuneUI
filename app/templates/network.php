@@ -6,7 +6,13 @@
         <form id="network-refresh" method="post">
             <button class="btn btn-lg btn-primary" name="refresh" value="1" id="refresh"><i class="fa fa-refresh sx"></i>Refresh interfaces</button>
         </form>
-    </div>    
+    </div>
+    <br>
+    <div class="boxed">
+        <p>Configure an Access Point (AP). With this option enabled your device opens an Access Point.<br>
+        Rune Audio tries to connect to configured wifi profiles first!</p>
+        <button class="btn btn-lg btn-primary" onclick="location.href='/accesspoint'">AP settings</button>
+    </div>
     <h2>Network interfaces</h2>
     <p>List of active network interfaces. Click on an entry to configure the corresponding connection.</p>
     <form id="network-interface-list" class="button-list" method="post">

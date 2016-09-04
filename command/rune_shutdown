@@ -33,14 +33,19 @@
 
 if [ $1 == "poweroff" ] ; then
   echo "power off RuneAudio"
+  splash="/usr/share/bootsplash/shutdown.png"
 else
   echo "reboot RuneAudio"
+  splash="/usr/share/bootsplash/reboot.png"
 fi
 
 echo "Stop MPD and unmount shares..."
 mpc stop
 systemctl stop nginx
 sleep 1
+killall xinit
+sleep 1
+ply-image "$splash"
 systemctl stop mpd
 systemctl stop spopd
 sleep 1
@@ -49,3 +54,4 @@ xset dpms force off
 sleep 1
 umount -aft nfs
 umount -aft cifs
+

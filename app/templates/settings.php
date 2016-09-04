@@ -392,6 +392,8 @@
                 <h3 class="modal-title">System status</h3>
             </div>
             <div class="modal-body">
+                <strong>RuneAudio version / build</strong>
+                <p>Ver. <?=$this->sysstate['release'] ?> build <?=$this->sysstate['buildversion'] ?></p>
 				<strong>Active kernel</strong>
 				<p><?=$this->sysstate['kernel'] ?></p>
 				<strong>System time</strong>

@@ -334,7 +334,15 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
-    }
+        case 'pl-ashuffle':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['playlist'])) {
+					sysCmdAsync('/usr/local/bin/ashuffle -f /var/lib/mpd/playlists/'.$_POST['playlist'].'.m3u &');
+                    ui_notify('Playing randomly from', $_POST['playlist'].'.m3u');
+                }
+            }
+            break;
+	}
 } else {
   echo 'MPD DB INTERFACE<br>';
   echo 'INTERNAL USE ONLY<br>';

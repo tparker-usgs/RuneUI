@@ -40,6 +40,7 @@ var GUI = {
     DBupdate: 0,
     activePlayer: '',
     browsemode: 'file',
+    checkvol: 0,
     currentDBpos: [0,0,0,0,0,0,0,0,0,0,0],
     currentDBpath: ['','','','','','','','','','',''],
     currentalbum: null,
@@ -47,8 +48,9 @@ var GUI = {
     currentpath: '',
     currentsong: null,
     json: 0,
-    lastvol: 0,
     libraryhome: '',
+    maxvol: 100,
+    minvol: 0,
     mode: 'websocket',
     noticeUI: {},
     playlist: null,
@@ -58,6 +60,7 @@ var GUI = {
     stepVolumeInt: 0,
     stream: '',
     visibility: 'visible',
+    vol_changed_local: 0,
     volume: null
 };
 
@@ -108,6 +111,42 @@ function parsePath(str) {
         songpath = str.slice(0,cutpos);
     }
     return songpath;
+}
+
+// switch view after a certain time
+var idleTime = 0;
+var viewScreenSaver = 0;
+var isLocalHost = 0;
+$(document).ready(function () {
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+        isLocalHost = 1;
+        //Increment the idle time counter every minute.
+        var idleInterval = setInterval(timerIncrement, 600); // 1 minute
+
+        //Zero the idle timer on mouse movement and keypress.
+
+        $(this).on( "mousemove click keypress", function (e) {
+            idleTime = 0;
+            if (viewScreenSaver) {
+                $('.tab-content').show("slow");
+                $('.screen-saver-content').hide("slow");
+                $('#menu-bottom').show("slow");
+                $('#menu-top').show("slow");
+                viewScreenSaver = 0;
+            }
+        });
+    }
+});
+
+function timerIncrement() {
+    idleTime = idleTime + 1;
+    if (idleTime > 19) { // 20 * timerIncrement
+		$('.tab-content').hide("slow");
+		$('.screen-saver-content').show("slow");
+		$('#menu-bottom').hide("slow");
+		$('#menu-top').hide("slow");
+		viewScreenSaver = 1;
+    }
 }
 
 // update countdown
@@ -166,6 +205,22 @@ function timeConvert2(ss) {
     if (ss < 10) { ss = '0' + ss; }
     return hr + mm + ':' + ss;
 }
+function timeConvert3(ss) {
+    var hr = Math.floor(ss/3600);
+    var mm = Math.floor((ss -(hr * 3600))/60);
+    ss = Math.floor(ss -(hr*3600) -(mm * 60));
+    if (hr > 0) {
+        if (hr < 10){
+            hr = '0' + hr + 'h ';
+        }
+        hr += 'h ';
+    } else {
+        hr = '';
+    }
+    if (mm < 10) { mm = '0' + mm; }
+    if (ss < 10) { ss = '0' + ss; }
+    return hr + mm + 'm ' + ss + 's';
+}
 
 // reset countdown
 function countdownRestart(startFrom) {
@@ -173,12 +228,20 @@ function countdownRestart(startFrom) {
     display.countdown({since: -(startFrom), compact: true, format: 'MS'});
 }
 
+function reset_vol_changed_local() {
+    GUI.vol_changed_local = 0;
+}
+
 // set volume with knob
 function setvol(val) {
-    $('#volume').val(val, false).trigger('update');
+    //$('#volume').val(val, false).trigger('update');
     GUI.volume = val;
     $('#volumemute').removeClass('btn-primary');
     sendCmd('setvol ' + val);
+    if (GUI.vol_changed_local === 0) {
+	    setInterval(reset_vol_changed_local, 5000);
+        GUI.vol_changed_local = 1;
+    }
 }
 
 // stepped volume control
@@ -348,11 +411,6 @@ function sortOrder(id) {
     sendCmd('moveid ' + id + ' ' + pos);
 }
 
-// sort list by inner HTML
-function sortByInnerHtml(a, b){
-    return a.innerHTML.toLowerCase() > b.innerHTML.toLowerCase() ? 1 : -1;
-}
-
 // loading spinner display/hide
 function loadingSpinner(section, hide) {
     if (hide === 'hide') {
@@ -514,6 +572,9 @@ function refreshState() {
         $('#stop').removeClass('btn-primary');
     } else if (state === 'pause') {
         $('#playlist-position span').html('Not playing');
+		if (isLocalHost === 1) {
+            $('#playlist-position-ss span').html('Not playing');
+        }
         $('#play').addClass('btn-primary');
         $('i', '#play').removeClass('fa fa-play').addClass('fa fa-pause');
         $('#stop').removeClass('btn-primary');
@@ -536,6 +597,9 @@ function refreshState() {
         }
         $('#time').val(0, false).trigger('update');
         $('#format-bitrate').html('&nbsp;');
+		if (isLocalHost === 1) {
+            $('#format-bitrate-ss').html('&nbsp;');
+        }
         $('li', '#playlist-entries').removeClass('active');
     }
     if (state !== 'stop') {
@@ -548,6 +612,9 @@ function refreshState() {
         }
         var fileinfo = (GUI.json.audio_channels && GUI.json.audio_sample_depth && GUI.json.audio_sample_rate) ? (GUI.json.audio_channels + ', ' + GUI.json.audio_sample_depth + ' bit, ' + GUI.json.audio_sample_rate +' kHz, '+GUI.json.bitrate+' kbps') : '&nbsp;';
         $('#format-bitrate').html(fileinfo);
+		if (isLocalHost === 1) {
+            $('#format-bitrate-ss').html(fileinfo);
+        }
         $('li', '#playlist-entries').removeClass('active');
         var current = parseInt(GUI.json.song);
         $('#playlist-entries').find('li').eq(current).addClass('active');
@@ -555,11 +622,20 @@ function refreshState() {
     if (GUI.json.playlistlength && GUI.json.playlistlength !== '0') {
         if (GUI.json.song) {
             $('#playlist-position span').html('Playlist position ' + (parseInt(GUI.json.song) + 1) + '/' + GUI.json.playlistlength);
+            if (isLocalHost === 1) {
+                $('#playlist-position-ss span').html('Playlist position ' + (parseInt(GUI.json.song) + 1) + '/' + GUI.json.playlistlength);
+            }
         } else {
             $('#playlist-position span').html('Playlist position 1/' + GUI.json.playlistlength);
+            if (isLocalHost === 1) {
+                $('#playlist-position-ss span').html('Playlist position 1/' + GUI.json.playlistlength);
+            }
         }
     } else {
         $('#playlist-position span').html('Empty queue, add some music!');
+        if (isLocalHost === 1) {
+            $('#playlist-position-ss span').html('Empty queue, add some music!');
+        }
     }
     // show UpdateDB icon
     // console.log('dbupdate = ', GUI.json.updating_db);
@@ -579,7 +655,7 @@ function updateGUI() {
     var currentsong = GUI.json.currentsong;
     var currentalbum = GUI.json.currentalbum;
     // set radio mode if stream is present
-    GUI.stream = isUrl(GUI.json.file) ? 'radio' : '';
+    GUI.stream = ((radioname !== null && radioname !== undefined && radioname !== '') ? 'radio' : '');
     // check MPD status and refresh the UI info
     refreshState();
     if ($('#section-index').length) {
@@ -593,16 +669,28 @@ function updateGUI() {
             }
         }
         // common actions
-        $('#volume').val((volume === '-1') ? 100 : volume, false).trigger('update');
+        if (GUI.vol_changed_local === 0) {
+            $('#volume').val((volume === '-1') ? 100 : volume, false).trigger('update');
+        }
         // console.log('currentartist = ', GUI.json.currentartist);
         if (GUI.stream !== 'radio') {
             $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
             $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
             $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
+            if (isLocalHost === 1) {
+                $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+                $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+                $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
+            }
         } else {
             $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
             $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
             $('#currentalbum').html('<span class="notag">streaming</span>');
+            if (isLocalHost === 1) {
+                $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
+                $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
+                $('#currentalbum-ss').html('<span class="notag">streaming</span>');
+            }
         }
         if (GUI.json.repeat === '1') {
             $('#repeat').addClass('btn-primary');
@@ -624,26 +712,43 @@ function updateGUI() {
         } else {
             $('#single').removeClass('btn-primary');
         }
-        
-		GUI.currentsong = currentsong;
-		var currentalbumstring = currentartist + ' - ' + currentalbum;
-		if (GUI.currentalbum !== currentalbumstring) {
+        GUI.currentsong = currentsong;
+        var currentalbumstring = currentartist + ' - ' + currentalbum;
+        if (GUI.currentalbum !== currentalbumstring) {
+            if (isLocalHost === 1) {
+                $('#artist-bio-ss').html('');
+                $('#artist-image-ss').css('background-image', '');
+                $('#song-lyric-ss').html('');
+            }
 			if (GUI.stream !== 'radio') {
-				var covercachenum = Math.floor(Math.random()*1001);
-				$('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
-			
-				$.ajax({
-				   url: '/lyric/',
-				   success: function(data){
-					  $('#cover-art').attr('title',data);
-				   },
-				   cache: false
-				});
-			
+                var covercachenum = Math.floor(Math.random()*1001);
+                $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
+                if (isLocalHost === 1) {
+                    $('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
+                    $.ajax({
+                        url: '/artist_info/',
+                        success: function(data){
+						    var info = jQuery.parseJSON(data);
+					        $('#artist-bio-ss').html(info.artist.bio.summary);
+					        $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        },
+                        cache: false
+                    });
+                    $.ajax({
+                        url: '/lyric/',
+                        success: function(data){
+					        $('#song-lyric-ss').html(data);
+                        },
+                        cache: false
+                    });
+                }
 			} else {
-				$('#cover-art').css('background-image','url("assets/img/cover-radio.jpg")');
-			}
-		}
+                $('#cover-art').css('background-image','url("assets/img/cover-radio.jpg")');
+                if (isLocalHost === 1) {
+                    $('#cover-art-ss').css('background-image','url("assets/img/cover-radio.jpg")');
+                }
+            }
+        }        
         GUI.currentalbum = currentalbumstring;
     }
 }
@@ -652,7 +757,7 @@ function updateGUI() {
 function getPlaylistPlain(data) {
     var current = parseInt(GUI.json.song) + 1;
     var state = GUI.json.state;
-    var content = '', time = '', artist = '', album = '', title = '', name='', str = '', filename = '', path = '', id = 0, songid = '', bottomline = '', totaltime = '', pos = 0;
+    var content = '', time = '', artist = '', album = '', title = '', name='', str = '', filename = '', path = '', id = 0, songid = '', bottomline = '', totaltime = 0, playlisttime = 0, pos = 0;
     var i, line, lines = data.split('\n'), infos=[];
     for (i = 0; (line = lines[i]); i += 1) {
         infos = line.split(': ');
@@ -691,9 +796,10 @@ function getPlaylistPlain(data) {
             if (name !== '') {
                 title = '<i class="fa fa-microphone"></i>' + name;
                 bottomline = 'URL: ' + (path === '') ? str : path;
-                totaltime = '';
+				totaltime = '';
             } else {
                 totaltime = '<span>' + timeConvert2(time) + '</span>';
+				playlisttime += time;
             }
             pos++;
             content += '<li id="pl-' + songid + '"' + (state !== 'stop' && pos === current ? ' class="active"' : '') + '><i class="fa fa-times-circle pl-action" title="Remove song from playlist"></i><span class="sn">' + title + totaltime + '</span><span class="bl">' + bottomline + '</span></li>';
@@ -708,7 +814,7 @@ function getPlaylistPlain(data) {
     $('#pl-filter-results').addClass('hide').html('');
     $('#pl-filter').val('');
     $('#pl-manage').removeClass('hide');
-    $('#pl-count').removeClass('hide').html(pos + ((pos !== 1) ? ' entries' : ' entry'));
+    $('#pl-count').removeClass('hide').html(pos + ((pos !== 1) ? ' entries' : ' entry') + ' ' + timeConvert3(playlisttime) + ' total playtime');
 }
 
 // refresh the queue (TODO: improve in PushStream mode)
@@ -784,7 +890,6 @@ function renderUI(text){
         if (GUI.stream !== 'radio') {
             refreshKnob();
         } else {
-            window.clearInterval(GUI.currentKnob);
             $('#time').val(0, false).trigger('update');
         }
         // console.log('GUI.json.playlist = ' + GUI.json.playlist + ', GUI.playlist = ', GUI.playlist);
@@ -826,8 +931,6 @@ function getPlaylists(){
         url: '/command/?cmd=listplaylists',
         success: function(data){
             renderPlaylists(data);
-            var list = $("#pl-editor");
-            list.children().sort(sortByInnerHtml).appendTo(list);
         },
         cache: false
     });
@@ -1051,7 +1154,7 @@ function populateDB(options){
         
     // DEBUG
     // console.log('populateDB OPTIONS: data = ' + data + ', path = ' + path + ', uplevel = ' + uplevel + ', keyword = ' + keyword +', querytype = ' + querytype);
-    // console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
 
     if (plugin !== '') {
     // plugins
@@ -1410,9 +1513,6 @@ function commandButton(el) {
     else if (el.hasClass('btn-volume')) {
         var vol;
         var knobvol = parseInt($('#volume').val());
-        if (GUI.volume === null ) {
-            GUI.volume = knobvol;
-        }
         if (dataCmd === 'volumedn' && parseInt(GUI.volume) > 0) {
             vol = parseInt(GUI.volume) - 1;
             GUI.volume = vol;
@@ -1428,12 +1528,13 @@ function commandButton(el) {
                 vol = 0;
             } else {
                 el.removeClass('btn-primary');
-                setvol(GUI.volume);
+                vol = GUI.volume;
             }
         }
         // console.log('volume = ', GUI.volume);
         if ((vol >= 0) && (vol <= 100)) {
             sendCmd('setvol ' + vol);
+            $('#volume').val(vol, false).trigger('update');
         }
         return;
     }
@@ -1712,35 +1813,7 @@ function visChange() {
     }
 }
 
-// check if a string is a url
-function isUrl(s) {
-    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-    return regexp.test(s);
-}
 
-// display date time on local browsers
-function checkTime(i) {
-    if (i < 10) {
-        i = "0" + i;
-    }
-    return i;
-}
-function startTime() {
-    var today = new Date();
-    var h = today.getHours();
-    var m = today.getMinutes();
-    var s = today.getSeconds();
-    // add a zero in front of numbers<10
-    m = checkTime(m);
-    s = checkTime(s);
-    document.getElementById('clock-display').innerHTML = h + ":" + m + ":" + s;
-    t = setTimeout(function () {
-        startTime()
-    }, 500);
-}
-
-if (document.location.hostname == "localhost")
-    startTime();
 
 if ($('#section-index').length) {
 
@@ -1793,24 +1866,66 @@ if ($('#section-index').length) {
             var el = $(this);
             commandButton(el);
         });
-        
-        $('#volume-step-dn').on({
-            mousedown : function () {
-                volumeStepCalc('dn');
-            },
-            mouseup : function () {
-                volumeStepSet();
-            }
+
+        var intervalId;
+        var interval;
+        $("#volumedn").on('mouseleave mouseout mouseup', function() {
+            clearInterval(intervalId);
+            return false;
         });
-        
-        $('#volume-step-up').on({
-            mousedown : function () {
-                volumeStepCalc('up');
-            },
-            mouseup : function () {
-                volumeStepSet();
-            }
+        $('#volumedn').mousedown(function(){
+            interval = 300;
+            intervalId = setInterval(vol_down_interval, interval + 200);
+            return false;
         });
+        function vol_down_interval() {
+            clearInterval(intervalId);
+            interval = interval - 10;
+			if (interval < 50) {
+                interval = 50;
+            }
+            intervalId = setInterval(vol_down_interval, interval);
+            var vol;
+            var knobvol = parseInt($('#volume').val());
+            if (parseInt(GUI.volume) > 0) {
+                vol = parseInt(GUI.volume) - 1;
+                GUI.volume = vol;
+                $('#volumemute').removeClass('btn-primary');
+            }
+            if ((vol >= 0) && (vol <= 100)) {
+                setvol(vol);
+                $('#volume').val(vol, false).trigger('update');
+            }
+        }
+
+        $("#volumeup").on('mouseleave mouseout mouseup', function() {
+            clearInterval(intervalId);
+            return false;
+        });
+        $('#volumeup').mousedown(function(){
+            interval = 300;
+            intervalId = setInterval(vol_up_interval, interval + 200);
+            return false;
+        });
+        function vol_up_interval() {
+            clearInterval(intervalId);
+            interval = interval - 10;
+			if (interval < 50) {
+                interval = 50;
+            }
+            intervalId = setInterval(vol_up_interval, interval);
+            var vol;
+            var knobvol = parseInt($('#volume').val());
+            if (parseInt(GUI.volume) < 100) {
+                vol = parseInt(GUI.volume) + 1;
+                GUI.volume = vol;
+                $('#volumemute').removeClass('btn-primary');
+            }
+            if ((vol >= 0) && (vol <= 100)) {
+                setvol(vol);
+                $('#volume').val(vol, false).trigger('update');
+            }
+        }
         
         // play/pause when clicking on the counter or total time inside the progress knob
         $('#countdown-display').click(function(){
@@ -1845,15 +1960,27 @@ if ($('#section-index').length) {
             inline: false,
             change: function (value) {
                 var vol = parseInt(value);
-                if (dynVolumeKnob && vol !== GUI.lastvol) {
-                    GUI.lastvol = vol;
+                if (vol > GUI.maxvol - 4 && GUI.checkvol < GUI.minvol + 5) {
+                    $('#volume').val(0);
+					if (dynVolumeKnob) {
+                        $(document).mouseup();
+                    }
+                    return false;
+                } else if (vol < GUI.minvol + 4 && GUI.checkvol > GUI.maxvol - 5) {
+                    $('#volume').val(100);
+					if (dynVolumeKnob) {
+                        $(document).mouseup();
+                    }
+                    return false;
+                }
+                if (dynVolumeKnob && vol !== GUI.volume) {
                     setvol(vol);
                 }
+                GUI.checkvol = vol;
             },
             release: function (value) {
                 var vol = parseInt(value);
-                if (!dynVolumeKnob && vol !== GUI.lastvol) {
-                    GUI.lastvol = vol;
+                if (!dynVolumeKnob && vol !== GUI.volume) {
                     setvol(vol);
                 }
             },
@@ -2273,8 +2400,12 @@ if ($('#section-index').length) {
                         cache: false
                     });
                     break;
+					
+				case 'pl-ashuffle':
+                    $.post('/db/?cmd=pl-ashuffle', { 'playlist' : path });
+                    break;
                     
-                case 'wradd':
+				case 'wradd':
                     path = path.split(' | ')[1];
                     getDB({
                         cmd: 'add',
@@ -2331,7 +2462,7 @@ if ($('#section-index').length) {
                     break;
             }
         });
-
+		
         // add webradio
         $('#webradio-add-button').click(function(){
             var radioname = $('#webradio-add-name').val();
@@ -2393,23 +2524,13 @@ if ($('#section-index').length) {
             $.scrollTo(0 , 500);
         });
         $('#pl-prevPage').click(function(){
-	    var pageHeight = $(window).height() - document.getElementById("pl-manage").offsetHeight
-	                                        - document.getElementById("menu-bottom").offsetHeight
-	                                        - document.getElementById("menu-top").offsetHeight
-	                                        - document.getElementById("pl-search").offsetHeight
-	                                        - document.getElementById("pl-1").offsetHeight;
-	    var scrollTop = $(window).scrollTop();
-            var scrolloffset = scrollTop - pageHeight;
+            var scrollTop = $(window).scrollTop();
+            var scrolloffset = scrollTop - $(window).height();
             $.scrollTo(scrolloffset , 500);
         });
         $('#pl-nextPage').click(function(){
-	    var pageHeight = $(window).height() - document.getElementById("pl-manage").offsetHeight
-	                                        - document.getElementById("menu-bottom").offsetHeight
-	                                        - document.getElementById("menu-top").offsetHeight
-	                                        - document.getElementById("pl-search").offsetHeight
-	                                        - document.getElementById("pl-1").offsetHeight;
-	    var scrollTop = $(window).scrollTop();
-            var scrolloffset = scrollTop + pageHeight;
+            var scrollTop = $(window).scrollTop();
+            var scrolloffset = scrollTop + $(window).height();
             $.scrollTo(scrolloffset , 500);
         });
         $('#pl-lastPage').click(function(){
@@ -2453,11 +2574,7 @@ if ($('#section-index').length) {
             $.post('/settings/', { 'syscmd' : 'reboot' });
             toggleLoader();
         });
-        // local display off
-        $('#syscmd-display_off').click(function(){
-            $.post('/settings/', { 'syscmd' : 'display_off' });
-        });
-		
+        
         // social share overlay
         overlayTrigger('#overlay-social');
         // play source overlay
@@ -2755,6 +2872,33 @@ if ($('#section-index').length) {
 
         }
 
+        // ACCESSPOINT
+        // ----------------------------------------------------------------------------------------------------
+        
+        if ($('#section-accesspoint').length) {
+            
+            // show/hide AP settings form
+            $('#accesspoint').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#accesspointSettings').removeClass('hide');
+                    $('#accesspointBox').addClass('boxed-group');
+                } else {
+                    $('#accesspointSettings').addClass('hide');
+                    $('#accesspointBox').removeClass('boxed-group');
+                }
+            });
+
+            $('#ip-address').change(function(){
+                var parts = $('#ip-address').val().split('.');
+				parts[3]++;
+				$('#dhcp-range').val(parts.join('.')+','+parts[0]+'.'+parts[1]+'.'+parts[2]+'.254,24h');
+				parts[3] = 255;
+                $('#broadcast').val(parts.join('.'));
+                $('#dhcp-option-dns').val($('#ip-address').val());
+                $('#dhcp-option-router').val($('#ip-address').val());
+            });
+        }
+        
         // MPD
         // ----------------------------------------------------------------------------------------------------
         

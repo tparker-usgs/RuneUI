@@ -1,3 +1,25 @@
+<div class="screen-saver-content" style="display:none;">
+    <!-- PLAYBACK PANEL -->
+    <div id="playback-ss" class="tab-pane active">
+        <div class="container-fluid">
+			<div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
+			<div id="playlist-position-ss"><button class="btn btn-default btn-xs">MPD</button><span></span></div>
+			<div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div class="col-sm-4 coverart-ss">
+                <img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+            </div>
+			<div>
+				<div class="col-sm-4 coverart">
+					<img id="artist-image-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
+					<div id="artist-bio-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+				</div>	
+			</div>	
+			<div id="song-lyric-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+        </div>
+    </div>
+</div>
 <div class="tab-content">
     <!-- PLAYBACK PANEL -->
     <div id="playback" class="tab-pane active">
@@ -188,6 +210,7 @@
         <ul class="dropdown-menu" role="menu">
             <li><a href="javascript:;" data-cmd="pl-add"><i class="fa fa-plus-circle sx"></i> Add to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-replace"><i class="fa fa-undo sx"></i> Replace the queue</a></li>
+			<li><a href="javascript:;" data-cmd="pl-ashuffle"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-rename"><i class="fa fa-edit sx"></i> Rename</a></li>
             <li><a href="javascript:;" data-cmd="pl-rm"><i class="fa fa-trash-o sx"></i> Delete</a></li>
         </ul>

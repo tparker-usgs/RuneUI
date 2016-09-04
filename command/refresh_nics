@@ -170,6 +170,93 @@ if (!empty($removed_nics)) {
         }
     }
 }
+
+// handle removed nics
+
+// start AP if configured and no IP is assigned
+if (FALSE === $redis->hGet('AccessPoint', 'enabled')) {
+    $redis->hSet('AccessPoint', 'enabled', 0);
+}
+if (FALSE === $redis->hGet('AccessPoint', 'ip-address')) {
+    $redis->hSet('AccessPoint', 'ip-address', '192.168.1.1');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'broadcast')) {
+    $redis->hSet('AccessPoint', 'broadcast', '192.168.1.255');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'ssid')) {
+    $redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'passphrase')) {
+    $redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'dhcp-range')) {
+    $redis->hSet('AccessPoint', 'dhcp-range', '192.168.1.2,192.168.1.254,24h');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'dhcp-option-dns')) {
+    $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.1.1');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'dhcp-option-router')) {
+    $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.1.1');
+}
+if (FALSE === $redis->hGet('AccessPoint', 'enable-NAT')) {
+    $redis->hSet('AccessPoint', 'enable-NAT', 0);
+}
+if ($redis->hGet('AccessPoint', 'enabled') === '1') {
+	runelog('------------------ try to start AP if no IP is assigned ---------------------');
+	$got_one_IP = false;
+	if (!empty($active_nics)) {
+		foreach($active_nics as $nic) {
+			if (($nic === "wlan0") && (sysCmd('ip address show dev '.$nic.' | grep inet | wc -l')[0] !== '0')) {
+				runelog('########### got one IP for nic: '.$nic);
+				$got_one_IP = true;
+			}
+		}
+	}
+	if ($got_one_IP === false) {
+		runelog('########### no IP => start AP on wlan0');
+		sysCmd('systemctl stop netctl-auto@wlan0');
+		// change AP name
+		$file = '/etc/hostapd/hostapd.conf';
+        $newArray = wrk_replaceTextLine($file, '', 'ssid=', 'ssid='.$redis->hGet("AccessPoint", "ssid"));
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		// change passphrase
+		$file = '/etc/hostapd/hostapd.conf';
+        $newArray = wrk_replaceTextLine($file, '', 'wpa_passphrase=', 'wpa_passphrase='.$redis->hGet("AccessPoint", "passphrase"));
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		sysCmd('systemctl start hostapd');
+		// change dhcp-range
+		$file = '/etc/dnsmasq.conf';
+        $newArray = wrk_replaceTextLine($file, '', 'dhcp-range=', 'dhcp-range='.$redis->hGet("AccessPoint", "dhcp-range"));
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		// change dhcp-option
+		$file = '/etc/dnsmasq.conf';
+        $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:dns-server,', 'dhcp-option-force=option:dns-server,'.$redis->hGet("AccessPoint", "dhcp-option-dns"));
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		$file = '/etc/dnsmasq.conf';
+        $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:router,', 'dhcp-option-force=option:router,'.$redis->hGet("AccessPoint", "dhcp-option-router"));
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		sysCmd('systemctl start dnsmasq');
+		sysCmd('ip addr add '.$redis->hGet("AccessPoint", "ip-address").'/24 broadcast '.$redis->hGet("AccessPoint", "broadcast").' dev wlan0');
+		if ($redis->hGet('AccessPoint', 'enable-NAT') === '1') {
+			sysCmd('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
+			sysCmd('iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT');
+			sysCmd('iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT');
+			sysCmd('sysctl net.ipv4.ip_forward=1');
+		}
+	}
+}
+// start AP end
+
 // end - unlock the scan system
 runelog('--------------------------- unlock the scan system ---------------------------');
 $redis->Set('lock_wifiscan', 0);

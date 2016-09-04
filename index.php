@@ -54,6 +54,7 @@ $template->activePlayer = $activePlayer;
 // allowed controllers
 $controllers = array(
     'lyric',
+	'artist_info',
     'coverart',
     'credits',
     'dev',
@@ -63,6 +64,7 @@ $controllers = array(
     'login',
     'mpd',
     'network',
+    'accesspoint',
     'playback',
     'settings',
     'sources',
