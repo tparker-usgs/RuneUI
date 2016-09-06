@@ -78,9 +78,17 @@
                 <div class="col-sm-offset-2 col-sm-10">
                     <a href="/network" class="btn btn-default btn-lg">Cancel</a>
                     <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+                    <div class="checkbox">
+                        <br>
+                        <label>
+                            <input class="sx" type="checkbox" name="settings[restart]" value="1"> Restart Accesspoint 
+                        </label>
+                        <label>
+                            <input class="sx" type="checkbox" name="settings[reboot]" value="1"> Save settings and reboot
+                        </label>
+                    </div>
                 </div>
             </div>
-            <br>
         </form>
     </div>
     <fieldset>

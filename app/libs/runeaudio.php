@@ -1399,10 +1399,59 @@ function wrk_apconfig($redis, $action, $args = null)
             $redis->hSet('AccessPoint', 'dhcp-range', $args->{'dhcp-range'});
             $redis->hSet('AccessPoint', 'dhcp-option-dns', $args->{'dhcp-option-dns'});
             $redis->hSet('AccessPoint', 'dhcp-option-router', $args->{'dhcp-option-router'});
-            if (isset($args->{'enable-NAT'})) {
+            if ($args->{'enable-NAT'} === '1') {
                 $redis->hSet('AccessPoint', 'enable-NAT', $args->{'enable-NAT'});
             } else {
                 $redis->hSet('AccessPoint', 'enable-NAT', 0);
+            }
+            if ($args->{'reboot'} === '1') {
+                runelog('**** AP reboot requested ****', $args);
+                $return = 'reboot';
+            } elseif ($args->{'restart'} === '1') {
+                runelog('**** AP restart requested ****', $args);
+                // change AP name
+                $file = '/etc/hostapd/hostapd.conf';
+                $newArray = wrk_replaceTextLine($file, '', 'ssid=', 'ssid='.$args->{'ssid'});
+                $fp = fopen($file, 'w');
+                $return = fwrite($fp, implode("", $newArray));
+                fclose($fp);
+                // change passphrase
+                $file = '/etc/hostapd/hostapd.conf';
+                $newArray = wrk_replaceTextLine($file, '', 'wpa_passphrase=', 'wpa_passphrase='.$args->{'passphrase'});
+                $fp = fopen($file, 'w');
+                $return = fwrite($fp, implode("", $newArray));
+                fclose($fp);
+                sysCmd('systemctl start hostapd');
+                // change dhcp-range
+                $file = '/etc/dnsmasq.conf';
+                $newArray = wrk_replaceTextLine($file, '', 'dhcp-range=', 'dhcp-range='.$args->{'dhcp-range'});
+                $fp = fopen($file, 'w');
+                $return = fwrite($fp, implode("", $newArray));
+                fclose($fp);
+                // change dhcp-option
+                $file = '/etc/dnsmasq.conf';
+                $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:dns-server,', 'dhcp-option-force=option:dns-server,'.$args->{'dhcp-option-dns'});
+                $fp = fopen($file, 'w');
+                $return = fwrite($fp, implode("", $newArray));
+                fclose($fp);
+                $file = '/etc/dnsmasq.conf';
+                $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:router,', 'dhcp-option-force=option:router,'.$args->{'dhcp-option-router'});
+                $fp = fopen($file, 'w');
+                $return = fwrite($fp, implode("", $newArray));
+                fclose($fp);
+                sysCmd('ip addr flush dev wlan0');
+                sysCmd('ip addr add '.$args->{'ip-address'}.'/24 broadcast '.$args->{'broadcast'}.' dev wlan0');
+                sysCmd('systemctl restart hostapd');
+                sysCmd('systemctl restart dnsmasq');
+                if ($args->{'enable-NAT'} === '1') {
+                    sysCmd('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
+                    sysCmd('iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT');
+                    sysCmd('iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT');
+                    sysCmd('sysctl net.ipv4.ip_forward=1');
+                } else {
+                    sysCmd('sysctl net.ipv4.ip_forward=0');
+                }
+                $return[] = '';
             }
             break;
         case 'reset':
