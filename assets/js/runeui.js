@@ -1838,9 +1838,9 @@ if ($('#section-index').length) {
         // startChannel(queueChannel());
         
         // first GUI update
-        //updateGUI();
+        // updateGUI();
         
-		// PNotify init options
+        // PNotify init options
         PNotify.prototype.options.styling = 'fontawesome';
         PNotify.prototype.options.stack.dir1 = 'up';
         PNotify.prototype.options.stack.dir2 = 'left';
@@ -2044,8 +2044,8 @@ if ($('#section-index').length) {
             if ($('#open-panel-dx').hasClass('active')) {
                 var current = parseInt(GUI.json.song);
                 customScroll('pl', current, 500);
-				if (!$('#pl-filter-results').hasClass('hide'))  //mod when playlist browsing, click to show queue again
-                    $('#pl-filter-results').click(); 
+                if (!$('#pl-filter-results').hasClass('hide'))  //mod when playlist browsing, click to show queue again
+                    $('#pl-filter-results').click();
             }
         })
         .on('shown.bs.tab', function (e) {
