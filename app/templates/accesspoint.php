@@ -1,6 +1,19 @@
 <div class="container">
     <h1>Access Point settings</h1>
-    
+
+    <?php if($this->wifiavailable === 0): ?>
+        <br>
+        <div class="col-sm-offset-2 col-sm-10">
+            <h2>No WiFi dongle available</h2>
+            <a href="/network" class="btn btn-default btn-lg">Cancel</a>
+        </div>
+    <?php elseif($this->wififeatureAP === 0): ?>
+        <br>
+        <div class="col-sm-offset-2 col-sm-10">
+            <h2>Your WiFi dongle is not capable to be used as AccessPoint!</h2>
+            <a href="/network" class="btn btn-default btn-lg">Cancel</a>
+        </div>
+    <?php else : ?>
     <div <?php if($this->enabled === '1'): ?>class="boxed-group"<?php endif ?> id="accesspointBox">
         <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
             <div class="form-group">
@@ -105,8 +118,11 @@
                     <tr><th>DNS server:</th><td><?=$this->accesspoint['dhcp-option-dns'] ?></td></tr>
                     <tr><th>DNS router:</th><td><?=$this->accesspoint['dhcp-option-router'] ?></td></tr>
                     <tr><th>enable-NAT:</th><td><?php if($this->accesspoint['enable-NAT'] === '1'): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                </tbody>
+                    <tr><th>WiFi is available:</th><td><?php if($this->wifiavailable === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <tr><th>WiFi is AP capable:</th><td><?php if($this->wififeatureAP === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    </tbody>
             </table>
         </div>
     </fieldset>
+    <?php endif ?>
 </div>

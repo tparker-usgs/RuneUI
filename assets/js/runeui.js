@@ -139,7 +139,12 @@ $(document).ready(function () {
 });
 
 function timerIncrement() {
-    idleTime = idleTime + 1;
+    if ($('#section-index').length) {
+		// only when in playback section
+		idleTime = idleTime + 1;
+	} else {
+		idleTime = 0;
+	}
     if (idleTime > 19) { // 20 * timerIncrement
 		$('.tab-content').hide("slow");
 		$('.screen-saver-content').show("slow");
@@ -159,6 +164,13 @@ function refreshTimer(startFrom, stopTo, state) {
     if (state !== 'play'){
         // console.log('startFrom = ', startFrom);
         display.countdown('pause');
+    }
+    var displayss = $('#countdown-display-ss');
+    displayss.countdown('destroy');
+    displayss.countdown({ since: ((state !== 'stop' || state !== undefined)? -(startFrom) : 0), compact: true, format: 'MS' });
+    if (state !== 'play'){
+        // console.log('startFrom = ', startFrom);
+        displayss.countdown('pause');
     }
 }
 
@@ -226,6 +238,8 @@ function timeConvert3(ss) {
 function countdownRestart(startFrom) {
     var display = $('#countdown-display').countdown('destroy');
     display.countdown({since: -(startFrom), compact: true, format: 'MS'});
+    var displayss = $('#countdown-display-ss').countdown('destroy');
+    displayss.countdown({since: -(startFrom), compact: true, format: 'MS'});
 }
 
 function reset_vol_changed_local() {
@@ -547,7 +561,7 @@ function renderLibraryHome() {
     }
     if (chkKey(obj.Dirble)) {
     // Dirble block
-        content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble <span id="home-count-dirble">(' + obj.Dirble + ')</span></h3>radio stations open directory</div>' + divClose;
+        content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3>radio stations open directory</div>' + divClose;
     }
     // Jamendo (static)
     content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3>world\'s largest platform for free music</div>' + divClose;
@@ -584,6 +598,7 @@ function refreshState() {
         $('#stop').addClass('btn-primary');
         if ($('#section-index').length) {
             $('#countdown-display').countdown('destroy');
+			$('#countdown-display-ss').countdown('destroy');
         }
         // if (GUI.stream === 'radio') {
             // $('#elapsed').html('&infin;');
@@ -592,8 +607,10 @@ function refreshState() {
         // }
         if (GUI.stream === 'radio') {
             $('#total').html('<span>&infin;</span>');
+			$('#total-ss').html('<span>&infin;</span>');
         } else {
             $('#total').html('00:00');
+			$('#total-ss').html('00:00');
         }
         $('#time').val(0, false).trigger('update');
         $('#format-bitrate').html('&nbsp;');
@@ -607,8 +624,10 @@ function refreshState() {
         // $('#elapsed').html((GUI.json.elapsed !== undefined)? timeConvert(GUI.json.elapsed) : '00:00');
         if (GUI.stream === 'radio') {
             $('#total').html('<span>&infin;</span>');
+			$('#total-ss').html('<span>&infin;</span>');
         } else {
             $('#total').html((GUI.json.time !== undefined)? timeConvert(GUI.json.time) : '00:00');
+			$('#total-ss').html((GUI.json.time !== undefined)? timeConvert(GUI.json.time) : '00:00');
         }
         var fileinfo = (GUI.json.audio_channels && GUI.json.audio_sample_depth && GUI.json.audio_sample_rate) ? (GUI.json.audio_channels + ', ' + GUI.json.audio_sample_depth + ' bit, ' + GUI.json.audio_sample_rate +' kHz, '+GUI.json.bitrate+' kbps') : '&nbsp;';
         $('#format-bitrate').html(fileinfo);
@@ -1448,7 +1467,9 @@ function onreleaseKnob(value) {
             // console.log('seekto = ', seekto);
             $('#time').val(value);
             $('#countdown-display').countdown('destroy');
+			$('#countdown-display-ss').countdown('destroy');
             $('#countdown-display').countdown({since: -seekto, compact: true, format: 'MS'});
+			$('#countdown-display-ss').countdown({since: -seekto, compact: true, format: 'MS'});
         } else {
             $('#time').val(0).trigger('change');
         }
@@ -1468,6 +1489,7 @@ function commandButton(el) {
             window.clearInterval(GUI.currentKnob);
             $('.playlist').find('li').removeClass('active');
             $('#total').html('00:00');
+			$('#total-ss').html('00:00');
         }
     }
     // play/pause
@@ -1478,16 +1500,19 @@ function commandButton(el) {
             cmd = 'pause';
             if ($('#section-index').length) {
                 $('#countdown-display').countdown('pause');
+				$('#countdown-display-ss').countdown('pause');
             }
         } else if (state === 'pause') {
             cmd = 'play';
             if ($('#section-index').length) {
                 $('#countdown-display').countdown('resume');
+				$('#countdown-display-ss').countdown('resume');
             }
         } else if (state === 'stop') {
             cmd = 'play';
             if ($('#section-index').length) {
                 $('#countdown-display').countdown({since: 0, compact: true, format: 'MS'});
+				$('#countdown-display-ss').countdown({since: 0, compact: true, format: 'MS'});
             }
         }
         //$(this).find('i').toggleClass('fa fa-play').toggleClass('fa fa-pause');
@@ -1506,6 +1531,7 @@ function commandButton(el) {
     else if (dataCmd === 'previous' || dataCmd === 'next') {
         if ($('#section-index').length) {
             $('#countdown-display').countdown('pause');
+			$('#countdown-display-ss').countdown('pause');
             window.clearInterval(GUI.currentKnob);
         }
     }
