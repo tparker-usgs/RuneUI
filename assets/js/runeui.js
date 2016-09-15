@@ -2639,8 +2639,9 @@ if ($('#section-index').length) {
 
         // on screen keyboard
         if (document.location.hostname == "localhost")
-            $('.osk-trigger').onScreenKeyboard();
-        
+            $('.osk-trigger').onScreenKeyboard({
+				'draggable': true
+			}); 
     });
     
 } else {
@@ -2977,8 +2978,9 @@ if ($('#section-index').length) {
 
         // on screen keyboard
         if (document.location.hostname == "localhost")
-            $('.osk-trigger').onScreenKeyboard();
-		    
+            $('.osk-trigger').onScreenKeyboard({
+				'draggable': true
+			});		    
     });
     
     

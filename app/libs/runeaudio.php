@@ -2173,7 +2173,7 @@ if ($action === 'reset') {
             unset($mpdcfg['log_level']);
             unset($mpdcfg['log_file']);
             // --- state file ---
-            if ($mpdcfg['state_file'] === 'no') {
+            if (!isset($mpdcfg['state_file'])) {
                 $redis->hDel('mpdconf', 'state_file');
             } else {
                 $output .= "state_file\t\"/var/lib/mpd/mpdstate\"\n";
@@ -2445,7 +2445,7 @@ function wrk_shairport($redis, $ao, $name = null)
     $acard = json_decode($redis->hget('acards', $ao));
     runelog('acard details: ', $acard);
     $file = '/usr/lib/systemd/system/shairport.service';
-    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport -w --name='.$name.' --on-start=$ON --on-stop=$OFF --meta-dir=/var/run/shairport -o alsa -- -d plug'.$acard->device);
+    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport -w --name="'.$name.'" --on-start=$ON --on-stop=$OFF --meta-dir=/var/run/shairport -o alsa -- -d plug'.$acard->device);
     runelog('shairport.service :', $newArray);
     // Commit changes to /usr/lib/systemd/system/shairport.service
     $fp = fopen($file, 'w');
@@ -2943,7 +2943,7 @@ function wrk_upmpdcli($redis, $name = null)
         $name = $redis->hGet('dlna', 'name');
     }
     $file = '/usr/lib/systemd/system/upmpdcli.service';
-    $newArray = wrk_replaceTextLine($file, '', 'ExecStart', 'ExecStart=/usr/bin/upmpdcli -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f '.$name);
+    $newArray = wrk_replaceTextLine($file, '', 'ExecStart', 'ExecStart=/usr/bin/upmpdcli -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
     runelog('upmpdcli.service :', $newArray);
     // Commit changes to /usr/lib/systemd/system/upmpdcli.service
     $fp = fopen($file, 'w');
