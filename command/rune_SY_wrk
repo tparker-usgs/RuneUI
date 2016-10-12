@@ -84,6 +84,14 @@ if (FALSE === $redis->get('mpd_start_volume')) {
     $redis->set('mpd_start_volume', '-1');
 }
 
+if (FALSE === $redis->get('localSStime')) {
+    $redis->set('localSStime', '15');
+}
+
+if (FALSE === $redis->get('remoteSStime')) {
+    $redis->set('remoteSStime', '-1');
+}
+
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {

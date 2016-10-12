@@ -116,6 +116,12 @@ if (isset($_POST)) {
         } else {
             $redis->get('local_browser') == 0 || $redis->set('local_browser', 0);
         }
+        if (isset($_POST['features']['localSStime'])) {
+            $redis->set('localSStime', $_POST['features']['localSStime']);
+        }
+        if (isset($_POST['features']['remoteSStime'])) {
+            $redis->set('remoteSStime', $_POST['features']['remoteSStime']);
+        }
         if ($_POST['features']['udevil'] == 1) {
             // create worker job (start udevil)
             $redis->get('udevil') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'udevil', 'action' => 'start'));
@@ -182,6 +188,8 @@ $template->orionprofile = $redis->get('orionprofile');
 $template->airplay = $redis->hGetAll('airplay');
 $template->dlna = $redis->hGetAll('dlna');
 $template->local_browser = $redis->get('local_browser');
+$template->localSStime = $redis->get('localSStime');
+$template->remoteSStime = $redis->get('remoteSStime');
 $template->udevil = $redis->get('udevil');
 $template->coverart = $redis->get('coverart');
 $template->globalrandom = $redis->get('globalrandom');

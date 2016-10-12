@@ -11,6 +11,7 @@ flush();
          
 // --------------------- MPD ---------------------
 if ($activePlayer === 'MPD' && $redis->Get('lyric')) {
-    echo str_replace ( "</br>" , "\n" , sysCmd("sh /var/www/command/lyric.sh")[2]);
+    //echo str_replace ( "</br>" , "\n" , sysCmd("sh /var/www/command/lyric.sh")[2]);
+    echo sysCmd("sh /var/www/command/lyric.sh")[2];
 }
 runelog("\n--------------------- lyric (end) ---------------------");

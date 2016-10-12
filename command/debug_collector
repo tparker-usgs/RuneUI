@@ -143,7 +143,7 @@ function debug_data($redis)
     // } else {
     // $output .= $streaminfo;
     // }
-    $command = implode("\n", sysCmd('mpc version'));
+    $command = implode("\n", sysCmd('mpd --version'));
     $output .= "###### mpd version ######\n";
     $output .= $command;
     $output .= "\n\n";

@@ -594,14 +594,18 @@ function browseDB($sock,$browsemode,$query) {
             break;
 		case 'artist':
             if (isset($query) && !empty($query)){
-                sendMpdCommand($sock,'list "album" "'.html_entity_decode($query).'"');
+                if ($query === 'Various Artists') {
+                    sendMpdCommand($sock,'list artist albumartist "Various Artists"');    
+                } else {
+                    sendMpdCommand($sock,'list "album" "'.html_entity_decode($query).'"');
+                }
             } else {
-                sendMpdCommand($sock,'list "artist"');
+                sendMpdCommand($sock,'list "albumartist"');
 			}
             break;
 		case 'genre':
             if (isset($query) && !empty($query)){
-                sendMpdCommand($sock,'list "artist" "genre" "'.html_entity_decode($query).'"');
+                sendMpdCommand($sock,'list "albumartist" "genre" "'.html_entity_decode($query).'"');
             } else {
                 sendMpdCommand($sock,'list "genre"');
 			}
@@ -650,6 +654,32 @@ function addToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
 }
 
 function addAlbumToQueue($sock, $path, $addplay = null, $pos = null)
+{
+    if (isset($addplay)) {
+        $cmdlist = "command_list_begin\n";
+        $cmdlist .= "findadd \"album\" \"".html_entity_decode($path)."\"\n";
+        $cmdlist .= "play ".$pos."\n";
+        $cmdlist .= "command_list_end";
+        sendMpdCommand($sock, $cmdlist);
+    } else {
+        sendMpdCommand($sock, "findadd \"album\" \"".html_entity_decode($path)."\"");
+    }
+}
+
+function addArtistToQueue($sock, $path, $addplay = null, $pos = null)
+{
+    if (isset($addplay)) {
+        $cmdlist = "command_list_begin\n";
+        $cmdlist .= "findadd \"album\" \"".html_entity_decode($path)."\"\n";
+        $cmdlist .= "play ".$pos."\n";
+        $cmdlist .= "command_list_end";
+        sendMpdCommand($sock, $cmdlist);
+    } else {
+        sendMpdCommand($sock, "findadd \"album\" \"".html_entity_decode($path)."\"");
+    }
+}
+
+function addGenreToQueue($sock, $path, $addplay = null, $pos = null)
 {
     if (isset($addplay)) {
         $cmdlist = "command_list_begin\n";
@@ -789,6 +819,9 @@ function _parseFileListResponse($resp)
                     $plCounter++;
                     $plistArray[$plCounter]['album'] = $value;
                 } elseif ( $element === 'Artist' ) {
+                    $plCounter++;
+                    $plistArray[$plCounter]['artist'] = $value;
+                } elseif ( $element === 'AlbumArtist' ) {
                     $plCounter++;
                     $plistArray[$plCounter]['artist'] = $value;
                 } elseif ( $element === 'Genre' ) {
@@ -2173,7 +2206,7 @@ if ($action === 'reset') {
             unset($mpdcfg['log_level']);
             unset($mpdcfg['log_file']);
             // --- state file ---
-            if (!isset($mpdcfg['state_file'])) {
+            if (!isset($mpdcfg['state_file']) || $mpdcfg['state_file'] === 'no') {
                 $redis->hDel('mpdconf', 'state_file');
             } else {
                 $output .= "state_file\t\"/var/lib/mpd/mpdstate\"\n";

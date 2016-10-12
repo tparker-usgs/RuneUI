@@ -1,3 +1,7 @@
+<script>
+    var localSStime = parseInt("<?php echo $this->localSStime; ?>");
+    var remoteSStime = parseInt("<?php echo $this->remoteSStime; ?>");
+</script>
 <div class="screen-saver-content" style="display:none;">
     <!-- PLAYBACK PANEL -->
     <div id="playback-ss" class="tab-pane active">
@@ -26,10 +30,8 @@
                 </div>
                 <div style="height: auto">
                     <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
-<!-- 
                         <div id="lyric-ss" style="font-size: 30px; display: block; box-sizing: border-box; text-align: left; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i>Lyric:</i></div>
-                        <div id="song-lyric-ss" style="font-size: 16px"><pre class="fa fa-spinner fa-spin"></pre></div>
--->
+                        <div id="song-lyric-ss" style="font-size: 10px; -moz-column-count: 2; -webkit-column-count: 2; column-count: 2;"><pre class="fa fa-spinner fa-spin"></pre></div>
                     </div>
                 </div>
             </div>
@@ -182,7 +184,7 @@
             <li><a href="javascript:;" data-cmd="add"><i class="fa fa-plus-circle sx"></i> Add</a></li>
             <li><a href="javascript:;" data-cmd="addplay"><i class="fa fa-play sx"></i> Add and play</a></li>
             <li><a href="javascript:;" data-cmd="addreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
-            <li><a href="javascript:;" data-cmd="update"><i class="fa fa-refresh sx"></i> Update this folder</a></li>
+            <li><a href="javascript:;" data-cmd="rescan"><i class="fa fa-refresh sx"></i> Update this folder</a></li>
             <li><a href="javascript:;" data-cmd="bookmark"><i class="fa fa-star sx"></i> Save as bookmark</a></li>
         </ul>
     </div>
@@ -241,6 +243,20 @@
             <li><a href="javascript:;" data-cmd="albumaddreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
         </ul>
     </div>
+    <div id="context-menu-artist" class="context-menu">
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="javascript:;" data-cmd="artistadd"><i class="fa fa-plus-circle sx"></i> Add</a></li>
+            <li><a href="javascript:;" data-cmd="artistaddplay"><i class="fa fa-play sx"></i> Add and play</a></li>
+            <li><a href="javascript:;" data-cmd="artistaddreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
+        </ul>
+    </div>
+    <div id="context-menu-genre" class="context-menu">
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="javascript:;" data-cmd="genreadd"><i class="fa fa-plus-circle sx"></i> Add</a></li>
+            <li><a href="javascript:;" data-cmd="genreaddplay"><i class="fa fa-play sx"></i> Add and play</a></li>
+            <li><a href="javascript:;" data-cmd="genreaddreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
+        </ul>
+    </div>
 </div>
 <div id="modal-pl-save" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-pl-save-label" aria-hidden="true">
     <div class="modal-dialog">
@@ -287,7 +303,7 @@
             </div>
             <div class="modal-body">
                 <label for="pl-rename-name">Rename "<strong id="pl-rename-oldname"></strong>" playlist to:</label>
-                <input id="pl-rename-name" class="form-control" type="text" placeholder="Enter playlist name">
+                <input id="pl-rename-name" class="form-control osk-trigger" type="text" placeholder="Enter playlist name">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>

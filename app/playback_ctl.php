@@ -50,5 +50,8 @@ if ($redis->get('volume') == 1 && $template->activePlayer !== 'Spotify') {
     $template->volume['divclass'] = 'nomixer';
 }
 $template->volume['dynamic'] = $redis->get('dynVolumeKnob');
-$template->dev = $redis->get;
+$template->dev = $redis->get('dev');
 $template->spotify = $redis->hGet('spotify', 'enable');
+$template->localSStime = $redis->get('localSStime');
+$template->remoteSStime = $redis->get('remoteSStime');
+

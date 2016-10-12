@@ -279,6 +279,20 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-sm-2 control-label" for="localSStime">ScreenSaver time</label>
+                <div class="col-sm-10">
+                    <input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+                    <span class="help-block">Sets the time for the local screensaver (0-100, -1 disables the feature).</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="remoteSStime">ScreenSaver time</label>
+                <div class="col-sm-10">
+                    <input class="form-control osk-trigger input-lg" type="number" id="remoteSStime" name="features[remoteSStime]" value="<?=$this->remoteSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+                    <span class="help-block">Sets the time for the remote screensaver (0-100, -1 disables the feature).</span>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="udevil" class="control-label col-sm-2">USB Automount</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">

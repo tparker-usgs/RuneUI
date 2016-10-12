@@ -33,6 +33,7 @@
  */
 // inspect POST
 if (isset($_POST)) {
+    if ($_POST['rescanmpd'] == 1) sendMpdCommand($mpd, 'rescan');
     if ($_POST['updatempd'] == 1) sendMpdCommand($mpd, 'update');
     if ($_POST['mountall'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'mountall' ));
     if (isset($_POST['usb-umount'])) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'umountusb', 'args' => $_POST['usb-umount']));
