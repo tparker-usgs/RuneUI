@@ -603,7 +603,14 @@ function browseDB($sock,$browsemode,$query) {
                 sendMpdCommand($sock,'list "albumartist"');
 			}
             break;
-		case 'genre':
+		case 'composer':
+            if (isset($query) && !empty($query)){
+                sendMpdCommand($sock,'find "composer" "'.html_entity_decode($query).'"');
+            } else {
+                sendMpdCommand($sock,'list "composer"');
+			}
+            break;
+        case 'genre':
             if (isset($query) && !empty($query)){
                 sendMpdCommand($sock,'list "albumartist" "genre" "'.html_entity_decode($query).'"');
             } else {
@@ -824,6 +831,9 @@ function _parseFileListResponse($resp)
                 } elseif ( $element === 'AlbumArtist' ) {
                     $plCounter++;
                     $plistArray[$plCounter]['artist'] = $value;
+                } elseif ( $element === 'Composer' ) {
+                    $plCounter++;
+                    $plistArray[$plCounter]['composer'] = $value;
                 } elseif ( $element === 'Genre' ) {
                     $plCounter++;
                     $plistArray[$plCounter]['genre'] = $value;
@@ -3190,6 +3200,7 @@ function ui_status($mpd, $status)
         $status['currentartist'] = $curTrack[0]['Artist'];
         $status['currentsong'] = htmlentities($curTrack[0]['Title'], ENT_XML1, 'UTF-8');
         $status['currentalbum'] = $curTrack[0]['Album'];
+        $status['currentcomposer'] = $curTrack[0]['Composer'];
         $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
     } else {
         $path = parseFileStr($curTrack[0]['file'], '/');

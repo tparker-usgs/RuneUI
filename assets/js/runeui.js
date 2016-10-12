@@ -577,6 +577,8 @@ function renderLibraryHome() {
     content += divOpen + '<div id="home-albums" class="home-block' + toggleMPD + '" data-path="Albums" data-browsemode="album"><i class="fa fa-dot-circle-o"></i><h3>Albums</h3>browse MPD database by album</div>' + divClose;
     // Artist list (static)
     content += divOpen + '<div id="home-artists" class="home-block' + toggleMPD + '" data-path="Artists" data-browsemode="artist"><i class="fa fa-users"></i><h3>Artists</h3>browse MPD database by artist</div>' + divClose;
+    // Composer list (static)
+    content += divOpen + '<div id="home-composer" class="home-block' + toggleMPD + '" data-path="Composer" data-browsemode="composer"><i class="fa fa-users"></i><h3>Composers</h3>browse MPD database by composer</div>' + divClose;
     // Genre list (static)
     content += divOpen + '<div id="home-genre" class="home-block' + toggleMPD + '" data-path="Genres" data-browsemode="genre"><i class="fa fa-tags"></i><h3>Genres</h3>browse MPD database by genre</div>' + divClose;
     content += '</div>';
@@ -1059,6 +1061,25 @@ function parseResponse(options) {
                     content += inputArr.artist;
                     content += '</span></li>';
                 }
+            } else if (GUI.browsemode === 'composer') {
+            // browse by composer
+                if (inputArr.file !== undefined) {
+                    content = '<li id="db-' + (i + 1) + '" data-path="';
+                    content += inputArr.file;
+                    content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
+                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + '</span></span>';
+                    content += ' <span class="bl">';
+                    content +=  inputArr.Artist;
+                    content += ' - ';
+                    content +=  inputArr.Album;
+                    content += '</span></li>';
+                } else if (inputArr.composer !== '') {
+                    content = '<li id="db-' + (i + 1) + '" class="db-folder db-composer" data-path="';
+                    content += inputArr.composer;
+                    content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-composer"></i><span><i class="fa fa-user"></i>';
+                    content += inputArr.composer;
+                    content += '</span></li>';
+                }
             } else if (GUI.browsemode === 'genre') {
             // browse by genre
                 if (inputArr.artist !== undefined) {
@@ -1344,6 +1365,12 @@ function populateDB(options){
             breadcrumb.html(path);
         } else {
             breadcrumb.html('Artists/' + path);
+        }
+    } else if (GUI.browsemode === 'composer') {
+        if (path === 'Composer') {
+            breadcrumb.html(path);
+        } else {
+            breadcrumb.html('Composer/' + path);
         }
     } else if (GUI.browsemode === 'genre') {
         if (path === 'Genres') {
@@ -2289,6 +2316,13 @@ if ($('#section-index').length) {
                             path: path,
                             uplevel: 0,
                             browsemode: 'artist'
+                        });
+                    } else if (el.hasClass('db-composer')) {
+                    // browse by composer
+                        getDB({
+                            path: path,
+                            uplevel: 0,
+                            browsemode: 'composer'
                         });
                     } else if (el.hasClass('db-genre')) {
                     // browse by genre
