@@ -752,6 +752,19 @@ function updateGUI() {
                     cache: false
                 });
             } else {
+                var covercachenum = Math.floor(Math.random()*1001);
+                //$('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
+                //$('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
+                $.ajax({
+                    url: '/artist_info/',
+                    success: function(data){
+                        var info = jQuery.parseJSON(data);
+                        $('#artist-bio-ss').html(info.artist.bio.summary);
+						$('#song-lyric-ss').html(info.artist.bio.content);
+                        $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                    },
+                    cache: false
+                });
                 $('#cover-art').css('background-image','url("assets/img/cover-radio.jpg")');
                 $('#cover-art-ss').css('background-image','url("assets/img/cover-radio.jpg")');
             }
@@ -878,7 +891,7 @@ function getPlaylist(text) {
 }
 
 // launch the Playback UI refresh from the data response
-function renderUI(text){
+function renderUI(text, id, channel){
     toggleLoader('close');
     // update global GUI array
     GUI.json = text[0];
@@ -1197,7 +1210,9 @@ function populateDB(options){
 
             data.sort(function(a, b){
                 if (path === 'Spotify' && querytype === '') {
-                    nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase();
+                    if (a.hasOwnProperty("name") && b.hasOwnProperty("name")) {
+                        nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase();
+                    }
                 } else if (querytype === 'tracks') {
                     nameA=a.title.toLowerCase(), nameB=b.title.toLowerCase();
                 } else {
@@ -1321,11 +1336,13 @@ function populateDB(options){
             }
             data.sort(function(a, b){
                 if (path === 'Artists' || path === 'AlbumArtists'|| path === 'Various Artists') {
-                    nameA=a.artist.toLowerCase(), nameB=b.artist.toLowerCase();
+                    if (a.hasOwnProperty("Artist") && b.hasOwnProperty("Artist")) {
+                        nameA=a.Artist.toLowerCase(), nameB=b.Artist.toLowerCase();
+                    }
                 } else if (path === 'Albums') {
-                    nameA=a.album.toLowerCase(), nameB=b.album.toLowerCase();
+                    nameA=a.Album.toLowerCase(), nameB=b.Album.toLowerCase();
                 } else if (path === 'Webradio') {
-                    nameA=a.playlist.toLowerCase(), nameB=b.playlist.toLowerCase();
+                    nameA=a.Playlist.toLowerCase(), nameB=b.Playlist.toLowerCase();
                 } else {
                     return 0;
                 }
@@ -2436,6 +2453,14 @@ if ($('#section-index').length) {
                         } else {
                             GUI.browsemode = 'genre';
                         }
+                    } else if (GUI.browsemode === 'composer') {
+                        path = GUI.currentDBpath[GUI.currentDBpos[10] - 1];
+                        // console.log(path);
+                        if (path === '') {
+                            path = 'Composer';
+                        } else {
+                            GUI.browsemode = 'artist';
+                        }
                     } else if (GUI.browsemode === 'genre') {
                         path = 'Genres';
                     } else if (GUI.browsemode === 'albumfilter') {
@@ -2477,7 +2502,13 @@ if ($('#section-index').length) {
                     sendCmd('clear');
                     sendCmd('load "' + path + '"');
                     break;
-                    
+
+                case 'pl-addreplaceplay':
+                    sendCmd('clear');
+                    sendCmd('load "' + path + '"');
+                    sendCmd('play');
+                    break;
+
                 case 'pl-rename':
                     $('#modal-pl-rename').modal();
                     $('#pl-rename-oldname').text(path);

@@ -231,6 +231,7 @@
         <ul class="dropdown-menu" role="menu">
             <li><a href="javascript:;" data-cmd="pl-add"><i class="fa fa-plus-circle sx"></i> Add to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-replace"><i class="fa fa-undo sx"></i> Replace the queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-addreplaceplay"><i class="fa fa-share-square-o sx"></i> Replace and play the queue</a></li>
 			<li><a href="javascript:;" data-cmd="pl-ashuffle"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-rename"><i class="fa fa-edit sx"></i> Rename</a></li>
             <li><a href="javascript:;" data-cmd="pl-rm"><i class="fa fa-trash-o sx"></i> Delete</a></li>
