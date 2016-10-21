@@ -61,7 +61,8 @@ var GUI = {
     stream: '',
     visibility: 'visible',
     vol_changed_local: 0,
-    volume: null
+    volume: null,
+    clientUUID: null
 };
 
 
@@ -70,11 +71,22 @@ var GUI = {
 // FUNCTIONS
 // ====================================================================================================
 
+// generate UUID
+function generateUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+};
+
 // send a MPD playback control command
 function sendCmd(inputcmd) {
     $.ajax({
         type: 'GET',
-        url: '/command/?cmd=' + inputcmd,
+        url: '/command/?cmd=' + inputcmd + '&clientUUID=' + GUI.clientUUID,
         cache: false
     });
 }
@@ -119,6 +131,10 @@ var viewScreenSaver = 0;
 var isLocalHost = 0;
 var SStime = -1;
 $(document).ready(function () {
+
+    // get an UUID for the client
+    GUI.clientUUID = generateUUID();
+
     if ($('#section-index').length) {
         if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
             isLocalHost = 1;
@@ -891,7 +907,7 @@ function getPlaylist(text) {
 }
 
 // launch the Playback UI refresh from the data response
-function renderUI(text, id, channel){
+function renderUI(text){
     toggleLoader('close');
     // update global GUI array
     GUI.json = text[0];
@@ -1654,7 +1670,9 @@ function commandButton(el) {
 // Library home screen
 function libraryHome(text) {
     GUI.libraryhome = text[0];
-    renderLibraryHome(); // TODO: do it only while in home
+	if (GUI.libraryhome.clientUUID === GUI.clientUUID) {
+        renderLibraryHome(); // TODO: do it only while in home
+    }
 }
 
 // list of in range wlans

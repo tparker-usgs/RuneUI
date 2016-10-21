@@ -3218,7 +3218,7 @@ function ui_status($mpd, $status)
     return $status;
 }
 
-function ui_libraryHome($redis)
+function ui_libraryHome($redis, $clientUUID)
 {
     // LocalStorage
     $localStorages = countDirs('/mnt/MPD/LocalStorage');
@@ -3253,7 +3253,7 @@ function ui_libraryHome($redis)
     // runelog('bookmarks: ',$bookmarks);
     // $jsonHome = json_encode(array_merge($bookmarks, array(0 => array('networkMounts' => $networkmounts)), array(0 => array('USBMounts' => $usbmounts)), array(0 => array('webradio' => $webradios)), array(0 => array('Dirble' => $dirble->amount)), array(0 => array('ActivePlayer' => $activePlayer))));
     // $jsonHome = json_encode(array_merge($bookmarks, array(0 => array('networkMounts' => $networkmounts)), array(0 => array('USBMounts' => $usbmounts)), array(0 => array('webradio' => $webradios)), array(0 => array('Spotify' => $spotify)), array(0 => array('Dirble' => $dirble->amount)), array(0 => array('ActivePlayer' => $activePlayer))));
-    $jsonHome = json_encode(array('bookmarks' => $bookmarks, 'localStorages' => $localStorages, 'networkMounts' => $networkmounts, 'USBMounts' => $usbmounts, 'webradio' => $webradios, 'Spotify' => $spotify, 'Dirble' => $dirble->amount, 'ActivePlayer' => $activePlayer));
+    $jsonHome = json_encode(array('bookmarks' => $bookmarks, 'localStorages' => $localStorages, 'networkMounts' => $networkmounts, 'USBMounts' => $usbmounts, 'webradio' => $webradios, 'Spotify' => $spotify, 'Dirble' => $dirble->amount, 'ActivePlayer' => $activePlayer, 'clientUUID' => $clientUUID));
     // Encode UI response
     runelog('libraryHome JSON: ', $jsonHome);
     ui_render('library', $jsonHome);
@@ -3327,6 +3327,7 @@ function ui_lastFM_similar($artist, $track, $lastfm_apikey, $proxy)
 function ui_render($channel, $data)
 {
     curlPost('http://127.0.0.1/pub?id='.$channel, $data);
+    runelog('ui_render channel=', $channel);
 }
 
 function ui_timezone() {
@@ -3340,9 +3341,9 @@ function ui_timezone() {
   return $zones_array;
 }
 
-function ui_update($redis ,$sock)
+function ui_update($redis, $sock, $clientUUID)
 {
-    ui_libraryHome($redis);
+    ui_libraryHome($redis, $clientUUID);
     switch ($redis->get('activePlayer')) {
         case 'MPD':
             if ($redis->get('pl_length') !== '0') {
