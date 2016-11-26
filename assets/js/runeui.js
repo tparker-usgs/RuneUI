@@ -56,6 +56,7 @@ var GUI = {
     playlist: null,
     plugin: '',
     state: '',
+    old_state: 'none',
     stepVolumeDelta: 0,
     stepVolumeInt: 0,
     stream: '',
@@ -128,6 +129,7 @@ function parsePath(str) {
 // switch view after a certain time
 var idleTime = 0;
 var viewScreenSaver = 0;
+var widthScreenSaver = 0;
 var isLocalHost = 0;
 var SStime = -1;
 $(document).ready(function () {
@@ -708,17 +710,31 @@ function updateGUI() {
         // console.log('currentartist = ', GUI.json.currentartist);
         if (GUI.stream !== 'radio') {
             $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
-            $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
-            $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
             $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+            if (currentsong === null || currentsong.length > 35) {
+                $('#currentsong-ss')[0].style.fontSize = "26px";
+            } else if (currentsong.length > 25) {
+                $('#currentsong-ss')[0].style.fontSize = "33px";
+            } else {
+                $('#currentsong-ss')[0].style.fontSize = "40px";
+            }
+            $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
             $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+            if (currentalbum === null || currentalbum.length > 45) {
+                $('#currentalbum-ss')[0].style.fontSize = "20px";
+            } else if (currentalbum.length > 30) {
+                $('#currentalbum-ss')[0].style.fontSize = "24px";
+            } else {
+                $('#currentalbum-ss')[0].style.fontSize = "30px";
+            }
+            $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
             $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
         } else {
             $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
-            $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
-            $('#currentalbum').html('<span class="notag">streaming</span>');
             $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
+            $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
             $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
+            $('#currentalbum').html('<span class="notag">streaming</span>');
             $('#currentalbum-ss').html('<span class="notag">streaming</span>');
         }
         if (GUI.json.repeat === '1') {
@@ -743,10 +759,11 @@ function updateGUI() {
         }
         GUI.currentsong = currentsong;
         var currentalbumstring = currentartist + ' - ' + currentalbum;
-        if (GUI.currentalbum !== currentalbumstring) {
+        if (GUI.old_state !== GUI.state || GUI.currentalbum !== currentalbumstring) {
+            GUI.old_state = GUI.state;
             $('#artist-bio-ss').html('');
             $('#artist-image-ss').css('background-image', '');
-            $('#song-lyric-ss').html('');
+            $('#addinfo-text-ss').html('');
             if (GUI.stream !== 'radio') {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
@@ -755,18 +772,22 @@ function updateGUI() {
                     url: '/artist_info/',
                     success: function(data){
                         var info = jQuery.parseJSON(data);
-                        $('#artist-bio-ss').html(info.artist.bio.summary);
-                        $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
+                            $('#artist-bio-ss').html(info.artist.bio.content.substring(0,1000) + ' ... ');
+                            //$('#artist-bio-ss').html(info.artist.bio.summary);
+                            $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
+                            $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        }
                     },
                     cache: false
                 });
-                $.ajax({
-                    url: '/lyric/',
-                    success: function(data){
-                        $('#song-lyric-ss').html(data);
-                    },
-                    cache: false
-                });
+//                $.ajax({
+//                    url: '/lyric/',
+//                    success: function(data){
+//                        $('#addinfo-text-ss').html(data);
+//                    },
+//                    cache: false
+//                });
             } else {
                 var covercachenum = Math.floor(Math.random()*1001);
                 //$('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
@@ -775,9 +796,12 @@ function updateGUI() {
                     url: '/artist_info/',
                     success: function(data){
                         var info = jQuery.parseJSON(data);
-                        $('#artist-bio-ss').html(info.artist.bio.summary);
-						$('#song-lyric-ss').html(info.artist.bio.content);
-                        $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
+                            $('#artist-bio-ss').html(info.artist.bio.content.substring(0,1000) + ' ... ');
+                            //$('#artist-bio-ss').html(info.artist.bio.summary);
+                            $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
+                            $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        }
                     },
                     cache: false
                 });
@@ -1226,11 +1250,11 @@ function populateDB(options){
 
             data.sort(function(a, b){
                 if (path === 'Spotify' && querytype === '') {
-                    if (a.hasOwnProperty("name") && b.hasOwnProperty("name")) {
-                        nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase();
-                    }
+                    nameA = a.hasOwnProperty('name')?a.name.toLowerCase():'';
+                    nameB = b.hasOwnProperty('name')?b.name.toLowerCase():'';
                 } else if (querytype === 'tracks') {
-                    nameA=a.title.toLowerCase(), nameB=b.title.toLowerCase();
+                    nameA = a.hasOwnProperty('title')?a.title.toLowerCase():'';
+                    nameB = b.hasOwnProperty('title')?b.title.toLowerCase():'';
                 } else {
                     return 0;
                 }
@@ -1272,9 +1296,11 @@ function populateDB(options){
             
             data.sort(function(a, b){
                 if (querytype === 'childs' || querytype === 'categories') {
-                    nameA=a.title.toLowerCase(), nameB=b.title.toLowerCase();
+                    nameA = a.hasOwnProperty('title')?a.title.toLowerCase():'';
+                    nameB = b.hasOwnProperty('title')?b.title.toLowerCase():'';
                 } else if (querytype === 'childs-stations' || querytype === 'stations') {
-                    nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase();
+                    nameA = a.hasOwnProperty('name')?a.name.toLowerCase():'';
+                    nameB = b.hasOwnProperty('name')?b.name.toLowerCase():'';
                 } else {
                     return 0;
                 }
@@ -1307,7 +1333,8 @@ function populateDB(options){
 
             data.sort(function(a, b){
                 if (path === 'Jamendo' && querytype === '') {
-                    nameA=a.dispname.toLowerCase(), nameB=b.dispname.toLowerCase();
+                    nameA = a.hasOwnProperty('dispname')?a.dispname.toLowerCase():'';
+                    nameB = b.hasOwnProperty('dispname')?b.dispname.toLowerCase():'';
                 } else {
                     return 0;
                 }
@@ -1352,13 +1379,17 @@ function populateDB(options){
             }
             data.sort(function(a, b){
                 if (path === 'Artists' || path === 'AlbumArtists'|| path === 'Various Artists') {
-                    if (a.hasOwnProperty("Artist") && b.hasOwnProperty("Artist")) {
-                        nameA=a.Artist.toLowerCase(), nameB=b.Artist.toLowerCase();
-                    }
+                    nameA = a.hasOwnProperty('artist')?a.artist.toLowerCase():'';
+                    nameB = b.hasOwnProperty('artist')?b.artist.toLowerCase():'';
                 } else if (path === 'Albums') {
-                    nameA=a.Album.toLowerCase(), nameB=b.Album.toLowerCase();
+                    nameA = a.hasOwnProperty('album')?a.album.toLowerCase():'';
+                    nameB = b.hasOwnProperty('album')?b.album.toLowerCase():'';
                 } else if (path === 'Webradio') {
-                    nameA=a.Playlist.toLowerCase(), nameB=b.Playlist.toLowerCase();
+                    nameA = a.hasOwnProperty('playlist')?a.playlist.toLowerCase():'';
+                    nameB = b.hasOwnProperty('playlist')?b.playlist.toLowerCase():'';
+                } else if (path === 'Genres') {
+                    nameA = a.hasOwnProperty('genre')?a.genre.toLowerCase():'';
+                    nameB = b.hasOwnProperty('genre')?b.genre.toLowerCase():'';
                 } else {
                     return 0;
                 }
@@ -1670,9 +1701,9 @@ function commandButton(el) {
 // Library home screen
 function libraryHome(text) {
     GUI.libraryhome = text[0];
-	if (GUI.libraryhome.clientUUID === GUI.clientUUID) {
+//	if (GUI.libraryhome.clientUUID === GUI.clientUUID) {
         renderLibraryHome(); // TODO: do it only while in home
-    }
+//    }
 }
 
 // list of in range wlans

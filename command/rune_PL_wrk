@@ -70,7 +70,7 @@ while (1) {
                 if ($forceupdate !== 0) {
                     $forceupdate = 0;
                     runelog('----------------------------------- FORCE UPDATE -----------------------------------');
-                    ui_update($redis, $socket);
+                    ui_update($redis, $socket, 0);
                 }
                 $status = _parseStatusResponse(MpdStatus($socket));
                 // store next songid

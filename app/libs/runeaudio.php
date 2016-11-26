@@ -660,12 +660,13 @@ function addToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
     }
 }
 
-function addAlbumToQueue($sock, $path, $addplay = null, $pos = null)
+function addAlbumToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
 {
     if (isset($addplay)) {
         $cmdlist = "command_list_begin\n";
+        $cmdlist .= (isset($clear)) ? "clear\n" : "";               // add clear call if needed
         $cmdlist .= "findadd \"album\" \"".html_entity_decode($path)."\"\n";
-        $cmdlist .= "play ".$pos."\n";
+        $cmdlist .= (isset($addplay)) ? "play ".$pos."\n" : "";     // add play call if needed
         $cmdlist .= "command_list_end";
         sendMpdCommand($sock, $cmdlist);
     } else {
@@ -673,29 +674,45 @@ function addAlbumToQueue($sock, $path, $addplay = null, $pos = null)
     }
 }
 
-function addArtistToQueue($sock, $path, $addplay = null, $pos = null)
+function addArtistToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
 {
     if (isset($addplay)) {
         $cmdlist = "command_list_begin\n";
-        $cmdlist .= "findadd \"album\" \"".html_entity_decode($path)."\"\n";
-        $cmdlist .= "play ".$pos."\n";
+        $cmdlist .= (isset($clear)) ? "clear\n" : "";               // add clear call if needed
+        $cmdlist .= "findadd \"artist\" \"".html_entity_decode($path)."\"\n";
+        $cmdlist .= (isset($addplay)) ? "play ".$pos."\n" : "";     // add play call if needed
         $cmdlist .= "command_list_end";
         sendMpdCommand($sock, $cmdlist);
     } else {
-        sendMpdCommand($sock, "findadd \"album\" \"".html_entity_decode($path)."\"");
+        sendMpdCommand($sock, "findadd \"artist\" \"".html_entity_decode($path)."\"");
     }
 }
 
-function addGenreToQueue($sock, $path, $addplay = null, $pos = null)
+function addGenreToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
 {
     if (isset($addplay)) {
         $cmdlist = "command_list_begin\n";
-        $cmdlist .= "findadd \"album\" \"".html_entity_decode($path)."\"\n";
-        $cmdlist .= "play ".$pos."\n";
+        $cmdlist .= (isset($clear)) ? "clear\n" : "";               // add clear call if needed
+        $cmdlist .= "findadd \"genre\" \"".html_entity_decode($path)."\"\n";
+        $cmdlist .= (isset($addplay)) ? "play ".$pos."\n" : "";     // add play call if needed
         $cmdlist .= "command_list_end";
         sendMpdCommand($sock, $cmdlist);
     } else {
-        sendMpdCommand($sock, "findadd \"album\" \"".html_entity_decode($path)."\"");
+        sendMpdCommand($sock, "findadd \"genre\" \"".html_entity_decode($path)."\"");
+    }
+}
+
+function addComposerToQueue($sock, $path, $addplay = null, $pos = null, $clear = null)
+{
+    if (isset($addplay)) {
+        $cmdlist = "command_list_begin\n";
+        $cmdlist .= (isset($clear)) ? "clear\n" : "";               // add clear call if needed
+        $cmdlist .= "findadd \"composer\" \"".html_entity_decode($path)."\"\n";
+        $cmdlist .= (isset($addplay)) ? "play ".$pos."\n" : "";     // add play call if needed
+        $cmdlist .= "command_list_end";
+        sendMpdCommand($sock, $cmdlist);
+    } else {
+        sendMpdCommand($sock, "findadd \"composer\" \"".html_entity_decode($path)."\"");
     }
 }
 

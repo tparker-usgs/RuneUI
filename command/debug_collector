@@ -57,6 +57,11 @@ function debug_data($redis)
     $output .= "playerID:\t".$redis->get('playerid')."\n";
     $output .= "\n";
     $output .= "\n";
+    $output .= "###### Boot configuration ######\n";
+    $output .=  file_get_contents('/boot/config.txt');
+    $output .= "\n";
+    $output .= "\n";
+    $output .= "##################################################\n\n\n";
     $output .= "###### System load statistics (procinfo -H) ######\n";
     $command = sysCmd('procinfo -H');
     $output .= implode("\n", $command)."\n\n\n";

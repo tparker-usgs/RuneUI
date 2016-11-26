@@ -401,6 +401,35 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
+        case 'composeradd':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['path'])) {
+                    addComposerToQueue($mpd, $_POST['path']);
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                }
+            }
+            break;
+        case 'composeraddplay':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['path'])) {
+                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $pos = $status['playlistlength'] ;
+                    addComposerToQueue($mpd, $_POST['path'], 1, $pos);
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                }
+            }
+            break;
+        case 'composeraddreplaceplay':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['path'])) {
+                    addComposerToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                }
+            }
+            break;
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {

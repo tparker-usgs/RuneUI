@@ -6,18 +6,18 @@
     <!-- PLAYBACK PANEL -->
     <div id="playback-ss" class="tab-pane active">
         <div class="container-fluid">
-            <div id="leftpanel-ss" style="float: left; width: 50%; height: 100%">
+            <div id="leftpanel-ss" style="float: left; width: 40%; height: 100%">
                 <div id="currentartist-ss" style="font-size: 30px; display: block; box-sizing: border-box; text-align: center; font-family: "Lato,Helvetica Neue,Helvetica,Arial,sans-serif"; line-height: 1.42857; color: rgb(224, 231, 238)"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="currentsong-ss" style="white-space: nowrap; overflow: hidden; height: 40px; font-size: 40px; display: block; box-sizing: border-box; text-align: center; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="currentalbum-ss" style=" font-size: 30px; display: block; box-sizing: border-box; text-align: center; font-family: "Lato,Helvetica Neue,Helvetica,Arial,sans-serif"; line-height: 1.42857; color: rgb(224, 231, 238);"><i class="fa fa-spinner fa-spin"></i></div>
                 <div class="col-sm-4 coverart-ss" style="height: auto; margin: 10px auto 11px; width: 100%;">
-                    <img id="cover-art-ss" style="width: 100%; height: auto; border: 2px solid rgb(52, 73, 94); border-radius: 6px; background-size: 100% 100%;" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+                    <img id="cover-art-ss" style="width: 100%; height: auto; border: 2px solid rgb(52, 73, 94); margin-bottom: 20px; border-radius: 6px; background-size: 100% 100%;" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
                     <div id="countdown-display-ss" style="float: left; width: 50%; line-height: 38px; font-size: 38px; font-weight: bold; text-align: center;"><i class="fa fa-spinner fa-spin"></i></div>
                     <div id="total-ss" style="line-height: 38px; font-size: 28px; font-weight: bold; text-align: center;"><i class="fa fa-spinner fa-spin"></i></div>
                 </div>
             </div>
-            <div id="rightpanel-ss" style="float: right; width: 50%; height: 100%">
-                <div style="height: 150px">
+            <div id="rightpanel-ss" style="float: right; width: 60%; height: 100%">
+                <div style="height: 110px">
                     <div id="playlist-position-ss" style="padding-top: 30px; font-size: 22px; display: block; box-sizing: border-box; text-align: center; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><span></span></div>
                     <div id="format-bitrate-ss" style="font-size: 22px; display: block; box-sizing: border-box; text-align: center; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i class="fa fa-spinner fa-spin"></i></div>
                 </div>
@@ -30,8 +30,8 @@
                 </div>
                 <div style="height: auto">
                     <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
-                        <div id="lyric-ss" style="font-size: 30px; display: block; box-sizing: border-box; text-align: left; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i>Lyric:</i></div>
-                        <div id="song-lyric-ss" style="font-size: 10px; -moz-column-count: 2; -webkit-column-count: 2; column-count: 2;"><pre class="fa fa-spinner fa-spin"></pre></div>
+                        <div id="addinfo-ss" style="font-size: 24px; display: block; box-sizing: border-box; text-align: left; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i>Additional Info:</i></div>
+                        <div id="addinfo-text-ss" style="font-size: 15px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
                     </div>
                 </div>
             </div>
@@ -256,6 +256,13 @@
             <li><a href="javascript:;" data-cmd="genreadd"><i class="fa fa-plus-circle sx"></i> Add</a></li>
             <li><a href="javascript:;" data-cmd="genreaddplay"><i class="fa fa-play sx"></i> Add and play</a></li>
             <li><a href="javascript:;" data-cmd="genreaddreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
+        </ul>
+    </div>
+    <div id="context-menu-composer" class="context-menu">
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="javascript:;" data-cmd="composeradd"><i class="fa fa-plus-circle sx"></i> Add</a></li>
+            <li><a href="javascript:;" data-cmd="composeraddplay"><i class="fa fa-play sx"></i> Add and play</a></li>
+            <li><a href="javascript:;" data-cmd="composeraddreplaceplay"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
         </ul>
     </div>
 </div>
