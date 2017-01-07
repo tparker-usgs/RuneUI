@@ -120,7 +120,10 @@
                     <tr><th>enable-NAT:</th><td><?php if($this->accesspoint['enable-NAT'] === '1'): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
                     <tr><th>WiFi is available:</th><td><?php if($this->wifiavailable === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
                     <tr><th>WiFi is AP capable:</th><td><?php if($this->wififeatureAP === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                    </tbody>
+                    <tr><th>Connect to AP:</th><td><?php if($this->wififeatureAP === 1): ?><img src="/img/RuneAudioAP.png" style="width: 300px"><?php else: ?><?php endif; ?></td></tr>
+                    <tr><th>&nbsp;</td></tr>
+                    <tr><th>Connect to RA:</th><td><?php if($this->wififeatureAP === 1): ?><img src="/img/RuneAudioURL.png" style="width: 300px"><?php else: ?><?php endif; ?></td></tr>
+                </tbody>
             </table>
         </div>
     </fieldset>

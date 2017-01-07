@@ -1513,6 +1513,8 @@ function wrk_apconfig($redis, $action, $args = null)
                 }
                 $return[] = '';
             }
+            sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioAP.png "WIFI:S:'.$args->ssid.';T:WPA2;P:'.$args->passphrase.';;"');
+            sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioURL.png http://'.$args->{'ip-address'});
             break;
         case 'reset':
             break;

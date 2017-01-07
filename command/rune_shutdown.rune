@@ -34,18 +34,9 @@
 if [[ $1 == "poweroff" ]] ; then
   echo "power off RuneAudio"
   splash="/usr/share/bootsplash/shutdown.png"
-  gpio mode 7 out
-  gpio write 7 1
-  sleep 1
-  echo "Setting pin GPIO7 Low"
-  gpio write 7 0
 else
   echo "reboot RuneAudio"
   splash="/usr/share/bootsplash/reboot.png"
-  # Reboot blink will stop after Boot OK return
-  echo "setting pin GPIO 4 High"
-  gpio -g mode 4 out
-  gpio -g write 4 1
 fi
 
 echo "Stop MPD and unmount shares..."

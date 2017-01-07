@@ -25,13 +25,13 @@
                     <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
                         <div id="artist-ss" style="font-size: 30px; display: block; box-sizing: border-box; text-align: left; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i>Artist:</i></div>
                         <img id="artist-image-ss" style="margin-right: 20px; margin-left: 10px; float: left; width: 130px; height: auto; border: 2px solid rgb(52, 73, 94); border-radius: 6px; background-size: 100% 100%;" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
-                        <div id="artist-bio-ss" style="font-size: 16px"><pre class="fa fa-spinner fa-spin"></pre></div>
+                        <div id="artist-bio-ss" style="font-size: 20px"><pre class="fa fa-spinner fa-spin"></pre></div>
                     </div>
                 </div>
                 <div style="height: auto">
                     <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
                         <div id="addinfo-ss" style="font-size: 24px; display: block; box-sizing: border-box; text-align: left; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px;"><i>Additional Info:</i></div>
-                        <div id="addinfo-text-ss" style="font-size: 15px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
+                        <div id="addinfo-text-ss" style="font-size: 20px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
                     </div>
                 </div>
             </div>
