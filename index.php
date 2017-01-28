@@ -53,7 +53,7 @@ $activePlayer = $redis->get('activePlayer');
 $template->activePlayer = $activePlayer;
 // allowed controllers
 $controllers = array(
-    'alsaconfig',
+    'alsamixer',
     'lyric',
 	'artist_info',
     'coverart',

@@ -438,6 +438,12 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
+        case 'pl-ashuffle-stop':
+            if ($activePlayer === 'MPD') {
+                sysCmdAsync('/usr/bin/killall ashuffle &');
+                ui_notify('Stopped Playing randomly', '');
+            }
+            break;
 	}
 } else {
   echo 'MPD DB INTERFACE<br>';

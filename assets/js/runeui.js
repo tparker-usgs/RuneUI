@@ -1089,6 +1089,32 @@ function getPlaylists(){
     });
 }
 
+// update save playlist dropdown
+function updatePlaylistDropdown(data){
+    var i, line, lines=data.split('\n'), infos=[];
+    var options = '';
+    for (i = 0; (line = lines[i]); i += 1 ) {
+        infos = line.split(': ');
+        if( 'playlist' === infos[0] ) {
+            options += '<option value="'+infos[1]+'" />';
+        }
+    }
+    document.getElementById('pl-list').innerHTML = options;
+    loadingSpinner('pl', 'hide');
+}
+
+// get saved playlists
+function getPlaylistsDropdown(){
+    loadingSpinner('pl');
+    $.ajax({
+        url: '/command/?cmd=listplaylists',
+        success: function(data){
+            updatePlaylistDropdown(data);
+        },
+        cache: false
+    });
+}
+
 // parse the JSON response and return the formatted code
 function parseResponse(options) {
     // DEFAULTS
@@ -2176,8 +2202,16 @@ if ($('#section-index').length) {
         $('#total').click(function(){
             sendCmd('pause');
         });
-        
-        
+
+        $('#random').click(function(){
+            if ($('#random').attr('data-cmd') === 'pl-ashuffle-stop') {
+                $.post('/db/?cmd=pl-ashuffle-stop', '');
+                $('#random').attr('data-cmd', 'random');
+                $('#random').attr('title', 'Random');
+                $('#random').removeClass('btn-primary');
+            }
+        });
+
         // KNOBS
         // ----------------------------------------------------------------------------------------------------
         
@@ -2370,7 +2404,12 @@ if ($('#section-index').length) {
             sendCmd('rename "' + oldname + '" "' + newname + '"');
             getPlaylists();
         });
-        
+
+        // playlist save action
+        $('#pl-manage-save').click(function(){
+            getPlaylistsDropdown();
+        });
+
         // sort Queue entries
         var sortlist = document.getElementById('playlist-entries');
         new Sortable(sortlist, {
@@ -2668,8 +2707,11 @@ if ($('#section-index').length) {
 
                 case 'pl-ashuffle':
                     $.post('/db/?cmd=pl-ashuffle', { 'playlist' : path });
+                    $('#random').attr('data-cmd', 'pl-ashuffle-stop');
+                    $('#random').attr('title', 'Stop randomly adding songs');
+                    $('#random').addClass('btn-primary');
                     break;
-                    
+
                 case 'wradd':
                     path = path.split(' | ')[1];
                     getDB({
@@ -2839,6 +2881,10 @@ if ($('#section-index').length) {
             $.post('/settings/', { 'syscmd' : 'reboot' });
             toggleLoader();
         });
+        // system display off
+        $('#syscmd-display_off').click(function(){
+            $.post('/settings/', { 'syscmd' : 'display_off' });
+        });
         
         // social share overlay
         overlayTrigger('#overlay-social');
@@ -2933,7 +2979,10 @@ if ($('#section-index').length) {
             $.post('/settings/', { 'syscmd' : 'reboot' });
             toggleLoader();
         });
-        
+        // system display off
+        $('#syscmd-display_off').click(function(){
+            $.post('/settings/', { 'syscmd' : 'display_off' });
+        });
         
         // COMMON
         // ----------------------------------------------------------------------------------------------------

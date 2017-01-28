@@ -106,6 +106,12 @@ while (1) {
                     } else {
                         $redis->set('lock_globalrandom', 0);
                     }
+
+                    // ashuffle runs
+                    $retval = sysCmd('pidof ashuffle');
+                    if (intval($retval[0]) > 0)
+                        $status['random'] = '1';
+
                     // JSON response for GUI
                     runelog('rune_PL_wrk: ui_render() response', json_encode($status));
                     ui_render('playback', json_encode($status));

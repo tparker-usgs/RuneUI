@@ -275,7 +275,10 @@
             </div>
             <div class="modal-body">
                 <label for="pl-save-name">Give a name to this playlist</label>
-                <input id="pl-save-name" class="form-control osk-trigger" type="text" placeholder="Enter playlist name">
+                <input id="pl-save-name" class="form-control osk-trigger" type="text" placeholder="Enter playlist name" list='pl-list'>
+                    <datalist id='pl-list'>
+                    </datalist>
+                </input>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
