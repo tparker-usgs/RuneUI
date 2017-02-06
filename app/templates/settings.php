@@ -118,14 +118,26 @@
             <div class="form-group">
                 <label class="control-label col-sm-2" for="i2smodule">Linux Kernel</label>
                 <div class="col-sm-10">
-                    <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
-                        <option value="linux-ARCH"><?php echo $this->kernel; ?></option>
+                    <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
+                        <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
+                        <option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
+                        <option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
+                        <option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC</option>
+                        <option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFiBerry AMP</option>
+                        <option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFiBerry DAC</option>
+                        <option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFiBerry DAC+</option>
+                        <option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HifiBerry Digi / Digi+</option>
+                        <option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HifiBerry Digi Pro</option>
+                        <option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO Pi-DAC</option>
+                        <option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Pi-DAC+</option>
+                        <option value="iqaudio-digi-wm8804-audio" <?php if($this->i2smodule === 'iqaudio-digi-wm8804-audio'): ?> selected <?php endif ?>>IQaudIO Digi</option>
+                        <option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>Justboom DAC</option>
+                        <option value="justboom-digi" <?php if($this->i2smodule === 'justboom-digi'): ?> selected <?php endif ?>>Justboom Digi</option>
+                        <option value="pisound" <?php if($this->i2smodule === 'pisound'): ?> selected <?php endif ?>>Pisound</option>
+                        <option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
+                        <option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPI DAC</option>
                     </select>
-                    <span class="help-block">There are no other kernels available at the moment!</span>
-                </div>
-                <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
-                <div class="col-sm-10">
-                    <span class="help-block">Enable I&#178;S output by selecting one of the available sets of modules (in this version you have to edit /boot/config.txt), specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot.</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available sets of modules, specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot.</span>
                 </div>
             </div>
             <?php endif;?>

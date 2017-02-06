@@ -84,6 +84,10 @@ if (FALSE === $redis->get('mpd_start_volume')) {
     $redis->set('mpd_start_volume', '-1');
 }
 
+if (FALSE === $redis->get('mpd_autoplay')) {
+    $redis->set('mpd_autoplay', '0');
+}
+
 if (FALSE === $redis->get('localSStime')) {
     $redis->set('localSStime', '15');
 }
@@ -288,7 +292,7 @@ if ('1' === $redis->get('globalrandom')) {
 }
 
 // turn wifi power saving off
-    sysCmd('iwconfig wlan0 power off');
+sysCmd('iwconfig wlan0 power off');
 
 // close startup Redis connection
 $redis->close();
@@ -901,6 +905,10 @@ $redis->pconnect('/tmp/redis.sock');
         $all_mounted = wrk_sourcemount($redis, 'mountall');
         if ($all_mounted === 1) {
             runelog('wrk_SY: all shares mounted successfully!');
+            // start play if enabled
+            if ($redis->get('mpd_autoplay') === '1') {
+                sysCmd('/usr/bin/mpc play');
+            }
         } else {
             $retries_mounting++;
             runelog('wrk_SY: error mounting shares, try it again! Count: '.$retries_mounting);

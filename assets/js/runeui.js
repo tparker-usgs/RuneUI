@@ -853,6 +853,10 @@ function updateGUI() {
             $('#artist-bio-ss').html('');
             $('#artist-image-ss').css('background-image', '');
             $('#addinfo-text-ss').html('');
+            $('#artist-bio-overlay').html('');
+            $('#artist-image-overlay').css('background-image', '');
+            $('#addinfo-text-overlay').html('');
+			$('#lyric-text-overlay').html('');
             if (GUI.stream !== 'radio') {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
@@ -863,25 +867,31 @@ function updateGUI() {
                         var info = jQuery.parseJSON(data);
                         if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
                             $('#artist-bio-ss').html(info.artist.bio.content.substring(0,550) + ' ... ');
-                            //$('#artist-bio-ss').html(info.artist.bio.summary);
+                            $('#artist-bio-overlay').html(info.artist.bio.summary);
+                            $('#artist-bio-full-overlay').html(info.artist.bio.content);
                             $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
+                            $('#addinfo-text-overlay').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name + '<br>&nbsp;<br>&nbsp;');
                             $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+							$('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
                         } else {
                             $('#artist-bio-ss').html(' sorry, no info available ');
-                            //$('#artist-bio-ss').html(info.artist.bio.summary);
+                            $('#artist-bio-overlay').html(' sorry, no info available ');
                             $('#addinfo-text-ss').html('');
+                            $('#addinfo-text-overlay').html('');
+							$('#lyric-text-overlay').html('');
 							$('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
+							$('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
                         }
                     },
                     cache: false
                 });
-                // $.ajax({
-                    // url: '/lyric/',
-                    // success: function(data){
-                        // $('#addinfo-text-ss').html(data);
-                    // },
-                    // cache: false
-                // });
+                $.ajax({
+                    url: '/lyric/',
+                    success: function(data){
+                       $('#lyric-text-overlay').html(data);
+                    },
+                    cache: false
+                });
             } else {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $.ajax({
@@ -2885,7 +2895,7 @@ if ($('#section-index').length) {
         $('#syscmd-display_off').click(function(){
             $.post('/settings/', { 'syscmd' : 'display_off' });
         });
-        
+
         // social share overlay
         overlayTrigger('#overlay-social');
         // play source overlay

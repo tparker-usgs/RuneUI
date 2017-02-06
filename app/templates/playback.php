@@ -65,7 +65,7 @@
                 <div class="col-sm-<?=$this->colspan ?> coverart">
                     <img id="cover-art" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
                     <button id="overlay-social-open" class="btn btn-default" type="button" title="Share this track"><i class="fa fa-share"></i></button>
-                    <!--<a href="#" id="overlay-playsource-open" class="btn btn-default" title="Play source">MPD</a>-->
+                    <button id="songinfo-open" class="btn btn-default" type="button" title="Song Info" href="#songinfo-modal" data-toggle="modal"><i class="fa fa-info"></i></button>
                 </div>
                 <?php endif ?>
                 <div id="volume-knob" class="col-sm-<?=$this->colspan ?> <?=$this->volume['divclass'] ?>">
@@ -380,6 +380,34 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
                 <button id="webradio-delete-button" type="button" class="btn btn-primary btn-lg" data-dismiss="modal">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="songinfo-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="songinfo-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <!-- <h4 class="modal-title" id="songinfo-modal-label" >Song info</h4> -->
+            </div>
+            <div class="modal-body txtmid">
+                <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
+                    <div id="artist-overlay" style="font-size: 30px; display: block; box-sizing: border-box; text-align: center; font-weight: bold; color: rgb(0, 149, 216); line-height: 34px; margin-bottom: 20px; margin-top: 20px;"><i>Artist:</i></div>
+                    <img id="artist-image-overlay" style="margin-right: 20px; margin-left: 10px; float: left; width: 130px; height: auto; border: 2px solid rgb(52, 73, 94); border-radius: 6px; background-size: 100% 100%;" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
+                    <div id="artist-bio-overlay" style="font-size: 20px"><pre class="fa fa-spinner fa-spin"></pre></div>
+                    <div id="artist-bio-full-overlay" style="font-size: 20px" hidden="true"><pre class="fa fa-spinner fa-spin"></pre></div>
+                </div>
+                <div style="height: auto">
+                    <div class="col-sm-4 coverart" style="height: auto; margin: 10px auto 11px; width: 100%;">
+                        <div id="addinfo-text-overlay" style="font-size: 20px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
+                        <div id="lyric-overlay" style="font-size: 30px; display: block; box-sizing: border-box; text-align: center; font-weight: bold; color: rgb(0, 149, 216); line-height: 24px; margin-bottom: 20px; margin-top: 20px;"><i>Lyric:</i></div>
+                        <div id="lyric-text-overlay" style="font-size: 20px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
+                    </div>
+                </div>
+			</div>
+			<div class="modal-footer">
+                <button class="btn btn-default btn-lg" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
     </div>
