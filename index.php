@@ -37,6 +37,21 @@ include($_SERVER['HOME'].'/app/config/config.php');
 include($_SERVER['HOME'].'/app/libs/vendor/autoload.php');
 // open session
 session_start();
+
+// password prodection
+if (FALSE === $redis->get('password')) {
+    $redis->set('password', '$2y$12$k3zKY3VANC3f90AHZyj/DOWmQ56hczAXZ/UOmxMmeP8kGNDnRelfm');
+}
+if (FALSE === $redis->get('pwd_protection')) {
+    $redis->set('pwd_protection', '0');
+}
+if (!is_localhost() && !isset($_SESSION["login"]) && $redis->get('pwd_protection')) {
+    $host  = $_SERVER['HTTP_HOST'];
+    $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+    $extra = 'login.php';
+	header("Location: http://$host$uri/$extra");
+	die();
+}
 // plates: create new engine
 $engine = new \League\Plates\Engine('/srv/http/app/templates');
 // plates: load asset extension

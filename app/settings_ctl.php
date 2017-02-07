@@ -116,6 +116,11 @@ if (isset($_POST)) {
         } else {
             $redis->get('local_browser') == 0 || $redis->set('local_browser', 0);
         }
+        if ($_POST['features']['pwd_protection'] == 1) {
+            $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
+        } else {
+            $redis->get('pwd_protection') == 0 || $redis->set('pwd_protection', 0);
+        }
         if (isset($_POST['features']['localSStime'])) {
             $redis->set('localSStime', $_POST['features']['localSStime']);
         }
@@ -199,3 +204,4 @@ $template->spotify = $redis->hGetAll('spotify');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
 $template->kernel = $redis->get('kernel');
+$template->pwd_protection = $redis->get('pwd_protection');

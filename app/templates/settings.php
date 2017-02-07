@@ -281,6 +281,16 @@
                 </div>
             </div>
 			<div class="form-group">
+                <label for="pwd-protection" class="control-label col-sm-2">Password protection</label>
+                <div class="col-sm-10">
+                    <label class="switch-light well" onclick="">
+                        <input name="features[pwd_protection]" type="checkbox" value="1"<?php if($this->pwd_protection == 1): ?> checked="checked" <?php endif ?>>
+                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                    </label>
+                    <span class="help-block">Protect the UI with a password (standard is "rune").</span>
+                </div>
+            </div>
+			<div class="form-group">
                 <label for="local-browser" class="control-label col-sm-2">Local browser</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">

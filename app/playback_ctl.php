@@ -54,4 +54,5 @@ $template->dev = $redis->get('dev');
 $template->spotify = $redis->hGet('spotify', 'enable');
 $template->localSStime = $redis->get('localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
-
+$template->hostname = $redis->get('hostname');
+$template->pwd_protection = $redis->get('pwd_protection');
