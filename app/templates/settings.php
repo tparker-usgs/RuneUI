@@ -287,7 +287,7 @@
                         <input name="features[pwd_protection]" type="checkbox" value="1"<?php if($this->pwd_protection == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Protect the UI with a password (standard is "rune").</span>
+                    <span class="help-block">Protect the UI with a password (standard is "rune" can be changed on login screen).</span>
                 </div>
             </div>
 			<div class="form-group">

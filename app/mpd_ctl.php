@@ -63,7 +63,6 @@
         if (isset($_POST['mpd']['crossfade'])) {
             sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
         }
-		
 		if ($_POST['mpd']['globalrandom'] == "1") {
             $redis->get('globalrandom') == 1 || $redis->set('globalrandom', 1);
         } else {
@@ -72,6 +71,11 @@
 		if (isset($_POST['mpd']['addrandom'])) {
             $redis->get('addrandom') == $_POST['mpd']['addrandom'] || $redis->set('addrandom', $_POST['mpd']['addrandom']);
         }
+		if ($_POST['mpd']['mpd_autoplay'] == "1") {
+            $redis->get('mpd_autoplay') == 1 || $redis->set('mpd_autoplay', 1);
+        } else {
+            $redis->get('mpd_autoplay') == 0 || $redis->set('mpd_autoplay', 0);
+        }
     }
  }
 waitSyWrk($redis, $jobID);
@@ -79,6 +83,7 @@ waitSyWrk($redis, $jobID);
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->realtime_volume = $redis->get('dynVolumeKnob');
 $template->mpd['start_volume'] = $redis->get('mpd_start_volume');
+$template->mpd['mpd_autoplay'] = $redis->get('mpd_autoplay');
 $template->mpd['globalrandom'] = $redis->get('globalrandom');
 $template->mpd['addrandom'] = $redis->get('addrandom');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);

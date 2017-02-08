@@ -214,6 +214,16 @@
         <legend>Misc options</legend>
         <fieldset>
             <div class="form-group">
+                <label class="control-label col-sm-2" for="autoplay">Autoplay</label>
+                <div class="col-sm-10">
+                    <label class="switch-light well" onclick="">
+                        <input name="mpd[mpd_autoplay]" type="checkbox" value="1"<?php if($this->mpd['mpd_autoplay'] == 1): ?> checked="checked" <?php endif ?>>
+                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                    </label>
+                    <span class="help-block">If set to ON the player starts automatically after boot.</span>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="crossfade">Crossfade</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="crossfade" name="mpd[crossfade]" value="<?=$this->mpd['crossfade'] ?>" data-trigger="change" min="0" placeholder="0" />
