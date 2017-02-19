@@ -90,7 +90,23 @@ if (isset($_POST)) {
         if ($_POST['i2smodule'] === 'berrynosmini') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_berrynosmini'));
         // autoswitch optimized kernel profile for IQaudIO Pi-DAC
         if ($_POST['i2smodule'] === 'iqaudiopidac') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_iqaudio'));
+
+    // audio-on-off
+        if ($redis->get('audio_on_off') !== $_POST['audio_on_off']) {
+            // submit worker job
+            $notification = new stdClass();
+            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'audio_on_off', 'args' => $_POST['audio_on_off']));
+            $notification->text = 'Please wait';
+            wrk_notify($redis, 'startjob', $notification, $job);
+            $jobID[] = $job;
+            if ($_POST['audio_on_off'] == 1) {
+                $redis->get('audio_on_off') == 1 || $redis->set('audio_on_off', 1);
+            } else {
+                $redis->get('audio_on_off') == 0 || $redis->set('audio_on_off', 0);
+            }
+        }
     }
+
     // ----- FEATURES -----
     if (isset($_POST['features'])) {
         if ($_POST['features']['airplay']['enable'] == 1) {
@@ -203,5 +219,6 @@ $template->proxy = $redis->hGetAll('proxy');
 $template->spotify = $redis->hGetAll('spotify');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
+$template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');

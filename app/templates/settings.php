@@ -116,11 +116,21 @@
             <?php endif;?>
             <?php if($this->hwplatformid === '08'): ?>
             <div class="form-group">
-                <label class="control-label col-sm-2" for="i2smodule">Linux Kernel</label>
+                <label class="control-label col-sm-2" for="kernel">Linux Kernel</label>
+                <div class="col-sm-10">
+                    <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
+                        <option value="<?php echo $this->kernel; ?>"><?php echo $this->kernel; ?></option>
+                    </select>
+                    <span class="help-block">No other kernels available.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
                         <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
                         <option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
+                        <option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
                         <option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
                         <option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC</option>
                         <option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFiBerry AMP</option>
@@ -137,8 +147,18 @@
                         <option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
                         <option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPI DAC</option>
                     </select>
-                    <span class="help-block">Enable I&#178;S output selecting one of the available sets of modules, specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot.</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.</span>
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="audio_on_off" class="control-label col-sm-2">HDMI & 3,5mm jack</label>
+                <div class="col-sm-10">
+                    <label class="switch-light well" onclick="">
+                        <input name="audio_on_off" type="checkbox" value="1"<?php if($this->audio_on_off == 1): ?> checked="checked" <?php endif ?>>
+                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                    </label>
+                    <span class="help-block">Set "ON" to enable or "OFF" to disable the onboard ALSA audio interface)</span>
+                </div>                
             </div>
             <?php endif;?>
             <!-- <div 

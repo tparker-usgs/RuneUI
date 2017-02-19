@@ -2059,86 +2059,110 @@ function wrk_audioOutput($redis, $action, $args = null)
 
 function wrk_i2smodule($redis, $args)
 {
-    if (wrk_mpdPlaybackStatus() === 'playing') {
-        $mpd = openMpdSocket('/run/mpd.sock');
-        sendMpdCommand($mpd, 'kill');
-        closeMpdSocket($mpd);
-    }
-    switch ($args) {
-        case 'none':
-            sysCmd('rmmod snd_soc_iqaudio_dac').usleep(300000);
-            sysCmd('rmmod snd_soc_hifiberry_digi').usleep(300000);
-            sysCmd('rmmod snd_soc_hifiberry_dac').usleep(300000);
-            sysCmd('rmmod snd_soc_hifiberry_dacplus').usleep(300000);
-            sysCmd('rmmod snd_soc_wm8804').usleep(300000);
-			sysCmd('rmmod snd_soc_odroid_dac').usleep(300000);
-            sysCmd('rmmod snd_soc_pcm512x').usleep(300000);
-            sysCmd('rmmod snd_soc_pcm5102').usleep(300000);
-            sysCmd('rmmod snd_soc_pcm5102a');
-            break;
-        case 'berrynos':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_dac');
-            break;
-        case 'berrynosmini':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_dac');
-            break;
-        case 'hifiberrydac':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_dac');
-            break;
-        case 'hifiberrydacplus':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_dacplus');
-            break;
-        case 'hifiberrydigi':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_digi');
-            break;
-        case 'iqaudiopidac':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
-            sysCmd('modprobe snd_soc_iqaudio_dac');
-            break;
-        case 'raspyplay3':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
-            sysCmd('modprobe snd_soc_hifiberry_dac');
-            break;
-        case 'raspyplay4':
-            sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
-            sysCmd('modprobe snd_soc_wm8804').usleep(300000);
-            sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
-            sysCmd('modprobe snd_soc_iqaudio_dac');
-            break;
-        case 'odroidhifishield':
-			sysCmd('modprobe snd_soc_odroid_dac').usleep(300000);
-            sysCmd('modprobe snd_soc_pcm5102').usleep(300000);
-            break;
-	}
     $redis->set('i2smodule', $args);
-    wrk_mpdconf($redis, 'refresh');
+        
+    if($redis->get('hwplatformid') === '08') {
+        ## RuneAudio enable HDMI & analog output
+        $file = '/boot/config.txt';
+        $newArray = wrk_replaceTextLine($file, '', 'dtoverlay=', 'dtoverlay='.$args, '## RuneAudio I2S-Settings', 1);
+        // Commit changes to /boot/config.txt
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);        
+    } else {
+        if (wrk_mpdPlaybackStatus() === 'playing') {
+            $mpd = openMpdSocket('/run/mpd.sock');
+            sendMpdCommand($mpd, 'kill');
+            closeMpdSocket($mpd);
+        }
+        switch ($args) {
+            case 'none':
+                sysCmd('rmmod snd_soc_iqaudio_dac').usleep(300000);
+                sysCmd('rmmod snd_soc_hifiberry_digi').usleep(300000);
+                sysCmd('rmmod snd_soc_hifiberry_dac').usleep(300000);
+                sysCmd('rmmod snd_soc_hifiberry_dacplus').usleep(300000);
+                sysCmd('rmmod snd_soc_wm8804').usleep(300000);
+                sysCmd('rmmod snd_soc_odroid_dac').usleep(300000);
+                sysCmd('rmmod snd_soc_pcm512x').usleep(300000);
+                sysCmd('rmmod snd_soc_pcm5102').usleep(300000);
+                sysCmd('rmmod snd_soc_pcm5102a');
+                break;
+            case 'berrynos':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_dac');
+                break;
+            case 'berrynosmini':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_dac');
+                break;
+            case 'hifiberrydac':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_dac');
+                break;
+            case 'hifiberrydacplus':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_dacplus');
+                break;
+            case 'hifiberrydigi':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_digi');
+                break;
+            case 'iqaudiopidac':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
+                sysCmd('modprobe snd_soc_iqaudio_dac');
+                break;
+            case 'raspyplay3':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102a').usleep(300000);
+                sysCmd('modprobe snd_soc_hifiberry_dac');
+                break;
+            case 'raspyplay4':
+                sysCmd('modprobe bcm2708_dmaengine').usleep(300000);
+                sysCmd('modprobe snd_soc_wm8804').usleep(300000);
+                sysCmd('modprobe snd_soc_bcm2708_i2s').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm512x').usleep(300000);
+                sysCmd('modprobe snd_soc_iqaudio_dac');
+                break;
+            case 'odroidhifishield':
+                sysCmd('modprobe snd_soc_odroid_dac').usleep(300000);
+                sysCmd('modprobe snd_soc_pcm5102').usleep(300000);
+                break;
+        }
+        wrk_mpdconf($redis, 'refresh');
+    }
+}
+
+function wrk_audio_on_off($redis, $args)
+{
+    if($redis->get('hwplatformid') === '08') {
+        ## RuneAudio enable HDMI & analog output
+        $file = '/boot/config.txt';
+        $newArray = wrk_replaceTextLine($file, '', 'dtparam=audio=', 'dtparam=audio='.($args == 1 ? 'on' : 'off'), '## RuneAudio HDMI & 3,5mm jack', 1);
+        // Commit changes to /boot/config.txt
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+    }
 }
 
 function wrk_kernelswitch($redis, $args)

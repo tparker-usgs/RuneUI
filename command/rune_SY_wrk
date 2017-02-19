@@ -96,6 +96,10 @@ if (FALSE === $redis->get('remoteSStime')) {
     $redis->set('remoteSStime', '-1');
 }
 
+if (FALSE === $redis->get('audio_on_off')) {
+    $redis->set('audio_on_off', '0');
+}
+
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
@@ -443,6 +447,24 @@ $redis->pconnect('/tmp/redis.sock');
                     // send notification
                     // TODO: make a real check!
                     ui_notify_async('I&#178;S kernel module', 'Operation completed', $jobID);
+                    // TODO (rework needed)
+                    $ao = $redis->get('ao');
+                    runelog('env: reenable the current AO', $ao);
+                    if ($ao === 'bcm2835 ALSA_1' OR $ao === 'bcm2835 ALSA_2') {
+                        sysCmd('mpc enable only "bcm2835 ALSA"');
+                    } else {    
+                        sysCmd('mpc enable only "'.$ao.'"');
+                    }
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+                case 'audio_on_off':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    runelog('env: SET dtparam-audio', $job->args);
+                    wrk_audio_on_off($redis, $job->args);
+                    // send notification
+                    // TODO: make a real check!
+                    ui_notify_async('Switching onboard audio mode', 'Operation completed', $jobID);
                     // TODO (rework needed)
                     $ao = $redis->get('ao');
                     runelog('env: reenable the current AO', $ao);
