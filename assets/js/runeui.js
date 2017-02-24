@@ -1830,9 +1830,15 @@ function commandButton(el) {
 // Library home screen
 function libraryHome(text) {
     GUI.libraryhome = text[0];
-//	if (GUI.libraryhome.clientUUID === GUI.clientUUID) {
+    if (GUI.libraryhome.clientUUID === GUI.clientUUID && GUI.plugin !== 'Dirble' && GUI.currentpath !== 'Webradio') {
         renderLibraryHome(); // TODO: do it only while in home
-//    }
+    }
+    if (GUI.currentpath === 'Webradio') {
+        getDB({
+            path: 'Webradio',
+            uplevel: 0
+		});
+    }
 }
 
 // list of in range wlans

@@ -147,7 +147,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             if (isset($_POST['path'])) {
                 if (saveBookmark($redis, $_POST['path'])) {
                     ui_notify('Bookmark saved', $_POST['path'].' added to bookmarks');
-                    ui_libraryHome($redis);
+                    ui_libraryHome($redis, $clientUUID);
                 } else {
                     ui_notify('Error saving bookmark', 'please try again later');
                 }
@@ -155,7 +155,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             if (isset($_POST['id'])) {
                 if (deleteBookmark($redis,$_POST['id'])) {
                     ui_notify('Bookmark deleted', '"' . $_POST['name'] . '" successfully removed');
-                    ui_libraryHome($redis);
+                    ui_libraryHome($redis, $clientUUID);
                 } else {
                     ui_notify('Error deleting bookmark', 'Please try again later');
                 }
@@ -196,7 +196,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     }
                     // Search radio station
                     if ($_POST['querytype'] === 'search' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/search/'.$_POST['args'].$token, $proxy);
+                        echo curlGet($dirblecfg['baseurl'].'/search/'.urlencode($_POST['args']).$token, $proxy);
                     }
                     // Get stations by continent
                     //if ($_POST['querytype'] === 'continent' && isset($_POST['args'])) {

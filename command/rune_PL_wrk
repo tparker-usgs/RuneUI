@@ -98,6 +98,14 @@ while (1) {
                     //    sysCmdAsync('ui_render_pl');
                     //    runelog('---------------- PLAYLIST RENDER ----------------');
                     //}
+                    
+                    if ($status['changed'] === 'mixer') {
+                        //$redis->set('current_volume', $status['volume']);
+                        if ($redis->get('ao') === 'PianoDACPlus' && $redis->hget('mpdconf', 'mixer_type') === 'hardware') {
+                            sysCmd('amixer -D '.json_decode($redis->hget('acards', 'PianoDACPlus'))->mixer_device.' set Subwoofer '.$status['volume'].'%');
+                        }
+                    }
+                    
                     // Global Random
                     if (($redis->get('globalrandom') === '1') && ($redis->get('lastsongid') != $status['songid']) && ($redis->get('lock_globalrandom') === '0')) {
                         $addsong = new globalRandom($status);

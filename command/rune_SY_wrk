@@ -836,7 +836,7 @@ $redis->pconnect('/tmp/redis.sock');
                             ui_notify_async('Webradio', $job->args->label.' deleted', $jobID);
                         }
                     }
-                    ui_libraryHome($redis, $mpd);
+                    ui_libraryHome($redis, $clientUUID);
                     closeMpdSocket($mpd);
                     $redis->sRem('w_lock', $jobID);
                     break;

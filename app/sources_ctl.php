@@ -93,4 +93,4 @@ if (isset($template->action)) {
     } else {
         $template->title = 'Add new network mount';
     }
-} 
+}
