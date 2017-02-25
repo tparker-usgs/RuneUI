@@ -49,6 +49,7 @@ var GUI = {
     currentsong: null,
     json: 0,
     libraryhome: '',
+    forceGUIupdate: false,
     maxvol: 100,
     minvol: 0,
     mode: 'websocket',
@@ -1839,6 +1840,10 @@ function libraryHome(text) {
             uplevel: 0
 		});
     }
+	if (GUI.forceGUIupdate === true) {
+        GUI.forceGUIupdate = false;
+		renderLibraryHome();
+	}
 }
 
 // list of in range wlans
@@ -2909,6 +2914,7 @@ if ($('#section-index').length) {
         // play source manual switch
         $('#playsource-mpd').click(function(){
             if ($(this).hasClass('inactive')) {
+				GUI.forceGUIupdate = true;
                 $.ajax({
                     url: '/command/?switchplayer=MPD',
                     cache: false
@@ -2920,6 +2926,7 @@ if ($('#section-index').length) {
         $('#playsource-spotify').click(function(){
             if ($(this).hasClass('inactive')) {
                 if (GUI.libraryhome.Spotify === '1') {
+					GUI.forceGUIupdate = true;
                     $.ajax({
                         url: '/command/?switchplayer=Spotify',
                         cache: false
