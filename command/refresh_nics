@@ -70,6 +70,23 @@ runelog('########### configured_nics ########### ', $configured_nics);
 // print_r(array_diff($configured_nics,$detected_nics));
 // print_r($removed_nics);
 runelog('########### removed_nics ########### ', $removed_nics);
+// check if wlan0/1 is detected
+if (!in_array("wlan0", $detected_nics)) {
+    $retval = sysCmd('systemctl is-enabled netctl-auto@wlan0');
+    if ($retval[0] === 'enabled') {
+        sysCmd ("systemctl stop netctl-auto@wlan0");
+        sysCmd ("systemctl disable netctl-auto@wlan0");
+        runelog('######## Disabled netctl-auto@wlan0 ########');
+    }
+}
+if (!in_array("wlan1", $detected_nics)) {
+    $retval = sysCmd('systemctl is-enabled netctl-auto@wlan1');
+    if ($retval[0] === 'enabled') {
+        sysCmd ("systemctl stop netctl-auto@wlan1");
+        sysCmd ("systemctl disable netctl-auto@wlan1");
+        runelog('######## Disabled netctl-auto@wlan1 ########');
+    }
+}
 // handle inactive nics
 runelog('--------------------------- handle inactive nics ---------------------------');
 unset($nic);
