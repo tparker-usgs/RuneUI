@@ -1,6 +1,7 @@
 <?php
 $redis = new Redis();
-$redis->connect('127.0.0.1');
+//$redis->connect('127.0.0.1');
+$redis->connect('/tmp/redis.sock');
 $hash = $redis->get('password');
 
 if (!password_verify($_POST['pwd'], $hash)) die();
