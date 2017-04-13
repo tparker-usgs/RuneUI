@@ -1511,7 +1511,7 @@ function wrk_apconfig($redis, $action, $args = null)
                 } else {
                     sysCmd('sysctl net.ipv4.ip_forward=0');
                 }
-                $return[] = '';
+                $return[] = array();
             }
             sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioAP.png "WIFI:S:'.$args->ssid.';T:WPA2;P:'.$args->passphrase.';;"');
             sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioURL.png http://'.$args->{'ip-address'});
@@ -2061,7 +2061,7 @@ function wrk_i2smodule($redis, $args)
 {
     $redis->set('i2smodule', $args);
         
-    if($redis->get('hwplatformid') === '08') {
+    if($redis->get('hwplatformid') === '01' || $redis->get('hwplatformid') === '08') {
         ## RuneAudio enable HDMI & analog output
         $file = '/boot/config.txt';
         $newArray = wrk_replaceTextLine($file, '', 'dtoverlay=', 'dtoverlay='.$args, '## RuneAudio I2S-Settings', 1);
@@ -2689,6 +2689,7 @@ function wrk_getHwPlatform()
             switch($arch) {
                 // RaspberryPi
                 case 'BCM2708':
+                case 'BCM2835':
                     $arch = '01';
                     break;
                 // UDOO
@@ -2718,6 +2719,8 @@ function wrk_getHwPlatform()
                     break;
                 // RaspberryPi
                 case 'BCM2709':
+                case 'BCM2836':
+                case 'BCM2837':
                     $arch = '08';
                     break;
                 // ODROID C1
