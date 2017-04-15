@@ -3464,7 +3464,7 @@ function curlGet($url, $proxy = null)
         }
     }
     @curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 400);
-    @curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    @curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     @curl_setopt($ch, CURLOPT_HEADER, 0);
     @curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $response = curl_exec($ch);
