@@ -1511,7 +1511,7 @@ function wrk_apconfig($redis, $action, $args = null)
                 } else {
                     sysCmd('sysctl net.ipv4.ip_forward=0');
                 }
-                $return[] = array();
+                $return = '';
             }
             sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioAP.png "WIFI:S:'.$args->ssid.';T:WPA2;P:'.$args->passphrase.';;"');
             sysCmd('qrencode -l H -t PNG -o /var/www/assets/img/RuneAudioURL.png http://'.$args->{'ip-address'});

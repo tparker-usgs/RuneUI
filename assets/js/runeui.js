@@ -280,7 +280,7 @@ function setvol(val) {
     $('#volumemute').removeClass('btn-primary');
     sendCmd('setvol ' + val);
     if (GUI.vol_changed_local === 0) {
-        setInterval(reset_vol_changed_local, 5000);
+        setTimeout(reset_vol_changed_local, 15000);
         GUI.vol_changed_local = 1;
     }
 }
@@ -1810,7 +1810,7 @@ function commandButton(el) {
         }
         // console.log('volume = ', GUI.volume);
         if ((vol >= 0) && (vol <= 100)) {
-            sendCmd('setvol ' + vol);
+            setvol(vol);
             $('#volume').val(vol, false).trigger('update');
         }
         return;

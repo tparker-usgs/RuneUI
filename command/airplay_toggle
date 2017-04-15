@@ -62,4 +62,4 @@ switch($status) {
 }
 
 // update player view
-ui_libraryHome($redis);
+ui_libraryHome($redis, 'Server');
