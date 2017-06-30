@@ -2717,7 +2717,7 @@ function wrk_getHwPlatform()
                 case 'Freescale i.MX6 Quad/DualLite (Device Tree)':
                     $arch = '07';
                     break;
-                // RaspberryPi
+                // RaspberryPi2/3
                 case 'BCM2709':
                 case 'BCM2836':
                 case 'BCM2837':
@@ -2737,6 +2737,7 @@ function wrk_getHwPlatform()
             }
         }
     }
+    $arch = '08';
     if (!isset($arch)) {
         $arch = '--';
     }

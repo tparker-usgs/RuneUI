@@ -131,6 +131,7 @@
                         <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
                         <option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
                         <option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
+                        <option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo Digione</option>
                         <option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
                         <option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC</option>
                         <option value="dionaudio-loco" <?php if($this->i2smodule === 'dionaudio-loco'): ?> selected <?php endif ?>>Dion Audio LOCO DAC-AMP</option>
@@ -150,6 +151,7 @@
                         <option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
                         <option value="rra-digidac1-wm8741-audio" <?php if($this->i2smodule === 'rra-digidac1-wm8741-audio'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
                         <option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPI DAC</option>
+                        <option value="rpi-cirrus-wm5102" <?php if($this->i2smodule === 'rpi-cirrus-wm5102'): ?> selected <?php endif ?>>RPI cirrus wm5102</option>
                     </select>
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.</span>
                 </div>
@@ -182,6 +184,7 @@
                         <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
                         <option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
                         <option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
+                        <option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo Digione</option>
                         <option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
                         <option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC</option>
                         <option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFiBerry AMP</option>
@@ -197,6 +200,7 @@
                         <option value="pisound" <?php if($this->i2smodule === 'pisound'): ?> selected <?php endif ?>>Pisound</option>
                         <option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
                         <option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPI DAC</option>
+                        <option value="rpi-cirrus-wm5102" <?php if($this->i2smodule === 'rpi-cirrus-wm5102'): ?> selected <?php endif ?>>RPI cirrus wm5102</option>
                     </select>
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.</span>
                 </div>
