@@ -2682,62 +2682,145 @@ function wrk_getHwPlatform()
     $file = '/proc/cpuinfo';
     $fileData = file($file);
     foreach($fileData as $line) {
-        if (substr($line, 0, 8) == 'Hardware') {
-            $arch = trim(substr($line, 11, 50));
+        if (substr($line, 0, 8) == 'Revision') {
+            $revision = trim(substr($line, 11, 50));
             // debug
-            runelog('wrk_getHwPlatform() /proc/cpu string', $arch);
-            switch($arch) {
-                // RaspberryPi
-                case 'BCM2708':
-                case 'BCM2835':
-                    $arch = '01';
-                    break;
-                // UDOO
-                case 'SECO i.Mx6 UDOO Board':
-                    $arch = '02';
-                    break;
-                // CuBox
-                case 'Marvell Dove (Flattened Device Tree)':
-                case 'SolidRun CuBox':
-                    $arch = '03';
-                    break;
-                // BeagleBone Black
-                case 'Generic AM33XX (Flattened Device Tree)':
-                    $arch = '04';
-                    break;
-                // Utilite Standard
-                case 'Compulab CM-FX6':
-                    $arch = '05';
-                    break;
-                // Cubietruck
-                case 'sun7i':
-                    $arch = '06';
-                    break;
-                // Cubox-i
-                case 'Freescale i.MX6 Quad/DualLite (Device Tree)':
-                    $arch = '07';
-                    break;
-                // RaspberryPi2/3
-                case 'BCM2709':
-                case 'BCM2836':
-                case 'BCM2837':
-                    $arch = '08';
-                    break;
-                // ODROID C1
-                case 'ODROIDC':
-                    $arch = '09';
-                    break;                    
-                // ODROID C2
-                case 'ODROID-C2':
-                    $arch = '10';
-                    break;  
-                default:
-                    $arch = '--';
-                    break;
-            }
+            runelog('wrk_getHwPlatform() /proc/cpuinfo revision', $revision);
         }
+
+        if (substr($line, 0, 8) == 'Hardware') {
+            $hardware = trim(substr($line, 11, 50));
+            // debug
+            runelog('wrk_getHwPlatform() /proc/cpuinfo hardware', $hardware);
+        } 
     }
+
+    switch($hardware) {
+        // RaspberryPi
+        case 'BCM2708':
+        case 'BCM2709':
+        case 'BCM2835':
+        case 'BCM2836':
+        case 'BCM2837':
+            if (intval("0x".$revision, 16) < 16) {
+                // RaspberryPi1
+                $arch = '01';
+                // RaspberryPi2/3
+                $arch = '08';
+            }
+            else {
+                $model = trim(substr($revision, -2, 1));
+                switch($model) {
+                    // 0 = A,
+                    case "0":
+                        $arch = '01';
+                        break;
+                    // 1 = B,
+                    case "1":
+                        $arch = '01';
+                        break;
+                    // 2 = A+,
+                    case "2":
+                        $arch = '01';
+                        break;
+                    // 3 = B+,
+                    case "3":
+                        $arch = '01';
+                        break;
+                    // 4 = B Pi2,
+                    case "4":
+                        $arch = '08';
+                        break;
+                    // 5 = Alpha,
+                    case "5":
+                        $arch = '--';
+                        break;
+                    // 6 = Compute Module
+                    case "6":
+                        $arch = '01';
+                        break;
+                    // 7 = unknown,
+                    case "7":
+                        $arch = '--';
+                        break;
+                    // 8 = B Pi3,
+                    case "8":
+                        $arch = '08';
+                        break;
+                    // 9 = Zero,
+                    case "9":
+                        $arch = '08';
+                        break;
+                    // A = Compute Module 3
+                    case "A":
+                        $arch = '08';
+                        break;
+                    // B = unknown,
+                    case "B":
+                        $arch = '--';
+                        break;
+                    // C = Zero W
+                    case "C":
+                        $arch = '08';
+                        break;
+                    default:
+                        $arch = '--';
+                        break;
+                }
+            }
+            break;
+
+        // UDOO
+        case 'SECO i.Mx6 UDOO Board':
+            $arch = '02';
+            break;
+
+        // CuBox
+        case 'Marvell Dove (Flattened Device Tree)':
+        case 'SolidRun CuBox':
+            $arch = '03';
+            break;
+
+        // BeagleBone Black
+        case 'Generic AM33XX (Flattened Device Tree)':
+            $arch = '04';
+            break;
+
+        // Utilite Standard
+        case 'Compulab CM-FX6':
+            $arch = '05';
+            break;
+
+        // Cubietruck
+        case 'sun7i':
+            $arch = '06';
+            break;
+
+        // Cubox-i
+        case 'Freescale i.MX6 Quad/DualLite (Device Tree)':
+            $arch = '07';
+            break;
+
+        // ODROID C1
+        case 'ODROIDC':
+            $arch = '09';
+            break;                    
+
+        // ODROID C2
+        case 'ODROID-C2':
+            $arch = '10';
+            break;  
+
+        default:
+            $arch = '--';
+            break;
+    }
+
     $arch = '08';
+    if (!isset($arch)) {
+        $arch = '--';
+    }
+    
     if (!isset($arch)) {
         $arch = '--';
     }
