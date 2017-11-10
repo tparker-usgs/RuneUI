@@ -886,7 +886,7 @@ function _parseStatusResponse($resp)
         }
         // "elapsed time song_percent" added to output array
          $time = explode(":", $plistArray['time']);
-         if ($time[0] != 0) {
+         if ($time[0] != 0 && $time[1] != 0) {
          $percent = round(($time[0]*100)/$time[1]);
          } else {
             $percent = 0;
