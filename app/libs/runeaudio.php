@@ -3028,6 +3028,21 @@ function wrk_playerID($arch)
 {
     // $playerid = $arch.md5(uniqid(rand(), true)).md5(uniqid(rand(), true));
     $playerid = $arch.md5_file('/sys/class/net/eth0/address');
+    // janui modification for a Pi Zero W connected without wired ethernet (e.g. AP mode) there is no eth0 address
+    // if not filled then use the wlan0 information
+    if (trim($playerid) === $arch) {
+        $playerid = $arch.md5_file('/sys/class/net/wlan0/address');
+    }
+    // And just in case a normal Pi Zero boots the first time without any network interface use the CPU serial number
+    if (trim($playerid) === $arch) {
+        $retval = sysCmd("grep -Po '^Serial\s*:\s*\K[[:xdigit:]]{16}' /proc/cpuinfo");
+        $playerid = $arch.'CPU'.$retval[0];
+    }
+    // And just in case...
+    if (trim($playerid) === $arch) {
+        $playerid = $arch.'-00000-UNKNOWN-00000-';
+    }
+    // end janui modification
     return $playerid;
 }
 
