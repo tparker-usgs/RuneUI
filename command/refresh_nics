@@ -192,13 +192,13 @@ if (!empty($removed_nics)) {
 
 // start AP if configured and no IP is assigned
 if (FALSE === $redis->hGet('AccessPoint', 'enabled')) {
-    $redis->hSet('AccessPoint', 'enabled', 0);
+    $redis->hSet('AccessPoint', 'enabled', 1);
 }
 if (FALSE === $redis->hGet('AccessPoint', 'ip-address')) {
-    $redis->hSet('AccessPoint', 'ip-address', '192.168.1.1');
+    $redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'broadcast')) {
-    $redis->hSet('AccessPoint', 'broadcast', '192.168.1.255');
+    $redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'ssid')) {
     $redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
@@ -207,16 +207,16 @@ if (FALSE === $redis->hGet('AccessPoint', 'passphrase')) {
     $redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'dhcp-range')) {
-    $redis->hSet('AccessPoint', 'dhcp-range', '192.168.1.2,192.168.1.254,24h');
+    $redis->hSet('AccessPoint', 'dhcp-range', '192.168.5.2,192.168.5.254,24h');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'dhcp-option-dns')) {
-    $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.1.1');
+    $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'dhcp-option-router')) {
-    $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.1.1');
+    $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
 }
 if (FALSE === $redis->hGet('AccessPoint', 'enable-NAT')) {
-    $redis->hSet('AccessPoint', 'enable-NAT', 0);
+    $redis->hSet('AccessPoint', 'enable-NAT', 1);
 }
 if ($redis->hGet('AccessPoint', 'enabled') === '1') {
 	runelog('------------------ try to start AP if no IP is assigned ---------------------');
@@ -229,7 +229,11 @@ if ($redis->hGet('AccessPoint', 'enabled') === '1') {
 			}
 		}
 	}
-	if ($got_one_IP === false) {
+   // Start AP only if a supported nic is available by checking for the line '* AP' in the section 'Supported interface modes:' in the output from 'iw list'
+   // 'iw list' returns nothing when some unsupported nics are installed. These unsupported nics seem only to work when netctl-auto@wlan0 is running, don't switch it off
+   $iwAccessPointInfo = sysCmd("iw list | sed -n '/Supported interface modes:/,/:/p' | grep '* AP$'");
+   if (($got_one_IP === false) && (trim($iwAccessPointInfo[0]) == '* AP')) {
+   //if ($got_one_IP === false) {
 		runelog('########### no IP => start AP on wlan0');
 		sysCmd('systemctl stop netctl-auto@wlan0');
 		// change AP name
