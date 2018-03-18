@@ -2469,6 +2469,9 @@ if ($action === 'reset') {
             $activePlayer = $redis->get('activePlayer');
             if ($activePlayer === 'MPD') {
                 sysCmd('systemctl start mpd');
+				if ($redis->get('globalrandom') === '1') {
+					sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+				}
                 if ($redis->get('mpd_playback_status') === 'playing') {
                     syscmd('mpc play');
                 }
@@ -2491,6 +2494,7 @@ if ($action === 'reset') {
             closeMpdSocket($mpd);
             sleep(1);
             sysCmd('systemctl stop mpd');
+			sysCmd('systemctl stop ashuffle');
             break;
         case 'restart':
             wrk_mpdconf($redis, 'stop');
@@ -2659,6 +2663,7 @@ function wrk_sourcecfg($redis, $action, $args)
         case 'reset':
             $source = $redis->keys('mount_*');
             sysCmd('systemctl stop mpd');
+			sysCmd('systemctl stop ashuffle');
             usleep(500000);
                 foreach ($source as $key) {
                     $mp = $redis->hGetAll($key);
@@ -2670,6 +2675,9 @@ function wrk_sourcecfg($redis, $action, $args)
             // reset mount index
             if ($return) $redis->del('mountidx');
             sysCmd('systemctl start mpd');
+			if ($redis->get('globalrandom') === '1') {
+				sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+			}
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
@@ -3050,7 +3058,10 @@ function wrk_switchplayer($redis, $playerengine)
 {
     switch ($playerengine) {
         case 'MPD':
-            $return = sysCmd('systemctl start mpd');
+            $return = sysCmd('pgrep -x mpd || systemctl start mpd');
+			if ($redis->get('globalrandom') === '1') {
+				sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+			}
             usleep(500000);
             if ($redis->hGet('lastfm','enable') === '1') sysCmd('systemctl start mpdscribble');
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl start upmpdcli');
@@ -3066,6 +3077,7 @@ function wrk_switchplayer($redis, $playerengine)
             usleep(500000);
             if ($redis->hGet('lastfm','enable') === '1') sysCmd('systemctl stop mpdscribble');
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl stop upmpdcli');
+			sysCmd('systemctl stop ashuffle');
             $redis->set('activePlayer', 'Spotify');
             $return = sysCmd('systemctl stop mpd');
             $redis->set('mpd_playback_status', 'stop');
@@ -3111,6 +3123,7 @@ function wrk_changeHostname($redis, $newhostname)
     sysCmd('systemctl restart avahi-daemon');
     // reconfigure MPD
     sysCmd('systemctl stop mpd');
+	sysCmd('systemctl stop ashuffle');
     // update zeroconfname in MPD configuration
     $redis->hMset('mpdconf','zeroconf_name', $newhostname);
     // update airplayname
@@ -3123,7 +3136,10 @@ function wrk_changeHostname($redis, $newhostname)
     // rewrite mpd.conf file
     wrk_mpdconf('/etc', $redis);
     // restart MPD
-    sysCmd('systemctl start mpd');
+    sysCmd('pgrep -x mpd || systemctl start mpd');
+	if ($redis->get('globalrandom') === '1') {
+		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	}
     // restart SAMBA << TODO: use systemd!!!
     sysCmd('killall -HUP smbd && killall -HUP nmbd');
     // TODO: restart MiniDLNA

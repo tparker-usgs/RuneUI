@@ -105,6 +105,9 @@ $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
     // check MPD process
     sysCmd('pgrep -x mpd || systemctl start mpd');
+	if ($redis->get('globalrandom') === '1') {
+		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	}
 } elseif ($activePlayer === 'Spotify') {
     // check MPD process
     sysCmd('pgrep -x spopd || systemctl start spopd');
@@ -154,12 +157,16 @@ if ($playerid_db === '') {
     // reset sourcecfg to defaults
     runelog('reset sourcecfg to defaults');
     sysCmd('systemctl stop mpd');
+	sysCmd('systemctl stop ashuffle');
     wrk_sourcecfg($redis,'reset');
     // reset Webradios
     $redis->del('webradios');
     sysCmd('rm /mnt/MPD/Webradio/*');
     // reconnect to new instance of MPD
     sysCmd('systemctl start mpd');
+	if ($redis->get('globalrandom') === '1') {
+		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	}
     $mpd = openMpdSocket('/run/mpd.sock', 0);
     // clear MPD database
     sendMpdCommand($mpd,'update');
@@ -229,7 +236,10 @@ if ($redis->get('i2smodule') !== 'none') {
 }
 // start player backend
 if ($activePlayer === 'MPD') {
-    sysCmd('systemctl start mpd');
+    sysCmd('pgrep -x mpd || systemctl start mpd');
+	if ($redis->get('globalrandom') === '1') {
+		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	}
     usleep(500000);
     // set mpd start volume
     $mpd_volume = $redis->get('mpd_start_volume');
@@ -292,7 +302,7 @@ if ($redis->get('local_browser') === '1') {
 
 // start globalrandom if configured
 if ('1' === $redis->get('globalrandom')) {
-    sysCmd('systemctl start ashuffle.service');
+    sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 }
 
 // turn wifi power saving off

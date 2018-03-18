@@ -40,7 +40,7 @@ function redisDatastore($redis,$action) {
     switch ($action) {
         case 'reset':
             // kernel
-            $redis->set('kernel', 'linux-arch-rpi_3.12.26-1-ARCH');
+            $redis->set('kernel', 'Linux runeaudio 4.14.24-1-ARCH');
             $redis->set('i2smodule', 'none');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
@@ -89,7 +89,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
             $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
             $redis->hSet('mpdconf', 'volume_normalization', 'no');
-            $redis->hSet('mpdconf', 'audio_buffer_size', '2048');
+            $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
             $redis->hSet('mpdconf', 'buffer_before_play', '10%');
             $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
             $redis->hSet('mpdconf', 'mixer_type', 'software');
@@ -119,7 +119,7 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'beta-20141216');
+            $redis->set('buildversion', 'gearhead-janui-20180308');
             $redis->set('release', '0.4');
             // HW platform data
             // $redis->set('playerid', '');
@@ -229,7 +229,7 @@ function redisDatastore($redis,$action) {
             break;
         case 'check':
             // kernel
-            $redis->get('kernel') || $redis->set('kernel', 'linux-arch-rpi_3.12.26-1-ARCH');
+            $redis->get('kernel') || $redis->set('kernel', 'Linux runeaudio 4.14.24-1-ARCH');
             $redis->get('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->get('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->get('activePlayer') || $redis->set('activePlayer', 'MPD');
@@ -276,7 +276,7 @@ function redisDatastore($redis,$action) {
             $redis->get('debug') || $redis->set('debug', 0);
             $redis->get('debugdata') || $redis->set('debugdata', '');
             $redis->get('opcache') || $redis->set('opcache', 1);
-            $redis->get('buildversion') || $redis->set('buildversion', 'alpha-20141002');
+            $redis->get('buildversion') || $redis->set('buildversion', 'gearhead-janui-20180308');
             // HW platform data
             $redis->get('playerid') || $redis->set('playerid', '');
             $redis->get('hwplatform') || $redis->set('hwplatform', '');
@@ -291,7 +291,7 @@ function redisDatastore($redis,$action) {
             $redis->hGet('resolvconf', 'timeout') || $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hGet('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', '1');
             // lock keys
-            $redis->get('lock_globalrandom') || $redis->set('globalrandom_lock', 0);
+            $redis->get('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             $redis->get('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);
             $redis->get('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
             break;

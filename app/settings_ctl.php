@@ -155,11 +155,11 @@ if (isset($_POST)) {
         } else {
             $redis->get('coverart') == 0 || $redis->set('coverart', 0);
         }
-        if ($_POST['features']['globalrandom'] == 1) {
-            $redis->get('globalrandom') == 1 || $redis->set('globalrandom', 1);
-        } else {
-            $redis->get('globalrandom') == 0 || $redis->set('globalrandom', 0);
-        }
+        //if ($_POST['features']['globalrandom'] == 1) {
+        //    $redis->get('globalrandom') == 1 || $redis->set('globalrandom', 1);
+        //} else {
+        //    $redis->get('globalrandom') == 0 || $redis->set('globalrandom', 0);
+        //}
         if ($_POST['features']['lastfm']['enable'] == 1) {
             // create worker job (start mpdscribble)
             if (($_POST['features']['lastfm']['user'] != $redis->hGet('lastfm', 'user') OR $_POST['features']['lastfm']['pass'] != $redis->hGet('lastfm', 'pass')) OR $redis->hGet('lastfm', 'enable') != $_POST['features']['lastfm']['enable']) {
@@ -213,7 +213,7 @@ $template->localSStime = $redis->get('localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
 $template->udevil = $redis->get('udevil');
 $template->coverart = $redis->get('coverart');
-$template->globalrandom = $redis->get('globalrandom');
+//$template->globalrandom = $redis->get('globalrandom');
 $template->lastfm = $redis->hGetAll('lastfm');
 $template->proxy = $redis->hGetAll('proxy');
 $template->spotify = $redis->hGetAll('spotify');
