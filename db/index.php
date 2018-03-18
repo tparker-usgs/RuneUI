@@ -31,8 +31,10 @@
  *  coder: Simone De Gregori
  *
  */
+// Environment vars
 // common include
 include($_SERVER['HOME'].'/app/config/config.php');
+//include('/var/www/app/config/config.php');
 ini_set('display_errors', -1);
 error_reporting('E_ALL');
 // check current player backend
@@ -433,15 +435,18 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
-					sysCmdAsync('/usr/local/bin/ashuffle -f /var/lib/mpd/playlists/'.$_POST['playlist'].'.m3u &');
-                    ui_notify('Playing randomly from', $_POST['playlist'].'.m3u');
+					$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
+					waitSyWrk($redis, $jobID);
+					ui_notify('Started Random Play from the playlist', $_POST['playlist']);
+					sleep(3);
+					ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
                 }
             }
             break;
         case 'pl-ashuffle-stop':
             if ($activePlayer === 'MPD') {
-                sysCmdAsync('/usr/bin/killall ashuffle &');
-                ui_notify('Stopped Playing randomly', '');
+                // sysCmdAsync('/usr/bin/killall ashuffle &');
+                ui_notify('Use the MPD menu to switch Random Play off', '');
             }
             break;
 	}

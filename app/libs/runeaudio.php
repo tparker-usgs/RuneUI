@@ -2234,7 +2234,6 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
-			$redis->hSet('mpdconf', 'soxr', 'very high');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             wrk_mpdconf($redis, 'writecfg');
             break;
@@ -2304,15 +2303,6 @@ if ($action === 'reset') {
                     $output .="decoder {\n";
                     $output .="\tplugin \t\"ffmpeg\"\n";
                     $output .="\tenabled \"".$value."\"\n";
-                    $output .="}\n";
-                    continue;
-                }
-                if ($param === 'soxr') {
-                    // --- resampeler plugin ---
-                    $output .="\n";
-                    $output .="resampler {\n";
-                    $output .="\tplugin \t\"soxr\"\n";
-                    $output .="\tquality \"".$value."\"\n";
                     $output .="}\n";
                     continue;
                 }

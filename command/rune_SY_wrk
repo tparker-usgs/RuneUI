@@ -105,9 +105,9 @@ $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
     // check MPD process
     sysCmd('pgrep -x mpd || systemctl start mpd');
-	if ($redis->get('globalrandom') === '1') {
-		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	}
+	//if ($redis->get('globalrandom') === '1') {
+	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	//}
 } elseif ($activePlayer === 'Spotify') {
     // check MPD process
     sysCmd('pgrep -x spopd || systemctl start spopd');
@@ -164,9 +164,9 @@ if ($playerid_db === '') {
     sysCmd('rm /mnt/MPD/Webradio/*');
     // reconnect to new instance of MPD
     sysCmd('systemctl start mpd');
-	if ($redis->get('globalrandom') === '1') {
-		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	}
+	//if ($redis->get('globalrandom') === '1') {
+	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	//}
     $mpd = openMpdSocket('/run/mpd.sock', 0);
     // clear MPD database
     sendMpdCommand($mpd,'update');
@@ -237,9 +237,9 @@ if ($redis->get('i2smodule') !== 'none') {
 // start player backend
 if ($activePlayer === 'MPD') {
     sysCmd('pgrep -x mpd || systemctl start mpd');
-	if ($redis->get('globalrandom') === '1') {
-		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	}
+	//if ($redis->get('globalrandom') === '1') {
+	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+	//}
     usleep(500000);
     // set mpd start volume
     $mpd_volume = $redis->get('mpd_start_volume');
@@ -599,6 +599,39 @@ $redis->pconnect('/tmp/redis.sock');
                     wrk_mpdconf($redis, 'restart');
                     $redis->sRem('w_lock', $jobID);
                     break;
+                case 'ashufflereset':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					// If it exists, remove the symbolic link which ashuffle uses as a random playlist. ashuffle uses the whole MPD database in it is not present
+					sysCmd('rm -f '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					// Stop ashuffle
+					sysCmd('systemctl stop ashuffle');
+					// shuffle.service has the line: ExecStart=/usr/bin/ashuffle -f /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
+					// The hard coded /var/lib/mpd/playlists is set to $redis->hget('mpdconf', 'playlist_directory')
+					// This will modify the standard shuffle.service to be able to random play from playlists
+					$file = '/usr/lib/systemd/system/ashuffle.service';
+					$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -f '.$redis->hGet('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					$fp = fopen($file, 'w');
+					$return = fwrite($fp, implode("", $newArray));
+					fclose($fp);
+					// Restart ashuffle if global random ON
+					if ('1' === $redis->get('globalrandom')) {
+						sysCmd('systemctl start ashuffle');
+					}
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+                case 'pl_ashuffle':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('pl_ashuffle args: ', $job->args);
+                    $redis->sAdd('w_lock', $jobID);
+					// Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
+					sysCmd('ln -sf '.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					// Force global random ON
+					$redis->set('globalrandom', '1');
+					// Force ashuffle (re)start
+					sysCmd('systemctl restart ashuffle || systemctl start ashuffle');
+                    $redis->sRem('w_lock', $jobID);
+                    break;
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     runelog('netcfg action: ', $job->action);
@@ -644,7 +677,9 @@ $redis->pconnect('/tmp/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
                     // reset accesspoint configuration to default
                     if ($job->action === 'reset') {
-                        // todo
+						// Need to test the following
+                        // $redis->Del('AccessPoint');
+						// sysCmd('/var/www/command/refresh_nics');
                         $redis->sRem('w_lock', $jobID);
                     }
                     // write network configuration

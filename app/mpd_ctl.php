@@ -76,7 +76,7 @@
         } else {
             $redis->get('mpd_autoplay') == 0 || $redis->set('mpd_autoplay', 0);
         }
-		$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdrestart'));
+		$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
     }
  }
 waitSyWrk($redis, $jobID);

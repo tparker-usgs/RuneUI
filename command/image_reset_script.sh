@@ -19,8 +19,10 @@ rm -f /var/lib/mpd/mpdstate
 rm -rf /var/log/*
 rm -rf /root/.*
 rm -rf /var/www/test
-rm -rf /mnt/MPD/LocalStorage
-rm -rf /mnt/MPD/Webradio
+rm -rf /mnt/MPD/LocalStorage/*
+rm -rf /mnt/MPD/Webradio/*
+rm -rf /var/lib/mpd/playlists/*
+rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
 php -f /srv/http/db/redis_datastore_setup reset

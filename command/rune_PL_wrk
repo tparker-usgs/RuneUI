@@ -111,8 +111,11 @@ while (1) {
 						// janui modified for ashuffle: removed addsong added forceupdate
 						//$addsong = new globalRandom($status);
 						//$addsong->start();
-						$forceupdate = 1;
+						//$forceupdate = 1;
 						// janui end modification
+						//runelog('rune_PL_wrk: ui_render() response', json_encode($status));
+						//ui_render('playback', json_encode($status));
+						//ui_update($redis, $socket, 0);
 						$redis->set('lock_globalrandom', 1);
 					} else {
 						$redis->set('lock_globalrandom', 0);
@@ -122,8 +125,34 @@ while (1) {
 						//if (intval($retval[0]) > 0)
 						//	$status['random'] = '1';
 						// JSON response for GUI
-						runelog('rune_PL_wrk: ui_render() response', json_encode($status));
-						ui_render('playback', json_encode($status));
+						//runelog('rune_PL_wrk: ui_render() response', json_encode($status));
+						//ui_render('playback', json_encode($status));
+					}
+					runelog('rune_PL_wrk: ui_render() response', json_encode($status));
+					ui_render('playback', json_encode($status));
+					// Detect deletion of playlist random file
+					// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the pl_ashuffle in /db/index.php
+					if (FALSE === $redis->get('last_pl_randomfile')) {
+						// redis variable not set > first time
+						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+							$redis->set('last_pl_randomfile', 'exists');
+						} else {
+							$redis->set('last_pl_randomfile', 'none');
+						}
+					} else {
+						// redis variable set > not first time
+						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+							// file found
+							$redis->set('last_pl_randomfile', 'exists');
+						} else {
+							// no file
+							if ($redis->get('last_pl_randomfile') === 'exists') {
+								// but the file was there the last time so restart ashuffle
+								$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle'));
+								waitSyWrk($redis, $jobID);
+							}
+							$redis->set('last_pl_randomfile', 'none');
+						}
 					}
 					// janui end modified
 

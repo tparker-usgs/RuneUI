@@ -237,7 +237,7 @@
                         <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if($this->mpd['globalrandom'] == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">(EXPERIMENTAL) Toggles the global random, which adds a random song to the queue when it reaches the end. Changes will take effect after you restart your device.</span>
+                    <span class="help-block">(EXPERIMENTAL) Toggles the global random, which adds a random song to the queue when it reaches the end.</span>
                 </div>
             </div>
             <div class="form-group">
