@@ -1962,11 +1962,11 @@ function wrk_audioOutput($redis, $action, $args = null)
             foreach ($acards as $card) {
                 unset($sub_interfaces);
                 unset($data);
-                $card_index = explode(' : ', $card);
+                $card_index = explode(' : ', $card, 2);
                 $card_index = trim($card_index[0]);
                 // acards loop
                 runelog('>>--------------------------- card: '.$card.' index: '.$card_index.' (start) --------------------------->>');
-                $card = explode(' - ', $card);
+                $card = explode(' - ', $card, 2);
                 $card = trim($card[1]);
                 // $description = sysCmd("cat /proc/asound/cards | grep : | cut -d ':' -f 2 | cut -d ' ' -f 4-20");
                 // debug
@@ -2234,6 +2234,7 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
+			$redis->hSet('mpdconf', 'soxr', 'very high');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             wrk_mpdconf($redis, 'writecfg');
             break;
@@ -2303,6 +2304,15 @@ if ($action === 'reset') {
                     $output .="decoder {\n";
                     $output .="\tplugin \t\"ffmpeg\"\n";
                     $output .="\tenabled \"".$value."\"\n";
+                    $output .="}\n";
+                    continue;
+                }
+                if ($param === 'soxr') {
+                    // --- resampeler plugin ---
+                    $output .="\n";
+                    $output .="resampler {\n";
+                    $output .="\tplugin \t\"soxr\"\n";
+                    $output .="\tquality \"".$value."\"\n";
                     $output .="}\n";
                     continue;
                 }
