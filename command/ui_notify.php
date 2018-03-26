@@ -38,13 +38,13 @@ ini_set('error_reporting', -1);
 ini_set('error_log','/var/log/runeaudio/ui_notify.log');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/tmp/redis.sock');
+$redis->connect('/run/redis.sock');
 include('/var/www/app/libs/runeaudio.php');
 // ---- end functions -----
 if (isset($argv[2]) && !isset($argv[3])) {
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/tmp/redis.sock');
+$redis->connect('/run/redis.sock');
     if (!($redis->sIsMember('w_lock', $argv[2]))) {
             usleep(800000);
     } else {

@@ -70,7 +70,7 @@ sysCmd('systemctl stop php-fpm');
 sysCmd('chmod 777 /run');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/tmp/redis.sock');
+$redis->connect('/run/redis.sock');
 
 if (FALSE === $redis->get('dynVolumeKnob')) {
     $redis->set('dynVolumeKnob', '1');
@@ -318,7 +318,7 @@ $all_mounted = 0;
 $retries_mounting = 0;
 while (1) {
 // Connect to Redis backend
-$redis->pconnect('/tmp/redis.sock');
+$redis->pconnect('/run/redis.sock');
 // runelog('[wrk] loop marker ',microtime(true));
     // monitor loop
     if (!empty($redis->hGetAll('w_queue'))) {

@@ -38,7 +38,7 @@ ini_set('error_reporting', -1);
 ini_set('error_log', '/var/log/runeaudio/refresh_ao.log');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/tmp/redis.sock');
+$redis->connect('/run/redis.sock');
 include('/var/www/app/libs/runeaudio.php');
 $lock = $redis->get('lock_refresh_ao');
 runelog('lock status ', $lock);

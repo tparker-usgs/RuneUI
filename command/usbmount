@@ -39,7 +39,7 @@ ini_set('error_log','/var/log/runeaudio/usbmount.log');
 include('/var/www/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/tmp/redis.sock');
+$redis->connect('/run/redis.sock');
 // handle HFS+ mount
 if (strpos(file_get_contents('/proc/mounts'), '/mnt/MPD/USB/EFI vfat')) {
     sysCmd('devmon --unmount /mnt/MPD/USB/EFI');
