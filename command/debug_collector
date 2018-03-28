@@ -42,25 +42,27 @@ $redis = new Redis();
 $redis->connect('/run/redis.sock');
 function debug_data($redis)
 {
-    $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d ' ' -f 2");
+	$acards = sysCmd("cat /proc/asound/cards | grep : | cut -d ' ' -f 2");
     $output = "\n";
     $output .= "###### System info ######\n";
     $output .=  file_get_contents('/proc/version');
     $output .= "\n";
-    $output .=  "system time:\t".implode('\n', sysCmd('date'));
+    $output .= "System time:\t".implode('\n', sysCmd('date'));
     $output .= "\n";
+    $output .= "System load:\t".file_get_contents('/proc/loadavg');
+    $output .= "Hardware model:\t".implode('\n', sysCmd('cat /proc/device-tree/model'));
     $output .= "\n";
-    $output .=  "system load:\t".file_get_contents('/proc/loadavg');
+    $output .= "Linux version:\t".implode('\n', sysCmd('uname -r'));
     $output .= "\n";
+    $output .= "Build version:\t".$redis->get('buildversion')."\n";
     $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";
-    $output .= "\n";
-    $output .= "playerID:\t".$redis->get('playerid')."\n";
-    $output .= "\n";
-    $output .= "\n";
-    $output .= "###### Boot configuration ######\n";
-    $output .=  file_get_contents('/boot/config.txt');
+    $output .= "PlayerID:\t".$redis->get('playerid')."\n";
     $output .= "\n";
     $output .= "\n";
+    $output .= "###### Boot configuration (cat /boot/config.txt) ######\n";
+    $command = sysCmd("grep -v -e '^[[:space:]]*$' /boot/config.txt | grep -v '#.*='");
+    $output .= implode("\n", $command)."\n\n\n";
+    unset($command);
     $output .= "##################################################\n\n\n";
     $output .= "###### System load statistics (procinfo -H) ######\n";
     $command = sysCmd('procinfo -H');
@@ -184,6 +186,30 @@ function debug_data($redis)
     $command = sysCmd('df -h');
     $output .= implode("\n", $command)."\n\n\n";
     unset($command);
+	if (file_exists("/usr/bin/parted")) {
+		$output .= "###### Filesystem mounts - partitions (parted -ls) ######\n";
+		$command = sysCmd('parted -ls');
+		$output .= implode("\n", $command)."\n";
+		unset($command);
+	}
+	if (file_exists("/usr/bin/smartctl")) {
+		$drive_list = sysCmd('smartctl --scan-open -- -H -i');
+		if (!empty($drive_list)) {
+			foreach($drive_list as $drive) {
+				$drive = trim($drive);
+				if ($drive != "") {
+					$drive = "smartctl ".$drive." | grep -E 'Model:|Capacity:|-health self-'";
+					$output .= "###### Hard Disk Drive - SMART Health Check (".$drive.") ######\n";
+					$command = sysCmd($drive);
+					$output .= implode("\n", $command)."\n\n";
+					unset($command);
+				}
+			}
+			unset($drive);
+			unset($drive_list);
+			$output .= "\n";
+		}
+	}
     $output .= "###### Loaded kernel modules ######\n";
     $command = sysCmd('lsmod');
     $output .= implode("\n", $command)."\n\n\n";
@@ -228,6 +254,10 @@ function debug_data($redis)
     $output .= "###### Network wifi status (iwconfig) ######\n";
     $command = sysCmd('iwconfig');
     $output .= implode("\n", $command)."\n\n";
+    unset($command);
+    $output .= "###### Network wifi Access Point (redis-cli hgetall AccessPoint) ######\n";
+	$command = sysCmd('redis-cli hgetall AccessPoint');
+	$output .= implode("\n", $command)."\n\n";
     unset($command);
     // $output .= "###### Network wifi site-scan (iwlist scan) ######\n";
     // $command = sysCmd('iwlist scan');

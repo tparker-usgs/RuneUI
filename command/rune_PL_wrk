@@ -50,7 +50,6 @@ while (1) {
     // Connect to Redis backend
     $redis = new Redis();
     $redis->pconnect('/run/redis.sock');
-#    $redis->pconnect('127.0.0.1:6379');
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
@@ -108,31 +107,32 @@ while (1) {
                     }
                     
                     // Global Random
-					if (($redis->get('globalrandom') === '1') && ($redis->get('lastsongid') != $status['songid']) && ($redis->get('lock_globalrandom') === '0')) {
-						// janui modified for ashuffle: removed addsong added forceupdate
-						//$addsong = new globalRandom($status);
-						//$addsong->start();
-						//$forceupdate = 1;
-						// janui end modification
-						//runelog('rune_PL_wrk: ui_render() response', json_encode($status));
-						//ui_render('playback', json_encode($status));
-						//ui_update($redis, $socket, 0);
+					if (($redis->get('globalrandom') === '1') && ($status['state'] === 'stop') && ($redis->get('lock_globalrandom') === '1')) {
+						// MPD now stopped, the last track was the last in the queue, ashuffle will start a new track in this status
+						// to avoid displaying the first track in the queue force a UI update and skip the UI render step
+						ui_update($redis, $socket, 0);
+						// skip only once
+						$redis->set('lock_globalrandom', 0);
+					} else {
+						// normal process render the UI
+						// save JSON response for extensions
+						runelog('rune_PL_wrk: ui_render() response', json_encode($status));
+						ui_render('playback', json_encode($status));
+					}
+					If (($redis->get('globalrandom') === '1') && ($status['state'] === 'play') && ($redis->get('nextsongid') === '')) {
+						// now playing the last track in the queue
 						$redis->set('lock_globalrandom', 1);
 					} else {
+						// in all other circumstances do not skip 
 						$redis->set('lock_globalrandom', 0);
-						// janui modified for ashuffle: included the following lines inside the else, previously after/outside the else
-						// ashuffle runs
-						//$retval = sysCmd('pidof ashuffle');
-						//if (intval($retval[0]) > 0)
-						//	$status['random'] = '1';
-						// JSON response for GUI
-						//runelog('rune_PL_wrk: ui_render() response', json_encode($status));
-						//ui_render('playback', json_encode($status));
 					}
-					runelog('rune_PL_wrk: ui_render() response', json_encode($status));
-					ui_render('playback', json_encode($status));
+					$status['actPlayer'] = "MPD";
+					$redis->set('act_player_info', json_encode($status));
+
+                    $errorcode = socket_last_error($socket);
+                    runelog('last socket error = ', $errorcode);
 					// Detect deletion of playlist random file
-					// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the pl_ashuffle in /db/index.php
+					// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
 					if (FALSE === $redis->get('last_pl_randomfile')) {
 						// redis variable not set > first time
 						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
@@ -141,15 +141,15 @@ while (1) {
 							$redis->set('last_pl_randomfile', 'none');
 						}
 					} else {
-						// redis variable set > not first time
+						// redis variable is set > not first time
 						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
 							// file found
 							$redis->set('last_pl_randomfile', 'exists');
 						} else {
-							// no file
+							// no file found
 							if ($redis->get('last_pl_randomfile') === 'exists') {
-								// but the file was there the last time so restart ashuffle
-								$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle'));
+								// but the file was there the last time, so restart ashuffle
+								$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
 								waitSyWrk($redis, $jobID);
 							}
 							$redis->set('last_pl_randomfile', 'none');
@@ -157,12 +157,6 @@ while (1) {
 					}
 					// janui end modified
 
-                    // save JSON response for extensions
-                    $status['actPlayer'] = "MPD";
-                    $redis->set('act_player_info', json_encode($status));
-
-                    $errorcode = socket_last_error($socket);
-                    runelog('last socket error = ', $errorcode);
                 } while ($errorcode === 0);
 
                 // close Redis connection

@@ -135,6 +135,9 @@ function redisDatastore($redis,$action) {
             $redis->set('pl_length', 0);
             $redis->set('nextsongid', 0);
             $redis->set('lastsongid', 0);
+			// Samba parameters
+			$redis->hSet('samba', 'devonoff', 1);
+            $redis->hSet('samba', 'prodonoff', 0);
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hSet('resolvconf', 'attempts', '1');
@@ -287,6 +290,9 @@ function redisDatastore($redis,$action) {
             $redis->get('pl_length') || $redis->set('pl_length', 0);
             $redis->get('nextsongid') || $redis->set('nextsongid', 0);
             $redis->get('lastsongid') || $redis->set('lastsongid', 0);
+			// Samba parameters
+			$redis->hGet('samba', 'devonoff') || $redis->hSet('samba', 'devonoff', 1);
+            $redis->hGet('samba', 'prodonoff') || $redis->hSet('samba', 'prodonoff', 0);
             // network parameters
             $redis->hGet('resolvconf', 'timeout') || $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hGet('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', '1');

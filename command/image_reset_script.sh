@@ -28,14 +28,11 @@ redis-cli set hwplatformid ""
 php -f /srv/http/db/redis_datastore_setup reset
 git config -f /var/www/.git/config user.name ""
 git config -f /var/www/.git/config user.email ""
-mkdir -p /home/samba_readme
-rm -rf /home/samba_readme/*
-cp /var/www/app/config/defaults/rune_samba_readme /home/samba_readme/rune_samba_readme
 rm -rf //etc/samba/smb-dev.conf /etc/samba/smb-dist.conf /etc/samba/smb-prod.conf
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
-cp /var/www/app/config/defaults/smb-dist.conf /etc/samba/smb-dist.conf
-cp /var/www/app/config/defaults/smb-dist.conf /etc/samba/smb-prod.conf
+cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
+cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/shairport.service /usr/lib/systemd/system/shairport.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
