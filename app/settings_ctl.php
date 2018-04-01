@@ -36,7 +36,7 @@ if (isset($_POST)) {
     // ----- HOSTNAME -----
     if (isset($_POST['hostname'])) {
         if (empty($_POST['hostname'])) {
-        $args = 'runeaudio';
+        $args = 'RuneAudio';
         } else {
         $args = $_POST['hostname'];
         }
@@ -155,6 +155,13 @@ if (isset($_POST)) {
         } else {
             $redis->get('coverart') == 0 || $redis->set('coverart', 0);
         }
+		if ($_POST['features']['sambaprodonoff'] == 1) {
+            // create worker job (start sambaprodon)
+            $redis->hGet('samba', 'prodonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodon'));
+        } else {
+            // create worker job (start sambaprodoff)
+            $redis->hGet('samba', 'prodonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodoff'));
+        }
         //if ($_POST['features']['globalrandom'] == 1) {
         //    $redis->get('globalrandom') == 1 || $redis->set('globalrandom', 1);
         //} else {
@@ -199,6 +206,7 @@ $template->sysstate['kernel'] = file_get_contents('/proc/version');
 $template->sysstate['time'] = implode('\n', sysCmd('date'));
 $template->sysstate['uptime'] = date('d:H:i:s', strtok(file_get_contents('/proc/uptime'), ' ' ));
 $template->sysstate['HWplatform'] = $redis->get('hwplatform')." (".$redis->get('hwplatformid').")";
+$template->sysstate['HWmodel'] = implode('\n', sysCmd('cat /proc/device-tree/model'));
 $template->sysstate['playerID'] = $redis->get('playerid');
 $template->sysstate['buildversion'] = $redis->get('buildversion');
 $template->sysstate['release'] = $redis->get('release');
@@ -222,3 +230,4 @@ $template->i2smodule = $redis->get('i2smodule');
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');
+$template->sambaprodonoff = $redis->hGet('samba', 'prodonoff');

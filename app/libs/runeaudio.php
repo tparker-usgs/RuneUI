@@ -2718,7 +2718,7 @@ function wrk_getHwPlatform()
         case 'BCM2837':
             if (intval("0x".$revision, 16) < 16) {
                 // RaspberryPi1
-                $arch = '01';
+                //$arch = '01';
                 // RaspberryPi2/3
                 $arch = '08';
             }
@@ -2766,15 +2766,32 @@ function wrk_getHwPlatform()
                         $arch = '08';
                         break;
                     // A = Compute Module 3
+                    case "a":
+                        $arch = '08';
+                        break;
                     case "A":
                         $arch = '08';
+                        break;
+                    // B = unknown,
+                    case "b":
+                        $arch = '--';
                         break;
                     // B = unknown,
                     case "B":
                         $arch = '--';
                         break;
                     // C = Zero W
+                    case "c":
+                        $arch = '08';
+                        break;
                     case "C":
+                        $arch = '08';
+                        break;
+                    // D = B+ Pi3
+                    case "d":
+                        $arch = '08';
+                        break;
+                    case "D":
                         $arch = '08';
                         break;
                     default:
@@ -2875,7 +2892,7 @@ function wrk_setHwPlatform($redis)
             $redis->set('hwplatformid', $arch);
             break;
         case '08':
-            $redis->set('hwplatform', 'RaspberryPi2');
+            $redis->set('hwplatform', 'RaspberryPi');
             $redis->set('hwplatformid', $arch);
             break;
         case '09':
@@ -3036,7 +3053,7 @@ function wrk_playerID($arch)
 {
     // $playerid = $arch.md5(uniqid(rand(), true)).md5(uniqid(rand(), true));
     $playerid = $arch.md5_file('/sys/class/net/eth0/address');
-    // janui modification for a Pi Zero W connected without wired ethernet (e.g. AP mode) there is no eth0 address
+    // janui modification for a Pi Zero W connected without wired Ethernet (e.g. AP mode) there is no eth0 address
     // if not filled then use the wlan0 information
     if (trim($playerid) === $arch) {
         $playerid = $arch.md5_file('/sys/class/net/wlan0/address');
@@ -3115,24 +3132,48 @@ function wrk_NTPsync($ntpserver)
 
 function wrk_changeHostname($redis, $newhostname)
 {
-    $hn = sysCmd('hostname');
-    runelog('current hostname', $hn[0]);
+	// new hostname can not have spaces or special characters
+	$newhostname = trim($newhostname);
+    If ($newhostname != preg_replace('/[^A-Za-z0-9-]/', '', $newhostname)) {
+		// do not do anything
+		runelog('new hostname invalid', $newhostname);
+		return;
+	}
+	$shn = sysCmd('hostname');
+	$rhn = $redis->get('hostname');
+    runelog('current system hostname:', $shn[0]);
+	runelog('current redis hostname :', $rhn);
+	runelog('new hostname           :', $newhostname);
+    // update airplayname
+    if ($redis->hGet('airplay', 'name') === $rhn) {
+        $redis->hSet('airplay', 'name', $newhostname);
+		wrk_shairport($redis, $redis->get('ao'), $newhostname);
+        if ($redis->hGet('airplay','enable') === '1') {
+			runelog("service: airplay restart",'');
+			sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
+		}
+    }
+    // update dlnaname
+    if ($redis->hGet('dlna', 'name') === $rhn) {
+        $redis->hSet('dlna','name', $newhostname);
+		wrk_upmpdcli($redis, $newhostname);
+		if ($redis->hGet('dlna', 'enable') === '1') {
+			runelog("service: UPMPDCLI restart");
+			sysCmd('systemctl restart upmpdcli || systemctl start upmpdcli');
+		}
+    }
     // change system hostname
+	$redis->set('hostname', $newhostname);
     sysCmd('hostnamectl set-hostname '.$newhostname);
+    // update AVAHI serice data
+    wrk_avahiconfig($newhostname);
     // restart avahi-daemon
     sysCmd('systemctl restart avahi-daemon');
     // reconfigure MPD
-    sysCmd('systemctl stop mpd');
 	sysCmd('systemctl stop ashuffle');
+    sysCmd('systemctl stop mpd');
     // update zeroconfname in MPD configuration
     $redis->hMset('mpdconf','zeroconf_name', $newhostname);
-    // update airplayname
-    if ($redis->hGet('airplay','name') === $hn[0]) {
-        $redis->hSet('airplay','name', $newhostname);
-        if ($redis->hGet('airplay','enable') === '1') sysCmd('systemctl restart shairport-sync');
-    }
-    // update AVAHI serice data
-    wrk_avahiconfig($newhostname);
     // rewrite mpd.conf file
     wrk_mpdconf('/etc', $redis);
     // restart MPD
@@ -3140,9 +3181,35 @@ function wrk_changeHostname($redis, $newhostname)
 	if ($redis->get('globalrandom') === '1') {
 		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 	}
-    // restart SAMBA << TODO: use systemd!!!
-    sysCmd('killall -HUP smbd && killall -HUP nmbd');
-    // TODO: restart MiniDLNA
+    // restart SAMBA
+	sysCmd('systemctl stop smbd nmbd');
+	if ($redis->get('dev') > 0) {
+		// dev mode on
+		if ($redis->hGet('samba', 'devonoff') > 0) {
+			// Samba dev mode enabled
+			runelog("service: SAMBA restart (DEV-Mode ON) and Samba Dev enabled");
+			// switch smb.conf (development)
+			sysCmd('rm /etc/samba/smb.conf');
+			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
+			sysCmd('systemctl start smbd');
+			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('systemctl start nmbd');
+			sysCmd('pgrep nmbd || systemctl start nmbd');
+		}
+	}  else {
+		// dev mode off, prod mode on
+		if ($redis->hGet('samba', 'prodonoff') > 0) {
+			// Samba prod mode enabled
+			runelog("service: SAMBA restart (DEV-Mode OFF) and Samba Prod enabled");
+			// switch smb.conf (production)
+			sysCmd('rm /etc/samba/smb.conf');
+			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
+			sysCmd('systemctl start smbd');
+			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('systemctl start nmbd');
+			sysCmd('pgrep nmbd || systemctl start nmbd');
+		}
+	}
     // set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
 }

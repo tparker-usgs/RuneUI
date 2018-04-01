@@ -450,6 +450,7 @@ $redis->pconnect('/run/redis.sock');
                 case 'hostname':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+					ui_notify('Settings - Change Hostname', 'it takes some time .....');
                     wrk_changeHostname($redis, $job->args);
                     $hn = sysCmd('hostname');
                     $redis->set('hostname', $hn[0]);
@@ -644,7 +645,7 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('systemctl restart ashuffle || systemctl start ashuffle');
                     $redis->sRem('w_lock', $jobID);
                     break;
-				case 'samba_prod_on':
+				case 'sambaprodon':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
 					$redis->hSet('samba', 'prodonoff', 1);
@@ -661,7 +662,7 @@ $redis->pconnect('/run/redis.sock');
 					}
                     $redis->sRem('w_lock', $jobID);
 					break;
-				case 'samba_prod_off':
+				case 'sambaprodoff':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
 					$redis->hSet('samba', 'prodonoff', 0);
@@ -743,13 +744,42 @@ $redis->pconnect('/run/redis.sock');
 				case 'rerninstall':
 				    runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('cd /home; rm install.sh; wget -qN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh; chmod +x install.sh; ./install.sh');
+					ui_notify("Rern's Addons", 'it takes some time .....');
+					sysCmd('rm -fr /home/rern');
+					sysCmd('mkdir -m=777 -p ./rern');
+					//sysCmd('cd /home/rern > /home/rern/Rern_Addons.log');
+					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
+					sysCmd('chmod +x -v ./install.sh >> /home/rern/Rern_Addons.log');
+					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
+					//sysCmd('cd ~ >> /home/rern/Rern_Addons.log');
+					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep 'Addons '");
+					sleep(1);
+					ui_notify("Rern's Addons", implode("\n", $command));
+					sleep(1);
+					ui_notify("Rern's Addons", "You may need to reboot...");
+					sleep(1);
+					unset($command);
 					$redis->sRem('w_lock', $jobID);
 					break;
 				case 'rernreinstall':
 				    runelog('wrk_SY: ', $job->wrkcmd);
+					ui_notify("Rern's Addons", 'it takes some time .....');
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('cd /home; rm install.sh; rm /usr/local/bin/uninstall_addo.sh; redis-cli hdel addons addo; wget -qN --show-progress https://github.com/rern/RuneAudio_Addons/raw/master/install.sh; chmod +x install.sh; ./install.sh');
+					sysCmd('rm -fr /home/rern');
+					sysCmd('mkdir -m=777 -p /home/rern');
+					//sysCmd('cd /home/rern > /home/rern/Rern_Addons.log');
+					sysCmd('rm -fr /usr/local/bin/uninstall_addo.sh');
+					sysCmd('redis-cli del addons addo');
+					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
+					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
+					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
+					//sysCmd('cd ~ >> /home/rern/Rern_Addons.log');
+					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep 'Addons '");
+					ui_notify("Rern's Addons", implode("\n", $command));
+					sleep(1);
+					ui_notify("Rern's Addons", "You may need to reboot...");
+					sleep(1);
+					unset($command);
 					$redis->sRem('w_lock', $jobID);
 					break;
                 case 'netcfg':

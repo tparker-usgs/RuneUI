@@ -51,6 +51,14 @@ if (isset($_POST)) {
             // create worker job (stop udevil)
             $redis->get('debug') == 0 || $redis->set('debug', 0);
         }
+    // ----- SAMBA -----
+        if ($_POST['mode']['sambadevonoff']['enable'] == 1) {
+            // create worker job (start udevil)
+            $redis->hget('samba', 'devonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevon'));
+        } else {
+            // create worker job (stop udevil)
+            $redis->hget('samba', 'devonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevoff'));
+        }
     }
     // ----- OPCACHE -----
     if (isset($_POST['opcache'])) {
@@ -81,13 +89,21 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'gitpull') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'gitpull'));
         // ----- RESTART WORKERS -----
         if (isset($_POST['syscmd']['wrkrestart'])) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'wrkrestart', 'args' => $_POST['syscmd']['wrkrestart']));
+        // ----- RESTART SAMBA -----
+        if ($_POST['syscmd']['sambarestart']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+        // ----- INSTALL RERNS ADD-ON MENU -----
+        if ($_POST['syscmd']['rerninstall']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rerninstall'));
+        // ----- REMOVE RERNS ADD-ON MENU -----
+        if ($_POST['syscmd']['rernreinstall']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rernreinstall'));
     }
 }
 waitSyWrk($redis, $jobID);
+$template->dev = $redis->get('dev');
 $template->debug = $redis->get('debug');
 $template->playerid = $redis->get('playerid');
 $template->opcache = $redis->get('opcache');
 $template->gitbranch = $redis->hGet('git', 'branch');
+$template->sambadevonoff = $redis->hGet('samba', 'devonoff');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

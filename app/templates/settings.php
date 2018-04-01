@@ -14,7 +14,8 @@
                 <label class="control-label col-sm-2" for="hostname">Player hostname</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="hostname" name="hostname" value="<?php echo $this->hostname; ?>" placeholder="runeaudio" autocomplete="off">
-                    <span class="help-block">Set the player hostname. This will change the address used to reach the RuneUI.</span>
+                    <span class="help-block">Set the player hostname. This will change the address used to reach the RuneUI.<br>
+					No <strong>spaces</strong> or <strong>special charecters</strong> allowed in the name.</span>
                 </div>
             </div>
             <div class="form-group">
@@ -409,6 +410,18 @@
                     <span class="help-block">Toggle the display of album art on the Playback main screen</span>
                 </div>
             </div>
+            <div class="form-group">
+                <label for="sambaprodonoff" class="control-label col-sm-2">Samba Production mode</label>
+                <div class="col-sm-10">
+                    <label class="switch-light well" onclick="">
+                        <input name="features[sambaprodonoff]" type="checkbox" value="1"<?php if($this->sambaprodonoff == 1): ?> checked="checked" <?php endif ?>>
+                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                    </label>
+                    <span class="help-block">Activate/Deactivate Samba in <strong>Production</strong> mode.<br>
+					By default Samba is <strong>OFF</strong> in Production mode.<br>
+					Default settings when set ON: <strong>Read only</strong> access to the music library's is given to all local network users, <strong>no password</strong> is required.</span>
+                </div>
+            </div>
             <!-- <div class="form-group">
                 <label for="udevil" class="control-label col-sm-2">Global Random mode</label>
                 <div class="col-sm-10">
@@ -515,6 +528,8 @@
 				<em>refresh page to update</em></p>
 				<strong>HW platform</strong>
 				<p><?=$this->sysstate['HWplatform'] ?></p>
+				<strong>HW model</strong>
+				<p><?=$this->sysstate['HWmodel'] ?></p>
 				<strong>playerID</strong>
 				<p><?=$this->sysstate['playerID'] ?></p>
             </div>

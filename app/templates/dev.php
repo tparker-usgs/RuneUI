@@ -102,6 +102,17 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-sm-2 control-label">Samba Dev mode</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[sambadevonoff][enable]" type="checkbox" value="1"<?php if($this->sambadevonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">Activate/Deactivate Samba in <strong>Dev</strong> mode.<br>
+					By default Samba is <strong>ON</strong> in Dev mode with Read and <strong>Write</strong> access to system files.</span>
+                </div>
+            </div>
+            <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button class="btn btn-primary btn-lg" value="1" name="mode[debug][submit]" type="submit">Save settings</button>
                 </div>
@@ -138,6 +149,30 @@
                 <div class="col-sm-10">
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                     <span class="help-block">&nbsp;</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Restart Samba</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">If you change the Samba configuration files a restart is required to activate your changes.</span>
+                </div>
+            </div>              
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Install Rern's Addons</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
+					Refresh the browser after installing, this should enable the Addons menu. It is possible that a reboot is required enable the Addons menu.<br>
+					You can remove the Rern's Addons menu via the Addons menu.<br>
+					The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum.</span>
+                </div>
+            </div>              
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Re-install Rern's Addons</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernreinstall" id="syscmd-rernreinstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.</span>
                 </div>
             </div>              
         </fieldset>

@@ -45,7 +45,7 @@ function redisDatastore($redis,$action) {
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
             // player features
-            $redis->set('hostname', 'runeaudio');
+            $redis->set('hostname', 'RuneAudio');
             $redis->set('ntpserver', 'pool.ntp.org');
             $redis->hSet('airplay', 'enable', 1);
             $redis->hSet('airplay', 'name', 'RuneAudio');
@@ -120,7 +120,7 @@ function redisDatastore($redis,$action) {
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
             $redis->set('buildversion', 'gearhead-janui-20180308');
-            $redis->set('release', '0.4');
+            $redis->set('release', '0.5');
             // HW platform data
             // $redis->set('playerid', '');
             // $redis->set('hwplatform', '');
