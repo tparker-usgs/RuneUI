@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 #Type=forking
-User=redis
+#User=redis
 PIDFile=/run/redis/redis.pid
 ExecStartPre=/bin/mkdir -p /var/lib/redis
 ExecStart=/usr/bin/redis-server /etc/redis.conf
