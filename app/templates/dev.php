@@ -109,7 +109,7 @@
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                     <span class="help-block">Activate/Deactivate Samba in <strong>Dev</strong> mode.<br>
-					By default Samba is <strong>ON</strong> in Dev mode with Read and <strong>Write</strong> access to system files.</span>
+					By default Samba is <strong>ON</strong> in Dev mode with read and <strong>write</strong> access to system files.</span>
                 </div>
             </div>
             <div class="form-group">

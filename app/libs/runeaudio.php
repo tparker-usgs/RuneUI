@@ -2209,6 +2209,10 @@ if ($action === 'reset') {
     switch ($action) {
         case 'reset':
             // default MPD config
+			unset($command);
+			$command = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '");
+			$redis->hSet('mpdconf', 'version', trim(reset($command)));
+			unset($command);
             $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hSet('mpdconf', 'zeroconf_name', 'runeaudio');
             $redis->hSet('mpdconf', 'log_level', 'none');
@@ -2233,6 +2237,17 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
+			// for soxr using MPD v0.19 it it difficult to see if the package has been built with the correct parameters
+			// when MPD v0.20 and higher is exclusivly used the next line should be relpaced
+			// with: $command = sysCmd("mpd --version | grep 'soxr'")
+			$command = sysCmd("grep 'soxr' /usr/bin/mpd");
+			if ($command[0] == '') {
+				// do nothing $command is not set or the first array entry is null
+			} else {
+				// the word soxr has been fornd in the mpd binary
+				$redis->hSet('mpdconf', 'soxr', 'very high');
+			}
+			unset($command);
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             wrk_mpdconf($redis, 'writecfg');
@@ -2270,6 +2285,11 @@ if ($action === 'reset') {
             unset($mpdcfg['state_file']);
             // --- general settings ---
             foreach ($mpdcfg as $param => $value) {
+				if ($param === 'version') {
+					// --- MPD version number ---
+                    $output .="# MPD version number: ".$value."\n\n";
+                    continue;
+                }
                 if ($param === 'audio_output_interface' OR $param === 'dsd_usb') {
                     continue;
                 }
@@ -2283,7 +2303,7 @@ if ($action === 'reset') {
                     } else {
                         $redis->set('volume', 0);
                     }
-                }                
+                }
                 if ($param === 'user' && $value === 'mpd') {
                     $output .= $param." \t\"".$value."\"\n";
                     $output .= "group \t\"audio\"\n";
@@ -2306,6 +2326,25 @@ if ($action === 'reset') {
                     $output .="}\n";
                     continue;
                 }
+                if ($param === 'soxr') {
+                    // --- soxr samplerate converter - resampler ---
+					if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
+						// MPD version is higher than 0.20
+						$output .="\n";
+						$output .="resampler {\n";
+						$output .="\tplugin \t\"".$param."\"\n";
+						$output .="\tquality \"".$value."\"\n";
+						$output .="}\n";
+						continue;
+					} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
+						// MPD version is higher than 0.19 but lower than 0.20
+						$output .="\nsamplerate_converter \"".$param." ".$value."\"\n\n";
+						continue;
+					} else {
+						// MPD version is lower than 0.19 - do nothing
+						continue;
+					}
+				}
                 if ($param === 'curl') {
                     // --- input plugin ---
                     $output .="\n";

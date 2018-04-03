@@ -90,11 +90,11 @@ if (isset($_POST)) {
         // ----- RESTART WORKERS -----
         if (isset($_POST['syscmd']['wrkrestart'])) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'wrkrestart', 'args' => $_POST['syscmd']['wrkrestart']));
         // ----- RESTART SAMBA -----
-        if ($_POST['syscmd']['sambarestart']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+        if ($_POST['syscmd'] === 'sambarestart') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
         // ----- INSTALL RERNS ADD-ON MENU -----
-        if ($_POST['syscmd']['rerninstall']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rerninstall'));
+        if ($_POST['syscmd'] === 'rerninstall') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rerninstall'));
         // ----- REMOVE RERNS ADD-ON MENU -----
-        if ($_POST['syscmd']['rernreinstall']) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rernreinstall'));
+        if ($_POST['syscmd'] === 'rernreinstall') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rernreinstall'));
     }
 }
 waitSyWrk($redis, $jobID);
