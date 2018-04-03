@@ -777,6 +777,16 @@ $redis->pconnect('/run/redis.sock');
 					unset($command);
 					$redis->sRem('w_lock', $jobID);
 					break;
+                case 'xorgserverstart':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					sysCmd('xinit /root/.xinitrc');
+					$redis->sRem('w_lock', $jobID);
+                case 'xorgserverstop':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					sysCmd('pkill -15 Xorg');
+					$redis->sRem('w_lock', $jobID);
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     runelog('netcfg action: ', $job->action);

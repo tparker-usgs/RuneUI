@@ -128,9 +128,15 @@ if (isset($_POST)) {
             $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']['name']));
         }
         if ($_POST['features']['local_browser'] == 1) {
-            $redis->get('local_browser') == 1 || $redis->set('local_browser', 1);
+            if ($redis->get('local_browser') != 1) {
+				$redis->set('local_browser', 1);
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstart'));
+			}
         } else {
-            $redis->get('local_browser') == 0 || $redis->set('local_browser', 0);
+            if ($redis->get('local_browser') != 0) {
+				$redis->set('local_browser', 0);
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstop'));
+			}
         }
         if ($_POST['features']['pwd_protection'] == 1) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
@@ -155,18 +161,6 @@ if (isset($_POST)) {
         } else {
             $redis->get('coverart') == 0 || $redis->set('coverart', 0);
         }
-		if ($_POST['features']['sambaprodonoff'] == 1) {
-            // create worker job (start sambaprodon)
-            $redis->hGet('samba', 'prodonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodon'));
-        } else {
-            // create worker job (start sambaprodoff)
-            $redis->hGet('samba', 'prodonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodoff'));
-        }
-        //if ($_POST['features']['globalrandom'] == 1) {
-        //    $redis->get('globalrandom') == 1 || $redis->set('globalrandom', 1);
-        //} else {
-        //    $redis->get('globalrandom') == 0 || $redis->set('globalrandom', 0);
-        //}
         if ($_POST['features']['lastfm']['enable'] == 1) {
             // create worker job (start mpdscribble)
             if (($_POST['features']['lastfm']['user'] != $redis->hGet('lastfm', 'user') OR $_POST['features']['lastfm']['pass'] != $redis->hGet('lastfm', 'pass')) OR $redis->hGet('lastfm', 'enable') != $_POST['features']['lastfm']['enable']) {
@@ -221,7 +215,6 @@ $template->localSStime = $redis->get('localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
 $template->udevil = $redis->get('udevil');
 $template->coverart = $redis->get('coverart');
-//$template->globalrandom = $redis->get('globalrandom');
 $template->lastfm = $redis->hGetAll('lastfm');
 $template->proxy = $redis->hGetAll('proxy');
 $template->spotify = $redis->hGetAll('spotify');
@@ -230,4 +223,4 @@ $template->i2smodule = $redis->get('i2smodule');
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');
-$template->sambaprodonoff = $redis->hGet('samba', 'prodonoff');
+$template->local_browseronoff = file_exists('/usr/bin/Xorg');

@@ -368,6 +368,7 @@
             </div>
 			<div class="form-group">
                 <label for="local-browser" class="control-label col-sm-2">Local browser</label>
+				<?php if($this->local_browseronoff): ?>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
                         <input name="features[local_browser]" type="checkbox" value="1"<?php if($this->local_browser == 1): ?> checked="checked" <?php endif ?>>
@@ -375,6 +376,11 @@
                     </label>
                     <span class="help-block">Start a local browser on HDMI or TFT.</span>
                 </div>
+                <?php else: ?>
+                <div class="col-sm-10">
+                    <span class="help-block"><br>Disabled, the required software not installed on this model.<br><br></span>
+				</div>
+                <?php endif ?>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="localSStime">ScreenSaver time</label>
@@ -410,38 +416,6 @@
                     <span class="help-block">Toggle the display of album art on the Playback main screen</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="sambaprodonoff" class="control-label col-sm-2">Samba Production mode</label>
-                <div class="col-sm-10">
-                    <label class="switch-light well" onclick="">
-                        <input name="features[sambaprodonoff]" type="checkbox" value="1"<?php if($this->sambaprodonoff == 1): ?> checked="checked" <?php endif ?>>
-                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-                    </label>
-                    <span class="help-block">Activate/Deactivate Samba in <strong>Production</strong> mode.<br>
-					By default Samba is <strong>OFF</strong> in Production mode.<br>
-					Default settings when set ON: <strong>Read only</strong> access to the music library's is given to all local network users, <strong>no password</strong> is required.</span>
-                </div>
-            </div>
-            <!-- <div class="form-group">
-                <label for="udevil" class="control-label col-sm-2">Global Random mode</label>
-                <div class="col-sm-10">
-                    <label class="switch-light well" onclick="">
-                        <input name="features[globalrandom]" type="checkbox" value="1"<?php if($this->globalrandom == 1): ?> checked="checked" <?php endif ?>>
-                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-                    </label>
-                    <span class="help-block">Toggle random playback on the whole music library [WARNING - EXPERIMENTAL]</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="wifiap" class="control-label col-sm-2">WiFi AccessPoint</label>
-                <div class="col-sm-10">
-                    <label class="switch-light well" onclick="">
-                        <input name="features[wifiap]" type="checkbox" value="1"<?php if($this->wifiap == 1): ?> checked="checked" <?php endif ?>>
-                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-                    </label>
-                    <span class="help-block">Toggle the AP-Mode WiFi feature (default SSID: RuneAudio)</span>
-                </div>
-            </div> -->
             <div <?php if($this->lastfm['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="lastfmBox">
                 <div class="form-group">
                     <label for="lastfm" class="control-label col-sm-2">Last.fm scrobbling</label>

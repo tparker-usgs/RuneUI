@@ -57,13 +57,21 @@ if (isset($_POST)) {
             // create worker job (stop udevil)
             $redis->get('debug') == 0 || $redis->set('debug', 0);
         }
-    // ----- SAMBA -----
+    // ----- SAMBA DEV-----
         if ($_POST['mode']['sambadevonoff']['enable'] == 1) {
             // create worker job (start udevil)
             $redis->hget('samba', 'devonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevon'));
         } else {
             // create worker job (stop udevil)
             $redis->hget('samba', 'devonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevoff'));
+        }
+    // ----- SAMBA Prod-----
+        if ($_POST['mode']['sambaprodonoff']['enable'] == 1) {
+            // create worker job (start udevil)
+            $redis->hget('samba', 'prodonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodon'));
+        } else {
+            // create worker job (stop udevil)
+            $redis->hget('samba', 'prodonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodoff'));
         }
     }
     // ----- OPCACHE -----
@@ -110,6 +118,7 @@ $template->playerid = $redis->get('playerid');
 $template->opcache = $redis->get('opcache');
 $template->gitbranch = $redis->hGet('git', 'branch');
 $template->sambadevonoff = $redis->hGet('samba', 'devonoff');
+$template->sambaprodonoff = $redis->hGet('samba', 'prodonoff');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

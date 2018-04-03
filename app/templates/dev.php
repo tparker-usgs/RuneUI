@@ -39,7 +39,7 @@
             </div>
         </fieldset>
     </form>
-    <form class="form-horizontal" method="post">
+    <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
         <fieldset>
             <legend>DevTeam functions</legend>
             <div class="boxed-group">
@@ -109,7 +109,20 @@
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                     <span class="help-block">Activate/Deactivate Samba in <strong>Dev</strong> mode.<br>
-					By default Samba is <strong>ON</strong> in Dev mode with read and <strong>write</strong> access to system files.</span>
+					By default Samba is <strong>ON</strong> in Dev mode.<br>
+					Default settings when set ON: <strong>Read and write</strong> access to system files is given to all local network users, <strong>no password</strong> is required.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Samba Production mode</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[sambaprodonoff][enable]" type="checkbox" value="1"<?php if($this->sambaprodonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">Activate/Deactivate Samba in <strong>Production</strong> mode.<br>
+					By default Samba is <strong>OFF</strong> in Production mode.<br>
+					Default settings when set ON: <strong>Read only</strong> access to the music library's is given to all local network users, <strong>no password</strong> is required.</span>
                 </div>
             </div>
             <div class="form-group">
