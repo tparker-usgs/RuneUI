@@ -37,11 +37,17 @@ if (isset($_POST)) {
     if (isset($_POST['mode'])) {
         if ($_POST['mode']['dev']['enable'] == 1) {
             // create worker job (start udevil)
-            $redis->get('dev') == 1 || $redis->set('dev', 1);
-            $redis->get('debug') == 1 || $redis->set('debug', 1);
+            if ($redis->get('dev') != 1) {
+				$redis->set('dev', 1);
+				$redis->get('debug') == 1 || $redis->set('debug', 1);
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+			}
         } else {
             // create worker job (stop udevil)
-            $redis->get('dev') == 0 || $redis->set('dev', 0);
+            if ($redis->get('dev') != 0) {
+				$redis->set('dev', 0);
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+			}
         }
     // ----- DEBUG -----
         if ($_POST['mode']['debug']['enable'] == 1) {
