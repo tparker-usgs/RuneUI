@@ -24,4 +24,4 @@ xbindkeys &
 
 # start midori in privat mode with fullscreen display
 #midori -p -e Fullscreen http://localhost
-sudo -u http chromium --no-sandbox --app=http://localhost --start-fullscreen --force-device-scale-factor=0.5
+sudo -u http chromium --no-sandbox --app=http://localhost --start-fullscreen --force-device-scale-factor=1.8
