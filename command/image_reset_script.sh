@@ -11,9 +11,9 @@
 #Set automatic MPD rebuild ON in the Sources Menu.
 #Reset the image using the following commands, some commands may fail (e.g. samba not installed), no problem.
 
-systemctl disable ashuffle mpd mpdscribble nmbd smbd shairport udevil upmpdcli hostapd shairport-sync
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local.browser
 systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_PL_wrk rune_SY_wrk sshd systemd-resolved
-systemctl stop ashuffle mpd spopd shairport smbd nmbd shairport-sync
+systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local.browser
 rm -f /var/lib/mpd/mpd.db
 rm -f /var/lib/mpd/mpdstate
 rm -rf /var/log/*
@@ -33,7 +33,6 @@ cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
-cp /var/www/app/config/defaults/shairport.service /usr/lib/systemd/system/shairport.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
 cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
