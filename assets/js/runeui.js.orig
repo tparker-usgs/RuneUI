@@ -280,7 +280,7 @@ function setvol(val) {
     $('#volumemute').removeClass('btn-primary');
     sendCmd('setvol ' + val);
     if (GUI.vol_changed_local === 0) {
-        setInterval(reset_vol_changed_local, 5000);
+        setTimeout(reset_vol_changed_local, 15000);
         GUI.vol_changed_local = 1;
     }
 }
@@ -1388,7 +1388,11 @@ function populateDB(options){
                 } else {
                     return 0;
                 }
-                return nameA.localeCompare(nameB);
+                if (nameA < nameB) //sort string ascending
+                    return -1;
+                if (nameA > nameB)
+                    return 1;
+                return 0; //default return value (no sorting)
             });
             for (i = 0; (row = data[i]); i += 1) {
                 content += parseResponse({
@@ -1421,7 +1425,7 @@ function populateDB(options){
             // console.log(data);
             
             data.sort(function(a, b){
-                if (querytype === '' || querytype === 'childs' || querytype === 'categories') {
+                if (querytype === 'childs' || querytype === 'categories') {
                     nameA = a.hasOwnProperty('title')?a.title.toLowerCase():'';
                     nameB = b.hasOwnProperty('title')?b.title.toLowerCase():'';
                 } else if (querytype === 'childs-stations' || querytype === 'stations') {
@@ -1430,7 +1434,11 @@ function populateDB(options){
                 } else {
                     return 0;
                 }
-                return nameA.localeCompare(nameB);
+                if (nameA < nameB) //sort string ascending
+                    return -1;
+                if (nameA > nameB)
+                    return 1;
+                return 0; //default return value (no sorting)
             });
 
             for (i = 0; (row = data[i]); i += 1) {
@@ -1460,7 +1468,11 @@ function populateDB(options){
                 } else {
                     return 0;
                 }
-                return nameA.localeCompare(nameB);
+                if (nameA < nameB) //sort string ascending
+                    return -1;
+                if (nameA > nameB)
+                    return 1;
+                return 0; //default return value (no sorting)
             });
             for (i = 0; (row = data[i]); i += 1) {
                 content += parseResponse({
@@ -1508,13 +1520,14 @@ function populateDB(options){
                 } else if (path === 'Genres') {
                     nameA = a.hasOwnProperty('genre')?a.genre.toLowerCase():'';
                     nameB = b.hasOwnProperty('genre')?b.genre.toLowerCase():'';
-                } else if (path) {
-                    nameA = a.hasOwnProperty('directory')?a.directory.toLowerCase():'';
-                    nameB = b.hasOwnProperty('directory')?b.directory.toLowerCase():'';
                 } else {
                     return 0;
                 }
-                return nameA.localeCompare(nameB);
+                if (nameA < nameB) //sort string ascending
+                    return -1;
+                if (nameA > nameB)
+                    return 1;
+                return 0; //default return value (no sorting)
             });
             if (path === 'Webradio') {
                 content += '<li id="webradio-add" class="db-webradio-add"><i class="fa fa-plus-circle db-icon"></i><span class="sn"><em>add new</em></span><span class="bl">add a webradio to your library</span></li>';
@@ -1797,7 +1810,7 @@ function commandButton(el) {
         }
         // console.log('volume = ', GUI.volume);
         if ((vol >= 0) && (vol <= 100)) {
-            sendCmd('setvol ' + vol);
+            setvol(vol);
             $('#volume').val(vol, false).trigger('update');
         }
         return;
