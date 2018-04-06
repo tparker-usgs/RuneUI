@@ -2572,20 +2572,112 @@ function wrk_shairport($redis, $ao, $name = null)
 {
     if (!isset($name)) {
         $name = $redis->hGet('airplay', 'name');
-    }
+//    } else {
+//		$redis->hSet('airplay', 'name', $name);
+	}
     $acard = json_decode($redis->hget('acards', $ao));
     runelog('acard details: ', $acard);
-    $file = '/usr/lib/systemd/system/shairport-sync.service';
-    //$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
-	if ($acard->mixer_control != '')
-		$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
-	else
-		$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->device);
-    runelog('shairport-sync.service :', $newArray);
-    // Commit changes to /usr/lib/systemd/system/shairport-sync.service
+	$redis->hSet('airplay', 'alsa_output_device', $acard->device);
+	if ($acard->mixer_device != '') {
+		$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
+	} else {
+		$redis->hSet('airplay', 'alsa_mixer_device', 'default');
+	}
+	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control);
+	$redis->hSet('airplay', 'extlabel', $acard->extlabel);
+	if ($redis->hGet('airplay', 'interpolation') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'interpolation', 'soxr');
+	}
+	if ($redis->hGet('airplay', 'output_backend') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'output_backend', 'alsa');
+	}
+	if ($redis->hGet('airplay', 'alac_decoder') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'alac_decoder', 'apple');
+	}
+	if ($redis->hGet('airplay', 'run_this_before_play_begins') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'run_this_before_play_begins', '/var/www/command/airplay_toggle on');
+	}
+	if ($redis->hGet('airplay', 'run_this_after_play_ends') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'run_this_after_play_ends', '/var/www/command/airplay_toggle off');
+	}
+	if ($redis->hGet('airplay', 'run_this_wait_for_completion') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'run_this_wait_for_completion', 'yes');
+	}
+	if ($redis->hGet('airplay', 'alsa_output_format') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'alsa_output_format', 'S16');
+	}
+	if ($redis->hGet('airplay', 'alsa_output_format') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'alsa_output_format', 'S16');
+	}
+	if ($redis->hGet('airplay', 'pipe_pipe_name') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
+	}
+	if ($redis->hGet('airplay', 'metadata_enabled') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'metadata_enabled', 'yes');
+	}
+	if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
+	}
+	if ($redis->hGet('airplay', 'metadata_pipe_name') != '') {
+		// do nothing
+	} else {
+		$redis->hSet('airplay', 'metadata_pipe_name', '/tmp/shairport-sync-metadata');
+	}
+	// update shairport-sync.conf
+	$file = '/etc/shairport-sync.conf';
+    $newArray = wrk_replaceTextLine($file, '', ' general_name', 'name="'.$redis->hGet('airplay', 'name').'"; // general_name');
+    $newArray = wrk_replaceTextLine('', $newArray, ' general_output_backend', 'output_backend="'.$redis->hGet('airplay', 'output_backend').'"; // general_output_backend');
+    $newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', 'interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+    $newArray = wrk_replaceTextLine('', $newArray, ' general_alac_decoder', 'alac_decoder="'.$redis->hGet('airplay', 'alac_decoder').'"; // general_alac_decoder');
+    $newArray = wrk_replaceTextLine('', $newArray, ' run_this_before_play_begins', 'run_this_before_play_begins="'.$redis->hGet('airplay', 'run_this_before_play_begins').'"; // run_this_before_play_begins');
+    $newArray = wrk_replaceTextLine('', $newArray, ' run_this_after_play_ends', 'run_this_after_play_ends="'.$redis->hGet('airplay', 'run_this_after_play_ends').'"; // run_this_after_play_ends');
+    $newArray = wrk_replaceTextLine('', $newArray, ' run_this_wait_for_completion', 'wait_for_completion="'.$redis->hGet('airplay', 'run_this_wait_for_completion').'"; // run_this_wait_for_completion');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_device', 'output_device="'.$redis->hGet('airplay', 'alsa_output_device').'"; // alsa_output_device');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
+    $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
+    $newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
+    $newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+    $newArray = wrk_replaceTextLine('', $newArray, ' metadata_pipe_name', 'pipe_name="'.$redis->hGet('airplay', 'metadata_pipe_name').'"; // metadata_pipe_name');
+    // Commit changes to shairport-sync.conf
     $fp = fopen($file, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
+	// update shairport-sync.service
+    //$file = '/usr/lib/systemd/system/shairport-sync.service';
+    //$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
+	//if ($acard->mixer_control != '')
+	//	$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
+	//else
+	//	$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->device);
+    // runelog('shairport-sync.service :', $newArray);
+    // Commit changes to /usr/lib/systemd/system/shairport-sync.service
+    //$fp = fopen($file, 'w');
+    //fwrite($fp, implode("", $newArray));
+    //fclose($fp);
     // update libao.conf
     $file = '/etc/libao.conf';
     $newArray = wrk_replaceTextLine($file, '', 'dev=', 'dev='.$acard->device);
@@ -2593,15 +2685,17 @@ function wrk_shairport($redis, $ao, $name = null)
     $fp = fopen($file, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
-    if ($redis->get('activePlayer') === 'Spotify') {
-        runelog('restart spopd');
-        sysCmd('systemctl restart spopd');
-    }
+	// stop spopd and shairport-sync
+	sysCmd('systemctl stop spopd shairport-sync');
     // update systemd
     sysCmd('systemctl daemon-reload');
+    if ($redis->get('activePlayer') === 'Spotify') {
+        runelog('restart spopd');
+        sysCmd('systemctl restart spopd || systemctl start spopd');
+    }
     if ($redis->hGet('airplay','enable') === '1') {
         runelog('restart shairport-sync');
-        sysCmd('systemctl restart shairport-sync');
+        sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
     }
     // set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
