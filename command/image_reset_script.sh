@@ -32,14 +32,20 @@ rm -rf //etc/samba/smb-dev.conf /etc/samba/smb-dist.conf /etc/samba/smb-prod.con
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
+# The following files should also be copied after a system update
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
 cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
+cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
+cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf 
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
+cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
+# end system update copy
 rm -f /etc/netctl/*
 cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0
 cp /var/www/app/config/defaults/test /etc/netctl/test
