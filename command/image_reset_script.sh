@@ -36,6 +36,7 @@ cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffl
 cp /var/www/app/config/defaults/shairport.service /usr/lib/systemd/system/shairport.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
+cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf 
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf

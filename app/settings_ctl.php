@@ -223,4 +223,4 @@ $template->i2smodule = $redis->get('i2smodule');
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');
-$template->local_browseronoff = file_exists('/usr/bin/Xorg');
+$template->local_browseronoff = file_exists('/usr/bin/xinit');

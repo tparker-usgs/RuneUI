@@ -307,8 +307,8 @@ $starttime = ($start4-$start3)+$firstlap;
 runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
 // call xinit for local browser
-if ($redis->get('local_browser') === '1') {
-    sysCmdAsync('/usr/bin/sudo /usr/bin/xinit');
+if ($redis->get('local_browser') === '1' && file_exists('/usr/bin/xinit')) {
+    sysCmdAsync('systemctl start local-browser.service');
 }
 
 // start globalrandom if configured
@@ -780,12 +780,12 @@ $redis->pconnect('/run/redis.sock');
                 case 'xorgserverstart':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('xinit /root/.xinitrc');
+					sysCmd('systemctl start local-browser.service');
 					$redis->sRem('w_lock', $jobID);
                 case 'xorgserverstop':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('pkill -15 Xorg');
+					sysCmd('systemctl stop local-browser.service');
 					$redis->sRem('w_lock', $jobID);
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);

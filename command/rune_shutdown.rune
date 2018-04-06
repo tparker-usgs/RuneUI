@@ -43,7 +43,7 @@ echo "Stop MPD and unmount shares..."
 mpc stop
 systemctl stop nginx
 sleep 1
-killall xinit
+systemctl stop local-browser
 sleep 1
 ply-image "$splash"
 systemctl stop mpd
