@@ -105,15 +105,15 @@ $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
     // check MPD process
     sysCmd('pgrep -x mpd || systemctl start mpd');
-	//if ($redis->get('globalrandom') === '1') {
-	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	//}
+	// ashuffle gets started automatically
 } elseif ($activePlayer === 'Spotify') {
     // check MPD process
     sysCmd('pgrep -x spopd || systemctl start spopd');
 } else {
-    // reset activePlayer state to MPD (default)
+    // reset activePlayer state to MPD (default) & check MPD process
     $redis->set('activePlayer', 'MPD');
+    sysCmd('pgrep -x mpd || systemctl start mpd');
+	// ashuffle gets started automatically
 }
 // read registered HW architecture
 $arch_db = $redis->get('hwplatformid');
@@ -164,9 +164,7 @@ if ($playerid_db === '') {
     sysCmd('rm /mnt/MPD/Webradio/*');
     // reconnect to new instance of MPD
     sysCmd('systemctl start mpd');
-	//if ($redis->get('globalrandom') === '1') {
-	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	//}
+	// ashuffle gets started automatically
     $mpd = openMpdSocket('/run/mpd.sock', 0);
     // clear MPD database
     sendMpdCommand($mpd,'update');
@@ -207,7 +205,7 @@ if ($playerid_db === '') {
     if ($redis->get('dev') > 0) {
 		// dev mode on
 		if ($redis->hGet('samba', 'devonoff') > 0) {
-			// Samba dev mode enabled
+			// Samba for dev mode enabled
 			runelog("service: SAMBA start (DEV-Mode ON) and Samba Dev enabled");
 			// switch smb.conf (development)
 			sysCmd('rm /etc/samba/smb.conf');
@@ -218,9 +216,9 @@ if ($playerid_db === '') {
 			sysCmd('pgrep nmbd || systemctl start nmbd');
 		}
     }  else {
-		// dev mode off, prod mode on
+		// dev mode off, so prod mode on
 		if ($redis->hGet('samba', 'prodonoff') > 0) {
-			// Samba prod mode enabled
+			// Samba for prod mode enabled
 			runelog("service: SAMBA start (DEV-Mode OFF) and Samba Prod enabled");
 			// switch smb.conf (production)
 			sysCmd('rm /etc/samba/smb.conf');
@@ -248,9 +246,7 @@ if ($redis->get('i2smodule') !== 'none') {
 // start player backend
 if ($activePlayer === 'MPD') {
     sysCmd('pgrep -x mpd || systemctl start mpd');
-	//if ($redis->get('globalrandom') === '1') {
-	//	sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	//}
+	// ashuffle gets started automatically
     usleep(500000);
     // set mpd start volume
     $mpd_volume = $redis->get('mpd_start_volume');
@@ -309,11 +305,6 @@ ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.
 // call xinit for local browser
 if ($redis->get('local_browser') === '1' && file_exists('/usr/bin/xinit')) {
     sysCmdAsync('systemctl start local-browser.service');
-}
-
-// start globalrandom if configured
-if ('1' === $redis->get('globalrandom')) {
-    sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 }
 
 // turn wifi power saving off
@@ -611,6 +602,24 @@ $redis->pconnect('/run/redis.sock');
                     wrk_mpdconf($redis, 'restart');
                     $redis->sRem('w_lock', $jobID);
                     break;
+                //case 'ashufflestart':
+                    //runelog('wrk_SY: ', $job->wrkcmd);
+                    //$redis->sAdd('w_lock', $jobID);
+					// shuffle.service has the line: ExecStart=/usr/bin/ashuffle -f /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
+					// The hard coded /var/lib/mpd/playlists is set to $redis->hget('mpdconf', 'playlist_directory')
+					// This will modify the standard shuffle.service to be able to random play from playlists
+					//$file = '/usr/lib/systemd/system/ashuffle.service';
+					//$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -f '.$redis->hGet('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					//$fp = fopen($file, 'w');
+					//$return = fwrite($fp, implode("", $newArray));
+					//fclose($fp);
+					// Restart ashuffle if global random ON
+					//if ('1' === $redis->get('globalrandom')) {
+						//sysCmd('systemctl daemon-reload');
+						// ashuffle gets started automatically
+					//}
+                    //$redis->sRem('w_lock', $jobID);
+                    //break;
                 case 'ashufflereset':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -629,7 +638,7 @@ $redis->pconnect('/run/redis.sock');
 					// Restart ashuffle if global random ON
 					if ('1' === $redis->get('globalrandom')) {
 						sysCmd('systemctl daemon-reload');
-						sysCmd('systemctl start ashuffle');
+						// ashuffle gets started automatically
 					}
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -639,10 +648,9 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					// Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
 					sysCmd('ln -sf '.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-					// Force global random ON
+					// Set global random ON
 					$redis->set('globalrandom', '1');
-					// Force ashuffle (re)start
-					sysCmd('systemctl restart ashuffle || systemctl start ashuffle');
+					// ashuffle gets started automatically
                     $redis->sRem('w_lock', $jobID);
                     break;
 				case 'sambaprodon':
@@ -747,6 +755,7 @@ $redis->pconnect('/run/redis.sock');
 					ui_notify("Rern's Addons", 'it takes some time .....');
 					sysCmd('rm -fr /home/rern');
 					sysCmd('mkdir -m=777 -p /home/rern');
+					sysCmd('rm -f ./install.sh');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
@@ -764,6 +773,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					sysCmd('rm -fr /home/rern');
 					sysCmd('mkdir -m=777 -p /home/rern');
+					sysCmd('rm -f ./install.sh');
 					sysCmd('rm -fr /usr/local/bin/uninstall_addo.sh');
 					sysCmd('redis-cli del addons addo');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
@@ -786,6 +796,20 @@ $redis->pconnect('/run/redis.sock');
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
 					sysCmd('systemctl stop local-browser.service');
+					$redis->sRem('w_lock', $jobID);
+                case 'airplayconfreset':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					sysCmd('cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service');
+					sysCmd('cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf');
+					wrk_sysAcl();
+					$airplay_name = $redis->hGet('airplay', 'name');
+					$airplay_enable = $redis->hGet('airplay', 'enable');
+					$redis->del('airplay');
+					$redis->hSet('airplay', 'name', $airplay_name);
+					$redis->hSet('airplay', 'enable', $airplay_enable);
+					sysCmd('/var/www/db/redis_datastore_setup check');
+					wrk_shairport($redis, $redis->get('ao'), $airplay_name);
 					$redis->sRem('w_lock', $jobID);
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
@@ -899,6 +923,8 @@ $redis->pconnect('/run/redis.sock');
                 case 'poweroff':
                 runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+					// save the playback status
+					wrk_mpdPlaybackStatus($redis);
                     // send notfy to UI
                     ui_notify_async('Shutdown', 'system shutdown in progress...', $jobID);
                     sysCmd('/var/www/command/rune_shutdown poweroff');
@@ -908,6 +934,8 @@ $redis->pconnect('/run/redis.sock');
                 case 'reboot':
                 runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+					// save the playback status
+					wrk_mpdPlaybackStatus($redis);
                     // send notfy to UI
                     ui_notify_async('Reboot', 'system reboot in progress...', $jobID);
                     sysCmd('/var/www/command/rune_shutdown reboot');
@@ -1125,23 +1153,33 @@ $redis->pconnect('/run/redis.sock');
     if ($all_mounted === 0) {
         runelog('wrk_SY: try to mount all shares!');
         $all_mounted = wrk_sourcemount($redis, 'mountall');
+        if ($retries_mounting > 20) {
+            $all_mounted = 1;
+        }
         if ($all_mounted === 1) {
             runelog('wrk_SY: all shares mounted successfully!');
             // start play if enabled
             if ($redis->get('mpd_autoplay') === '1') {
-                sysCmd('/usr/bin/mpc play');
+				$redis->set('mpd_playback_laststate', 'playing');
+				wrk_mpdRestorePlayerStatus($redis);
             }
         } else {
             $retries_mounting++;
             runelog('wrk_SY: error mounting shares, try it again! Count: '.$retries_mounting);
-            if ($retries_mounting > 20) {
-                $all_mounted = 1;
-                runelog('wrk_SY: mounting: tried it 20 times (10 seconds) => capitulating!');
-                ui_notify_async('ERROR','Failed to mount network shares');
-            }
             usleep(500000);
         }
     }
+	// start Global Random if enabled - check continually ashuffle get stopped for lots of reasons
+	// this is the only place where ashuffle it is started
+	if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
+		// seems to be a bug somewhere in MPD
+		// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
+		// wait until mpd has been running for a while before starting ashuffle
+		$mpd_uptime = trim(reset(sysCmd('ps -C mpd -o etimes=')));
+		if (intval($mpd_uptime) > intval($redis->get('ahuffle_start_delay'))) {
+			sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+		}
+	}
     // unload CPU
     usleep(500000);
 } // end while loop

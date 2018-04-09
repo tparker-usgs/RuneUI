@@ -1799,6 +1799,9 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             break;
     }
     if ($updateh === 1) {
+		// save playback status
+		wrk_mpdPlaybackStatus($redis);
+		// pause mpd
         sysCmd('mpc pause');
         //sysCmd('systemctl stop mpd');
         // activate configuration (RuneOS)
@@ -1824,7 +1827,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     }
     // update hash if necessary
     $updateh === 0 || $redis->set($args->name.'_hash', md5_file('/etc/netctl/'.$args->name));
-    if (wrk_mpdPlaybackStatus($redis, 'laststate') === 'playing') sysCmd('mpc play');
+	// set mpd to play if it was playing before the pause
+	wrk_mpdRestorePlayerStatus($redis);
     return $return;
 }
 
@@ -2072,7 +2076,7 @@ function wrk_i2smodule($redis, $args)
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);        
     } else {
-        if (wrk_mpdPlaybackStatus() === 'playing') {
+        if (wrk_mpdPlaybackStatus($redis) === 'playing') {
             $mpd = openMpdSocket('/run/mpd.sock');
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
@@ -2478,7 +2482,7 @@ if ($action === 'reset') {
         	wrk_mpdconf($redis, 'writecfg');
             wrk_shairport($redis, $args);
             // toggle playback state
-            if (wrk_mpdPlaybackStatus() === 'playing') {
+            if (wrk_mpdPlaybackStatus($redis) === 'playing') {
                 syscmd('mpc toggle');
                 $recover_state = 1;
                 // debug
@@ -2508,12 +2512,9 @@ if ($action === 'reset') {
             $activePlayer = $redis->get('activePlayer');
             if ($activePlayer === 'MPD') {
                 sysCmd('systemctl start mpd');
-				if ($redis->get('globalrandom') === '1') {
-					sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-				}
-                if ($redis->get('mpd_playback_status') === 'playing') {
-                    syscmd('mpc play');
-                }
+				// ashuffle gets started automatically
+				// restore the player status
+				wrk_mpdRestorePlayerStatus($redis);
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
                     sysCmd('systemctl restart mpdscribble');
@@ -2527,7 +2528,7 @@ if ($action === 'reset') {
             }
             break;
         case 'stop':
-            $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus());
+            $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
             $mpd = openMpdSocket('/run/mpd.sock');
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
@@ -2545,28 +2546,76 @@ if ($action === 'reset') {
 
 function wrk_mpdPlaybackStatus($redis = null, $action = null)
 {
+    $status = sysCmd("mpc status | grep '\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
+	$number = sysCmd("mpc status | grep '\[' | cut -d '#' -f 2 | cut -d '/' -f 1");
     if (isset($action)) {
         switch ($action) {
             case 'record':
-                return $redis->set('mpd_playback_laststate', wrk_mpdPlaybackStatus());
+                return $redis->set('mpd_playback_laststate', wrk_mpdPlaybackStatus($redis));
                 break;
             case 'laststate':
                 $mpdlaststate = $redis->get('mpd_playback_laststate');
-                $redis->set('mpd_playback_laststate', '');
+				if (!empty($status[0])) {
+					$redis->set('mpd_playback_laststate', trim($status[0]));
+					$redis->set('mpd_playback_lastnumber', trim($number[0]));
+				} else {
+					$redis->set('mpd_playback_laststate', '');
+					$redis->set('mpd_playback_lastnumber', '');
+				}
                 return $mpdlaststate;
                 break;
         }
     } else {
-        $status = sysCmd("mpc status | grep '\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
         // debug
         if (!empty($status[0])) {
             runelog('wrk_mpdPlaybackStatus (current state):', $status[0]);
+            runelog('wrk_mpdPlaybackStatus (current number):', $number[0]);
+			$redis->set('mpd_playback_laststate', trim($status[0]));
+			$redis->set('mpd_playback_lastnumber', trim($number[0]));
             return $status[0];
         } else {
+			$redis->set('mpd_playback_laststate', '');
+			$redis->set('mpd_playback_lastnumber', '');
             return false;
         }
     }
 }
+
+function wrk_mpdRestorePlayerStatus($redis)
+{
+	if (wrk_mpdPlaybackStatus($redis, 'laststate') === 'playing') {
+		// seems to be a bug somewhere in MPD
+		// if play is requested too quickly after start it goes into pause
+		// solve by repeat play commands (no effect if already playing)
+		// disable start global random
+		$redis->set('ashuffle_wait_for_play', '1');
+		for ($mpd_play_count = 0; $mpd_play_count <= 10; $mpd_play_count++) {
+			// wait before looping
+			sleep(1);
+			switch (wrk_mpdPlaybackStatus($redis)) {
+				case 'paused':
+					// it was playing, now paused, so toggle pause/play
+					sysCmd('mpc toggle || mpc toggle');
+					break;
+				case 'playing':
+					// it was playing, now playing, so do nothing and exit the loop
+					$mpd_play_count = 10;
+					break;
+				default:
+					// it was playing, now stopped, so start the track which was last playing
+					$command = sysCmd('mpc play '.$redis->get('mpd_playback_lastnumber').' || mpc play '.$redis->get('mpd_playback_lastnumber'));
+					if (trim($command[0]) == 'mpd error: Bad song index') {
+						// if the track is no longer in the playlist clear the track number for the next time
+						$redis->set('mpd_playback_lastnumber', '');
+					}
+					break;
+			}
+		}
+	}
+	// allow global random to start
+	$redis->set('ashuffle_wait_for_play', '0');
+}
+
 
 function wrk_shairport($redis, $ao, $name = null)
 {
@@ -2745,14 +2794,19 @@ function wrk_sourcemount($redis, $action, $id = null)
         case 'mountall':
             $test = 1;
             $mounts = $redis->keys('mount_*');
-            foreach ($mounts as $key) {
-                $mp = $redis->hGetAll($key);
-                if (!wrk_checkMount($mp['name'])) {
-                    if (wrk_sourcemount($redis, 'mount', $mp['id']) === 0) {
-                        $test = 0;
-                    }
-                }
-            }
+			if (!empty($mounts)) {
+				// $mounts is set and has values
+				foreach ($mounts as $key) {
+					if ($key != '') {
+						$mp = $redis->hGetAll($key);
+						if (!wrk_checkMount($mp['name'])) {
+							if (wrk_sourcemount($redis, 'mount', $mp['id']) === 0) {
+								$test = 0;
+							}
+						}
+					}
+				}
+			}
             $return = $test;
             break;
     }
@@ -2795,8 +2849,9 @@ function wrk_sourcecfg($redis, $action, $args)
             break;
         case 'reset':
             $source = $redis->keys('mount_*');
-            sysCmd('systemctl stop mpd');
 			sysCmd('systemctl stop ashuffle');
+			wrk_mpdPlaybackStatus($redis);
+            sysCmd('systemctl stop mpd');
             usleep(500000);
                 foreach ($source as $key) {
                     $mp = $redis->hGetAll($key);
@@ -2808,9 +2863,8 @@ function wrk_sourcecfg($redis, $action, $args)
             // reset mount index
             if ($return) $redis->del('mountidx');
             sysCmd('systemctl start mpd');
-			if ($redis->get('globalrandom') === '1') {
-				sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-			}
+			// ashuffle gets started automatically
+			wrk_mpdRestorePlayerStatus($redis);
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
@@ -3089,6 +3143,8 @@ function wrk_startAirplay($redis)
     if ($activePlayer != 'Airplay') {
         $redis->set('stoppedPlayer', $activePlayer);
         if ($activePlayer === 'MPD') {
+			// record  the mpd status
+			wrk_mpdPlaybackStatus($redis);
             // connect to MPD daemon
             $sock = openMpdSocket('/run/mpd.sock', 0);
             $status = _parseStatusResponse(MpdStatus($sock));
@@ -3148,6 +3204,8 @@ function wrk_stopAirplay($redis)
                 sendMpdCommand($sock, 'subscribe Airplay');
                 sendMpdCommand($sock, 'unsubscribe Airplay');
                 closeMpdSocket($sock);
+				// continue playing mpd where it stopped when airplay started
+				wrk_mpdRestorePlayerStatus($redis);
                 // debug
                 //runelog('sendMpdCommand', 'pause');
             } elseif ($stoppedPlayer === 'Spotify') {
@@ -3209,13 +3267,12 @@ function wrk_switchplayer($redis, $playerengine)
     switch ($playerengine) {
         case 'MPD':
             $return = sysCmd('pgrep -x mpd || systemctl start mpd');
-			if ($redis->get('globalrandom') === '1') {
-				sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-			}
+			// ashuffle gets started automatically
             usleep(500000);
             if ($redis->hGet('lastfm','enable') === '1') sysCmd('systemctl start mpdscribble');
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl start upmpdcli');
             $redis->set('activePlayer', 'MPD');
+			wrk_mpdRestorePlayerStatus($redis);
             $return = sysCmd('systemctl stop spopd');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3228,6 +3285,7 @@ function wrk_switchplayer($redis, $playerengine)
             if ($redis->hGet('lastfm','enable') === '1') sysCmd('systemctl stop mpdscribble');
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl stop upmpdcli');
 			sysCmd('systemctl stop ashuffle');
+			wrk_mpdPlaybackStatus($redis);
             $redis->set('activePlayer', 'Spotify');
             $return = sysCmd('systemctl stop mpd');
             $redis->set('mpd_playback_status', 'stop');
@@ -3304,6 +3362,7 @@ function wrk_changeHostname($redis, $newhostname)
     sysCmd('systemctl restart avahi-daemon');
     // reconfigure MPD
 	sysCmd('systemctl stop ashuffle');
+	wrk_mpdPlaybackStatus($redis);
     sysCmd('systemctl stop mpd');
     // update zeroconfname in MPD configuration
     $redis->hMset('mpdconf','zeroconf_name', $newhostname);
@@ -3311,9 +3370,8 @@ function wrk_changeHostname($redis, $newhostname)
     wrk_mpdconf('/etc', $redis);
     // restart MPD
     sysCmd('pgrep -x mpd || systemctl start mpd');
-	if ($redis->get('globalrandom') === '1') {
-		sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-	}
+	// ashuffle gets started automatically
+	wrk_mpdRestorePlayerStatus($redis);
     // restart SAMBA
 	sysCmd('systemctl stop smbd nmbd');
 	if ($redis->get('dev') > 0) {
@@ -3330,7 +3388,7 @@ function wrk_changeHostname($redis, $newhostname)
 			sysCmd('pgrep nmbd || systemctl start nmbd');
 		}
 	}  else {
-		// dev mode off, prod mode on
+		// dev mode off, so prod mode is on
 		if ($redis->hGet('samba', 'prodonoff') > 0) {
 			// Samba prod mode enabled
 			runelog("service: SAMBA restart (DEV-Mode OFF) and Samba Prod enabled");

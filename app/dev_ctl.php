@@ -107,8 +107,10 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'sambarestart') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
         // ----- INSTALL RERNS ADD-ON MENU -----
         if ($_POST['syscmd'] === 'rerninstall') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rerninstall'));
-        // ----- REMOVE RERNS ADD-ON MENU -----
+        // ----- REINSTALL RERNS ADD-ON MENU -----
         if ($_POST['syscmd'] === 'rernreinstall') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'rernreinstall'));
+        // ----- RESET AIRPLAY CONFIG -----
+        if ($_POST['syscmd'] === 'airplayconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayconfreset'));
     }
 }
 waitSyWrk($redis, $jobID);

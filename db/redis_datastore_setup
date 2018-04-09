@@ -111,6 +111,10 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+            $redis->set('ahuffle_start_delay', '35');
+			$redis->set('ashuffle_wait_for_play', '0');
+			$redis->set('mpd_playback_laststate', '');
+			$redis->set('mpd_playback_lastnumber', '');
             // plugins api-keys
             $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -291,6 +295,10 @@ function redisDatastore($redis,$action) {
             $redis->get('cmediafix') || $redis->set('cmediafix', 0);
             $redis->get('globalrandom') || $redis->set('globalrandom', 0);
             $redis->get('stoppedPlayer') || $redis->set('stoppedPlayer', '');
+			$redis->get('ahuffle_start_delay') || $redis->set('ahuffle_start_delay', '35');
+			$redis->get('ashuffle_wait_for_play') || $redis->set('ashuffle_wait_for_play', '0');
+			$redis->get('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
+			$redis->get('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
             // plugins api-keys
             $redis->get('lastfm_apikey') || $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hGet('lastfm', 'apikey') || $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');

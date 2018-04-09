@@ -187,6 +187,13 @@
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernreinstall" id="syscmd-rernreinstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                     <span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.</span>
                 </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Reset Airplay config</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay.</span>
+                </div>
             </div>              
         </fieldset>
     </form>
