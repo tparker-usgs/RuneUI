@@ -111,6 +111,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+            $redis->set('audio_on_off', '1');
             $redis->set('ahuffle_start_delay', '35');
 			$redis->set('ashuffle_wait_for_play', '0');
 			$redis->set('mpd_playback_laststate', '');
@@ -295,6 +296,7 @@ function redisDatastore($redis,$action) {
             $redis->get('cmediafix') || $redis->set('cmediafix', 0);
             $redis->get('globalrandom') || $redis->set('globalrandom', 0);
             $redis->get('stoppedPlayer') || $redis->set('stoppedPlayer', '');
+            $redis->get('audio_on_off') || $redis->set('audio_on_off', '1');
 			$redis->get('ahuffle_start_delay') || $redis->set('ahuffle_start_delay', '35');
 			$redis->get('ashuffle_wait_for_play') || $redis->set('ashuffle_wait_for_play', '0');
 			$redis->get('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
