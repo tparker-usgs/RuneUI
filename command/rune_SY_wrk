@@ -211,9 +211,9 @@ if ($playerid_db === '') {
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
 			sysCmd('systemctl start smbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('pgrep -x smbd || systemctl start smbd');
 			sysCmd('systemctl start nmbd');
-			sysCmd('pgrep nmbd || systemctl start nmbd');
+			sysCmd('pgrep -x nmbd || systemctl start nmbd');
 		}
     }  else {
 		// dev mode off, so prod mode on
@@ -224,9 +224,9 @@ if ($playerid_db === '') {
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
 			sysCmd('systemctl start smbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('pgrep -x smbd || systemctl start smbd');
 			sysCmd('systemctl start nmbd');
-			sysCmd('pgrep nmbd || systemctl start nmbd');
+			sysCmd('pgrep -x nmbd || systemctl start nmbd');
 		}
 	}
 }
@@ -666,9 +666,9 @@ $redis->pconnect('/run/redis.sock');
 						sysCmd('rm /etc/samba/smb.conf');
 						sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
 						sysCmd('systemctl start smbd');
-						sysCmd('pgrep smbd || systemctl start smbd');
+						sysCmd('pgrep -x smbd || systemctl start smbd');
 						sysCmd('systemctl start nmbd');
-						sysCmd('pgrep nmbd || systemctl start nmbd');
+						sysCmd('pgrep -x nmbd || systemctl start nmbd');
 					}
                     $redis->sRem('w_lock', $jobID);
 					break;
@@ -694,9 +694,9 @@ $redis->pconnect('/run/redis.sock');
 						sysCmd('rm /etc/samba/smb.conf');
 						sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
 						sysCmd('systemctl start smbd');
-						sysCmd('pgrep smbd || systemctl start smbd');
+						sysCmd('pgrep -x smbd || systemctl start smbd');
 						sysCmd('systemctl start nmbd');
-						sysCmd('pgrep nmbd || systemctl start nmbd');
+						sysCmd('pgrep -x nmbd || systemctl start nmbd');
 					} else {
 						// prod mode
 					}
@@ -731,9 +731,9 @@ $redis->pconnect('/run/redis.sock');
 							sysCmd('rm /etc/samba/smb.conf');
 							sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
 							sysCmd('systemctl start smbd');
-							sysCmd('pgrep smbd || systemctl start smbd');
+							sysCmd('pgrep -x smbd || systemctl start smbd');
 							sysCmd('systemctl start nmbd');
-							sysCmd('pgrep nmbd || systemctl start nmbd');
+							sysCmd('pgrep -x nmbd || systemctl start nmbd');
 						}
 					}  else {
 						// dev mode off, prod mode on
@@ -744,9 +744,9 @@ $redis->pconnect('/run/redis.sock');
 							sysCmd('rm /etc/samba/smb.conf');
 							sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
 							sysCmd('systemctl start smbd');
-							sysCmd('pgrep smbd || systemctl start smbd');
+							sysCmd('pgrep -x smbd || systemctl start smbd');
 							sysCmd('systemctl start nmbd');
-							sysCmd('pgrep nmbd || systemctl start nmbd');
+							sysCmd('pgrep -x nmbd || systemctl start nmbd');
 						}
 					}
                     $redis->sRem('w_lock', $jobID);
