@@ -57,6 +57,9 @@ sleep 1
 systemctl stop local-browser
 sleep 1
 ply-image "$splash"
+systemctl stop ashuffle
+systemctl stop shairport-sync
+sleep 1
 systemctl stop mpd
 systemctl stop spopd
 systemctl stop smbd

@@ -2591,7 +2591,7 @@ function wrk_mpdRestorePlayerStatus($redis)
 		// solve by repeat play commands (no effect if already playing)
 		for ($mpd_play_count = 0; $mpd_play_count < 10; $mpd_play_count++) {
 			// wait before looping
-			sleep(1);
+			sleep(3);
 			switch (wrk_mpdPlaybackStatus($redis)) {
 				case 'paused':
 					// it was playing, now paused, so set to play

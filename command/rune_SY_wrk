@@ -932,6 +932,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					// save the playback status
 					wrk_mpdPlaybackStatus($redis);
+					$redis->save();
                     // send notfy to UI
                     ui_notify_async('Shutdown', 'system shutdown in progress...', $jobID);
                     sysCmd('/var/www/command/rune_shutdown poweroff');
@@ -943,6 +944,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					// save the playback status
 					wrk_mpdPlaybackStatus($redis);
+					$redis->save();
                     // send notfy to UI
                     ui_notify_async('Reboot', 'system reboot in progress...', $jobID);
                     sysCmd('/var/www/command/rune_shutdown reboot');
@@ -1183,7 +1185,7 @@ $redis->pconnect('/run/redis.sock');
 		// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
 		// wait until mpd has been running for a while before starting ashuffle
 		$mpd_uptime = trim(reset(sysCmd('ps -C mpd -o etimes=')));
-		if (intval($mpd_uptime) > intval($redis->get('ahuffle_start_delay'))) {
+		if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
 			sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 		}
 	}
