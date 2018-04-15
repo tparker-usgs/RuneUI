@@ -48,21 +48,21 @@ if(file_exists('/srv/http/command/update_os'))
 }
 
 // test if all services are enabled
-$retval = sysCmd('systemctl is-enabled ntpd.service');
+$retval = sysCmd('systemctl is-enabled ntpd');
 if ($retval[0] === 'disabled')
-    sysCmd('systemctl enable ntpd.service');
-$retval = sysCmd('systemctl is-enabled rune_PL_wrk.service');
+    sysCmd('systemctl enable ntpd');
+$retval = sysCmd('systemctl is-enabled rune_PL_wrk');
 if ($retval[0] === 'disabled')
-    sysCmd('systemctl enable rune_PL_wrk.service');
-$retval = sysCmd('systemctl is-enabled redis.service');
+    sysCmd('systemctl enable rune_PL_wrk');
+$retval = sysCmd('systemctl is-enabled redis');
 if ($retval[0] === 'disabled')
-    sysCmd('systemctl enable redis.service');
-$retval = sysCmd('systemctl is-enabled nginx.service');
+    sysCmd('systemctl enable redis');
+$retval = sysCmd('systemctl is-enabled nginx');
 if ($retval[0] === 'disabled')
-    sysCmd('systemctl enable nginx.service');
-//$retval = sysCmd('systemctl is-enabled dhcpcd.service');
+    sysCmd('systemctl enable nginx');
+//$retval = sysCmd('systemctl is-enabled dhcpcd');
 //if ($retval[0] === 'disabled')
-//    sysCmd('systemctl enable dhcpcd.service');
+//    sysCmd('systemctl enable dhcpcd');
 
 // stop php-fpm
 sysCmd('systemctl stop php-fpm');
@@ -304,7 +304,7 @@ runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
 // call xinit for local browser
 if ($redis->get('local_browser') === '1' && file_exists('/usr/bin/xinit')) {
-    sysCmdAsync('systemctl start local-browser.service');
+    sysCmdAsync('systemctl start local-browser');
 }
 
 // turn wifi power saving off
@@ -792,12 +792,12 @@ $redis->pconnect('/run/redis.sock');
                 case 'xorgserverstart':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('systemctl start local-browser.service');
+					sysCmd('systemctl start local-browser');
 					$redis->sRem('w_lock', $jobID);
                 case 'xorgserverstop':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('systemctl stop local-browser.service');
+					sysCmd('systemctl stop local-browser');
 					$redis->sRem('w_lock', $jobID);
                 case 'airplayconfreset':
                     runelog('wrk_SY: ', $job->wrkcmd);
@@ -1077,31 +1077,31 @@ $redis->pconnect('/run/redis.sock');
                     if ($job->action === 'add') {
                         runelog('wificfg: add profile for SSID: '.$job->args->ssid);
                         ui_notify_async('Adding WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, 'add', $job->args);
+                        wrk_wifiprofile($redis, $job->action, $job->args);
                         ui_notify_async('Added WIFI-Profile', $job->args->ssid, $jobID);
                     }
                     if ($job->action === 'edit') {
                         runelog('wificfg: edit profile for SSID: '.$job->args->ssid);
                         ui_notify_async('Changing WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, 'edit', $job->args);
+                        wrk_wifiprofile($redis, $job->action, $job->args);
                         ui_notify_async('Changed WIFI-Profile', $job->args->ssid, $jobID);
                     }
                     if ($job->action === 'delete') {
                         runelog('wificfg: delete profile for SSID: '.$job->args->ssid);
                         ui_notify_async('Deleting WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, 'delete', $job->args);
+                        wrk_wifiprofile($redis, $job->action, $job->args);
                         ui_notify_async('Deleted WIFI-Profile', $job->args->ssid, $jobID);
                     }
                     if ($job->action === 'disconnect') {
                         runelog('wificfg: disconnect profile for SSID: '.$job->args->ssid);
                         ui_notify_async('Disconnecting from WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, 'disconnect', $job->args);
+                        wrk_wifiprofile($redis, $job->action, $job->args);
                         ui_notify_async('Disconnected from WIFI-Profile', $job->args->ssid, $jobID);
                     }
                     if ($job->action === 'connect') {
                         runelog('wificfg: connect profile for SSID: '.$job->args->ssid);
                         ui_notify_async('Connecting to WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, 'connect', $job->args);
+                        wrk_wifiprofile($redis, $job->action, $job->args);
                         ui_notify_async('Connected to WIFI-Profile', $job->args->ssid, $jobID);
                     }
                     // inject random delay to avoid wifi scan overlapping
