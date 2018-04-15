@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x #echo all commands to cli
 #Image reset script
 
 #Use the next line only for a distribution build, do not use on development versions!!! It clears the pacman history, makes a lot of space free, but that history is useful.
