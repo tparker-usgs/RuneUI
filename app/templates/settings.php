@@ -366,9 +366,9 @@
                     <span class="help-block">Protect the UI with a password (standard is "rune" can be changed on login screen).</span>
                 </div>
             </div>
+			<?php if($this->local_browseronoff): ?>
 			<div class="form-group">
                 <label for="local-browser" class="control-label col-sm-2">Local browser</label>
-				<?php if($this->local_browseronoff): ?>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
                         <input name="features[local_browser]" type="checkbox" value="1"<?php if($this->local_browser == 1): ?> checked="checked" <?php endif ?>>
@@ -376,12 +376,15 @@
                     </label>
                     <span class="help-block">Start a local browser on HDMI or TFT.</span>
                 </div>
-                <?php else: ?>
+			</div>
+            <?php else: ?>
+			<div class="form-group">
+                <label for="local-browser" class="control-label col-sm-2">Local browser</label>
                 <div class="col-sm-10">
                     <span class="help-block"><br>Disabled, the required software not installed on this model.<br><br></span>
-				</div>
-                <?php endif ?>
-            </div>
+                </div>
+			</div>
+            <?php endif ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="localSStime">ScreenSaver time</label>
                 <div class="col-sm-10">

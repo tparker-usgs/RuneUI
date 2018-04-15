@@ -2546,8 +2546,8 @@ if ($action === 'reset') {
 
 function wrk_mpdPlaybackStatus($redis = null, $action = null)
 {
-    $status = sysCmd("mpc status | grep '\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
-	$number = sysCmd("mpc status | grep '\[' | cut -d '#' -f 2 | cut -d '/' -f 1");
+    $status = trim(reset(sysCmd("mpc status | grep '^\[' | cut -d '[' -f 2 | cut -d ']' -f 1")));
+	$number = trim(reset(sysCmd("mpc status | grep '^\[' | cut -d '#' -f 2 | cut -d '/' -f 1")));
     if (isset($action)) {
         switch ($action) {
             case 'record':
@@ -2555,58 +2555,58 @@ function wrk_mpdPlaybackStatus($redis = null, $action = null)
                 break;
             case 'laststate':
                 $mpdlaststate = $redis->get('mpd_playback_laststate');
-				if (!empty($status[0])) {
-					$redis->set('mpd_playback_laststate', trim($status[0]));
-					$redis->set('mpd_playback_lastnumber', trim($number[0]));
+				if (!empty($status)) {
+					$redis->set('mpd_playback_laststate', $status);
+					$redis->set('mpd_playback_lastnumber', $number);
 				} else {
-					$redis->set('mpd_playback_laststate', '');
+					$redis->set('mpd_playback_laststate', 'stopped');
 					$redis->set('mpd_playback_lastnumber', '');
 				}
                 return $mpdlaststate;
                 break;
         }
     } else {
-        // debug
-        if (!empty($status[0])) {
-            runelog('wrk_mpdPlaybackStatus (current state):', $status[0]);
-            runelog('wrk_mpdPlaybackStatus (current number):', $number[0]);
-			$redis->set('mpd_playback_laststate', trim($status[0]));
-			$redis->set('mpd_playback_lastnumber', trim($number[0]));
-            return $status[0];
+        if (!empty($status)) {
+			// do nothing
         } else {
-			$redis->set('mpd_playback_laststate', '');
-			$redis->set('mpd_playback_lastnumber', '');
-            return false;
+			$status = 'stopped';
+			$number = '';
         }
+		runelog('wrk_mpdPlaybackStatus (current state):', $status);
+		runelog('wrk_mpdPlaybackStatus (current number):', $number);
+		$redis->set('mpd_playback_laststate', $status);
+		$redis->set('mpd_playback_lastnumber', $number);
     }
+	return $status;
 }
 
 function wrk_mpdRestorePlayerStatus($redis)
 {
+	// disable start global random
+	$redis->set('ashuffle_wait_for_play', '1');
+	$mpd_playback_lastnumber = $redis->get('mpd_playback_lastnumber');
 	if (wrk_mpdPlaybackStatus($redis, 'laststate') === 'playing') {
 		// seems to be a bug somewhere in MPD
-		// if play is requested too quickly after start it goes into pause
+		// if play is requested too quickly after start it goes into pause or does nothing
 		// solve by repeat play commands (no effect if already playing)
-		// disable start global random
-		$redis->set('ashuffle_wait_for_play', '1');
-		for ($mpd_play_count = 0; $mpd_play_count <= 10; $mpd_play_count++) {
+		for ($mpd_play_count = 0; $mpd_play_count < 10; $mpd_play_count++) {
 			// wait before looping
 			sleep(1);
 			switch (wrk_mpdPlaybackStatus($redis)) {
 				case 'paused':
-					// it was playing, now paused, so toggle pause/play
-					sysCmd('mpc toggle || mpc toggle');
+					// it was playing, now paused, so set to play
+					sysCmd('mpc play || mpc play');
 					break;
 				case 'playing':
 					// it was playing, now playing, so do nothing and exit the loop
 					$mpd_play_count = 10;
 					break;
 				default:
-					// it was playing, now stopped, so start the track which was last playing
-					$command = sysCmd('mpc play '.$redis->get('mpd_playback_lastnumber').' || mpc play '.$redis->get('mpd_playback_lastnumber'));
-					if (trim($command[0]) == 'mpd error: Bad song index') {
-						// if the track is no longer in the playlist clear the track number for the next time
-						$redis->set('mpd_playback_lastnumber', '');
+					// it was playing, now not paused or playing, so start the track which was last playing
+					sysCmd('mpc play '.$mpd_playback_lastnumber.' || mpc play '.$mpd_playback_lastnumber);
+					if ($mpd_play_count == 9) {
+						// one more loop to go, so next time play the first track in the playlist, no effect if the playlist is empty
+						$mpd_playback_lastnumber = '1';
 					}
 					break;
 			}

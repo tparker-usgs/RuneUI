@@ -163,7 +163,7 @@ if ($playerid_db === '') {
     $redis->del('webradios');
     sysCmd('rm /mnt/MPD/Webradio/*');
     // reconnect to new instance of MPD
-    sysCmd('systemctl start mpd');
+    sysCmd('systemctl start mpd || systemctl restart mpd');
 	// ashuffle gets started automatically
     $mpd = openMpdSocket('/run/mpd.sock', 0);
     // clear MPD database
@@ -792,13 +792,17 @@ $redis->pconnect('/run/redis.sock');
                 case 'xorgserverstart':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+					$redis->set('local_browser', 1);
 					sysCmd('systemctl start local-browser');
 					$redis->sRem('w_lock', $jobID);
+					break;
                 case 'xorgserverstop':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+					$redis->set('local_browser', 0);
 					sysCmd('systemctl stop local-browser');
 					$redis->sRem('w_lock', $jobID);
+					break;
                 case 'airplayconfreset':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -813,6 +817,7 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('/var/www/db/redis_datastore_setup check');
 					wrk_shairport($redis, $redis->get('ao'), $airplay_name);
 					$redis->sRem('w_lock', $jobID);
+					break;
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     runelog('netcfg action: ', $job->action);
@@ -907,7 +912,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'orionprofile':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     $profile = $job->args." ".$redis->get('hwplatformid');
                     runelog("env: SET KERNEL PROFILE", $job->args);
@@ -917,13 +922,13 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'phprestart':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     sysCmd('systemctl restart php-fpm');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'poweroff':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
 					// save the playback status
 					wrk_mpdPlaybackStatus($redis);
@@ -934,7 +939,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'reboot':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
 					// save the playback status
 					wrk_mpdPlaybackStatus($redis);
@@ -945,7 +950,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sRem('w_lock', $jobID);
                     break;
 				case 'display_off':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     sysCmd('export DISPLAY=:0; xset dpms force off');
                     $redis->sRem('w_lock', $jobID);

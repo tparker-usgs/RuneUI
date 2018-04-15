@@ -39,6 +39,8 @@ else
   splash="/usr/share/bootsplash/reboot.png"
 fi
 
+set +e
+
 echo "Stop MPD and unmount shares..."
 mpc stop
 systemctl stop nginx
@@ -48,10 +50,12 @@ sleep 1
 ply-image "$splash"
 systemctl stop mpd
 systemctl stop spopd
+systemctl stop smbd
+systemctl stop nmbd
 sleep 1
 export DISPLAY=:0
 xset dpms force off
 sleep 1
 umount -aft nfs
 umount -aft cifs
-
+return 0

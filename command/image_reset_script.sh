@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x #echo all commands to cli
+set -e #continue on error
 #Image reset script
 
 #Use the next line only for a distribution build, do not use on development versions!!! It clears the pacman history, makes a lot of space free, but that history is useful.
@@ -50,6 +51,7 @@ cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 rm -f /etc/netctl/*
 cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0
 cp /var/www/app/config/defaults/test /etc/netctl/test
+cp /var/www/app/config/defaults/config.txt /boot/config.txt
 php /srv/http/db/redis_datastore_setup reset
 rm -rf /var/log/runeaudio/*
 /var/www/command/rune_shutdown poweroff

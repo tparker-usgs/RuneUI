@@ -116,6 +116,7 @@ function redisDatastore($redis,$action) {
 			$redis->set('ashuffle_wait_for_play', '0');
 			$redis->set('mpd_playback_laststate', '');
 			$redis->set('mpd_playback_lastnumber', '');
+			$redis->set('local_browser', 0);
             // plugins api-keys
             $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -146,7 +147,7 @@ function redisDatastore($redis,$action) {
             // $redis->set('hwplatform', '');
             // $redis->set('hwplatformid', '');
             // player control
-            if ($redis->get('hwplatformid') === '01') {
+            if (($redis->get('hwplatformid') === '01') OR ($redis->get('hwplatformid') === '08')) {
                 $redis->set('ao', 'bcm2835 ALSA_1');
             } else {
                 $redis->set('ao', '');
@@ -301,6 +302,7 @@ function redisDatastore($redis,$action) {
 			$redis->get('ashuffle_wait_for_play') || $redis->set('ashuffle_wait_for_play', '0');
 			$redis->get('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
 			$redis->get('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
+			$redis->get('local_browser') || $redis->set('local_browser', 0);
             // plugins api-keys
             $redis->get('lastfm_apikey') || $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hGet('lastfm', 'apikey') || $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');

@@ -48,6 +48,8 @@ else
   gpio -g write 4 1
 fi
 
+set +e
+
 echo "Stop MPD and unmount shares..."
 mpc stop
 systemctl stop nginx
@@ -63,4 +65,4 @@ xset dpms force off
 sleep 1
 umount -aft nfs
 umount -aft cifs
-
+return 0
