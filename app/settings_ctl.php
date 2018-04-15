@@ -128,15 +128,9 @@ if (isset($_POST)) {
             $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']['name']));
         }
         if ($_POST['features']['local_browser'] == 1) {
-            if ($redis->get('local_browser') != 1) {
-				$redis->set('local_browser', 1);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstart'));
-			}
+            $redis->get('local_browser') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstart'));
         } else {
-            if ($redis->get('local_browser') != 0) {
-				$redis->set('local_browser', 0);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstop'));
-			}
+            $redis->get('local_browser') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstop'));
         }
         if ($_POST['features']['pwd_protection'] == 1) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);

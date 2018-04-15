@@ -50,6 +50,8 @@ sleep 1
 ply-image "$splash"
 systemctl stop mpd
 systemctl stop spopd
+systemctl stop smbd
+systemctl stop nmbd
 sleep 1
 export DISPLAY=:0
 xset dpms force off
