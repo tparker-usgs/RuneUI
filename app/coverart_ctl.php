@@ -213,9 +213,12 @@ if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $requ
             if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.jpg')) {
                 header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
                 readfile($_SERVER['HOME'].'/assets/img/airplay-cover.jpg');
+            } else if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.png')) {
+                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
+                readfile($_SERVER['HOME'].'/assets/img/airplay-cover.png');
             } else {
-                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/cover-default.png'));
-                readfile($_SERVER['HOME'].'/assets/img/cover-default.png');
+                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-default.png'));
+                readfile($_SERVER['HOME'].'/assets/img/airplay-default.png');
             }
             $output = 1;
         } else {

@@ -2074,7 +2074,7 @@ function wrk_i2smodule($redis, $args)
         // Commit changes to /boot/config.txt
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
-        fclose($fp);        
+        fclose($fp);
     } else {
         if (wrk_mpdPlaybackStatus($redis) === 'playing') {
             $mpd = openMpdSocket('/run/mpd.sock');
@@ -2342,7 +2342,7 @@ if ($action === 'reset') {
 						continue;
 					} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
 						// MPD version is higher than 0.19 but lower than 0.20
-						$output .="\nsamplerate_converter \"".$param." ".$value."\"\n\n";
+						$output .="samplerate_converter \"".$param." ".$value."\"\n";
 						continue;
 					} else {
 						// MPD version is lower than 0.19 - do nothing
@@ -2627,11 +2627,7 @@ function wrk_shairport($redis, $ao, $name = null)
     $acard = json_decode($redis->hget('acards', $ao));
     runelog('acard details: ', $acard);
 	$redis->hSet('airplay', 'alsa_output_device', $acard->device);
-	if ($acard->mixer_device != '') {
-		$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
-	} else {
-		$redis->hSet('airplay', 'alsa_mixer_device', 'default');
-	}
+	$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
 	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control);
 	$redis->hSet('airplay', 'extlabel', $acard->extlabel);
 	if ($redis->hGet('airplay', 'interpolation') != '') {
@@ -2704,8 +2700,16 @@ function wrk_shairport($redis, $ao, $name = null)
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_after_play_ends', 'run_this_after_play_ends="'.$redis->hGet('airplay', 'run_this_after_play_ends').'"; // run_this_after_play_ends');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_wait_for_completion', 'wait_for_completion="'.$redis->hGet('airplay', 'run_this_wait_for_completion').'"; // run_this_wait_for_completion');
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_device', 'output_device="'.$redis->hGet('airplay', 'alsa_output_device').'"; // alsa_output_device');
-    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
-    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+	if ($redis->hGet('airplay', 'alsa_mixer_control') === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', '// mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
+	} else {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
+	}
+	if ($redis->hGet('airplay', 'alsa_mixer_device') === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', '// mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+	} else {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+	}
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
     $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
     $newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
@@ -3175,8 +3179,9 @@ function wrk_startAirplay($redis)
             closeSpopSocket($sock);
         }
         $redis->set('activePlayer', 'Airplay');
-        ui_render('playback', "{\"currentartist\":\"<unknown>\",\"currentsong\":\"Airplay\",\"currentalbum\":\"<unknown>\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
-        sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+        //ui_render('playback', "{\"currentartist\":\"<unknown>\",\"currentsong\":\"Airplay\",\"currentalbum\":\"<unknown>\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
+        //sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+		$redis->hSet('airplay','initialised', 0);
     }
 }
 

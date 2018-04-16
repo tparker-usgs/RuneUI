@@ -625,6 +625,8 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					// If it exists, remove the symbolic link which ashuffle uses as a random playlist. ashuffle uses the whole MPD database in it is not present
 					sysCmd('rm -f '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					// set the indicator to say NO playlist random file exists
+					$redis->set('last_pl_randomfile', 'none');
 					// Stop ashuffle
 					sysCmd('systemctl stop ashuffle');
 					// shuffle.service has the line: ExecStart=/usr/bin/ashuffle -f /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
@@ -648,6 +650,8 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					// Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
 					sysCmd('ln -sf '.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+					// set the indicator to say a playlist random file exists
+					$redis->set('last_pl_randomfile', 'exists');
 					// Stop ashuffle
 					sysCmd('systemctl stop ashuffle');
 					// Set global random ON

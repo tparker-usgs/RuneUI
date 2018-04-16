@@ -53,7 +53,7 @@ while (1) {
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
-        $socket = openMpdSocket('/run/mpd.sock');
+        $socket = openMpdSocket('/run/mpd.sock', 0);
     } elseif ($activePlayer === 'Spotify') {
         runelog('rune_PL_wrk: open SPOP socket');
         $socket = openSpopSocket('localhost', 6602, 1);
@@ -66,215 +66,230 @@ while (1) {
         sleep(3);
     } else {
         // MPD playback engine
-            if ($activePlayer === 'MPD') {
-                if ($forceupdate !== 0) {
-                    $forceupdate = 0;
-                    runelog('----------------------------------- FORCE UPDATE -----------------------------------');
-                    ui_update($redis, $socket, 0);
-                }
-                $status = _parseStatusResponse(MpdStatus($socket));
-                // store next songid
-                $redis->set('nextsongid', $status['nextsongid']);
-                // store "lastsongid"
-                $redis->set('lastsongid', $status['songid']);
-                $redis->set('pl_length', $status['playlistlength']);
+		if ($activePlayer === 'MPD') {
+			if ($forceupdate !== 0) {
+				$forceupdate = 0;
+				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
+				ui_update($redis, $socket, 0);
+			}
+			$status = _parseStatusResponse(MpdStatus($socket));
+			// store next songid
+			$redis->set('nextsongid', $status['nextsongid']);
+			// store "lastsongid"
+			$redis->set('lastsongid', $status['songid']);
+			$redis->set('pl_length', $status['playlistlength']);
 
-                do {
-                    // idle LOOP
-                    runelog('rune_PL_wrk: enter idle loop');
-                    $status = monitorMpdState($socket);
+			do {
+				// idle LOOP
+				runelog('rune_PL_wrk: enter idle loop');
+				$status = monitorMpdState($socket);
 
-                    // store next songid
-                    $redis->set('nextsongid', $status['nextsongid']);
-                    // store "lastsongid"
-                    $redis->set('lastsongid', $status['songid']);
-                    $redis->set('pl_length', $status['playlistlength']);
+				// store next songid
+				$redis->set('nextsongid', $status['nextsongid']);
+				// store "lastsongid"
+				$redis->set('lastsongid', $status['songid']);
+				$redis->set('pl_length', $status['playlistlength']);
 
-                    // runelog('---------status data------------',$status);
-                    $status = ui_status($socket, $status);
-                    runelog('---------status data(2)------------',$status);
-                    // render Queue (push async)
-                    //if ($status['changed'] === 'playlist') {
-                    //    sysCmdAsync('ui_render_pl');
-                    //    runelog('---------------- PLAYLIST RENDER ----------------');
-                    //}
-                    
-                    if ($status['changed'] === 'mixer') {
-                        //$redis->set('current_volume', $status['volume']);
-                        if ($redis->get('ao') === 'PianoDACPlus' && $redis->hget('mpdconf', 'mixer_type') === 'hardware') {
-                            sysCmd('amixer -D '.json_decode($redis->hget('acards', 'PianoDACPlus'))->mixer_device.' set Subwoofer '.$status['volume'].'%');
-                        }
-                    }
-                    
-                    // Global Random
-					if (($redis->get('globalrandom') === '1') && ($status['state'] === 'stop') && ($redis->get('lock_globalrandom') === '1')) {
-						// MPD now stopped, the last track was the last in the queue, ashuffle will start a new track in this status
-						// to avoid displaying the first track in the queue force a UI update and skip the UI render step
-						ui_update($redis, $socket, 0);
-						// skip only once
-						$redis->set('lock_globalrandom', 0);
-					} else {
-						// normal process render the UI
-						// save JSON response for extensions
-						runelog('rune_PL_wrk: ui_render() response', json_encode($status));
-						ui_render('playback', json_encode($status));
-					}
-					If (($redis->get('globalrandom') === '1') && ($status['state'] === 'play') && ($redis->get('nextsongid') === '')) {
-						// now playing the last track in the queue
-						$redis->set('lock_globalrandom', 1);
-					} else {
-						// in all other circumstances do not skip 
-						$redis->set('lock_globalrandom', 0);
-					}
-					$status['actPlayer'] = "MPD";
-					$redis->set('act_player_info', json_encode($status));
-
-                    $errorcode = socket_last_error($socket);
-                    runelog('last socket error = ', $errorcode);
-					// Detect deletion of playlist random file
-					// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
-					if (FALSE === $redis->get('last_pl_randomfile')) {
-						// redis variable not set > first time
-						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
-							$redis->set('last_pl_randomfile', 'exists');
-						} else {
-							$redis->set('last_pl_randomfile', 'none');
-						}
-					} else {
-						// redis variable is set > not first time
-						if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
-							// file found
-							$redis->set('last_pl_randomfile', 'exists');
-						} else {
-							// no file found
-							if ($redis->get('last_pl_randomfile') === 'exists') {
-								// but the file was there the last time, so restart ashuffle
-								$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-								waitSyWrk($redis, $jobID);
-							}
-							$redis->set('last_pl_randomfile', 'none');
-						}
-					}
-					// janui end modified
-
-                } while ($errorcode === 0);
-
-                // close Redis connection
-                $redis->close();
-                runelog('rune_PL_wrk: close MPD local UNIX socket');
-                closeMpdSocket($socket);
-            } elseif ($activePlayer === 'Spotify') {
-                if ($forceupdate !== 0) {
-                    $forceupdate = 0;
-                    runelog('----------------------------------- FORCE UPDATE -----------------------------------');
-                    sysCmdAsync('/var/www/command/ui_update_async');
-                }
-                $status = monitorSpopState($socket);
-                $status['playlist'] = $redis->hGet('spotify', 'plversion');
-                ui_render('playback', json_encode($status));
-                runelog('rune_PL_wrk: UI JSON', $status);
-                runelog('rune_PL_wrk: close SPOP socket');
-
-                // save JSON response for extensions
-                $status['actPlayer'] = "Spotify";
-                $redis->set('act_player_info', json_encode($status));
-
-                closeSpopSocket($socket);
-            } elseif ($activePlayer === 'Airplay') {
-                if ($forceupdate !== 0) {
-                    $forceupdate = 0;
-                    runelog('---------------------------- FORCE UPDATE Airlplay ----------------------------------');
-                    sysCmdAsync('/var/www/command/ui_update_async');
-                }
-                if ($airplay_handle == FALSE) {
+				// runelog('---------status data------------',$status);
+				$status = ui_status($socket, $status);
+				runelog('---------status data(2)------------',$status);
+				// render Queue (push async)
+				//if ($status['changed'] === 'playlist') {
+				//    sysCmdAsync('ui_render_pl');
+				//    runelog('---------------- PLAYLIST RENDER ----------------');
+				//}
 				
-				    $airplay_handle = fopen("/var/run/shairport/now_playing", "r");
-                    stream_set_blocking($airplay_handle,false);
-                } else {
-                    $status = array();
-                    runelog('------------------------------ read now_playing shairport ----------------------------------');
-					
-					for($j = 0; $j < 6; $j++) {
-                        $line = fgets($airplay_handle);
-                        // split the line on the =
-                        $parts = explode("=", $line);
-                        if(!isset($parts[0])) {
-                            // if we have no part 0, set it to null
-                            $parts[0] = null;
-                        }
-                        else {
-                            switch ($parts[0]) {
-                            case "artist":
-                                $parts[0] = "currentartist";
-                                break;
-                            case "album":
-                                $parts[0] = "currentalbum";
-                                break;
-                            case "title":
-                                $parts[0] = "currentsong";
-                                break;
-                            default:
-                            }
-                        }
-                        if(!isset($parts[1])) {
-                            // if we have no part 1, set it to null
-                            $parts[1] = "";
-                        } else {
-                            // strip the NEWLINE
-                            $parts[1] = str_replace("\n", "", $parts[1]);
-                            if ($parts[1] == "<unknown>") $parts[1] = ".";
-                        }
-                        // package up our data object
-                        $status[$parts[0]] = $parts[1];
-                    }
-				    
-                    // create the JSON to send the UI
-					if(isset($status["currentartist"]) && ($status["currentartist"] !== "" || $status["currentsong"] !== "" || $status["currentalbum"] !== "")) {
-                        
-						$status['volume'] = "100";
-                        $status['random'] = "0";
-                        $status['single'] = "0";
-                        $status['consume'] = "0";
-                        $status['playlist'] = "1";
-                        $status['playlistlength'] = "1";
-                        $status['state'] = "play";
-                        $status['time'] = "0";
-                        $status['elapsed'] = "0";
-                        $status['song_percent'] = "100";
-                      
-                        $artwork = $status["artwork"];
-                        // is there an artwork?
-						// search in the folder becouse artwork reference seems to be wrong
-						$latestCoverFile = sysCmd('ls -tr /var/run/shairport/cover*.jpg | tail -n 1');
-						if($artwork !== "" && is_file($latestCoverFile[0])) {
-                            // $extension = substr(strrchr($artwork, "."), 1);
-                            // sysCmd('cp /var/run/shairport/'.$artwork.' /srv/http/assets/img/airplay-cover.'.$extension);
-							// runelog('-> latest cover file!' . $latestCoverFile[0] );
-							sysCmd('cp ' . $latestCoverFile[0] . ' /srv/http/assets/img/airplay-cover.jpg');
-                            sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.jpg');
-                            $artwork = "";
-                        }
-						else{
-							runelog('-> NO cover )');
+				if ($status['changed'] === 'mixer') {
+					//$redis->set('current_volume', $status['volume']);
+					if ($redis->get('ao') === 'PianoDACPlus' && $redis->hget('mpdconf', 'mixer_type') === 'hardware') {
+						sysCmd('amixer -D '.json_decode($redis->hget('acards', 'PianoDACPlus'))->mixer_device.' set Subwoofer '.$status['volume'].'%');
+					}
+				}
+				
+				// Global Random
+				if (($redis->get('globalrandom') === '1') && ($status['state'] === 'stop') && ($redis->get('lock_globalrandom') === '1')) {
+					// MPD now stopped, the last track was the last in the queue, ashuffle will start a new track in this status
+					// to avoid displaying the first track in the queue force a UI update and skip the UI render step
+					ui_update($redis, $socket, 0);
+					// skip only once
+					$redis->set('lock_globalrandom', 0);
+				} else {
+					// normal process render the UI
+					// save JSON response for extensions
+					runelog('rune_PL_wrk: ui_render() response', json_encode($status));
+					ui_render('playback', json_encode($status));
+				}
+				If (($redis->get('globalrandom') === '1') && ($status['state'] === 'play') && ($redis->get('nextsongid') === '')) {
+					// now playing the last track in the queue
+					$redis->set('lock_globalrandom', 1);
+				} else {
+					// in all other circumstances do not skip 
+					$redis->set('lock_globalrandom', 0);
+				}
+				// Detect deletion of playlist random file
+				// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
+				if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+					// file found
+					$redis->set('last_pl_randomfile', 'exists');
+				} else {
+					// no file found
+					if ($redis->get('last_pl_randomfile') === 'exists') {
+						// but the file was there the last time, so reset ashuffle
+						$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+						waitSyWrk($redis, $jobID);
+					}
+					$redis->set('last_pl_randomfile', 'none');
+				}
+				// janui end modified
+				$status['actPlayer'] = "MPD";
+				$redis->set('act_player_info', json_encode($status));
+				$errorcode = socket_last_error($socket);
+				runelog('last socket error = ', $errorcode);
+			} while (($errorcode === 0) && ($redis->get('activePlayer') === 'MPD'));
+
+			// close Redis connection
+			//$redis->close();
+			runelog('rune_PL_wrk: close MPD local UNIX socket');
+			closeMpdSocket($socket);
+		} elseif ($activePlayer === 'Spotify') {
+			if ($forceupdate !== 0) {
+				$forceupdate = 0;
+				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
+				sysCmdAsync('/var/www/command/ui_update_async');
+			}
+			$status = monitorSpopState($socket);
+			$status['playlist'] = $redis->hGet('spotify', 'plversion');
+			ui_render('playback', json_encode($status));
+			runelog('rune_PL_wrk: UI JSON', $status);
+			runelog('rune_PL_wrk: close SPOP socket');
+
+			// save JSON response for extensions
+			$status['actPlayer'] = "Spotify";
+			$redis->set('act_player_info', json_encode($status));
+			closeSpopSocket($socket);
+		} elseif ($activePlayer === 'Airplay') {
+			if ($forceupdate !== 0) {
+				$forceupdate = 0;
+				runelog('---------------------------- FORCE UPDATE Airlplay ----------------------------------');
+				sysCmdAsync('/var/www/command/ui_update_async');
+			}
+			if ($redis->hGet('airplay','initialised') === 1) {
+				// do nothing
+			} else {
+				// post some generic data to the UI
+				$redis->hSet('airplay','initialised', 1);
+				sysCmd('rm /srv/http/assets/img/airplay-cover.*');
+				$status = array();
+				$status['volume'] = "100";
+				$status['random'] = "0";
+				$status['single'] = "0";
+				$status['consume'] = "0";
+				$status['playlist'] = "1";
+				$status['playlistlength'] = "1";
+				$status['state'] = "play";
+				$status['time'] = "0";
+				$status['elapsed'] = "0";
+				$status['song_percent'] = "100";
+				$status['currentartist'] = "Airplay";
+				$status['currentalbum'] = "-----";
+				$status['currentsong'] = "Initialising";
+				// save JSON response for extensions
+				$status['actPlayer'] = "Airplay";
+				ui_render('playback', json_encode($status));
+				$redis->set('act_player_info', json_encode($status));
+				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+				sysCmdAsync('/var/www/command/ui_update_async');
+			}
+			if ($airplay_handle == FALSE) {
+				$airplay_handle = fopen("/var/run/shairport/now_playing", "r");
+				stream_set_blocking($airplay_handle,false);
+			} else {
+				runelog('------------------------------ read now_playing shairport ----------------------------------');
+				for($j = 0; $j < 6; $j++) {
+					$line = fgets($airplay_handle);
+					// split the line on the =
+					$parts = explode("=", $line);
+					if(!isset($parts[0])) {
+						// if we have no part 0, set it to null
+						$parts[0] = null;
+					}
+					else {
+						switch ($parts[0]) {
+						case "artist":
+							$parts[0] = "currentartist";
+							break;
+						case "album":
+							$parts[0] = "currentalbum";
+							break;
+						case "title":
+							$parts[0] = "currentsong";
+							break;
+						default:
 						}
-						 ui_render('playback', json_encode($status));
-						  // save JSON response for extensions
-                        $status['actPlayer'] = "Airplay";
-						$redis->set('act_player_info', json_encode($status));
-                    }
+					}
+					if(!isset($parts[1])) {
+						// if we have no part 1, set it to null
+						$parts[1] = "";
+					} else {
+						// strip the NEWLINE
+						$parts[1] = str_replace("\n", "", $parts[1]);
+						if ($parts[1] == "<unknown>") $parts[1] = ".";
+					}
+					// package up our data object
+					$status[$parts[0]] = $parts[1];
+				}
+				
+				// create the JSON to send the UI
+				if(isset($status["currentartist"]) && ($status["currentartist"] !== "" || $status["currentsong"] !== "" || $status["currentalbum"] !== "")) {
 					
-                    sleep(1);
-                    $forceupdate = 1;
-                }
-                sleep(1);
-                $forceupdate = 1;
-            } else {
-                sleep(1);
-                $forceupdate = 1;
-            }
-        // close Redis connection
-        $redis->close();
+					$status['volume'] = "100";
+					$status['random'] = "0";
+					$status['single'] = "0";
+					$status['consume'] = "0";
+					$status['playlist'] = "1";
+					$status['playlistlength'] = "1";
+					$status['state'] = "play";
+					$status['time'] = "0";
+					$status['elapsed'] = "0";
+					$status['song_percent'] = "100";
+				  
+					$artwork = $status["artwork"];
+					// is there an artwork?
+					// search in the folder becouse artwork reference seems to be wrong
+					$latestCoverFile = sysCmd('ls -tr /var/run/shairport/cover*.jpg | tail -n 1');
+					if($artwork !== "" && is_file($latestCoverFile[0])) {
+						// $extension = substr(strrchr($artwork, "."), 1);
+						// sysCmd('cp /var/run/shairport/'.$artwork.' /srv/http/assets/img/airplay-cover.'.$extension);
+						// runelog('-> latest cover file!' . $latestCoverFile[0] );
+						sysCmd('rm /srv/http/assets/img/airplay-cover.*');
+						sysCmd('cp ' . $latestCoverFile[0] . ' /srv/http/assets/img/airplay-cover.jpg');
+						sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.jpg');
+						$artwork = "";
+					}
+					else{
+						runelog('-> NO cover )');
+					}
+					ui_render('playback', json_encode($status));
+					  // save JSON response for extensions
+					$status['actPlayer'] = "Airplay";
+					$redis->set('act_player_info', json_encode($status));
+				}
+				
+				sleep(1);
+				$forceupdate = 1;
+			}
+			sleep(1);
+			$forceupdate = 1;
+		} else {
+			sleep(1);
+			$forceupdate = 1;
+		}
     }
+    // close Redis connection
+    $redis->close();
 // --- WORKER MAIN LOOP --- //
 }
+// These command never get executed!!!
 fclose ($airplay_handle);
+$redis->hSet('airplay','initialised', 0);
+
