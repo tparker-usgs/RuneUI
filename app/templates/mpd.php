@@ -211,8 +211,15 @@
         </div>
     </form>
     <form class="form-horizontal" action="" method="post" data-parsley-validate>
-        <legend>Misc options</legend>
+        <legend>Autoplay and Random Play</legend>
         <fieldset>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="crossfade">Crossfade</label>
+                <div class="col-sm-10">
+                    <input class="form-control osk-trigger input-lg" type="number" id="crossfade" name="mpd[crossfade]" value="<?=$this->mpd['crossfade'] ?>" data-trigger="change" min="0" placeholder="0" />
+                    <span class="help-block">Sets the current amount of crossfading between songs, in seconds (0 disables crossfading).</span>
+                </div>
+            </div>
             <div class="form-group">
                 <label class="control-label col-sm-2" for="autoplay">Autoplay</label>
                 <div class="col-sm-10">
@@ -224,27 +231,20 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="crossfade">Crossfade</label>
-                <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="number" id="crossfade" name="mpd[crossfade]" value="<?=$this->mpd['crossfade'] ?>" data-trigger="change" min="0" placeholder="0" />
-                    <span class="help-block">Sets the current amount of crossfading between songs, in seconds (0 disables crossfading).</span>
-                </div>
-            </div>
-            <div class="form-group">
                 <label class="control-label col-sm-2" for="globalrandom">Global random</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
                         <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if($this->mpd['globalrandom'] == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">(EXPERIMENTAL) Toggles the global random, which adds a random song to the queue when it reaches the end.</span>
+                    <span class="help-block">Toggles the global random, which adds a random song to the queue when it reaches the end.</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="addrandom">Add random tracks</label>
                 <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="number" id="addrandom" name="mpd[addrandom]" value="<?=$this->mpd['addrandom'] ?>" data-trigger="change" min="1" placeholder="0" />
-                    <span class="help-block">Add an amount of tracks to the playing queue, randomly picked from the MPD database.</span>
+                    <input class="form-control osk-trigger input-lg" type="number" id="addrandom" name="mpd[addrandom]" value="<?=$this->mpd['addrandom'] ?>" data-trigger="change" min="1" max="50" placeholder="0" />
+                    <span class="help-block">Add a number of tracks to the playing queue, randomly picked from the MPD database.</span>
                 </div>
             </div>
         </fieldset>

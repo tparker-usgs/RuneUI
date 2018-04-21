@@ -659,6 +659,17 @@ $redis->pconnect('/run/redis.sock');
 					// ashuffle gets started automatically
                     $redis->sRem('w_lock', $jobID);
                     break;
+                case 'addrandomtracks':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('addrandomtracks args: ', $job->args);
+                    $redis->sAdd('w_lock', $jobID);
+					// save the number of files to add
+					$redis->set('addrandom', $job->args);
+					// call ashuffle to add the specified number of tracks to the queue
+					ui_notify('Add random tracks', implode("\n", sysCmd('ashuffle -o '.$job->args)));
+					sleep(3);
+                    $redis->sRem('w_lock', $jobID);
+                    break;
 				case 'sambaprodon':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);

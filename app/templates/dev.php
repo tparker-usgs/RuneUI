@@ -137,12 +137,26 @@
             <legend>System commands</legend>
             <p>Just some handy system commands, without the hassle of logging into SSH.</p>
             <div class="form-group">
+                <label class="col-sm-2 control-label">Update RuneUI</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">&nbsp;</span>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-sm-2 control-label">Restart MPD service</label>
                 <div class="col-sm-10">
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdrestart" id="syscmd-mpdrestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                     <span class="help-block">&nbsp;</span>
                 </div>
-            </div>            
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Restart Samba</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">If you change the Samba configuration files a restart is required to activate your changes.</span>
+                </div>
+            </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Reset NET config</label>
                 <div class="col-sm-10">
@@ -158,29 +172,22 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label">Update RuneUI</label>
+                <label class="col-sm-2 control-label">Reset Airplay config</label>
                 <div class="col-sm-10">
-                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                    <span class="help-block">&nbsp;</span>
+                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                    <span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay.</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Restart Samba</label>
-                <div class="col-sm-10">
-                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                    <span class="help-block">If you change the Samba configuration files a restart is required to activate your changes.</span>
-                </div>
-            </div>              
             <div class="form-group">
                 <label class="col-sm-2 control-label">Install Rern's Addons</label>
                 <div class="col-sm-10">
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                     <span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
-					Refresh the browser after installing, this should enable the Addons menu. It is possible that a reboot is required enable the Addons menu.<br>
+					Refresh the browser after installing, this should enable the Addons menu. It is possible that a reboot is also required.<br>
 					You can remove the Rern's Addons menu via the Addons menu.<br>
 					The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum.</span>
                 </div>
-            </div>              
+            </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Re-install Rern's Addons</label>
                 <div class="col-sm-10">
@@ -188,13 +195,6 @@
                     <span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Reset Airplay config</label>
-                <div class="col-sm-10">
-                    <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                    <span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay.</span>
-                </div>
-            </div>              
         </fieldset>
     </form>
     <form class="form-horizontal" method="post">

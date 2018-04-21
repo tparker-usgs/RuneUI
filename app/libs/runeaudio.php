@@ -2680,8 +2680,8 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$redis->hSet('airplay', 'metadata_enabled', 'yes');
 	}
-	if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
-		// do nothing
+	if ($redis->get('coverart') == 0) {
+		$redis->hSet('airplay', 'metadata_include_cover_art', 'no');
 	} else {
 		$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
 	}
