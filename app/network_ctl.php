@@ -64,6 +64,12 @@ if (isset($_POST)) {
                 //ui_notify_async("'wrkcmd' => 'wificfg', 'action' => 'disconnect'", $_POST['wifiprofile']);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array( 'wrkcmd' => 'wificfg', 'action' => 'disconnect', 'args' => $_POST['wifiprofile'] ));
                 break;
+            case 'disconnect-delete':
+                //ui_notify_async("'wrkcmd' => 'wificfg', 'action' => 'disconnect'", $_POST['wifiprofile']);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array( 'wrkcmd' => 'wificfg', 'action' => 'disconnect', 'args' => $_POST['wifiprofile'] ));
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'wificfg', 'action' => 'delete', 'args' =>  $_POST['wifiprofile']));
+                break;
+				
         }
     }
 }

@@ -43,6 +43,7 @@
                 <div class="col-sm-12">
                     <a class="btn btn-default btn-lg" href="/network/edit/<?=$this->uri(3) ?>">Cancel</a>
                     <button class="btn btn-primary btn-lg" name="wifiprofile[action]" value="disconnect" type="submit">Disconnect</button>
+					<button class="btn btn-primary btn-lg" name="wifiprofile[action]" value="disconnect-delete" type="submit">Disconnect-Delete</button>
                     <input type="hidden" name="wifiprofile[ssid]" value="<?=urldecode($this->uri(4)) ?>">
                     <input type="hidden" name="wifiprofile[nic]" value="<?=$this->uri(3) ?>">
                 </div>
