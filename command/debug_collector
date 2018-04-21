@@ -193,7 +193,7 @@ function debug_data($redis)
 		unset($command);
 	}
 	if (file_exists("/usr/bin/smartctl")) {
-		$drive_list = sysCmd('smartctl --scan-open -- -H -i');
+		$drive_list = sysCmd('smartctl --scan-open -- -H -i | grep -v aborted');
 		if (!empty($drive_list)) {
 			foreach($drive_list as $drive) {
 				$drive = trim($drive);
