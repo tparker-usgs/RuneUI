@@ -108,7 +108,7 @@
                             <input id="opcache" name="mode[sambadevonoff][enable]" type="checkbox" value="1"<?php if($this->sambadevonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">Activate/Deactivate Samba in <strong>Dev</strong> mode.<br>
+                    <span class="help-block">Activate/Deactivate Samba when in <strong>Dev</strong> mode.<br>
 					By default Samba is <strong>ON</strong> in Dev mode.<br>
 					Default settings when set ON: <strong>Read and write</strong> access to system files is given to all local network users, <strong>no password</strong> is required.</span>
                 </div>
@@ -120,7 +120,7 @@
                             <input id="opcache" name="mode[sambaprodonoff][enable]" type="checkbox" value="1"<?php if($this->sambaprodonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">Activate/Deactivate Samba in <strong>Production</strong> mode.<br>
+                    <span class="help-block">Activate/Deactivate Samba when in <strong>Production</strong> mode.<br>
 					By default Samba is <strong>OFF</strong> in Production mode.<br>
 					Default settings when set ON: <strong>Read only</strong> access to the music library's is given to all local network users, <strong>no password</strong> is required.</span>
                 </div>
