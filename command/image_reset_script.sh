@@ -10,8 +10,7 @@ set -e #continue on error
 #Before running the script...
 #Connect via Wired ethernet, remove all WiFi profiles.
 #Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources.
-#Set automatic MPD rebuild ON in the Sources Menu.
-#Reset the image using the following commands, some commands may fail (e.g. samba not installed), no problem.
+#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
 #
 # set up services
 systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser
@@ -34,7 +33,17 @@ php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
 #
-# remover any git or samba passwords/email
+# update local git
+cd /srv/http/
+git stash
+git pull
+git config user.email "any@body.com"
+git config user.name "anybody"
+git stash
+git pull
+cd /home
+#
+# remove any git or samba passwords/email
 git config -f /var/www/.git/config user.name ""
 git config -f /var/www/.git/config user.email ""
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
