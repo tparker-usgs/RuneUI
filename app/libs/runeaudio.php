@@ -2589,9 +2589,9 @@ function wrk_mpdRestorePlayerStatus($redis)
 		// seems to be a bug somewhere in MPD
 		// if play is requested too quickly after start it goes into pause or does nothing
 		// solve by repeat play commands (no effect if already playing)
-		for ($mpd_play_count = 0; $mpd_play_count < 10; $mpd_play_count++) {
+		for ($mpd_play_count = 0; $mpd_play_count < 12; $mpd_play_count++) {
 			// wait before looping
-			sleep(3);
+			sleep(4);
 			switch (wrk_mpdPlaybackStatus($redis)) {
 				case 'paused':
 					// it was playing, now paused, so set to play
@@ -2599,12 +2599,12 @@ function wrk_mpdRestorePlayerStatus($redis)
 					break;
 				case 'playing':
 					// it was playing, now playing, so do nothing and exit the loop
-					$mpd_play_count = 10;
+					$mpd_play_count = 12;
 					break;
 				default:
 					// it was playing, now not paused or playing, so start the track which was last playing
 					sysCmd('mpc play '.$mpd_playback_lastnumber.' || mpc play '.$mpd_playback_lastnumber);
-					if ($mpd_play_count == 9) {
+					if ($mpd_play_count == 11) {
 						// one more loop to go, so next time play the first track in the playlist, no effect if the playlist is empty
 						$mpd_playback_lastnumber = '1';
 					}
