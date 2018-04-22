@@ -75,6 +75,8 @@ function redisDatastore($redis,$action) {
             $redis->hSet('dlna', 'queue', 1);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 6);
+			$redis->hSet('dlna', 'radioname', '');
+			$redis->hSet('dlna', 'file', '');
             $redis->set('udevil', 1);
             $redis->hSet('spotify', 'enable', 0);
             $redis->hSet('spotify', 'user', 'user');
@@ -147,7 +149,7 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'gearhead-janui-20180417');
+            $redis->set('buildversion', 'gearhead-janui-20180422');
             $redis->set('release', '0.5');
             // HW platform data
             // $redis->set('playerid', '');
@@ -295,6 +297,8 @@ function redisDatastore($redis,$action) {
             $redis->hGet('dlna', 'queue') || $redis->hSet('dlna', 'queue', 1);
             $redis->hGet('dlna', 'logfile') || $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hGet('dlna', 'loglevel') || $redis->hSet('dlna', 'loglevel', 0);
+			$redis->hGet('dlna', 'radioname') || $redis->hSet('dlna', 'radioname', '');
+			$redis->hGet('dlna', 'file') || $redis->hSet('dlna', 'file', '');
             $redis->hGet('spotify', 'enable') || $redis->hSet('spotify', 'enable', 0);
             $redis->hGet('spotify', 'user') || $redis->hSet('spotify', 'user', 'user');
             $redis->hGet('spotify', 'pass') || $redis->hSet('spotify', 'pass', 'pass');
@@ -335,7 +339,7 @@ function redisDatastore($redis,$action) {
             $redis->get('debug') || $redis->set('debug', 0);
             $redis->get('debugdata') || $redis->set('debugdata', '');
             $redis->get('opcache') || $redis->set('opcache', 1);
-            $redis->get('buildversion') || $redis->set('buildversion', 'gearhead-janui-20180417');
+            $redis->get('buildversion') || $redis->set('buildversion', 'gearhead-janui-20180422');
             // HW platform data
             $redis->get('playerid') || $redis->set('playerid', '');
             $redis->get('hwplatform') || $redis->set('hwplatform', '');
