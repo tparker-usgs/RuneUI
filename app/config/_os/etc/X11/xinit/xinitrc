@@ -22,6 +22,6 @@ matchbox-window-manager -use_titlebar no -use_cursor no &
 # install multimedia keyboard shortcuts
 xbindkeys &
 
-# start midori in privat mode with fullscreen display
-#midori -p -e Fullscreen http://localhost
-sudo -u http chromium --no-sandbox --app=http://localhost --start-fullscreen --force-device-scale-factor=1.8
+# start Chromium with fullscreen display
+#sudo -u http chromium --no-sandbox --app=http://localhost --start-fullscreen --force-device-scale-factor=1.8
+sudo -u http /etc/X11/xinit/start_chromium.sh
