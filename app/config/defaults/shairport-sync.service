@@ -11,6 +11,8 @@ ExecStartPre=/usr/bin/mkdir -p /var/run/shairport
 ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf
 User=shairport-sync
 Group=shairport-sync
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

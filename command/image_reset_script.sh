@@ -53,6 +53,7 @@ pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 rm -f /etc/samba/*.conf
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
+ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
@@ -72,7 +73,7 @@ rm -f /etc/netctl/*
 cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0
 cp /var/www/app/config/defaults/test /etc/netctl/test
 #
-# config.txt
+# copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
 #
 # remove logs, run poweroff script and remove mounts
@@ -81,15 +82,19 @@ rm -rf /var/log/runeaudio/*
 rm -rf /mnt/MPD/NAS/*
 #
 # file protection and ownership
-chown -R http.http /srv/http/
-chmod -R 644 /srv/http/
-find /srv/http/ -type f | xargs chmod 644
-find /srv/http/ -type d | xargs chmod 755
+# (the first 4 commands are slow but work with spaces in file-names required by chrome/xorg)
+find /srv/http/ -name '*.*' -exec chown http.http {} \;
+find /srv/http/ -type f -exec chmod 644 {} \;
+find /srv/http/ -type d -exec chmod 755 {} \;
+find /srv/http/ -name '*.php' -exec chmod 744 {} \;
 chmod 777 /run
 chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chown -R mpd.audio /var/lib/mpd
+#
+# reset services so that any cached files are replaced by the latest ones
+systemctl daemon-reload
 #
 # zero fill the file system
 cd /boot
