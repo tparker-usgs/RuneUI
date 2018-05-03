@@ -13,9 +13,9 @@ set -e #continue on error
 #Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
 #
 # set up services
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk 
 systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_PL_wrk rune_SY_wrk sshd systemd-resolved
-systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser
+systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli
 #
 # remove user files and logs
 rm -f /var/lib/mpd/mpd.db
@@ -54,6 +54,9 @@ rm -f /etc/samba/*.conf
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
+cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
+cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
+cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
@@ -82,18 +85,17 @@ rm -rf /var/log/runeaudio/*
 rm -rf /mnt/MPD/NAS/*
 #
 # file protection and ownership
-# (the first 4 commands are slow but work with spaces in file-names required by chrome/xorg)
-find /srv/http/ -name '*.*' -exec chown http.http {} \;
+# (the find commands are slow but work with spaces in file-names, required for chrome/xorg)
+chown -R http.http /srv/http/
 find /srv/http/ -type f -exec chmod 644 {} \;
 find /srv/http/ -type d -exec chmod 755 {} \;
-find /srv/http/ -name '*.php' -exec chmod 744 {} \;
 chmod 777 /run
 chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chown -R mpd.audio /var/lib/mpd
 #
-# reset services so that any cached files are replaced by the latest ones
+# reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload
 #
 # zero fill the file system
