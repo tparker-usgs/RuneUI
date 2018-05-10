@@ -35,7 +35,8 @@
 // common include
 $start = microtime(true);
 $smartctl_microtime_then = $start;
-$smartctl_check_minutes = 10;
+$smartctl_check_minutes = 20;
+$savecpu = 0;
 ini_set('display_errors', '1');
 error_reporting(E_ALL & ~E_NOTICE);
 ini_set('error_log', '/var/log/runeaudio/rune_SY_wrk.log');
@@ -212,10 +213,11 @@ if ($playerid_db === '') {
 			// switch smb.conf (development)
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep -x smbd || systemctl start smbd');
+			sysCmd('systemctl daemon-reload');
 			sysCmd('systemctl start nmbd');
+			sysCmd('systemctl start smbd');
 			sysCmd('pgrep -x nmbd || systemctl start nmbd');
+			sysCmd('pgrep -x smbd || systemctl start smbd');
 		}
     }  else {
 		// dev mode off, so prod mode on
@@ -225,10 +227,11 @@ if ($playerid_db === '') {
 			// switch smb.conf (production)
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep -x smbd || systemctl start smbd');
+			sysCmd('systemctl daemon-reload');
 			sysCmd('systemctl start nmbd');
+			sysCmd('systemctl start smbd');
 			sysCmd('pgrep -x nmbd || systemctl start nmbd');
+			sysCmd('pgrep -x smbd || systemctl start smbd');
 		}
 	}
 }
@@ -274,6 +277,10 @@ wrk_mpdconf($redis,'refresh');
 if ($redis->hGet('airplay', 'enable') === '1') {
     runelog("service: SHAIRPORT start",'');
     sysCmd('systemctl start shairport-sync');
+	// start the shairport sync metadata decoder if enabled
+	if ($redis->hGet('airplay', 'metadata_enabled') == 'yes') {
+		sysCmd('systemctl start rune_SSM_wrk');
+	}
 }
 // start udevil
 if ($redis->get('udevil') === '1') {
@@ -301,6 +308,7 @@ if ($redis->get('dev') === '0') {
 runelog('--- NORMAL STARTUP');
 // --- NORMAL STARTUP //
 $start4 = microtime(true);
+$smartctl_microtime_then = $start4;
 $starttime = ($start4-$start3)+$firstlap;
 runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
@@ -682,10 +690,11 @@ $redis->pconnect('/run/redis.sock');
 						// prod mode
 						sysCmd('rm /etc/samba/smb.conf');
 						sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-						sysCmd('systemctl start smbd');
-						sysCmd('pgrep -x smbd || systemctl start smbd');
+						sysCmd('systemctl daemon-reload');
 						sysCmd('systemctl start nmbd');
+						sysCmd('systemctl start smbd');
 						sysCmd('pgrep -x nmbd || systemctl start nmbd');
+						sysCmd('pgrep -x smbd || systemctl start smbd');
 					}
                     $redis->sRem('w_lock', $jobID);
 					break;
@@ -710,10 +719,11 @@ $redis->pconnect('/run/redis.sock');
 						//dev mode
 						sysCmd('rm /etc/samba/smb.conf');
 						sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-						sysCmd('systemctl start smbd');
-						sysCmd('pgrep -x smbd || systemctl start smbd');
+						sysCmd('systemctl daemon-reload');
 						sysCmd('systemctl start nmbd');
+						sysCmd('systemctl start smbd');
 						sysCmd('pgrep -x nmbd || systemctl start nmbd');
+						sysCmd('pgrep -x smbd || systemctl start smbd');
 					} else {
 						// prod mode
 					}
@@ -737,7 +747,6 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					sysCmd('systemctl stop smbd');
 					sysCmd('systemctl stop nmbd');
-					sysCmd('systemctl daemon-reload');
 					// restart samba services
 					if ($redis->get('dev') > 0) {
 						// dev mode on
@@ -747,10 +756,11 @@ $redis->pconnect('/run/redis.sock');
 							// switch smb.conf (development)
 							sysCmd('rm /etc/samba/smb.conf');
 							sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-							sysCmd('systemctl start smbd');
-							sysCmd('pgrep -x smbd || systemctl start smbd');
+							sysCmd('systemctl daemon-reload');
 							sysCmd('systemctl start nmbd');
+							sysCmd('systemctl start smbd');
 							sysCmd('pgrep -x nmbd || systemctl start nmbd');
+							sysCmd('pgrep -x smbd || systemctl start smbd');
 						}
 					}  else {
 						// dev mode off, prod mode on
@@ -760,10 +770,11 @@ $redis->pconnect('/run/redis.sock');
 							// switch smb.conf (production)
 							sysCmd('rm /etc/samba/smb.conf');
 							sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-							sysCmd('systemctl start smbd');
-							sysCmd('pgrep -x smbd || systemctl start smbd');
+							sysCmd('systemctl daemon-reload');
 							sysCmd('systemctl start nmbd');
+							sysCmd('systemctl start smbd');
 							sysCmd('pgrep -x nmbd || systemctl start nmbd');
+							sysCmd('pgrep -x smbd || systemctl start smbd');
 						}
 					}
                     $redis->sRem('w_lock', $jobID);
@@ -778,6 +789,8 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
+					sysCmd('curl -s -X GET "http://localhost/clear"');
+					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
 					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
 					sleep(3);
@@ -793,11 +806,13 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('rm -fr /home/rern');
 					sysCmd('mkdir -m=777 -p /home/rern');
 					sysCmd('rm -f ./install.sh');
-					sysCmd('rm -fr /usr/local/bin/uninstall_addo.sh');
+					sysCmd('rm -f /usr/local/bin/uninstall_addo.sh');
 					sysCmd('redis-cli del addons addo');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
+					sysCmd('curl -s -X GET "http://localhost/clear"');
+					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
 					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
 					sleep(3);
@@ -1195,73 +1210,86 @@ $redis->pconnect('/run/redis.sock');
             usleep(500000);
         }
     }
-	// Detect deletion of playlist random file
-	// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
-	// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
-	if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
-		// file found
-		$redis->set('last_pl_randomfile', 'exists');
-	} else {
-		// no file found
-		if ($redis->get('last_pl_randomfile') === 'exists') {
-			// but the file was there the last time, so reset ashuffle
-			// just stop ashuffle, it will start itself automatically (without a playlist random file)
-			sysCmd('systemctl stop ashuffle');
-			sysCmd('systemctl daemon-reload');
+	// The following are heavy on cpu time, run then only on every 15th cycle (= every 7 seconds)
+	// this will allow the normal queued actions to be more responsive, waiting only 0,5 seconds in sleep state
+	if ($savecpu++ > 15) {
+		$savecpu = 0;
+		// Detect deletion of playlist random file
+		// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
+		// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
+		if (sysCmd('systemctl is-active ashuffle') == 'active') {
+			if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+				// file found
+				$redis->set('last_pl_randomfile', 'exists');
+			} else {
+				// no file found
+				if ($redis->get('last_pl_randomfile') === 'exists') {
+					// but the file was there the last time, so reset ashuffle
+					// just stop ashuffle, it will start itself automatically (without a playlist random file)
+					sysCmd('systemctl stop ashuffle');
+					sysCmd('systemctl daemon-reload');
+				}
+				$redis->set('last_pl_randomfile', 'none');
+			}
 		}
-		$redis->set('last_pl_randomfile', 'none');
-	}
-	// start Global Random if enabled - check continually ashuffle get stopped for lots of reasons
-	// this is the only place where ashuffle it is started
-	if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
-		// seems to be a bug somewhere in MPD
-		// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
-		// wait until mpd has been running for a while before starting ashuffle
-		$mpd_uptime = trim(reset(sysCmd('ps -C mpd -o etimes=')));
-		if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
-			sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+		// start Global Random if enabled - check continually ashuffle get stopped for lots of reasons
+		// this is the only place where ashuffle it is started
+		if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
+			if (sysCmd('systemctl is-active ashuffle') == 'active') {
+				// already started, do nothing
+			} else {
+				// seems to be a bug somewhere in MPD
+				// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
+				// wait until mpd has been running for a while before starting ashuffle
+				$mpd_uptime = trim(reset(sysCmd('ps -C mpd -o etimes=')));
+				if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
+					sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+				}
+			}
 		}
-	}
-	// S.M.A.R.T. monitoring tools
-	// will test each attached hard disk and tape unit
-	// test only when something is playing and at a maximum rate of once per 10,5 minutes (set by the value of $smartctl_check_minutes)
-	// why test only when something is playing?
-	//	a) someone needs see the error messages and 
-	//  b) most hard disks will be usb drives which sleep when not in use, let them sleep
-	if (!empty(trim(reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed'))))) {
-		// something is playing
+		// S.M.A.R.T. monitoring tools
+		// will test each attached hard disk and tape unit
+		// test only when something is playing and at a maximum rate of once per 19,5 minutes (set by the value of $smartctl_check_minutes)
+		// why test only when something is playing?
+		//	a) someone needs see the error messages and 
+		//  b) most hard disks will be usb drives which sleep when not in use, let them sleep
 		$smartctl_delta_minutes = round((microtime(true) - $smartctl_microtime_then)/60);
 		if ($smartctl_delta_minutes > $smartctl_check_minutes) {
 			// more than check minutes have past
 			// store the microtime for the next cycle
 			$smartctl_microtime_then = microtime(true);
-			if (file_exists("/usr/bin/smartctl")) {
-				// monitoring tools software is installed
-				// scan for hard disks
-				$drive_list = sysCmd('smartctl --scan-open -- -H -i | grep -v aborted');
-				if (!empty($drive_list)) {
-					foreach($drive_list as $drive) {
-						// for each connected drive
-						$drive = trim($drive);
-						if ($drive != "") {
-							$drive = "smartctl ".$drive." | grep -E 'Model:|Capacity:|-health self-'";
-							$self_check = sysCmd($drive);
-							// the self check variable has 3 lines the third line must contain the word 'PASSED' or 'OK'
-							if ((strpos(' '.$self_check[2], 'OK') === false) && (strpos(' '.$self_check[2], 'PASSED') === false)) {
-								// there is a disk error, set the check frequency to 1,5 minutes and notify the UI
-								$smartctl_check_minutes = 2;
-								ui_notify('Disk errors - Action required', implode("\n", $self_check));
+			if (!empty(trim(reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed'))))) {
+				// something is playing
+				if (file_exists("/usr/bin/smartctl")) {
+					// monitoring tools software is installed
+					// scan for hard disks
+					$drive_list = sysCmd('smartctl --scan-open -- -H -i -s on | grep -v aborted');
+					if (!empty($drive_list)) {
+						foreach($drive_list as $drive) {
+							// for each connected drive
+							$drive = trim($drive);
+							if ($drive != "") {
+								$command = "smartctl ".$drive." | grep -E 'Model:|Capacity:|-health self-'";
+								$self_check = sysCmd($command);
+								// the self check variable has 3 lines the third line must contain the word 'PASSED' or 'OK'
+								if ((strpos(' '.$self_check[2], 'OK') === false) && (strpos(' '.$self_check[2], 'PASSED') === false)) {
+									// there is a disk error, set the check frequency to 1,5 minutes and notify the UI
+									ui_notify('Disk errors - Action required', implode("\n", $self_check));
+									// set the disk check frquency to 1,5 minutes
+									$smartctl_check_minutes = 2;
+								}
 							}
+							unset($self_check);
+							unset($command);
 						}
-						unset($self_check);
+						unset($drive);
+						unset($drive_list);
 					}
-					unset($drive);
-					unset($drive_list);
 				}
 			}
 		}
 	}
-    // unload CPU
+    // unload CPU: 0,5 second sleep
     usleep(500000);
 } // end while loop
 // --- WORKER MAIN LOOP //

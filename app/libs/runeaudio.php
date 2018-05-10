@@ -252,10 +252,10 @@ function sendMpdIdle($sock)
     return $response;
 }
 
-function monitorMpdState($sock)
+function monitorMpdState($redis, $sock)
 {
     if ($change = sendMpdIdle($sock)) {
-        $status = _parseStatusResponse(MpdStatus($sock));
+        $status = _parseStatusResponse($redis, MpdStatus($sock));
         $status['changed'] = substr($change[1], 0, -3);
         // runelog('monitorMpdState()', $status);
         return $status;
@@ -729,7 +729,7 @@ class globalRandom extends Thread
 
     public function run()
     {
-        $mpd = openMpdSocket('/run/mpd.sock');
+        $mpd = openMpdSocket('/run/mpd.sock', 0);
             // if ($this->status['consume'] == 0 OR $this->status['random'] == 0) {
             if ($this->status['random'] == 0) {
                 // sendMpdCommand($mpd,'consume 1');
@@ -870,11 +870,18 @@ function _parseFileListResponse($resp)
 }
 
 // format Output for "status"
-function _parseStatusResponse($resp)
+function _parseStatusResponse($redis, $resp)
 {
-    if (is_null($resp)) {
+    If (isset($resp)) {
+		$resp = trim($resp);
+	} else {
+		return null;
+	}
+	if (is_null($resp)) {
         return null;
-    } else {
+    } else if (empty($resp)) {
+		return null;
+	} else {
         $plistArray = array();
         $plistLine = strtok($resp, "\n");
         $plistFile = "";
@@ -887,7 +894,7 @@ function _parseStatusResponse($resp)
         // "elapsed time song_percent" added to output array
          $time = explode(":", $plistArray['time']);
          if ($time[0] != 0 && $time[1] != 0) {
-         $percent = round(($time[0]*100)/$time[1]);
+			$percent = round(($time[0]*100)/$time[1]);
          } else {
             $percent = 0;
          }
@@ -912,7 +919,57 @@ function _parseStatusResponse($resp)
             case '176400':
                 // no break
             case '352800':
-            $plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+                break;
+            case 'dsd64':
+                // no break
+            case 'DSD64':
+				$audio_format[2] = $audio_format[1];
+				$audio_format[1] = 'dsd';
+				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$plistArray['bitrate'] = intval(44100 * 64 /1000);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+                break;
+            case 'dsd128':
+                // no break
+            case 'DSD128':
+				$audio_format[2] = $audio_format[1];
+				$audio_format[1] = 'dsd';
+				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$plistArray['bitrate'] = intval(44100 * 128 / 1000);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+                break;
+            case 'dsd256':
+                // no break
+            case 'DSD256':
+				$audio_format[2] = $audio_format[1];
+				$audio_format[1] = 'dsd';
+				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$plistArray['bitrate'] = intval(44100 * 256 / 1000);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+                break;
+            case 'dsd512':
+                // no break
+            case 'DSD512':
+				$audio_format[2] = $audio_format[1];
+				$audio_format[1] = 'dsd';
+				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$plistArray['bitrate'] = intval(44100 * 512 / 1000);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+                break;
+            case 'dsd1024':
+                // no break
+            case 'DSD1024':
+				$audio_format[2] = $audio_format[1];
+				$audio_format[1] = 'dsd';
+				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$plistArray['bitrate'] = intval(44100 * 1024 / 1000);
+				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
                 break;
         }
         // format "audio_sample_depth" string
@@ -921,6 +978,16 @@ function _parseStatusResponse($resp)
         if ($audio_format[2] === "2") $plistArray['audio_channels'] = "Stereo";
         if ($audio_format[2] === "1") $plistArray['audio_channels'] = "Mono";
         // if ($audio_format[2] > 2) $plistArray['audio_channels'] = "Multichannel";
+		//
+		// when bitrate is empty/0 use mediainfo to examine the file which is playing, but only when the filename is available
+		$status = sysCmd('mpc status');
+		if (($plistArray['bitrate'] == '0') && (count($status) == 3)) {
+			$bitrate = reset(sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($status[0]).'" | grep "Overall bit rate  "'));
+			$bitrate = preg_replace('/[^0-9]/', '', $bitrate);
+			If (!empty($bitrate)) {
+				$plistArray['bitrate'] = $bitrate;
+			}
+		}
     }
     return $plistArray;
 }
@@ -2077,7 +2144,7 @@ function wrk_i2smodule($redis, $args)
         fclose($fp);
     } else {
         if (wrk_mpdPlaybackStatus($redis) === 'playing') {
-            $mpd = openMpdSocket('/run/mpd.sock');
+            $mpd = openMpdSocket('/run/mpd.sock', 0);
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
         }
@@ -2529,7 +2596,7 @@ if ($action === 'reset') {
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
-            $mpd = openMpdSocket('/run/mpd.sock');
+            $mpd = openMpdSocket('/run/mpd.sock', 0);
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
             sleep(1);
@@ -2616,7 +2683,6 @@ function wrk_mpdRestorePlayerStatus($redis)
 	$redis->set('ashuffle_wait_for_play', '0');
 }
 
-
 function wrk_shairport($redis, $ao, $name = null)
 {
     if (!isset($name)) {
@@ -2627,9 +2693,21 @@ function wrk_shairport($redis, $ao, $name = null)
     $acard = json_decode($redis->hget('acards', $ao));
     runelog('acard details: ', $acard);
 	$redis->hSet('airplay', 'alsa_output_device', $acard->device);
-	$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
-	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control);
-	$redis->hSet('airplay', 'extlabel', $acard->extlabel);
+	// shairport-sync output device is specified without a subdevice if only one subdevice exists
+	// determining the number of sub devices is done by counting the number of alsa info file for the device
+	// if (count(sysCmd('dir -l /proc/asound/card'.preg_split('/[\s,:]+/', $acard->device)[1].'/pcm?p/sub?/info')) > 1) {
+	//if (count(sysCmd('dir -l /proc/asound/card'.preg_split('/[\s,:]+/', $acard->device)[1].'/pcm?p/sub0/info')) > 1) {
+	//	$redis->hSet('airplay', 'alsa_output_device', $acard->device);
+	//} else {
+	//	$redis->hSet('airplay', 'alsa_output_device', preg_split('/[\s,]+/', $acard->device)[0]);
+	//}
+	//
+	// shairport-sync output device is always specified without a subdevice! Possible that this will need extra work for USB DAC's
+	$redis->hSet('airplay', 'alsa_output_device', preg_split('/[\s,]+/', $acard->device)[0]);
+	//
+	$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device) || $redis->hSet('airplay', 'alsa_mixer_device', '');
+	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control) || $redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
+	$redis->hSet('airplay', 'extlabel', $acard->extlabel) || $redis->hSet('airplay', 'extlabel', '');
 	if ($redis->hGet('airplay', 'interpolation') != '') {
 		// do nothing
 	} else {
@@ -2680,8 +2758,8 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$redis->hSet('airplay', 'metadata_enabled', 'yes');
 	}
-	if ($redis->get('coverart') == 0) {
-		$redis->hSet('airplay', 'metadata_include_cover_art', 'no');
+	if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
+		// do nothing
 	} else {
 		$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
 	}
@@ -2700,7 +2778,7 @@ function wrk_shairport($redis, $ao, $name = null)
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_after_play_ends', 'run_this_after_play_ends="'.$redis->hGet('airplay', 'run_this_after_play_ends').'"; // run_this_after_play_ends');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_wait_for_completion', 'wait_for_completion="'.$redis->hGet('airplay', 'run_this_wait_for_completion').'"; // run_this_wait_for_completion');
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_device', 'output_device="'.$redis->hGet('airplay', 'alsa_output_device').'"; // alsa_output_device');
-	if ($redis->hGet('airplay', 'alsa_mixer_control') === '') {
+	if ($redis->hGet('airplay', 'alsa_mixer_control') === 'PCM') {
 		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', '// mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
 	} else {
 		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
@@ -3111,7 +3189,7 @@ runelog('activePlayer = ', $activePlayer);
         if ($stoppedPlayer === 'MPD') {
             // connect to MPD daemon
             $sock = openMpdSocket('/run/mpd.sock', 0);
-            $status = _parseStatusResponse(MpdStatus($sock));
+            $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             if ($status['state'] === 'pause') {
                 $redis->set('stoppedPlayer', '');
@@ -3151,7 +3229,7 @@ function wrk_startAirplay($redis)
 			wrk_mpdPlaybackStatus($redis);
             // connect to MPD daemon
             $sock = openMpdSocket('/run/mpd.sock', 0);
-            $status = _parseStatusResponse(MpdStatus($sock));
+            $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             // to get MPD out of its idle-loop we discribe to a channel
             sendMpdCommand($sock, 'subscribe Airplay');
@@ -3198,7 +3276,7 @@ function wrk_stopAirplay($redis)
             if ($stoppedPlayer === 'MPD') {
                 // connect to MPD daemon
                 $sock = openMpdSocket('/run/mpd.sock', 0);
-                $status = _parseStatusResponse(MpdStatus($sock));
+                $status = _parseStatusResponse($redis, MpdStatus($sock));
                 runelog('MPD status', $status);
                 if ($status['state'] === 'pause') {
                     // clear the stopped player if we left MPD paused
@@ -3387,10 +3465,11 @@ function wrk_changeHostname($redis, $newhostname)
 			// switch smb.conf (development)
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('systemctl daemon-reload');
 			sysCmd('systemctl start nmbd');
+			sysCmd('systemctl start smbd');
 			sysCmd('pgrep nmbd || systemctl start nmbd');
+			sysCmd('pgrep smbd || systemctl start smbd');
 		}
 	}  else {
 		// dev mode off, so prod mode is on
@@ -3400,10 +3479,11 @@ function wrk_changeHostname($redis, $newhostname)
 			// switch smb.conf (production)
 			sysCmd('rm /etc/samba/smb.conf');
 			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
+			sysCmd('systemctl daemon-reload');
 			sysCmd('systemctl start nmbd');
+			sysCmd('systemctl start smbd');
 			sysCmd('pgrep nmbd || systemctl start nmbd');
+			sysCmd('pgrep smbd || systemctl start smbd');
 		}
 	}
     // set process priority

@@ -81,7 +81,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'addplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
                     addToQueue($mpd, $_POST['path'], 1, $pos);
                     // send MPD response to UI
@@ -328,7 +328,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'albumaddplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
                     addAlbumToQueue($mpd, $_POST['path'], 1, $pos);
                     // send MPD response to UI
@@ -357,7 +357,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'artistaddplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
                     addArtistToQueue($mpd, $_POST['path'], 1, $pos);
                     // send MPD response to UI
@@ -386,7 +386,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'genreaddplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
                     addGenreToQueue($mpd, $_POST['path'], 1, $pos);
                     // send MPD response to UI
@@ -415,7 +415,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'composeraddplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse(MpdStatus($mpd));
+                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
                     addComposerToQueue($mpd, $_POST['path'], 1, $pos);
                     // send MPD response to UI

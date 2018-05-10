@@ -52,7 +52,7 @@ if ($activePlayer === 'MPD') {
     // connect to MPD daemon
     $mpd2 = openMpdSocket('/run/mpd.sock', 0);
     // fetch MPD status
-    $status = _parseStatusResponse(MpdStatus($mpd2));
+    $status = _parseStatusResponse($redis, MpdStatus($mpd2));
     $curTrack = getTrackInfo($mpd2, $status['song']);
     $mpdRoot = "/mnt/MPD/";
     $trackMpdPath = findPLposPath($status['song'], $mpd2);
@@ -69,10 +69,11 @@ if ($activePlayer === 'MPD') {
     $current_mpd_folder = substr(substr($currentpath, 0, strrpos($currentpath, "/")), 9);
     runelog("MPD (current_mpd_folder)", $current_mpd_folder);
 // --------------------- Spotify ---------------------
-} elseif ($redis->get('activePlayer') === 'Spotify') {
+} else if ($redis->get('activePlayer') === 'Spotify') {
     runelog('rune_PL_wrk: open SPOP socket');
     $spop = openSpopSocket('localhost', 6602, 1);
 }
+
 if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD') {
     // extact song details
     if (isset($curTrack[0]['Title'])) {
@@ -180,53 +181,54 @@ if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $requ
         readfile($_SERVER['HOME'].'/assets/img/cover-default.png');
         $output = 1;
     }
+} else if ($activePlayer === 'Spotify') {
+	$count = 1;
+	do {
+		sendSpopCommand($spop, 'image');
+		unset($spotify_cover);
+		$spotify_cover = readSpopResponse($spop);
+		$spotify_cover = json_decode($spotify_cover);
+		usleep(500000);
+		runelog('coverart (spotify): retry n: '.$count, $spotify_cover->status);
+		if ($spotify_cover->status === 'ok') {
+			$spotify_cover = base64_decode($spotify_cover->data);
+			break;
+		}
+		$count++;
+	} while ($count !== 10);
+	$bufferinfo = new finfo(FILEINFO_MIME);
+	$spotify_cover_mime = $bufferinfo->buffer($spotify_cover);
+	header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+	header('Pragma: no-cache'); // HTTP 1.0.
+	header('Expires: 0'); // Proxies.
+	header('Content-Type: '.$spotify_cover_mime);
+	echo $spotify_cover;
+} else if ($activePlayer === 'Airplay') {
+	// debug
+	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, no-transform'); // HTTP 1.1.
+	header('Pragma: no-cache'); // HTTP 1.0.
+	header('Expires: 0'); // Proxies, pre-expired content
+	if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.jpg')) {
+		runelog("coverart match: shairport coverURL=/assets/img/airplay-cover.jpg");
+		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
+		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
+		readfile($_SERVER['HOME'].'/assets/img/airplay-cover.jpg');
+	} else if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.png')) {
+		runelog("coverart match: shairport coverURL=/assets/img/airplay-cover.png");
+		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
+		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
+		readfile($_SERVER['HOME'].'/assets/img/airplay-cover.png');
+	} else {
+		runelog("coverart match: shairport coverURL=/assets/img/airplay-default.png");
+		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-default.png'));
+		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-default.png'));
+		readfile($_SERVER['HOME'].'/assets/img/airplay-default.png');
+	}
+	$output = 1;
 } else {
-    if ($activePlayer === 'Spotify') {
-        $count = 1;
-        do {
-            sendSpopCommand($spop, 'image');
-            unset($spotify_cover);
-            $spotify_cover = readSpopResponse($spop);
-            $spotify_cover = json_decode($spotify_cover);
-            usleep(500000);
-            runelog('coverart (spotify): retry n: '.$count, $spotify_cover->status);
-            if ($spotify_cover->status === 'ok') {
-                $spotify_cover = base64_decode($spotify_cover->data);
-                break;
-            }
-            $count++;
-        } while ($count !== 10);
-        $bufferinfo = new finfo(FILEINFO_MIME);
-        $spotify_cover_mime = $bufferinfo->buffer($spotify_cover);
-        header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
-        header('Pragma: no-cache'); // HTTP 1.0.
-        header('Expires: 0'); // Proxies.
-        header('Content-Type: '.$spotify_cover_mime);
-        echo $spotify_cover;
-    } else {
-        if ($activePlayer === 'Airplay') {
-            // debug
-            runelog("coverart match: shairport coverURL=/var/run/shairport/cover.jpg");
-            header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
-            header('Pragma: no-cache'); // HTTP 1.0.
-            header('Expires: 0'); // Proxies.
-            if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.jpg')) {
-                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
-                readfile($_SERVER['HOME'].'/assets/img/airplay-cover.jpg');
-            } else if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.png')) {
-                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
-                readfile($_SERVER['HOME'].'/assets/img/airplay-cover.png');
-            } else {
-                header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-default.png'));
-                readfile($_SERVER['HOME'].'/assets/img/airplay-default.png');
-            }
-            $output = 1;
-        } else {
-            // redirect to /covers NGiNX location
-            $local_cover_url =  'http://'.$_SERVER["SERVER_ADDR"].'/covers/'.$request_folder.'/'.$request_coverfile;
-            runelog("coverart: redirect to local-coverart (url): ", $local_cover_url);
-            header('Location: '.$local_cover_url, true, 301);
-        }
-    }
+	// redirect to /covers NGiNX location
+	$local_cover_url =  'http://'.$_SERVER["SERVER_ADDR"].'/covers/'.$request_folder.'/'.$request_coverfile;
+	runelog("coverart: redirect to local-coverart (url): ", $local_cover_url);
+	header('Location: '.$local_cover_url, true, 301);
 }
 runelog("\n--------------------- coverart (end) ---------------------");

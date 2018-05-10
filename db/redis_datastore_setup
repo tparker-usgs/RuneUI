@@ -173,6 +173,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hSet('resolvconf', 'attempts', '1');
             // proxy settings
+            $redis->hSet('proxy', 'enable', 0);
             $redis->hSet('proxy', 'host', '');
             $redis->hSet('proxy', 'user', '');
             $redis->hSet('proxy', 'pass', '');

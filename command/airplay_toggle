@@ -52,6 +52,7 @@ switch($status) {
         wrk_startAirplay($redis);
         // send notify
         ui_notify('AirPlay', 'Playback has been switched to an incoming Airplay stream.');
+		// set the shairport sync metadata decoder priority
         break;
     case "off":
         // stop Airplay

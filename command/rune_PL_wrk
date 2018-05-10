@@ -39,26 +39,11 @@ ini_set('error_log', '/var/log/runeaudio/rune_PL_wrk.log');
 include('/var/www/app/libs/runeaudio.php');
 error_reporting(E_ALL & ~E_NOTICE);
 
-// decode 'any' strings
-function decode($str) {
-    $res = "";
-    $i = 0;
-
-    while ($i+2 <= strlen($str)) {
-        $res .= chr(hexdec(substr($str, $i, 2)));
-        $i += 2;
-    }
-
-    return $res;
-}
-
 // reset worker logfile
 sysCmd('echo "--------------- start: rune_PL_wrk ---------------" > /var/log/runeaudio/rune_PL_wrk.log');
 runelog('WORKER rune_PL_wrk START');
 // reset forceupdate state
 $forceupdate = 1;
-$airplay_handle = FALSE;
-$mode = 'any';
 
 // --- WORKER MAIN LOOP --- //
 while (1) {
@@ -69,7 +54,7 @@ while (1) {
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
         $socket = openMpdSocket('/run/mpd.sock', 0);
-    } elseif ($activePlayer === 'Spotify') {
+    } else if ($activePlayer === 'Spotify') {
         runelog('rune_PL_wrk: open SPOP socket');
         $socket = openSpopSocket('localhost', 6602, 1);
     }
@@ -87,17 +72,20 @@ while (1) {
 				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
 				ui_update($redis, $socket, 0);
 			}
-			$status = _parseStatusResponse(MpdStatus($socket));
+			$status = array();
+			$status = _parseStatusResponse($redis, MpdStatus($socket));
 			// store next songid
 			$redis->set('nextsongid', $status['nextsongid']);
 			// store "lastsongid"
 			$redis->set('lastsongid', $status['songid']);
 			$redis->set('pl_length', $status['playlistlength']);
-
+			if (!empty($redis->get('lastmpdvolume'))) {
+				sysCmd('mpc volume '.$redis->get('lastmpdvolume'));
+			}
 			do {
 				// idle LOOP
 				runelog('rune_PL_wrk: enter idle loop');
-				$status = monitorMpdState($socket);
+				$status = monitorMpdState($redis, $socket);
 
 				// store next songid
 				$redis->set('nextsongid', $status['nextsongid']);
@@ -144,340 +132,77 @@ while (1) {
 				$status['actPlayer'] = "MPD";
 				$redis->set('act_player_info', json_encode($status));
 				$errorcode = socket_last_error($socket);
-				runelog('last socket error = ', $errorcode);
+				runelog('MPD last socket error = ', $errorcode);
+				$redis->set('lastmpdvolume', $status['volume']);
 			} while (($errorcode === 0) && ($redis->get('activePlayer') === 'MPD'));
 
 			// close Redis connection
 			//$redis->close();
 			runelog('rune_PL_wrk: close MPD local UNIX socket');
 			closeMpdSocket($socket);
+			$forceupdate = 1;
 		} elseif ($activePlayer === 'Spotify') {
 			if ($forceupdate !== 0) {
 				$forceupdate = 0;
 				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
-			$status = monitorSpopState($socket);
-			$status['playlist'] = $redis->hGet('spotify', 'plversion');
-			ui_render('playback', json_encode($status));
-			runelog('rune_PL_wrk: UI JSON', $status);
-			runelog('rune_PL_wrk: close SPOP socket');
+			$status = array();
+			do {
+				$status = monitorSpopState($socket);
+				$status['playlist'] = $redis->hGet('spotify', 'plversion');
+				ui_render('playback', json_encode($status));
+				runelog('rune_PL_wrk: UI JSON', $status);
+				runelog('rune_PL_wrk: close SPOP socket');
 
-			// save JSON response for extensions
-			$status['actPlayer'] = "Spotify";
-			$redis->set('act_player_info', json_encode($status));
+				// save JSON response for extensions
+				$status['actPlayer'] = "Spotify";
+				$redis->set('act_player_info', json_encode($status));
+				$errorcode = socket_last_error($socket);
+				runelog('Spotify last socket error = ', $errorcode);
+			} while  (($errorcode === 0) && ($redis->get('activePlayer') === 'Spotify'));
 			closeSpopSocket($socket);
+			$forceupdate = 1;
 		} else if ($activePlayer === 'Airplay') {
 			if ($forceupdate !== 0) {
 				$forceupdate = 0;
 				runelog('---------------------------- FORCE UPDATE Airplay ----------------------------------');
+				sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+//				$status = array();
+//				$status['volume'] = "100";
+				$status['audio'] = "44100:16:2";
+				$status['audio_sample_rate'] = "44.1";
+				$status['audio_sample_depth'] = "16";
+				$status['bitrate'] = "1411";
+				$status['audio_channels'] = "Stereo";
+				$status['random'] = "0";
+				$status['single'] = "0";
+				$status['consume'] = "0";
+				$status['playlist'] = "";
+				$status['playlistlength'] = "";
+				$status['state'] = "play";
+				$status['time'] = "0";
+				$status['elapsed'] = "0";
+				$status['song_percent'] = "100";
+				$status['currentartist'] = "Airplay";
+				$status['currentalbum'] = "-----";
+				$status['currentsong'] = "-----";
+				$status['actPlayer'] = "Airplay";
+				// save JSON response for extensions
+				$redis->set('act_player_info', json_encode($status));
+				ui_render('playback', json_encode($status));
+				//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
-			if ($airplay_handle == FALSE) {
-				runelog('rune_PL_wrk: Open Airplay metadata file: ', $redis->hGet('airplay', 'metadata_pipe_name'));
-				if ($airplay_handle = fopen($redis->hGet('airplay', 'metadata_pipe_name'), 'r)')) {
-					// set blocking false - fgets() will not wait for data
-					stream_set_blocking($airplay_handle, FALSE);
-					runelog('rune_PL_wrk: Airplay metadata file opened: ', $redis->hGet('airplay', 'metadata_pipe_name'));
-				} else {
-					runelog('rune_PL_wrk: Airplay metadata file open failed: ', $redis->hGet('airplay', 'metadata_pipe_name'));
-				}
-			} else {
-				runelog('rune_PL_wrk: Airplay metadata file is already open: ', $redis->hGet('airplay', 'metadata_pipe_name'));
-				while ($forceupdate === 0 && ($redis->get('activePlayer') === 'Airplay')) {
-					// read the matadata file  
-					// fgets() will is set up not to wait for data, this way the main loop check the active player regularly
-					if ($airplay_meta_line = fgets($airplay_handle)) {
-						// there is data to process - do nothing here
-					} else {
-						// there is an error or no data or eof
-						// clear the buffers, wait, then loop
-						$airplay_meta_line = '';
-						$mode = 'any';
-						runelog('rune_PL_wrk: Airplay metadata file read fail');
-						sleep(3);
-						break;
-					}
-					// decode the metadata 
-					if ($mode == 'any') {
-						if (preg_match('#<item><type>(\w+)</type><code>(\w+)</code><length>(\d+)</length>#', $airplay_meta_line, $matches)) {
-							$type = decode($matches[1]);
-							$code = decode($matches[2]);
-							$buf = '';
-							$length = $matches[3];
-						}
-						else if (preg_match('#<data encoding="base64">#', $airplay_meta_line)) {
-							$mode = 'data';
-						}
-					} else if ($mode == 'data') {
-						if (preg_match('#^(.*)</data>#', $airplay_meta_line, $matches)) {
-							$buf .= $matches[1];
-							$buf = base64_decode($buf);
-							$mode = 'any';
-						}
-						else {
-							$data .= $airplay_meta_line;
-						}
-					}
-					// metadata is identified by two decoded values the type and the code
-					// depending on the values of the decoded values various actions will take place
-					// only fo it for specific metadata records
-					if (preg_match('#</item>#', $airplay_meta_line)) {
-						$tag = $type.' '.$code;
-						runelog('rune_PL_wrk: Airplay tag: ', $tag);
-						switch ($tag) {
-							case 'core mper':
-								// persistent ID
-								runelog('rune_PL_wrk: Airplay persistent ID: ', $buf);
-								break;
-							case 'core ascp':
-								// composer
-								$status['currentcomposer'] = empty($buf) ? '***' : $buf;
-								runelog('rune_PL_wrk: Airplay composer: ', $buf);
-								break;
-							case 'core asdk':
-								// Song data kind
-								runelog('rune_PL_wrk: Airplay song data kind: ', $buf);
-								break;
-							case 'core caps':
-								// ?caps?
-								runelog('rune_PL_wrk: Airplay ?caps?: ', $buf);
-								break;
-							case 'core astn':
-								// song track number
-								runelog('rune_PL_wrk: Airplay song track number: ', $buf);
-								break;
-							case 'core astc':
-								// song track count
-								runelog('rune_PL_wrk: Airplay song track count: ', $buf);
-								break;
-							case 'core asdn':
-								// song track disk number
-								runelog('rune_PL_wrk: Airplay song track disc number: ', $buf);
-								break;
-							case 'core asdc':
-								// song track disk count
-								runelog('rune_PL_wrk: Airplay song track disc count: ', $buf);
-								break;
-							case 'core asar':
-								// artist
-								$status['currentartist'] = empty($buf) ? '***' : $buf;
-								runelog('rune_PL_wrk: Currentartist: ', $status['currentartist']);
-								break;
-							case 'core astm':
-								// song time in milliseconds - do not use this, song time is derived from 'ssnc prgr' progress
-								runelog('rune_PL_wrk: Song time $buf: ', $buf);
-								break;
-							case 'core asal':
-								// album
-								$status['currentalbum'] = empty($buf) ? '***' : $buf;
-								runelog('rune_PL_wrk: Currentalbum: ', $status['currentalbum']);
-								break;
-							case 'core minm':
-								// song
-								$status['currentsong'] = empty($buf) ? '***' : $buf;
-								runelog('rune_PL_wrk: Currentsong: ', $status['currentsong']);
-								break;
-							case 'core asgn':
-								// genre
-								$status['genre'] = empty($buf) ? '***' : $buf;
-								runelog('rune_PL_wrk: Genre: ', $status['genre']);
-								break;
-							case 'ssnc stal':
-								// Pipe stalled, no arguments
-								runelog('rune_PL_wrk: Pipe stalled, no arguments');
-								// clear the input buffers, close the pipe, force update and exit loop
-								$airplay_meta_line = '';
-								$mode = 'any';
-								fclose($airplay_handle);
-								$airplay_handle = FALSE;
-								$forceupdate = 1;
-								break;
-							case 'ssnc mdst':
-								// metadata start
-								runelog('rune_PL_wrk: Metadata start: ', $buf);
-								break;
-							case 'ssnc mden':
-								// metadata end
-								runelog('rune_PL_wrk: Metadata end: ', $buf);
-								break;
-							case 'ssnc pbeg':
-								// play stream begin, no arguments
-								runelog('rune_PL_wrk: Play stream begin, no arguments');
-								break;
-							case 'ssnc pend':
-								// play stream end, no arguments
-								runelog('rune_PL_wrk: Play stream end, no arguments');
-								break;
-							case 'ssnc prsm':
-								// play stream resume, no arguments
-								runelog('rune_PL_wrk: Play stream resume, no arguments');
-								break;
-							case 'ssnc clip':
-								// source IP number, can be ipv4 or ipv6
-								$redis->hSet('airplay','source_ip_number', trim($buf));
-								runelog('rune_PL_wrk: Source IP number: ', $buf);
-								break;
-							case 'ssnc svip':
-								// server IP number
-								$redis->hSet('airplay','server_ip_number', trim($buf));
-								runelog('rune_PL_wrk: Server IP number: ', $buf);
-								break;
-							case 'ssnc snua':
-								// user agent
-								$redis->hSet('airplay','user_agent', trim($buf));
-								runelog('rune_PL_wrk: User agent: ', $buf);
-								break;
-							case 'ssnc acre':
-								// source Active-Remote token
-								$redis->hSet('airplay','source_active_remote_token', trim($buf));
-								runelog('rune_PL_wrk: Source active-Remote token: ', $buf);
-								break;
-							case 'ssnc daid':
-								// source DACP-ID
-								$redis->hSet('airplay','dacp_id', trim($buf));
-								runelog('rune_PL_wrk: Source DACP-ID: ', $buf);
-								break;
-							case 'ssnc dapo':
-								// source remote control port number
-								$redis->hSet('airplay','source_remote_control_port_number', trim($buf));
-								runelog('rune_PL_wrk: Source remote control port number: ', $buf);
-								break;
-							case 'ssnc flsr':
-								// flush request
-								runelog('rune_PL_wrk: Flush request: ', $buf);
-								//No break, let the selection for 'ssnc pfls' run
-							case 'ssnc pfls':
-								// play stream flush, no arguments
-								runelog('rune_PL_wrk: Play stream flush, no arguments');
-								sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
-								$status = array();
-								$status['volume'] = "100";
-								$status['audio'] = "44100:24:2";
-								$status['audio_sample_rate'] = "44.1";
-								$status['audio_sample_depth'] = "24";
-								$status['audio_channels'] = "Stereo";
-								$status['random'] = "0";
-								$status['single'] = "0";
-								$status['consume'] = "0";
-								$status['playlist'] = "1";
-								$status['playlistlength'] = "1";
-								$status['state'] = "play";
-								$status['time'] = "0";
-								$status['elapsed'] = "0";
-								$status['song_percent'] = "100";
-								$status['currentartist'] = "Airplay";
-								$status['currentalbum'] = "-----";
-								$status['currentsong'] = "Initialising";
-								// save JSON response for extensions
-								$status['actPlayer'] = "Airplay";
-								ui_render('playback', json_encode($status));
-								$redis->set('act_player_info', json_encode($status));
-								//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
-								sysCmdAsync('/var/www/command/ui_update_async');
-								break;
-							case 'ssnc pcst':
-								// start picture send, no arguments
-								runelog('rune_PL_wrk: Start picture send, no arguments');
-								break;
-							case 'ssnc pcen':
-								// end picture send, no arguments
-								runelog('rune_PL_wrk: End picture send, no arguments');
-								break;
-							case 'ssnc snam':
-								// name of user sending device
-								runelog('rune_PL_wrk: Name of user sending device: ', $buf);
-								break;
-							case 'ssnc pvol':
-								// volume
-								// The volume is sent as a string -- "airplay_volume,volume,lowest_volume,highest_volume",
-								// where "volume", "lowest_volume" and "highest_volume" are given in dB.
-								// The "airplay_volume" is what's sent by the source (e.g. iTunes) to the player,
-								// and is from 0.00 down to -30.00, with -144.00 meaning "mute". This is linear on the
-								// volume control slider of iTunes or iOS AirPlay
-								//$status['volume'] = preg_split(',', $buf);
-								runelog('rune_PL_wrk: Volume: ', $buf);
-								break;
-							case 'ssnc prgr':
-								// progress
-								// This is metadata from AirPlay consisting of RTP timestamps for the start of the current play sequence,
-								// the current play point and the end of the play sequence. The timestamps probabably wrap at 2^32.
-								$progress = explode('/', $buf);
-								// $progress[0] = begin track timestamp 
-								// $progress[1] = current track position timestamp = playposition
-								// $progress[0] = end track timestamp 
-								// timestamps @ 44,100Htz - divide by 44100 for seconds (round for full seconds)
-								$status['elapsed'] = round(($progress[1] - $progress[0])/44100);
-								$status['time'] = round(($progress[2] - $progress[0])/44100);
-								// if negative results are provided then the timestamp has wrapped so add (2^32)/44100 seconds
-								if ($status['elapsed'] < 0) $status['elapsed'] = $status['elapsed'] + round((2 ** 32)/44100);
-								if ($status['time'] < 0) $status['time'] = $status['time'] + round((2 ** 32)/44100);
-								$status['song_percent'] = round(100*$status['elapsed']/$status['time']);
-								runelog('rune_PL_wrk: Progress: ', $buf);
-								runelog('rune_PL_wrk: Elapsed : ', $status['elapsed']);
-								runelog('rune_PL_wrk: Time    : ', $status['time']);
-								runelog('rune_PL_wrk: Percent : ', $status['song_percent']);
-								// save the json data set
-								$redis->set('act_player_info', json_encode($status));
-								// post the playback data to the UI
-								ui_render('playback', json_encode($status));
-								break;
-							case 'ssnc PICT':
-								// artwork
-								// forst detemine the image file type
-								$tmp = substr($buf, 0, 32);
-								if (strpos($tmp, 'PNG') !== false) {
-									$imgtype = 'png';
-								} else if (strpos($tmp, 'JFIF') !== false) {
-									$imgtype = 'jpg';
-								} else {
-									$imgtype = 'png';
-								}				
-								// create image file
-								if (strlen($buf)>128) {
-									if (file_put_contents('/srv/http/assets/img/airplay-cover.'.$imgtype, $buf) === false) {
-										runelog('rune_PL_wrk: Image file create failed, name: ', '/srv/http/assets/img/airplay-cover.'.$imgtype);
-										runelog('rune_PL_wrk: Image file create failed, buffer length: ', strlen($buf));
-										sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
-										break;
-									}
-									else {
-										runelog('rune_PL_wrk: Image file create created, name: ', '/srv/http/assets/img/airplay-cover.'.$imgtype);
-										runelog('rune_PL_wrk: Image file create created, buffer length: ', strlen($buf));
-										// make sure the impage file is readable for the UI (runs as user http)
-										sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.*');
-										// save the json data set
-										$redis->set('act_player_info', json_encode($status));	
-										// post the playback data to the UI
-										ui_render('playback', json_encode($status));
-									}
-								} else {
-									// no image file
-									runelog('rune_PL_wrk: No image file, buffer length: ', strlen($buf));
-									sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
-								}
-								break;
-							default:
-								runelog('rune_PL_wrk: Undefined: ', substr($buf, 0, 32));
-								break;
-						}
-						
-					}
-				}
-			}
-			if ($redis->get('activePlayer') != 'Airplay') {
-				// clear the input buffers, close the pipe, force update and exit loop
-				$airplay_meta_line = '';
-				$mode = 'any';
-				fclose($airplay_handle);
-				$airplay_handle = FALSE;
-				$forceupdate = 1;
-			}
+			do {
+				sleep(2);
+			} while ($redis->get('activePlayer') === 'Airplay');
 			sleep(1);
 		} else {
+			$forceupdate = 1;
 			sleep(1);
-			//$forceupdate = 1;
 		}
+		$forceupdate = 1;
     }
     // close Redis connection
     $redis->close();
