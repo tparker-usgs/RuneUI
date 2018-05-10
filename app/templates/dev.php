@@ -126,6 +126,54 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-sm-2 control-label">SoXr for MPD</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[soxrmpdonoff][enable]" type="checkbox" value="1"<?php if($this->soxrmpdonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">SoXr for MPD is set ON by default. It does nothing (and has no CPU overhead) unless sample-rate conversion is required.
+					This happens only in very special circumstances. It always reduces quality when it operates, but it is better than the built-in MPD sample-rate converter.
+					It also imposes a higher CPU overhead than the built-in MPD sample-rate converter. You can can override the default setting here.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">SoXr for Airplay</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if($this->soxrairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">SoXr for Airplay is set ON by default (for most processor types).
+					It improves the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for a better description.
+					It imposes a relatively high CPU overhead, as it works continually. You can can override the default setting here.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Airplay Metadata</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[metadataairplayonoff][enable]" type="checkbox" value="1"<?php if($this->metadataairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">Metadata for Airplay is set ON by default (for most processor types).
+					It imposes a medium CPU and memory overhead even when Airplay is not active, but not when Airplay is disabled.
+					You can can override the default setting here.</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Airplay Cover Art</label>
+                <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="opcache" name="mode[artworkairplayonoff][enable]" type="checkbox" value="1"<?php if($this->artworkairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                    <span class="help-block">Cover Art for Airplay is set ON or OFF depending on processor type.
+					When set on it imposes a high CPU overhead when Airplay is active. On less powerful processors it can fail to work properly.
+					Cover Art is automatically switched off when 'Metadata for Airplay' is off. You can can override the default setting here.</span>
+                </div>
+            </div>
+            <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button class="btn btn-primary btn-lg" value="1" name="mode[debug][submit]" type="submit">Save settings</button>
                 </div>
@@ -202,16 +250,23 @@
             <legend>Background WORKERS control</legend>
             <p>Just some handy "tools" for Background WORKERS management.</p>
             <div class="form-group">
-                <label class="col-sm-2 control-label">RuneAudio SYSTEM Worker (rune_SY_wrk)</label>
+                <label class="col-sm-2 control-label">RuneAudio SYstem Worker (rune_SY_wrk)</label>
                 <div class="col-sm-10">
                     <button class="btn btn-default btn-lg" value="rune_SY_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_SY_wrk</button>
                     <span class="help-block">&nbsp;</span>
                 </div>
-            </div>    
+            </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label">RuneAudio PLAYBACK Worker (rune_PL_wrk)</label>
+                <label class="col-sm-2 control-label">RuneAudio PLayback Worker (rune_PL_wrk)</label>
                 <div class="col-sm-10">
                     <button class="btn btn-default btn-lg" value="rune_PL_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_PL_wrk</button>
+                    <span class="help-block">&nbsp;</span>
+                </div>
+            </div>    
+            <div class="form-group">
+                <label class="col-sm-2 control-label">RuneAudio Shairport-sync Metadata decoder Worker (rune_SSM_wrk)</label>
+                <div class="col-sm-10">
+                    <button class="btn btn-default btn-lg" value="rune_SSM_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_SSM_wrk</button>
                     <span class="help-block">&nbsp;</span>
                 </div>
             </div>    

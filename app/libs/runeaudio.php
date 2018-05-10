@@ -2309,13 +2309,11 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
 			// for soxr using MPD v0.19 it it difficult to see if the package has been built with the correct parameters
-			// when MPD v0.20 and higher is exclusivly used the next line should be relpaced
-			// with: $command = sysCmd("mpd --version | grep 'soxr'")
-			$command = sysCmd("grep 'soxr' /usr/bin/mpd");
-			if ($command[0] == '') {
-				// do nothing $command is not set or the first array entry is null
-			} else {
-				// the word soxr has been fornd in the mpd binary
+			// when MPD v0.20 and higher is exclusively used the next line should be replaced with: 
+			// $count = sysCmd("mpd --version | grep -c 'soxr'")
+			$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
+			if ($count > 0) {
+				// the word soxr has been found in the mpd binary
 				$redis->hSet('mpdconf', 'soxr', 'very high');
 			}
 			unset($command);
@@ -2398,23 +2396,26 @@ if ($action === 'reset') {
                     continue;
                 }
                 if ($param === 'soxr') {
-                    // --- soxr samplerate converter - resampler ---
-					if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
-						// MPD version is higher than 0.20
-						$output .="\n";
-						$output .="resampler {\n";
-						$output .="\tplugin \t\"".$param."\"\n";
-						$output .="\tquality \"".$value."\"\n";
-						$output .="}\n";
-						continue;
-					} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
-						// MPD version is higher than 0.19 but lower than 0.20
-						$output .="samplerate_converter \"".$param." ".$value."\"\n";
-						continue;
-					} else {
-						// MPD version is lower than 0.19 - do nothing
-						continue;
+					if ($redis->get('soxrmpdonoff')) {
+						// --- soxr samplerate converter - resampler ---
+						if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
+							// MPD version is higher than 0.20
+							$output .="\n";
+							$output .="resampler {\n";
+							$output .="\tplugin \t\"".$param."\"\n";
+							$output .="\tquality \"".$value."\"\n";
+							$output .="}\n";
+							continue;
+						} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
+							// MPD version is higher than 0.19 but lower than 0.20
+							$output .="samplerate_converter \"".$param." ".$value."\"\n";
+							continue;
+						} else {
+							// MPD version is lower than 0.19 - do nothing
+							continue;
+						}
 					}
+					continue;
 				}
                 if ($param === 'curl') {
                     // --- input plugin ---
@@ -2708,10 +2709,14 @@ function wrk_shairport($redis, $ao, $name = null)
 	$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device) || $redis->hSet('airplay', 'alsa_mixer_device', '');
 	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control) || $redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
 	$redis->hSet('airplay', 'extlabel', $acard->extlabel) || $redis->hSet('airplay', 'extlabel', '');
-	if ($redis->hGet('airplay', 'interpolation') != '') {
-		// do nothing
+	if ($redis->hGet('airplay', 'soxronoff')) {
+		if ($redis->hGet('airplay', 'interpolation') != '') {
+			// do nothing
+		} else {
+			$redis->hSet('airplay', 'interpolation', 'soxr');
+		}
 	} else {
-		$redis->hSet('airplay', 'interpolation', 'soxr');
+		$redis->hSet('airplay', 'interpolation', '');
 	}
 	if ($redis->hGet('airplay', 'output_backend') != '') {
 		// do nothing
@@ -2753,15 +2758,23 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
 	}
-	if ($redis->hGet('airplay', 'metadata_enabled') != '') {
-		// do nothing
+	if ($redis->hGet('airplay', 'metadataonoff')) {
+		if ($redis->hGet('airplay', 'metadata_enabled') != '') {
+			// do nothing
+		} else {
+			$redis->hSet('airplay', 'metadata_enabled', 'yes');
+		}
 	} else {
-		$redis->hSet('airplay', 'metadata_enabled', 'yes');
+		$redis->hSet('airplay', 'metadata_enabled', '');
 	}
-	if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
-		// do nothing
+	if ($redis->hGet('airplay', 'artworkonoff')) {
+		if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
+			// do nothing
+		} else {
+			$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
+		}
 	} else {
-		$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
+		$redis->hSet('airplay', 'metadata_include_cover_art', '');
 	}
 	if ($redis->hGet('airplay', 'metadata_pipe_name') != '') {
 		// do nothing
@@ -2772,7 +2785,11 @@ function wrk_shairport($redis, $ao, $name = null)
 	$file = '/etc/shairport-sync.conf';
     $newArray = wrk_replaceTextLine($file, '', ' general_name', 'name="'.$redis->hGet('airplay', 'name').'"; // general_name');
     $newArray = wrk_replaceTextLine('', $newArray, ' general_output_backend', 'output_backend="'.$redis->hGet('airplay', 'output_backend').'"; // general_output_backend');
-    $newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', 'interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+	if ($redis->hGet('airplay', 'interpolation') === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', '// interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+	} else {
+		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', 'interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+	}
     $newArray = wrk_replaceTextLine('', $newArray, ' general_alac_decoder', 'alac_decoder="'.$redis->hGet('airplay', 'alac_decoder').'"; // general_alac_decoder');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_before_play_begins', 'run_this_before_play_begins="'.$redis->hGet('airplay', 'run_this_before_play_begins').'"; // run_this_before_play_begins');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_after_play_ends', 'run_this_after_play_ends="'.$redis->hGet('airplay', 'run_this_after_play_ends').'"; // run_this_after_play_ends');
@@ -2790,8 +2807,16 @@ function wrk_shairport($redis, $ao, $name = null)
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
     $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
-    $newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
-    $newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+	if ($redis->hGet('airplay', 'metadata_enabled') === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', '// enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
+	} else {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
+	}
+	if (($redis->hGet('airplay', 'metadata_include_cover_art') === '') OR ($redis->hGet('airplay', 'metadata_enabled') === '')) {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', '// include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+	} else {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+	}
     $newArray = wrk_replaceTextLine('', $newArray, ' metadata_pipe_name', 'pipe_name="'.$redis->hGet('airplay', 'metadata_pipe_name').'"; // metadata_pipe_name');
     // Commit changes to shairport-sync.conf
     $fp = fopen($file, 'w');
@@ -2960,7 +2985,7 @@ function wrk_sourcecfg($redis, $action, $args)
     return $return;
 }
 
-function wrk_getHwPlatform()
+function wrk_getHwPlatform($redis)
 {
     $file = '/proc/cpuinfo';
     $fileData = file($file);
@@ -2987,59 +3012,68 @@ function wrk_getHwPlatform()
         case 'BCM2837':
             if (intval("0x".$revision, 16) < 16) {
                 // RaspberryPi1
-                //$arch = '01';
-                // RaspberryPi2/3
                 $arch = '08';
+				$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+				$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+				$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+				$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
             }
             else {
                 $model = trim(substr($revision, -2, 1));
                 switch($model) {
                     // 0 = A,
                     case "0":
-                        $arch = '01';
-                        break;
+						// no break;
                     // 1 = B,
                     case "1":
-                        $arch = '01';
+                        $arch = '08';
+						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
                         break;
                     // 2 = A+,
                     case "2":
-                        $arch = '01';
-                        break;
+						// no break;
                     // 3 = B+,
                     case "3":
-                        $arch = '01';
+						// no break;
+                    // 6 = Compute Module
+                    case "6":
+						// no break;
+                    // 9 = Zero,
+                    case "9":
+						// no break;
+                    // C = Zero W
+                    case "c":
+						// no break;
+                    case "C":
+                        $arch = '08';
+						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
+						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
+						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
+						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
                         break;
                     // 4 = B Pi2,
                     case "4":
-                        $arch = '08';
-                        break;
-                    // 5 = Alpha,
-                    case "5":
-                        $arch = '--';
-                        break;
-                    // 6 = Compute Module
-                    case "6":
-                        $arch = '01';
-                        break;
-                    // 7 = unknown,
-                    case "7":
-                        $arch = '--';
-                        break;
+						// no break;
                     // 8 = B Pi3,
                     case "8":
-                        $arch = '08';
-                        break;
-                    // 9 = Zero,
-                    case "9":
-                        $arch = '08';
-                        break;
+						// no break;
                     // A = Compute Module 3
                     case "a":
-                        $arch = '08';
-                        break;
+						// no break;
                     case "A":
+						// no break;
+                    // D = B+ Pi3
+                    case "d":
+						// no break;
+                    case "D":
                         $arch = '08';
+						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
+						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
+						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
+						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
                         break;
                     // B = unknown,
                     case "b":
@@ -3049,19 +3083,13 @@ function wrk_getHwPlatform()
                     case "B":
                         $arch = '--';
                         break;
-                    // C = Zero W
-                    case "c":
-                        $arch = '08';
+                    // 5 = Alpha,
+                    case "5":
+                        $arch = '--';
                         break;
-                    case "C":
-                        $arch = '08';
-                        break;
-                    // D = B+ Pi3
-                    case "d":
-                        $arch = '08';
-                        break;
-                    case "D":
-                        $arch = '08';
+                    // 7 = unknown,
+                    case "7":
+                        $arch = '--';
                         break;
                     default:
                         $arch = '--';
@@ -3129,7 +3157,7 @@ function wrk_getHwPlatform()
 
 function wrk_setHwPlatform($redis)
 {
-    $arch = wrk_getHwPlatform();
+    $arch = wrk_getHwPlatform($redis);
     runelog('arch= ', $arch);
     $playerid = wrk_playerID($arch);
     $redis->set('playerid', $playerid);

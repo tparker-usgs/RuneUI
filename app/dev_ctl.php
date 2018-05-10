@@ -51,27 +51,59 @@ if (isset($_POST)) {
         }
     // ----- DEBUG -----
         if ($_POST['mode']['debug']['enable'] == 1) {
-            // create worker job (start udevil)
+            // set debug on
             $redis->get('debug') == 1 || $redis->set('debug', 1);
         } else {
-            // create worker job (stop udevil)
+            // set debug off
             $redis->get('debug') == 0 || $redis->set('debug', 0);
         }
-    // ----- SAMBA DEV-----
+    // ----- SAMBA DEV -----
         if ($_POST['mode']['sambadevonoff']['enable'] == 1) {
-            // create worker job (start udevil)
+            // create worker job (set on and start samba)
             $redis->hget('samba', 'devonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevon'));
         } else {
-            // create worker job (stop udevil)
+            // create worker job (set off and stop samba)
             $redis->hget('samba', 'devonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevoff'));
         }
-    // ----- SAMBA Prod-----
+    // ----- SAMBA Prod -----
         if ($_POST['mode']['sambaprodonoff']['enable'] == 1) {
-            // create worker job (start udevil)
+            // create worker job (set on and start samba)
             $redis->hget('samba', 'prodonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodon'));
         } else {
-            // create worker job (stop udevil)
+            // create worker job (set off and start samba)
             $redis->hget('samba', 'prodonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodoff'));
+        }
+    // ----- SoXr MPD -----
+        if ($_POST['mode']['soxrmpdonoff']['enable'] == 1) {
+            // create worker job (set on and reset/restart MPD/Airplay)
+            $redis->get('soxrmpdonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpdon'));
+        } else {
+            // create worker job (set off and reset/restart MPD/Airplay)
+            $redis->get('soxrmpdonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpdoff'));
+        }
+    // ----- SoXr Airplay -----
+        if ($_POST['mode']['soxrairplayonoff']['enable'] == 1) {
+            // create worker job (set on and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'soxronoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplayon'));
+        } else {
+            // create worker job (set off and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'soxronoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplayoff'));
+        }
+    // ----- Airplay Metadata -----
+        if ($_POST['mode']['metadataairplayonoff']['enable'] == 1) {
+            // create worker job (set on and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'metadataonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplayon'));
+        } else {
+            // create worker job (set off and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'metadataonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplayoff'));
+        }
+    // ----- Airplay Artwork -----
+        if ($_POST['mode']['artworkairplayonoff']['enable'] == 1) {
+            // create worker job (set on and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'artworkonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplayon'));
+        } else {
+            // create worker job (set off and reset/restart MPD/Airplay)
+            $redis->hget('airplay', 'artworkonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplayoff'));
         }
     }
     // ----- OPCACHE -----
@@ -121,6 +153,10 @@ $template->opcache = $redis->get('opcache');
 $template->gitbranch = $redis->hGet('git', 'branch');
 $template->sambadevonoff = $redis->hGet('samba', 'devonoff');
 $template->sambaprodonoff = $redis->hGet('samba', 'prodonoff');
+$template->soxrmpdonoff = $redis->get('soxrmpdonoff');
+$template->soxrairplayonoff = $redis->hGet('airplay', 'soxronoff');
+$template->metadataairplayonoff = $redis->hGet('airplay', 'metadataonoff');
+$template->artworkairplayonoff = $redis->hGet('airplay', 'artworkonoff');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

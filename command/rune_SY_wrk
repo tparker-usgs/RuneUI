@@ -133,7 +133,7 @@ runelog('WORKER rune_SY_wrk.php STARTING...');
 // INITIALIZE ENVIRONMENT --- //
 runelog('INITIALIZE ENVIRONMENT ---');
 // check Architecture
-$arch = wrk_getHwPlatform();
+$arch = wrk_getHwPlatform($redis);
 runelog('detected architecture: ', $arch);
 if ($arch_db !== $arch) {
     runelog('architecture mismatch: registered HWID: '.$arch_db.' detected: ', $arch);
@@ -789,7 +789,6 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
-					sysCmd('curl -s -X GET "http://localhost/clear"');
 					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
 					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
@@ -811,7 +810,6 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('wget -vN https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
-					sysCmd('curl -s -X GET "http://localhost/clear"');
 					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
 					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
@@ -844,10 +842,70 @@ $redis->pconnect('/run/redis.sock');
 					$airplay_name = $redis->hGet('airplay', 'name');
 					$airplay_enable = $redis->hGet('airplay', 'enable');
 					$redis->del('airplay');
+					sysCmd('/var/www/db/redis_datastore_setup check');
 					$redis->hSet('airplay', 'name', $airplay_name);
 					$redis->hSet('airplay', 'enable', $airplay_enable);
-					sysCmd('/var/www/db/redis_datastore_setup check');
+					$redis->hDel('airplay', 'soxronoff');
+					$redis->hDel('airplay', 'metadataonoff');
+					$redis->hDel('airplay', 'artworkonoff');
+					wrk_getHwPlatform($redis);
 					wrk_shairport($redis, $redis->get('ao'), $airplay_name);
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'soxrmpdon':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->set('soxrmpdonoff', 1);
+                    wrk_mpdconf($redis, 'refresh');
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'soxrmpdoff':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->set('soxrmpdonoff', 0);
+                    wrk_mpdconf($redis, 'refresh');
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'soxrairplayon':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'soxronoff', 1);
+					wrk_shairport($redis, $redis->get('ao'));
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'soxrairplayoff':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'soxronoff', 0);
+					wrk_shairport($redis, $redis->get('ao'));
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'metadataairplayon':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'metadataonoff', 1);
+					wrk_shairport($redis, $redis->get('ao'));
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'metadataairplayoff':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'metadataonoff', 0);
+					wrk_shairport($redis, $redis->get('ao'));
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'artworkairplayon':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'artworkonoff', 1);
+					wrk_shairport($redis, $redis->get('ao'));
+					$redis->sRem('w_lock', $jobID);
+					break;
+                case 'artworkairplayoff':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->hSet('airplay', 'artworkonoff', 0);
+					wrk_shairport($redis, $redis->get('ao'));
 					$redis->sRem('w_lock', $jobID);
 					break;
                 case 'netcfg':
