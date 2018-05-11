@@ -64,7 +64,8 @@ cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/lo
 cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
 cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
 cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
-cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf 
+cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
+cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
