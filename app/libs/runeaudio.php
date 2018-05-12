@@ -2853,12 +2853,6 @@ function wrk_shairport($redis, $ao, $name = null)
         runelog('restart shairport-sync');
         sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
     }
-	If ($redis->hGet('airplay','metadataonoff')) {
-        runelog('restart rune_SSM_wrk');
-        sysCmd('systemctl restart rune_SSM_wrk || systemctl start rune_SSM_wrk');
-    }
-    // set process priority
-    sysCmdAsync('sleep 1 && rune_prio nice');
 }
 
 function wrk_sourcemount($redis, $action, $id = null)
@@ -3054,11 +3048,7 @@ function wrk_getHwPlatform($redis)
                     case "C":
 						// C = Zero W
                         $arch = '08';
-						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
-						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
-						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
-						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
-                        break;
+						// no break;
                     case "4":
 						// 4 = B Pi2,
 						// no break;

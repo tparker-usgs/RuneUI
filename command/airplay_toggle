@@ -52,13 +52,18 @@ switch($status) {
         wrk_startAirplay($redis);
         // send notify
         ui_notify('AirPlay', 'Playback has been switched to an incoming Airplay stream.');
-		// set the shairport sync metadata decoder priority
+		// start and set the priority of the Airplay metadata decoder
+		if ($redis->hGet('airplay', 'metadata_enabled') == 'yes') {
+			sysCmd('systemctl start rune_SSM_wrk && sleep 3 && renice 20 $(pgrep -w rune_SSM_wrk)');
+		}
         break;
     case "off":
         // stop Airplay
         wrk_stopAirplay($redis);
         // send notify
         ui_notify('AirPlay', 'Airplay playback has completed. The player is now unlocked.');
+		// stop the Airplay metadata decoder
+		sysCmd('systemctl stop rune_SSM_wrk');
         break;
 }
 

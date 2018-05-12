@@ -277,10 +277,6 @@ wrk_mpdconf($redis,'refresh');
 if ($redis->hGet('airplay', 'enable') === '1') {
     runelog("service: SHAIRPORT start",'');
     sysCmd('systemctl start shairport-sync');
-	// start the shairport sync metadata decoder if enabled
-	if ($redis->hGet('airplay', 'metadata_enabled') == 'yes') {
-		sysCmd('systemctl start rune_SSM_wrk');
-	}
 }
 // start udevil
 if ($redis->get('udevil') === '1') {
