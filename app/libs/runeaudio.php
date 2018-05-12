@@ -2841,17 +2841,21 @@ function wrk_shairport($redis, $ao, $name = null)
     $fp = fopen($file, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
-	// stop spopd and shairport-sync
-	sysCmd('systemctl stop spopd shairport-sync');
+	// stop spopd, shairport-sync and rune_SSM_wrk
+	sysCmd('systemctl stop spopd shairport-sync rune_SSM_wrk');
     // update systemd
     sysCmd('systemctl daemon-reload');
     if ($redis->get('activePlayer') === 'Spotify') {
         runelog('restart spopd');
         sysCmd('systemctl restart spopd || systemctl start spopd');
     }
-    if ($redis->hGet('airplay','enable') === '1') {
+    if ($redis->hGet('airplay','enable')) {
         runelog('restart shairport-sync');
         sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
+    }
+	If ($redis->hGet('airplay','metadataonoff')) {
+        runelog('restart rune_SSM_wrk');
+        sysCmd('systemctl restart rune_SSM_wrk || systemctl start rune_SSM_wrk');
     }
     // set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
@@ -3021,74 +3025,77 @@ function wrk_getHwPlatform($redis)
             else {
                 $model = trim(substr($revision, -2, 1));
                 switch($model) {
-                    // 0 = A,
                     case "0":
-						// no break;
-                    // 1 = B,
-                    case "1":
+						// 0 = A or B
                         $arch = '08';
 						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
 						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
                         break;
-                    // 2 = A+,
+                    case "1":
+						// 1 = B+, A+ or Compute module 1
+						// no break;
                     case "2":
+						// 2 = A+,
 						// no break;
-                    // 3 = B+,
                     case "3":
+						// 3 = B+,
 						// no break;
-                    // 6 = Compute Module
                     case "6":
+						// 6 = Compute Module
 						// no break;
-                    // 9 = Zero,
                     case "9":
+						// 9 = Zero,
 						// no break;
-                    // C = Zero W
                     case "c":
+						// c = Zero W
 						// no break;
                     case "C":
+						// C = Zero W
                         $arch = '08';
 						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
 						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
                         break;
-                    // 4 = B Pi2,
                     case "4":
+						// 4 = B Pi2,
 						// no break;
-                    // 8 = B Pi3,
                     case "8":
+						// 8 = B Pi3,
 						// no break;
-                    // A = Compute Module 3
                     case "a":
+						// a = Compute Module 3
 						// no break;
                     case "A":
+						// A = Compute Module 3
 						// no break;
-                    // D = B+ Pi3
                     case "d":
+						// d = B+ Pi3
 						// no break;
                     case "D":
+						// D = B+ Pi3
                         $arch = '08';
 						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
 						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
                         break;
-                    // B = unknown,
                     case "b":
+						// b = unknown,
                         $arch = '--';
                         break;
-                    // B = unknown,
                     case "B":
+						// B = unknown,
                         $arch = '--';
                         break;
-                    // 5 = Alpha,
                     case "5":
+						// 5 = Alpha,
                         $arch = '--';
                         break;
-                    // 7 = unknown,
                     case "7":
+						// 7 = unknown,
                         $arch = '--';
                         break;
                     default:
@@ -3287,7 +3294,6 @@ function wrk_startAirplay($redis)
         $redis->set('activePlayer', 'Airplay');
         //ui_render('playback', "{\"currentartist\":\"<unknown>\",\"currentsong\":\"Airplay\",\"currentalbum\":\"<unknown>\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
         //sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
-		$redis->hSet('airplay','initialised', 0);
     }
 }
 
@@ -3411,9 +3417,9 @@ function wrk_switchplayer($redis, $playerengine)
 function wrk_sysAcl()
 {
     sysCmd('chown -R http.http /srv/http/');
+    sysCmd('find /srv/http/ -type f -exec chmod 644 {} \;');
+    sysCmd('find /srv/http/ -type d -exec chmod 755 {} \;');
     sysCmd('chmod 777 /run');
-    sysCmd('chmod 644 $(find /srv/http/ -type f)');
-    sysCmd('chmod 755 $(find /srv/http/ -type d)');
     sysCmd('chmod 755 /srv/http/command/*');
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');

@@ -68,6 +68,25 @@ runelog('WORKER rune_SSM_wrk START');
 // reset state
 $airplay_handle = FALSE;
 $mode = 'any';
+$status = array();
+$status['audio'] = "44100:16:2";
+$status['audio_sample_rate'] = "44.1";
+$status['audio_sample_depth'] = "16";
+$status['bitrate'] = "1411";
+$status['audio_channels'] = "Stereo";
+$status['random'] = "0";
+$status['single'] = "0";
+$status['consume'] = "0";
+$status['playlist'] = "0";
+$status['playlistlength'] = "0";
+$status['state'] = "play";
+$status['time'] = "0";
+$status['elapsed'] = "0";
+$status['song_percent'] = "100";
+$status['currentartist'] = "Airplay";
+$status['currentalbum'] = "-----";
+$status['currentsong'] = "-----";
+$status['actPlayer'] = "Airplay";
 // --- WORKER MAIN LOOP --- //
 while (1) {
     // Connect to Redis backend
