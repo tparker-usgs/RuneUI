@@ -1,6 +1,5 @@
 #!/bin/bash
 set -x #echo all commands to cli
-set -e #continue on error
 #Image reset script
 
 #Use the next line only for a distribution build, do not use on development versions!!! It clears the pacman history, makes a lot of space free, but that history is useful.
@@ -16,6 +15,7 @@ set -e #continue on error
 systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk 
 systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_PL_wrk rune_SY_wrk sshd systemd-resolved
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli
+systemctl unmask systemd-journald
 #
 # remove user files and logs
 rm -f /var/lib/mpd/mpd.db
@@ -72,6 +72,7 @@ cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
 cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
 cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
+cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
 #
 # network
 rm -f /etc/netctl/*
