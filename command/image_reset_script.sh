@@ -34,6 +34,7 @@ redis-cli set playerid ""
 redis-cli set hwplatformid ""
 #
 # update local git
+rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
 git stash
 git pull
