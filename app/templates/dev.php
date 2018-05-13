@@ -156,8 +156,8 @@
                             <input id="opcache" name="mode[metadataairplayonoff][enable]" type="checkbox" value="1"<?php if($this->metadataairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">Metadata for Airplay is set ON by default (for most processor types).
-					It imposes a medium CPU and memory overhead even when Airplay is not active, but not when Airplay is disabled.
+                    <span class="help-block">Metadata for Airplay is set ON or OFF depending on processor type.
+					It imposes a medium CPU and memory overhead when Airplay is active.
 					You can can override the default setting here.</span>
                 </div>
             </div>
@@ -169,7 +169,7 @@
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                     <span class="help-block">Cover Art for Airplay is set ON or OFF depending on processor type.
-					When set on it imposes a high CPU overhead when Airplay is active. On less powerful processors it can fail to work properly.
+					When set on it imposes a CPU overhead when Airplay is active. On less powerful processors it can fail to work properly.
 					Cover Art is automatically switched off when 'Metadata for Airplay' is off. You can can override the default setting here.</span>
                 </div>
             </div>

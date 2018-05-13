@@ -112,7 +112,9 @@
                         <option value="wolfsonaudiocard"  selected >Wolfson Audio Card</option>
                         <?php endif ?>
                     </select>
-                    <span class="help-block">Enable I&#178;S output selecting one of the available sets of modules, specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot.</span>
+					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose.</span>
                 </div>
             </div>
             -->
@@ -129,7 +131,6 @@
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
-						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
@@ -138,22 +139,24 @@
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Addons</option>
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Octo soundcard</option>
 						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Stereo soundcard</option>
-						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Zero soundcard</option>
 						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector WM8731 Audio</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023 / AMP</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
+						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Zero soundcard</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023 / AMP</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
 						<option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
 						<option value="dionaudio-loco" <?php if($this->i2smodule === 'dionaudio-loco'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2" <?php if($this->i2smodule === 'dionaudio-loco-v2'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Generic ES9023</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Generic ES90x8</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
@@ -171,20 +174,20 @@
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Pi-DACZero</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom Amp HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom Amp Zero</option>
+						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC Zero</option>
 						<option value="justboom-digi" <?php if($this->i2smodule === 'justboom-digi'): ?> selected <?php endif ?>>JustBoom Digi</option>
+						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>PIFi DAC Plus</option>
 						<option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
 						<option value="rra-digidac1-wm8741-audio" <?php if($this->i2smodule === 'rra-digidac1-wm8741-audio'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
 						<option value="rpi-cirrus-wm5102" <?php if($this->i2smodule === 'rpi-cirrus-wm5102'): ?> selected <?php endif ?>>RPi Cirrus WM5102</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPi DAC</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
-						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
-						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose.</span>
                 </div>
             </div>
             <div class="form-group">
@@ -212,7 +215,6 @@
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
-						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
@@ -221,22 +223,24 @@
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Addons</option>
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Octo soundcard</option>
 						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Stereo soundcard</option>
-						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Zero soundcard</option>
 						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector WM8731 Audio</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023 / AMP</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
+						<option value="audioinjector-wm8731-audio" <?php if($this->i2smodule === 'audioinjector-wm8731-audio'): ?> selected <?php endif ?>>Audioinjector Zero soundcard</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023 / AMP</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
 						<option value="akkordion-iqdacplus" <?php if($this->i2smodule === 'akkordion-iqdacplus'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
 						<option value="dionaudio-loco" <?php if($this->i2smodule === 'dionaudio-loco'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2" <?php if($this->i2smodule === 'dionaudio-loco-v2'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Generic ES9023</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Generic ES90x8</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
 						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
@@ -254,20 +258,20 @@
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Pi-DACZero</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom Amp HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom Amp Zero</option>
+						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC Zero</option>
 						<option value="justboom-digi" <?php if($this->i2smodule === 'justboom-digi'): ?> selected <?php endif ?>>JustBoom Digi</option>
+						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>PIFi DAC Plus</option>
 						<option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
 						<option value="rra-digidac1-wm8741-audio" <?php if($this->i2smodule === 'rra-digidac1-wm8741-audio'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
 						<option value="rpi-cirrus-wm5102" <?php if($this->i2smodule === 'rpi-cirrus-wm5102'): ?> selected <?php endif ?>>RPi Cirrus WM5102</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>RPi DAC</option>
-						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
-						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
-						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC</option>
+						<option value="audiophonics-i-sabre-k2m" <?php if($this->i2smodule === 'audiophonics-i-sabre-k2m'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible that the hardware which is displayed is not the one which you chose.</span>
                 </div>
             </div>
             <div class="form-group">

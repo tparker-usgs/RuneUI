@@ -93,7 +93,7 @@
                         <option value="verbose" <?php if($this->conf['log_level'] == 'verbose'): ?> selected <?php endif ?>>verbose</option>
                     </select>         
                     <span class="help-block">This setting controls the type of information which is logged. Available setting arguments are "disabled", "default", "secure" or "verbose".
-                    The "verbose" setting argument is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
+					The "verbose" setting argument is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
                 </div>
             </div>
             <div class="form-group" >
@@ -103,7 +103,7 @@
                         <option value="yes" <?php if(isset($this->conf['state_file'])): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if(!isset($this->conf['state_file'])): ?> selected <?php endif ?>>disabled</option>
                     </select>         
-                    <span class="help-block">This setting specifies if a state file is used. If the  state  file is active, the state of  mpd  will  be  saved when mpd is terminated by a TERM signal or by the "kill" command.  When  mpd is  restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
+                    <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
                 </div>
             </div>                   
             <div class="form-group" >
@@ -177,7 +177,7 @@
                 <label class="col-sm-2 control-label" for="port">Audio buffer size</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="audio-buffer-size" name="conf[audio_buffer_size]" value="<?=$this->conf['audio_buffer_size'] ?>" data-trigger="change" min="512" />
-                    <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 2048, large enough for nearly 12 seconds of CD-quality audio.</span>
+                    <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
                 </div>
             </div>
             <div class="form-group" >
@@ -189,7 +189,7 @@
                         <option value="20%" <?php if($this->conf['buffer_before_play'] == '20%'): ?> selected <?php endif ?>>20%</option>\n";    
                         <option value="30%" <?php if($this->conf['buffer_before_play'] == '30%'): ?> selected <?php endif ?>>30%</option>\n";                    
                     </select>
-                    <span class="help-block"> This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 1 second of CD-quality audio with the default buffer size</span>
+                    <span class="help-block"> This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
                 </div>
             </div>
             <div class="form-group">
@@ -237,14 +237,8 @@
                         <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if($this->mpd['globalrandom'] == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Toggles the global random, which adds a random song to the queue when it reaches the end.</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label" for="addrandom">Add random tracks</label>
-                <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="number" id="addrandom" name="mpd[addrandom]" value="<?=$this->mpd['addrandom'] ?>" data-trigger="change" min="1" max="50" placeholder="0" />
-                    <span class="help-block">Add a number of tracks to the playing queue, randomly picked from the MPD database.</span>
+                    <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
+					When you select a playlist as source for random play this option is switched on automatically.</span>
                 </div>
             </div>
         </fieldset>
@@ -252,6 +246,7 @@
             <div class="col-sm-offset-2 col-sm-10">
                 <a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
                 <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+				<span class="help-block">Use Save and apply to cancel random play from a playlist. It takes a little while before random play uses your full MPD library.</span>
             </div>
         </div>
     </form>

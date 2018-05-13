@@ -253,11 +253,6 @@ if ($activePlayer === 'MPD') {
     sysCmd('pgrep -x mpd || systemctl start mpd');
 	// ashuffle gets started automatically
     usleep(500000);
-    // set mpd start volume
-    $mpd_volume = $redis->get('mpd_start_volume');
-    if ($mpd_volume !== '-1') {
-        sysCmd('mpc volume '.$mpd_volume);
-    }
     // start upmpdcli
     if ($redis->hGet('dlna', 'enable') === '1') {
         runelog("service: UPMPDCLI start");
@@ -844,6 +839,7 @@ $redis->pconnect('/run/redis.sock');
 					$redis->hDel('airplay', 'soxronoff');
 					$redis->hDel('airplay', 'metadataonoff');
 					$redis->hDel('airplay', 'artworkonoff');
+					$redis->hDel('airplay', 'enable');
 					wrk_getHwPlatform($redis);
 					wrk_shairport($redis, $redis->get('ao'), $airplay_name);
 					$redis->sRem('w_lock', $jobID);
@@ -1253,6 +1249,10 @@ $redis->pconnect('/run/redis.sock');
         }
         if ($all_mounted === 1) {
             runelog('wrk_SY: all shares mounted successfully!');
+			// set mpd start volume
+			if ($redis->get('mpd_start_volume') !== '-1') {
+				sysCmd('mpc volume '.$redis->get('mpd_start_volume'));
+			}
             // start play if enabled
             if ($redis->get('mpd_autoplay') === '1') {
 				$redis->set('mpd_playback_laststate', 'playing');

@@ -3015,6 +3015,7 @@ function wrk_getHwPlatform($redis)
 				$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 				$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 				$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+				$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
             }
             else {
                 $model = trim(substr($revision, -2, 1));
@@ -3026,6 +3027,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         break;
                     case "1":
 						// 1 = B+, A+ or Compute module 1
@@ -3071,6 +3073,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
+						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
                         break;
                     case "b":
 						// b = unknown,
