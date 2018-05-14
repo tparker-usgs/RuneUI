@@ -95,6 +95,8 @@
     <p>ArchLinux (patch for alsa 384kHz audio support) by Gerarhead<br><a href="https://github.com/gearhead" target="_blank" rel="nofollow">https://github.com/gearhead</a></p>
     <p>Ashuffle by Josh Kunz<br><a href="https://github.com/joshkunz" target="_blank" rel="nofollow">https://github.com/joshkunz</a></p>
     <p>BlueZ by Official Linux Bluetooth protocol stack<br><a href="http://www.bluez.org/" target="_blank" rel="nofollow">http://www.bluez.org/</a></p>
+    <p>Pi-Bluetooth<br><a href="https://aur.archlinux.org/pi-bluetooth.git" target="_blank" rel="nofollow">https://aur.archlinux.org/pi-bluetooth.git</a></p>
+    <p>BlueZ-Utils-Compat<br><a href="https://aur.archlinux.org/packages/bluez-utils-compat/" target="_blank" rel="nofollow">https://aur.archlinux.org/packages/bluez-utils-compat/</a></p>
     <p>Ffmpeg by ffmpeg.org<br><a href="http://ffmpeg.org/" target="_blank" rel="nofollow">http://ffmpeg.org/</a></p>
     <p>Hfsprogs by Apple Open Source<br><a href="http://www.opensource.apple.com/" target="_blank" rel="nofollow">http://www.opensource.apple.com/</a></p>
     <p>Hfsutils by Apple Open Source<br><a href="http://www.opensource.apple.com/" target="_blank" rel="nofollow">http://www.opensource.apple.com/</a></p>
