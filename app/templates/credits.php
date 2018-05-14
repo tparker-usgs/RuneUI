@@ -95,7 +95,7 @@
     <p>ArchLinux (patch for alsa 384kHz audio support) by Gerarhead<br><a href="https://github.com/gearhead" target="_blank" rel="nofollow">https://github.com/gearhead</a></p>
     <p>Ashuffle by Josh Kunz<br><a href="https://github.com/joshkunz" target="_blank" rel="nofollow">https://github.com/joshkunz</a></p>
     <p>BlueZ by Official Linux Bluetooth protocol stack<br><a href="http://www.bluez.org/" target="_blank" rel="nofollow">http://www.bluez.org/</a></p>
-    <p>Pi-Bluetooth<br><a href="https://aur.archlinux.org/pi-bluetooth.git" target="_blank" rel="nofollow">https://aur.archlinux.org/pi-bluetooth.git</a></p>
+    <p>BlueZ-Alsa<br><a href="https://github.com/Arkq/bluez-alsa" target="_blank" rel="nofollow">https://github.com/Arkq/bluez-alsa</a></p>
     <p>BlueZ-Utils-Compat<br><a href="https://aur.archlinux.org/packages/bluez-utils-compat/" target="_blank" rel="nofollow">https://aur.archlinux.org/packages/bluez-utils-compat/</a></p>
     <p>Ffmpeg by ffmpeg.org<br><a href="http://ffmpeg.org/" target="_blank" rel="nofollow">http://ffmpeg.org/</a></p>
     <p>Hfsprogs by Apple Open Source<br><a href="http://www.opensource.apple.com/" target="_blank" rel="nofollow">http://www.opensource.apple.com/</a></p>
@@ -108,6 +108,7 @@
     <p>PHP by php.net<br><a href="http://php.net/" target="_blank" rel="nofollow">http://php.net/</a></p>
     <p>Phpiredis by Daniele Alessandri<br><a href="https://github.com/nrk" target="_blank" rel="nofollow">https://github.com/nrk</a></p>
     <p>Phpredis by Nicolas Favre-Felix, Michael Grunder &amp; Pavlo Yatsukhnenko<br><a href="https://github.com/phpredis" target="_blank" rel="nofollow">https://github.com/phpredis</a></p>
+    <p>Pi-Bluetooth<br><a href="https://aur.archlinux.org/pi-bluetooth.git" target="_blank" rel="nofollow">https://aur.archlinux.org/pi-bluetooth.git</a></p>
     <p>Rern's Addons by Rern<br><a href="https://github.com/rern" target="_blank" rel="nofollow">https://github.com/rern</a></p>
     <p>Samba4 by samba.org<br><a href="http://www.samba.org" target="_blank" rel="nofollow">http://www.samba.org</a><br>adapted for optimised for RuneAudio by gearhead<br><a href="https://github.com/gearhead" target="_blank" rel="nofollow">https://github.com/gearhead</a></p>
     <p>Shairport by James &#8220;abrasive&#8221; Laird<br><a href="https://github.com/abrasive/shairport" target="_blank" rel="nofollow">https://github.com/abrasive/shairport</a></p>
