@@ -42,6 +42,7 @@ git config user.email "any@body.com"
 git config user.name "anybody"
 git stash
 git pull
+git stash
 cd /home
 #
 # remove any git or samba passwords/email
