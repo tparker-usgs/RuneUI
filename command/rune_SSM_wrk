@@ -350,8 +350,8 @@ while (1) {
 						runelog('rune_SSM_wrk: Start picture send, no arguments');
 						sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
 						//sysCmd('cp /srv/http/assets/img/cover-black.png /srv/http/assets/img/airplay-cover.png');
-						//sysCmd('chown -f http.http /srv/http/assets/img/airplay-cover.*');
-						//sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.*');
+						//sysCmd('chown -f http.http /srv/http/assets/img/airplayimg/airplay-cover.*');
+						//sysCmd('chmod 755 /srv/http/assets/img/airplayimg/airplay-cover.*');
 						//sysCmdAsync('/var/www/command/ui_update_async');
 						break;
 					case 'ssnc pcen':
@@ -432,6 +432,7 @@ while (1) {
 									// make sure the impage file is readable for the UI (runs as user http)
 									sysCmd('chown -f http.http /srv/http/assets/img/airplay-cover.*');
 									sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.*');
+									sysCmd('ln -s /srv/http/assets/img/airplay-cover.'.$imgtype.' /srv/http/assets/img/airplay-cover.'.$imgtype);
 								}
 							} else {
 								// no image file

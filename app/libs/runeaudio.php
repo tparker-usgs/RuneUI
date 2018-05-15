@@ -3070,7 +3070,7 @@ function wrk_getHwPlatform($redis)
 						// D = B+ Pi3
                         $arch = '08';
 						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
-						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 1);
+						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);

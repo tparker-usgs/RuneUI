@@ -301,9 +301,6 @@ function redisDatastore($redis,$action) {
 			$redis->hGet('airplay', 'source_active_remote_token') || $redis->hSet('airplay', 'source_active_remote_token', '');
 			$redis->hGet('airplay', 'dacp_id') || $redis->hSet('airplay', 'dacp_id', '');
 			$redis->hGet('airplay', 'source_remote_control_port_number', '') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
-			$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
-			$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
-			$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
             $redis->hGet('dlna', 'enable') || $redis->hSet('dlna', 'enable', 0);
             $redis->hGet('dlna', 'name') || $redis->hSet('dlna', 'name', 'RuneAudio');
             $redis->hGet('dlna', 'queue') || $redis->hSet('dlna', 'queue', 1);

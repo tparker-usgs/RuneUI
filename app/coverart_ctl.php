@@ -209,15 +209,17 @@ if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $requ
 	header('Pragma: no-cache'); // HTTP 1.0.
 	header('Expires: 0'); // Proxies, pre-expired content
 	if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.jpg')) {
-		runelog("coverart match: shairport coverURL=/assets/img/airplay-cover.jpg");
-		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
-		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-cover.jpg'));
-		readfile($_SERVER['HOME'].'/assets/img/airplay-cover.jpg');
+		$imgfilename = $_SERVER['HOME'].'/assets/img/airplay-cover.jpg';
+		runelog('coverart match: ', $imgfilename);
+		header('Content-Type: ' .mime_content_type($imgfilename));
+		header('Content-Length: ' . filesize($imgfilename));
+		readfile($imgfilename);
 	} else if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.png')) {
-		runelog("coverart match: shairport coverURL=/assets/img/airplay-cover.png");
-		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
-		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-cover.png'));
-		readfile($_SERVER['HOME'].'/assets/img/airplay-cover.png');
+		$imgfilename = $_SERVER['HOME'].'/assets/img/airplay-cover.png';
+		runelog('coverart match: ', $imgfilename);
+		header('Content-Type: ' .mime_content_type($imgfilename));
+		header('Content-Length: ' . filesize($imgfilename));
+		readfile($imgfilename);
 	} else {
 		runelog("coverart match: shairport coverURL=/assets/img/airplay-default.png");
 		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-default.png'));
