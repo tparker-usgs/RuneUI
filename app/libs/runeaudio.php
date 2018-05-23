@@ -1800,17 +1800,17 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                         if (strpos($args->ie, "WPA2") !== false) {
                             $nic .= "    'proto=RSN'\n";
                         } else {
-                            $nic .= "    'proto=WPA'\n";
+                            $nic .= "    'proto=RSN WPA'\n"; // added RSN kg
                         }
                         if (strpos($args->GroupCipher, "CCMP") !== false) {
                             $nic .= "    'group=CCMP'\n";
                         } else {
-                            $nic .= "    'group=TKIP'\n";
+                            $nic .= "    'group=CCMP TKIP'\n"; // added CCMP kg
                         }           
                         if (strpos($args->PairwiseCiphers1, "CCMP") !== false OR strpos($args->PairwiseCiphers2, "CCMP") !== false) {
                             $nic .= "    'pairwise=CCMP'\n";
                         } else {
-                            $nic .= "    'pairwise=TKIP'\n";
+                            $nic .= "    'pairwise=CCMP TKIP'\n"; // added CCMP kg
                         }
                 }
                 $nic .= "    'priority=3'\n";
