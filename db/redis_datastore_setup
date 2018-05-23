@@ -44,6 +44,11 @@ function redisDatastore($redis,$action) {
             $redis->set('i2smodule', 'none');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
+			// UI login password 
+			$redis->set('pwd_protection', 0);
+			$option = array('cost' => 12);
+			$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
+			$redis->set('password', $hash);
             // player features
             $redis->set('hostname', 'RuneAudio');
             $redis->set('ntpserver', 'pool.ntp.org');
@@ -275,6 +280,15 @@ function redisDatastore($redis,$action) {
             $redis->get('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->get('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->get('activePlayer') || $redis->set('activePlayer', 'MPD');
+			// UI login password
+			if ((!empty(trim($redis->get('pwd_protection')))) && (!empty(trim($redis->get('password'))))){
+				// do nothing
+			} else {
+				$redis->set('pwd_protection', 0);
+				$option = array('cost' => 12);
+				$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
+				$redis->set('password', $hash);
+			}
             // player features
             $redis->get('hostname') || $redis->set('hostname', 'RuneAudio');
             $redis->get('ntpserver') || $redis->set('ntpserver', 'pool.ntp.org');
