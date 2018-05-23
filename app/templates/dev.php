@@ -144,9 +144,10 @@
                             <input id="opcache" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if($this->soxrairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">SoXr for Airplay is set ON by default (for most processor types).
-					It improves the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for a better description.
-					It imposes a relatively high CPU overhead, as it works continually. You can can override the default setting here.</span>
+                    <span class="help-block">SoXr for Airplay is set OFF by default. Your system will crash if it is switched on, we are investigating why this happens.
+					In the meantime please leave it switched OFF.<br>
+					(It should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for a better description.
+					It imposes a relatively high CPU overhead, as it works continually. You can can override the default setting here.)</span>
                 </div>
             </div>
             <div class="form-group">
