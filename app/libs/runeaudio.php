@@ -1972,47 +1972,10 @@ function wrk_checkMount($mpname)
     }
 }
 
-function wrk_cleanDistro($redis)
+function wrk_cleanDistro()
 {
     runelog('function CLEAN DISTRO invoked!!!','');
-    // remove mpd.db
-    sysCmd('systemctl stop mpd');
-    sysCmd('systemctl stop spopd');
-    sleep(1);
-    sysCmd('rm -f /var/lib/mpd/mpd.db');
-    sysCmd('rm -f /var/lib/mpd/mpdstate');
-    // reset /var/log/*
-    sysCmd('rm -f /var/log/*');
-    // reset /root/ logs
-    sysCmd('rm -rf /root/.*');
-    // reset /var/www/test
-    sysCmd('rm -rf /var/www/test');
-    // blank git user/email
-    sysCmd("git config -f /var/www/.git/config user.name \"\"");
-    sysCmd("git config -f /var/www/.git/config user.email \"\"");
-    // reset libao config file
-    sysCmd('cp /var/www/app/config/defaults/libao.conf /etc/libao.conf');
-    // reset shairport starter script
-    sysCmd('cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service');
-    // reset shairport config file
-    sysCmd('cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf');
-    // reset spop config file
-    sysCmd('cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf');
-    // reset mpdscribble config file
-    sysCmd('cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf');
-    // reset wpa_supplicant config file
-    sysCmd('cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf');
-    // reset netctl profiles
-    sysCmd('rm -f /etc/netctl/*');
-    sysCmd('cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0');
-    // reset Redis datastore
-    sysCmdAsync('/srv/http/db/redis_datastore_setup reset');
-    // reset /var/log/runeaudio/*
-    sysCmdAsync('rm -f /var/log/runeaudio/*');
-    sysCmd('/var/www/command/rune_shutdown');
-    // reset /mnt/MPD/NAS/*
-    sysCmd('rm -rf /mnt/MPD/NAS/*');
-    sysCmd('poweroff');
+    sysCmd('/srv/http/command/image_reset_script.sh');
 }
 
 function wrk_audioOutput($redis, $action, $args = null)
@@ -2285,7 +2248,7 @@ if ($action === 'reset') {
 			$redis->hSet('mpdconf', 'version', trim(reset($command)));
 			unset($command);
             $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
-            $redis->hSet('mpdconf', 'zeroconf_name', 'runeaudio');
+            $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
             $redis->hSet('mpdconf', 'log_level', 'none');
             $redis->hSet('mpdconf', 'bind_to_address', 'any');
             $redis->hSet('mpdconf', 'port', '6600');
@@ -2297,17 +2260,20 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hSet('mpdconf', 'dsd_usb', 'no');
             $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
             $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
             $redis->hSet('mpdconf', 'auto_update', 'no');
             $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
             $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
             $redis->hSet('mpdconf', 'volume_normalization', 'no');
-            $redis->hSet('mpdconf', 'audio_buffer_size', '2048');
+            $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
             $redis->hSet('mpdconf', 'buffer_before_play', '10%');
             $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
+            $redis->hSet('mpdconf', 'ffmpeg', 'yes');
+            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');			
 			// for soxr using MPD v0.19 it it difficult to see if the package has been built with the correct parameters
 			// when MPD v0.20 and higher is exclusively used the next line should be replaced with: 
 			// $count = sysCmd("mpd --version | grep -c 'soxr'")
@@ -2316,9 +2282,6 @@ if ($action === 'reset') {
 				// the word soxr has been found in the mpd binary
 				$redis->hSet('mpdconf', 'soxr', 'very high');
 			}
-			unset($command);
-            $redis->hSet('mpdconf', 'ffmpeg', 'yes');
-            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             wrk_mpdconf($redis, 'writecfg');
             break;
         case 'writecfg':
@@ -3049,7 +3012,6 @@ function wrk_getHwPlatform($redis)
 						// no break;
                     case "C":
 						// C = Zero W
-                        $arch = '08';
 						// no break;
                     case "4":
 						// 4 = B Pi2,
@@ -3075,24 +3037,25 @@ function wrk_getHwPlatform($redis)
 						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
                         break;
-                    case "b":
-						// b = unknown,
-                        $arch = '--';
-                        break;
-                    case "B":
-						// B = unknown,
-                        $arch = '--';
-                        break;
                     case "5":
 						// 5 = Alpha,
-                        $arch = '--';
-                        break;
+                        // no break;
                     case "7":
 						// 7 = unknown,
-                        $arch = '--';
-                        break;
+                        // no break;
+                    case "b":
+						// b = unknown,
+                        // no break;
+                    case "B":
+						// B = unknown,
+                        // no break;
                     default:
                         $arch = '--';
+						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         break;
                 }
             }
@@ -3517,13 +3480,19 @@ function wrk_changeHostname($redis, $newhostname)
     sysCmdAsync('sleep 1 && rune_prio nice');
 }
 
-function wrk_upmpdcli($redis, $name = null)
+function wrk_upmpdcli($redis, $name = null, $queueowner = null)
 {
     if (!isset($name)) {
         $name = $redis->hGet('dlna', 'name');
     }
+    if (!isset($queueowner)) {
+        $queueowner = $redis->hGet('dlna', 'queueowner');
+    }
+	if ($queueowner != 1) {
+		$queueowner = '0';
+	}
     $file = '/usr/lib/systemd/system/upmpdcli.service';
-    $newArray = wrk_replaceTextLine($file, '', 'ExecStart', 'ExecStart=/usr/bin/upmpdcli -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
+    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/upmpdcli -q '.$queueowner.' -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
     runelog('upmpdcli.service :', $newArray);
     // Commit changes to /usr/lib/systemd/system/upmpdcli.service
     $fp = fopen($file, 'w');
@@ -3755,7 +3724,7 @@ function ui_status($mpd, $status)
     return $status;
 }
 
-function ui_libraryHome($redis, $clientUUID)
+function ui_libraryHome($redis, $clientUUID=null)
 {
     // LocalStorage
     $localStorages = countDirs('/mnt/MPD/LocalStorage');
@@ -3878,7 +3847,7 @@ function ui_timezone() {
   return $zones_array;
 }
 
-function ui_update($redis, $sock, $clientUUID)
+function ui_update($redis, $sock, $clientUUID=null)
 {
     ui_libraryHome($redis, $clientUUID);
     switch ($redis->get('activePlayer')) {

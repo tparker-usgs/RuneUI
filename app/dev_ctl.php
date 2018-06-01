@@ -118,7 +118,10 @@ if (isset($_POST)) {
     }
     if (isset($_POST['syscmd'])) {
         // ----- BLANK PLAYERID -----
-        if ($_POST['syscmd'] === 'blankplayerid') $redis->set('playerid','');
+        if ($_POST['syscmd'] === 'blankplayerid') {
+			$redis->set('playerid','');
+			$redis->set('hwplatformid','');
+		}
         // ----- CLEARIMG -----
         if ($_POST['syscmd'] === 'clearimg') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'clearimg'));
         // ----- CHECK FS PERMISSIONS -----
@@ -149,6 +152,7 @@ waitSyWrk($redis, $jobID);
 $template->dev = $redis->get('dev');
 $template->debug = $redis->get('debug');
 $template->playerid = $redis->get('playerid');
+$template->hwplatformid = $redis->get('hwplatformid');
 $template->opcache = $redis->get('opcache');
 $template->gitbranch = $redis->hGet('git', 'branch');
 $template->sambadevonoff = $redis->hGet('samba', 'devonoff');

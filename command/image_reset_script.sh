@@ -29,6 +29,14 @@ rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 #
 # redis reset
+redis-cli del AccessPoint
+redis-cli del airplay
+redis-cli del dlna
+redis-cli del spotify
+redis-cli del mpdconf
+redis-cli del jamendo
+redis-cli del dirble
+redis-cli del samba
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""

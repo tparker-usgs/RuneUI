@@ -47,6 +47,7 @@
                     <label class="col-sm-2 control-label">PlayerID</label>
                     <div class="col-sm-10">
                         <input class="form-control input-lg" type="text" id="playerid" name="playerid" value="<?php echo $this->playerid; ?>" disabled autocomplete="off">
+                        <input class="form-control input-lg" type="text" id="hwplatformid" name="hwplatformid" value="<?php echo $this->hwplatformid; ?>" disabled autocomplete="off">
                         <span class="help-block">Current detected HW fingerprint.</span>
                     </div>
                 </div>
@@ -58,10 +59,13 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">Blank playerID</label>
+                    <label class="col-sm-2 control-label">Reset the RuneAudio player</label>
                     <div class="col-sm-10">
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="blankplayerid" id="syscmd-blankplayerid" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                        <span class="help-block">Reset playerID. The player will perform the configuration routine at next reboot.</span>
+                        <span class="help-block">Reset playerID and hwplatformID. The player will perform initialisation configuration routines during the next reboot.<br>
+						Always <strong>de-install</strong> Rern's Addons <strong>before</strong> choosing this option!
+						You will lose <strong>ALL</strong> of your settings after choosing this option!<br>
+						</span>
                     </div>
                 </div>                
                 <div class="form-group">
@@ -70,6 +74,7 @@
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="clearimg" id="syscmd-clearimg" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                         <span class="help-block">Clear command history, logs, reset image parameters to default settings.<br>
                         NOTE: (Dev team function) Use this function prior to public a RuneOS image.<br>
+						This function takes up to 20 minutes to complete, wait, be patient!<br>
                         WARNING: Automatic system shutdown after execution!</span>
                     </div>
                 </div>
@@ -132,7 +137,7 @@
                             <input id="opcache" name="mode[soxrmpdonoff][enable]" type="checkbox" value="1"<?php if($this->soxrmpdonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">SoXr for MPD is set ON by default. It does nothing (and has no CPU overhead) unless sample-rate conversion is required.
+                    <span class="help-block">SoXr for MPD is set ON or OFF depending on processor type. It does nothing (and has no CPU overhead) unless sample-rate conversion is required.
 					This happens only in very special circumstances. It always reduces quality when it operates, but it is better than the built-in MPD sample-rate converter.
 					It also imposes a higher CPU overhead than the built-in MPD sample-rate converter. You can can override the default setting here.</span>
                 </div>
@@ -144,10 +149,9 @@
                             <input id="opcache" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if($this->soxrairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                    <span class="help-block">SoXr for Airplay is set OFF by default. Your system will crash if it is switched on, we are investigating why this happens.
-					In the meantime please leave it switched OFF.<br>
-					(It should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for a better description.
-					It imposes a relatively high CPU overhead, as it works continually. You can can override the default setting here.)</span>
+                    <span class="help-block">SoXr for Airplay is set OFF by default. Your system <strong>will crash</strong> if it is switched ON, please leave it switched OFF.<br>
+					<i>In theory it should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for details.
+					Unfortunately it imposes a too high CPU overhead for the processors used by RuneAudio.</i></span>
                 </div>
             </div>
             <div class="form-group">
@@ -232,7 +236,7 @@
                 <div class="col-sm-10">
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                     <span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
-					Refresh the browser after installing, this should enable the Addons menu. It is possible that a reboot is also required.<br>
+					Refresh the browser after installing, this should enable the Addons menu. However it is possible that a reboot is also required.<br>
 					You can remove the Rern's Addons menu via the Addons menu.<br>
 					The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum.</span>
                 </div>
@@ -241,7 +245,8 @@
                 <label class="col-sm-2 control-label">Re-install Rern's Addons</label>
                 <div class="col-sm-10">
                     <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernreinstall" id="syscmd-rernreinstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                    <span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.</span>
+                    <span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.
+					A reboot will probably be required to make the Addons menu visible.</span>
                 </div>
             </div>
         </fieldset>
@@ -271,6 +276,49 @@
                     <span class="help-block">&nbsp;</span>
                 </div>
             </div>    
+        </fieldset>
+    </form>
+    <form class="form-horizontal" method="post">
+        <fieldset>
+            <legend>Notes</legend>
+            <p>Just some notes concerning optional packages and features</p>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Patched Linux kernel for audio output up to 384k</label>
+                <div class="col-sm-10">
+                    <span class="help-block">This version of RuneAudio has a patched kernel which allows alsa to stream at a bit-rate of 384k.
+					This is twice as high as the normal maximum rate of 192k.
+					Where necessary the parameters for selecting and setting up hardware audio cards have been adapted to give the best performance.<br>
+					If you update the kernel, you will loose the 384k feature and some of the setting for hardware audio cards will not be optimal.</span>
+                </div>
+            </div>    
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Hard-disk drive monitoring</label>
+                <div class="col-sm-10">
+                    <span class="help-block">If you have a hard-disk drive attached to Rune, hard disk health-check monitoring will automatically be carried out using 'smartmontools'.
+					Normally you will not notice that this is taking place. In the debug listing there is a status display.
+					Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI.</span>
+                </div>
+            </div>    
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Missing bit-rates in the player UI</label>
+                <div class="col-sm-10">
+                    <span class="help-block">For some unknown reason MPD is incapable of providing the bit-rates for some audio file types.
+					This results in the bit-rate not being displayed in the player UI.<br>
+					A solution for this problem has been implemented but not fully included in this version in order to keep the image smaller.
+					If missing bit-rates is a problem for you, you can install the package 'mediainfo' manually. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
+					You can find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
+					Then you can use the following command to install the package 'mediainfo': <strong>pacman -Sy mediainfo</strong></span>
+					
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Apparent errors in systemd timestamps</label>
+                <div class="col-sm-10">
+                    <span class="help-block">RuneAudio uses systemd services to run certain tasks. These tend to show incorrect start times because the hardware on which Rune runs generally has no hardware real-time clock and services are started before Rune updates it's system clock from internet.
+					This is not generally a problem and these erroneous times are not generally visible for the user. However it can be an issue if you are doing development and debug work.<br>
+					The package 'fake-hwclock' provides a good solution for this, install it using the following command: <strong>pacman -Sy fake-hwclock</strong></span>
+                </div>
+            </div>
         </fieldset>
     </form>
 <!-- <form class="form-horizontal" method="post">

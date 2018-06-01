@@ -384,11 +384,11 @@ $redis->pconnect('/run/redis.sock');
                     runelog('wrk_SY: ', $job->wrkcmd);
                     // Clean IMG
                     runelog('Clean IMG');
+                    // send notfy to UI
+                    ui_notify_async('Clean IMG', 'Started, this can take a while to complete', $jobID);
                     // enable OPcache
                     wrk_opcache('enable');
                     wrk_cleanDistro();
-                    // send notfy to UI
-                    ui_notify_async('Clean IMG', 'this image is now clean, ready to publish.', $jobID);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'debug':
@@ -399,21 +399,18 @@ $redis->pconnect('/run/redis.sock');
                 case 'dlna':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    if ($job->args !== $redis->hGet('dlna', 'name')) {
-                        $redis->hSet('dlna', 'name', $job->args);
+					sysCmd('systemctl stop upmpdcli');
+                    if (($job->args->name !== $redis->hGet('dlna', 'name')) OR ($job->args->queueowner !== $redis->hGet('dlna', 'queueowner'))) {
+                        $redis->hSet('dlna', 'name', $job->args->name);
+                        $redis->hSet('dlna', 'queueowner', $job->args->queueowner);
                         // update upmpdcli startup config
-                        wrk_upmpdcli($redis, $redis->hGet('dlna', 'name'));
-                        $restart = 1;
+                        wrk_upmpdcli($redis, $redis->hGet('dlna', 'name'), $redis->hGet('dlna', 'queueowner'));
                     }
                     // start upmpdcli
                     if ($job->action === 'start') {
                         runelog('service: UPMPDCLI start');
                         // start or re-start upmpdcli service
-                        if (isset($restart)) {
-                            sysCmd('systemctl restart upmpdcli');
-                        } else {
-                            sysCmd('systemctl start upmpdcli');
-                        }
+                        sysCmd('systemctl start upmpdcli');
                         $redis->hSet('dlna', 'enable', 1);
                         // send notfy to UI
                         ui_notify_async('UPnP / DLNA', 'UPnP / DLNA feature enabled', $jobID);
@@ -421,7 +418,6 @@ $redis->pconnect('/run/redis.sock');
                     // stop upmpdcli
                     if ($job->action === 'stop') {
                         runelog('service: UPMPDCLI stop');
-                        sysCmd('systemctl stop upmpdcli');
                         $redis->hSet('dlna', 'enable', 0);
                         // send notfy to UI
                         ui_notify_async('UPnP / DLNA', 'UPnP / DLNA feature disabled', $jobID);
@@ -1151,7 +1147,7 @@ $redis->pconnect('/run/redis.sock');
                             ui_notify_async('Webradio', $job->args->label.' deleted', $jobID);
                         }
                     }
-                    ui_libraryHome($redis, $clientUUID);
+                    ui_libraryHome($redis);
                     closeMpdSocket($mpd);
                     $redis->sRem('w_lock', $jobID);
                     break;

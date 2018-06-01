@@ -39,11 +39,11 @@ if (isset($_POST)) {
     if (isset($_POST['usb-umount'])) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'umountusb', 'args' => $_POST['usb-umount']));
     if (!empty($_POST['mount'])) {
         $_POST['mount']['remotedir'] = str_replace('\\', '/', $_POST['mount']['remotedir']);
-        if ($_POST['mount']['rsize'] == '') $_POST['mount']['rsize'] = 16384;
-        if ($_POST['mount']['wsize'] == '') $_POST['mount']['wsize'] = 17408;
+        if ($_POST['mount']['rsize'] == '') $_POST['mount']['rsize'] = 8192;
+        if ($_POST['mount']['wsize'] == '') $_POST['mount']['wsize'] = 16384;
         if ($_POST['mount']['options'] == '') {
             if ($_POST['mount']['type'] === 'cifs' OR $_POST['mount']['type'] === 'osx') {
-                $_POST['mount']['options'] = "cache=none,noserverino,ro";
+                $_POST['mount']['options'] = "cache=none,noserverino,ro,vers=1.0";
             } else {
                 $_POST['mount']['options'] = "nfsvers=3,ro";
             }

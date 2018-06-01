@@ -271,6 +271,10 @@ function debug_data($redis)
     $command = sysCmd('dmesg');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
+    $output .= "###### systemd (journal) messages (journalctl | grep -i 'Starting\|Started\|Error\|Warning') ######\n";
+    $command = sysCmd('journalctl | grep -i "Starting\|Started\|Error\|Warning"');
+    $output .= implode("\n", $command)."\n\n";
+    unset($command);
     $output .= "###### PHP backend ######\n";
     $output .= "php version:\t".phpversion()."\n";
     $output .= "debug level:\t".$redis->get('debug')."\n";

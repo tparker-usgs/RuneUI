@@ -49,6 +49,16 @@ function redisDatastore($redis,$action) {
 			$option = array('cost' => 12);
 			$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
 			$redis->set('password', $hash);
+			// Access Point
+			$redis->hSet('AccessPoint', 'enabled', 1);
+			$redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
+			$redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
+			$redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
+			$redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
+			$redis->hSet('AccessPoint', 'dhcp-range', '192.168.5.2,192.168.5.254,24h');
+			$redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
+			$redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
+			$redis->hSet('AccessPoint', 'enable-NAT', 1);
             // player features
             $redis->set('hostname', 'RuneAudio');
             $redis->set('ntpserver', 'pool.ntp.org');
@@ -82,7 +92,7 @@ function redisDatastore($redis,$action) {
 			$redis->hDel('airplay', 'artworkonoff');
             $redis->hSet('dlna', 'enable', 0);
             $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hSet('dlna', 'queue', 1);
+            $redis->hSet('dlna', 'queueowner', 0);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 6);
 			$redis->hSet('dlna', 'radioname', '');
@@ -116,6 +126,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hSet('mpdconf', 'dsd_usb', 'no');
             $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
             $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
             $redis->hSet('mpdconf', 'auto_update', 'no');
@@ -289,6 +300,16 @@ function redisDatastore($redis,$action) {
 				$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
 				$redis->set('password', $hash);
 			}
+			// Access Point
+			$redis->hGet('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
+			$redis->hGet('AccessPoint', 'ip-address') || $redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
+			$redis->hGet('AccessPoint', 'broadcast') || $redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
+			$redis->hGet('AccessPoint', 'ssid') || $redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
+			$redis->hGet('AccessPoint', 'passphrase') || $redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
+			$redis->hGet('AccessPoint', 'dhcp-range') || $redis->hSet('AccessPoint', 'dhcp-range', '192.168.5.2,192.168.5.254,24h');
+			$redis->hGet('AccessPoint', 'dhcp-option-dns') || $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
+			$redis->hGet('AccessPoint', 'dhcp-option-router') || $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
+			$redis->hGet('AccessPoint', 'enable-NAT') || $redis->hSet('AccessPoint', 'enable-NAT', 1);
             // player features
             $redis->get('hostname') || $redis->set('hostname', 'RuneAudio');
             $redis->get('ntpserver') || $redis->set('ntpserver', 'pool.ntp.org');
@@ -317,7 +338,7 @@ function redisDatastore($redis,$action) {
 			$redis->hGet('airplay', 'source_remote_control_port_number', '') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
             $redis->hGet('dlna', 'enable') || $redis->hSet('dlna', 'enable', 0);
             $redis->hGet('dlna', 'name') || $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hGet('dlna', 'queue') || $redis->hSet('dlna', 'queue', 1);
+            $redis->hGet('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 0);
             $redis->hGet('dlna', 'logfile') || $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hGet('dlna', 'loglevel') || $redis->hSet('dlna', 'loglevel', 0);
 			$redis->hGet('dlna', 'radioname') || $redis->hSet('dlna', 'radioname', '');

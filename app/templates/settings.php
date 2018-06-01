@@ -131,7 +131,7 @@
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
-                        <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
+						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
@@ -152,17 +152,17 @@
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
+						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus RTC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Standard</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
@@ -215,7 +215,7 @@
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
-                        <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
+						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
@@ -236,17 +236,17 @@
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
+						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus RTC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Standard</option>
-						<option value="hifiberry-dac" <?php if($this->i2smodule === 'hifiberry-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
+						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
@@ -282,7 +282,7 @@
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Set "ON" to enable or "OFF" to disable the onboard ALSA audio interface)</span>
-                </div>                
+                </div>
             </div>
             <?php endif;?>
             <!-- <div 
@@ -352,7 +352,7 @@
     <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
         <fieldset id="features-management">
             <legend>Features management</legend>
-            <p>Enable/disable optional modules that best suit your needs. Disabling unusued features will free system resources and might improve the overall performance.</p>
+            <p>Enable/disable optional modules that best suit your needs. Disabling unused features will free system resources and might improve the overall performance.</p>
             <div <?php if($this->airplay['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="airplayBox">
                 <div class="form-group">
                     <label for="airplay" class="control-label col-sm-2">AirPlay</label>
@@ -411,7 +411,8 @@
                             <input id="dlna" name="features[dlna][enable]" type="checkbox" value="1"<?php if($this->dlna['enable'] == 1): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                        <span class="help-block">Toggle the capability of receiving wireless streaming of audio via UPnP / DLNA protocol</span>
+                        <span class="help-block">Toggle the capability of receiving wireless streaming of audio via UPnP / DLNA protocol<br>
+						This function will not work when Random Play is switched ON</span>
                     </div>
                 </div>
                 <div class="<?php if($this->dlna['enable'] != 1): ?>hide<?php endif ?>" id="dlnaName">
@@ -420,6 +421,15 @@
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="text" id="dlna_name" name="features[dlna][name]" value="<?php echo $this->dlna['name']; ?>" data-trigger="change" placeholder="runeaudio">
                             <span class="help-block">UPnP / DLNA broadcast name</span>
+                        </div>
+                        <label class="control-label col-sm-2" for="dlna-queueowner">UPnP / DLNA is MPD queue owner</label>
+                        <div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="dlna_queueowner" name="features[dlna][queueowner]" type="checkbox" value="1"<?php if($this->dlna['queueowner'] == 1): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">When ON: a UPnP / DLNA broadcast will clear the MPD queue and then add and play the song, clearing the queue with each successive song<br>
+							When OFF: UPnP / DLNA will add songs to the end of the MPD queue and then play them</span>
                         </div>
                     </div>
                 </div>

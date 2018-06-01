@@ -149,7 +149,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             if (isset($_POST['path'])) {
                 if (saveBookmark($redis, $_POST['path'])) {
                     ui_notify('Bookmark saved', $_POST['path'].' added to bookmarks');
-                    ui_libraryHome($redis, $clientUUID);
+                    ui_libraryHome($redis);
                 } else {
                     ui_notify('Error saving bookmark', 'please try again later');
                 }
@@ -157,7 +157,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             if (isset($_POST['id'])) {
                 if (deleteBookmark($redis,$_POST['id'])) {
                     ui_notify('Bookmark deleted', '"' . $_POST['name'] . '" successfully removed');
-                    ui_libraryHome($redis, $clientUUID);
+                    ui_libraryHome($redis);
                 } else {
                     ui_notify('Error deleting bookmark', 'Please try again later');
                 }

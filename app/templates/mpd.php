@@ -238,7 +238,8 @@
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
-					When you select a playlist as source for random play this option is switched on automatically.</span>
+					When you select a playlist as source for random play this option is switched on automatically.<br>
+					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF.</span>
                 </div>
             </div>
         </fieldset>

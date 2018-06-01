@@ -119,13 +119,13 @@ if (isset($_POST)) {
             $redis->hGet('airplay','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplay', 'action' => 'stop', 'args' => $_POST['features']['airplay']['name']));
         }
         if ($_POST['features']['dlna']['enable'] == 1) {
-            if ($redis->hGet('dlna','enable') !== $_POST['features']['dlna']['enable'] OR $redis->hGet('dlna','name') !== $_POST['features']['dlna']['name']) {
+            if ($redis->hGet('dlna','enable') !== $_POST['features']['dlna']['enable'] OR $redis->hGet('dlna','name') !== $_POST['features']['dlna']['name'] OR $redis->hGet('dlna','queueowner') !== $_POST['features']['dlna']['queueowner']) {
                 // create worker job (start upmpdcli)
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'start', 'args' => $_POST['features']['dlna']['name']));
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'start', 'args' => $_POST['features']['dlna']));
             }
         } else {
             // create worker job (stop upmpdcli)
-            $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']['name']));
+            $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']));
         }
         if ($_POST['features']['local_browser'] == 1) {
             $redis->get('local_browser') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstart'));
