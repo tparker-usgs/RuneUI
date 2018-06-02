@@ -281,14 +281,14 @@
     <form class="form-horizontal" method="post">
         <fieldset>
             <legend>Notes</legend>
-            <p>Just some notes concerning optional packages and features</p>
+            <p>Just some notes concerning features and options</p>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Patched Linux kernel for audio output up to 384k</label>
                 <div class="col-sm-10">
-                    <span class="help-block">This version of RuneAudio has a patched kernel which allows alsa to stream at a bit-rate of 384k.
+                    <span class="help-block">This version of RuneAudio has a patched kernel which allows alsa to stream at a sample-rate up to 384k.
 					This is twice as high as the normal maximum rate of 192k.
 					Where necessary the parameters for selecting and setting up hardware audio cards have been adapted to give the best performance.<br>
-					If you update the kernel, you will loose the 384k feature and some of the setting for hardware audio cards will not be optimal.</span>
+					If you manually update the kernel, not only will you lose the 384k feature but some of the setting for hardware audio cards will no longer be optimal.</span>
                 </div>
             </div>    
             <div class="form-group">
@@ -302,12 +302,12 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">Missing bit-rates in the player UI</label>
                 <div class="col-sm-10">
-                    <span class="help-block">For some unknown reason MPD is incapable of providing the bit-rates for some audio file types.
+                    <span class="help-block">For some reason MPD is incapable of providing the bit-rate for some audio file types.
 					This results in the bit-rate not being displayed in the player UI.<br>
 					A solution for this problem has been implemented but not fully included in this version in order to keep the image smaller.
-					If missing bit-rates is a problem for you, you can install the package 'mediainfo' manually. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
+					If missing bit-rates is a problem for you, installing the package 'mediainfo' may provide a solution. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
 					You can find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
-					Then you can use the following command to install the package 'mediainfo': <strong>pacman -Sy mediainfo</strong></span>
+					Then you can use the following command to install the 'mediainfo' package: <strong>pacman -Sy mediainfo</strong></span>
 					
                 </div>
             </div>

@@ -124,7 +124,13 @@ rm zero.file
 sync
 cd /home
 #
-# shutdown
+# reset root password & host information (icon-name, chassis and hostname)
+echo -e "rune\nrune" | passwd root
+hostnamectl --static --transient --pretty set-icon-name multimedia-player
+hostnamectl --static --transient --pretty set-chassis embedded
+hostnamectl --static --transient --pretty set-hostname RuneAudio
+#
+# shutdown & poweroff
 shutdown -P now
 #---
 #End script

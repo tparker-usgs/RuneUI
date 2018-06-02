@@ -3428,7 +3428,7 @@ function wrk_changeHostname($redis, $newhostname)
     }
     // change system hostname
 	$redis->set('hostname', $newhostname);
-    sysCmd('hostnamectl set-hostname '.$newhostname);
+    sysCmd('hostnamectl  --static --transient --pretty set-hostname '.$newhostname);
     // update AVAHI serice data
     wrk_avahiconfig($newhostname);
     // restart avahi-daemon
