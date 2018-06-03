@@ -1,7 +1,7 @@
 #!/bin/bash
 
-artist_name=`mpc -f %artist% | head -n 1`
-title=`mpc -f %title% | head -n 1`
+artist_name=`redis-cli hget lyrics currentartist`
+title=`redis-cli hget lyrics currentsong`
 
 artist=`perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$artist_name"`
 title=`perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$title"`

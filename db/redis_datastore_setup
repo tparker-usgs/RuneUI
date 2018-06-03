@@ -140,6 +140,9 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			// default lyrics and info
+			$redis->hSet('lyrics', 'currentartist', '']);
+			$redis->hSet('lyrics', 'currentsong', '');
 			$redis->del('soxrmpdonoff');
 			$redis->set('localSStime', -1);
 			$redis->set('remoteSStime', -1);
@@ -348,6 +351,9 @@ function redisDatastore($redis,$action) {
             $redis->hGet('spotify', 'pass') || $redis->hSet('spotify', 'pass', 'pass');
             $redis->hGet('spotify', 'plversion') || $redis->hSet('spotify', 'plversion', 1);
             $redis->hGet('spotify', 'lastcmd') || $redis->hSet('spotify', 'lastcmd', '');
+			// default lyrics and info
+			$redis->hGet('lyrics', 'currentartist') || $redis->hSet('lyrics', 'currentartist', '');
+			$redis->hGet('lyrics', 'currentsong') || $redis->hSet('lyrics', 'currentsong', '');
             $redis->get('udevil') || $redis->set('udevil', 1);
             $redis->get('coverart') || $redis->set('coverart', 1);
             $redis->get('playmod') || $redis->set('playmod', 0);

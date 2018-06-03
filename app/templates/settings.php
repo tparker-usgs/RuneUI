@@ -152,21 +152,21 @@
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus RTC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Standard</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus, unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus, unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>
@@ -236,21 +236,21 @@
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES90x8</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic PCM510x</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp" <?php if($this->i2smodule === 'hifiberry-amp'): ?> selected <?php endif ?>>HiFIBerry Amp</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>HiFIBerry DAC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Lite</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Pro XLR</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus RTC</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Standard</option>
-						<option value="hifiberry-dac, 384k" <?php if($this->i2smodule === 'hifiberry-dac, 384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>HiFIBerry DAC Plus Zero</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus, unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus, unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>

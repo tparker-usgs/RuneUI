@@ -71,6 +71,7 @@ while (1) {
 				$forceupdate = 0;
 				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
 				ui_update($redis, $socket, 0);
+				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 			}
 			$status = array();
 			$status = _parseStatusResponse($redis, MpdStatus($socket));
@@ -80,7 +81,12 @@ while (1) {
 			$redis->set('lastsongid', $status['songid']);
 			$redis->set('pl_length', $status['playlistlength']);
 			if (!empty($redis->get('lastmpdvolume'))) {
-				sysCmd('mpc volume '.$redis->get('lastmpdvolume'));
+				$lastmpdvolume = $redis->get('lastmpdvolume');
+				do {
+					sleep(3);
+					// retry until MPD is up and returns the requested volume
+					$mpdvolume = trim(reset(sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
+				} while ($lastmpdvolume != $mpdvolume);
 			}
 			do {
 				// idle LOOP
@@ -102,6 +108,10 @@ while (1) {
 				//    runelog('---------------- PLAYLIST RENDER ----------------');
 				//}
 				
+				// store information for lyrics and info
+				$redis->hSet('lyrics', 'currentartist', $status['currentartist']);
+				$redis->hSet('lyrics', 'currentsong', $status['currentsong']);
+
 				if ($status['changed'] === 'mixer') {
 					//$redis->set('current_volume', $status['volume']);
 					if ($redis->get('ao') === 'PianoDACPlus' && $redis->hget('mpdconf', 'mixer_type') === 'hardware') {
@@ -133,7 +143,10 @@ while (1) {
 				$redis->set('act_player_info', json_encode($status));
 				$errorcode = socket_last_error($socket);
 				runelog('MPD last socket error = ', $errorcode);
-				$redis->set('lastmpdvolume', $status['volume']);
+				$lastmpdvolume = preg_replace('/[^0-9]/', '', reset(sysCmd('mpc volume | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
+				if (!empty($lastmpdvolume)) {
+					$redis->set('lastmpdvolume', $lastmpdvolume);
+				}
 			} while (($errorcode === 0) && ($redis->get('activePlayer') === 'MPD'));
 
 			// close Redis connection
@@ -145,6 +158,7 @@ while (1) {
 			if ($forceupdate !== 0) {
 				$forceupdate = 0;
 				runelog('----------------------------------- FORCE UPDATE -----------------------------------');
+				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
 			$status = array();
@@ -154,6 +168,11 @@ while (1) {
 				ui_render('playback', json_encode($status));
 				runelog('rune_PL_wrk: UI JSON', $status);
 				runelog('rune_PL_wrk: close SPOP socket');
+
+				// store information for lyrics and info
+				$redis->hSet('lyrics', 'currentartist', $status['currentartist']);
+				$redis->hSet('lyrics', 'currentsong', $status['currentsong']);
+				$redis->hSet('lyrics', 'currentalbum', $status['currentalbum']);
 
 				// save JSON response for extensions
 				$status['actPlayer'] = "Spotify";
@@ -188,10 +207,12 @@ while (1) {
 				$status['currentalbum'] = "-----";
 				$status['currentsong'] = "-----";
 				$status['actPlayer'] = "Airplay";
+				$status['radioname'] = null;
+				$status['OK'] = null;
 				// save JSON response for extensions
 				$redis->set('act_player_info', json_encode($status));
 				ui_render('playback', json_encode($status));
-				//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
 			do {

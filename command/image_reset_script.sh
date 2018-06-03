@@ -37,6 +37,7 @@ redis-cli del mpdconf
 redis-cli del jamendo
 redis-cli del dirble
 redis-cli del samba
+redis-cli del lyrics
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
@@ -54,8 +55,10 @@ git stash
 cd /home
 #
 # remove any git or samba passwords/email
-git config -f /var/www/.git/config user.name ""
-git config -f /var/www/.git/config user.email ""
+cd /srv/http/
+git config user.name ""
+git config user.email ""
+cd /home
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 #
 # The following commands should also be run after a system update or any package updates

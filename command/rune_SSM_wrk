@@ -90,9 +90,11 @@ $status['currentartist'] = "Airplay";
 $status['currentalbum'] = "-----";
 $status['currentsong'] = "-----";
 $status['actPlayer'] = "Airplay";
+$status['radioname'] = null;
+$status['OK'] = null;
 // save JSON response for extensions
 ui_render('playback', json_encode($status));
-//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 sysCmdAsync('/var/www/command/ui_update_async');
 // --- WORKER MAIN LOOP --- //
 while (1) {
@@ -206,6 +208,8 @@ while (1) {
 						// artist
 						$status['currentartist'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentartist: ', $status['currentartist']);
+						// store information for lyrics and info
+						$redis->hSet('lyrics', 'currentartist', $status['currentartist']);
 						break;
 					case 'core astm':
 						// song time in milliseconds - do not use this, song time is derived from 'ssnc prgr' progress
@@ -215,11 +219,14 @@ while (1) {
 						// album
 						$status['currentalbum'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentalbum: ', $status['currentalbum']);
+						// store information for lyrics and info
 						break;
 					case 'core minm':
 						// song
 						$status['currentsong'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentsong: ', $status['currentsong']);
+						// store information for lyrics and info
+						$redis->hSet('lyrics', 'currentsong', $status['currentsong']);
 						break;
 					case 'core asgn':
 						// genre
@@ -339,6 +346,8 @@ while (1) {
 						$status['currentalbum'] = "-----";
 						$status['currentsong'] = "-----";
 						$status['actPlayer'] = "Airplay";
+						$status['radioname'] = null;
+						$status['OK'] = null;
 						// save JSON response for extensions
 						ui_render('playback', json_encode($status));
 						$redis->set('act_player_info', json_encode($status));

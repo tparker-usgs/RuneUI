@@ -55,8 +55,10 @@ $retval = sysCmd('systemctl is-enabled ntpd');
 if ($retval[0] === 'disabled')
     sysCmd('systemctl enable ntpd');
 $retval = sysCmd('systemctl is-enabled rune_PL_wrk');
-if ($retval[0] === 'disabled')
-    sysCmd('systemctl enable rune_PL_wrk');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable rune_PL_wrk');
+    sysCmd('systemctl stop rune_PL_wrk');
+}
 $retval = sysCmd('systemctl is-enabled redis');
 if ($retval[0] === 'disabled')
     sysCmd('systemctl enable redis');
@@ -102,7 +104,20 @@ if (FALSE === $redis->get('remoteSStime')) {
 if (FALSE === $redis->get('audio_on_off')) {
     $redis->set('audio_on_off', '0');
 }
-
+// Start MPD in order to set the startup volume (if set) then kill MPD
+$mpdstartvolume = $redis->get('mpd_start_volume');
+if ($mpdstartvolume != -1) {
+	sysCmd('pgrep -x mpd || systemctl start mpd');
+	do {
+		sleep(3);
+		// retry until MPD is up and returns the requested volume
+		$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
+		} while ($mpdstartvolume != $mpdvolume);
+}
+// When MPD is killed the state (including the volume) is saved
+sysCmd('mpd --kill');
+// Save the last known MPD volume
+$redis->set('lastmpdvolume', $mpd_start_volume);
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
@@ -296,6 +311,8 @@ if ($redis->get('dev') === '0') {
     runelog('prime PHP OPCache');
     sysCmdAsync("curl -s -X GET 'http://127.0.0.1/command/cachectl.php?action=prime'");
 }
+// start rune_PL_wrk
+sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
 runelog('--- NORMAL STARTUP');
 // --- NORMAL STARTUP //
 $start4 = microtime(true);
@@ -426,13 +443,20 @@ $redis->pconnect('/run/redis.sock');
                     break;
                 case 'gitpull':
                     runelog('wrk_SY: ', $job->wrkcmd);
+					$redis->sAdd('w_lock', $jobID);
                     // Update RuneUI
                     runelog('Update RuneUI');
+					// preperation: delete the MPD watchdog, set up git user-name and email (set to player ID), and stash
+					sysCmd('rm -f /var/www/command/mpd-watchdog');
+					sysCmd('cd /srv/http/ && git config user.name "'.$redis->get('playerid').'"');
+					sysCmd('cd /srv/http/ && git config user.email "'.$redis->get('playerid').'@runeaudio.com"');
+                    sysCmd('cd /srv/http/ && git stash');
                     // git pull
-                    $sysoutput = sysCmd('cd /var/www/ && git pull');
-                    sysCmd("curl -s -X GET 'http://localhost/clear'");
+                    $sysoutput = sysCmd('cd /srv/http/ && git pull');
+                    //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
                     ui_notify_async('Update RuneUI', 'RuneUI updated successfully<br>'.implode('<br>', $sysoutput), $jobID);
+					sleep(5);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':
@@ -778,7 +802,7 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
 					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
-					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
+					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode("<br>", $command)));
 					sleep(3);
 					ui_notify("Rern's Addons", "You may need to reboot...");
 					sleep(1);
@@ -799,7 +823,7 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
 					sleep(1);
 					$command = sysCmd("grep -v -e '^[[:space:]]*$' /home/rern/Rern_Addons.log | grep -E 'Menu|please'");
-					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9- ]/', '', implode("\n", $command)));
+					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode("<br>", $command)));
 					sleep(3);
 					ui_notify("Rern's Addons", "You may need to reboot...");
 					sleep(1);
