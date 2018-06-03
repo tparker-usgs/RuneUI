@@ -1265,10 +1265,6 @@ $redis->pconnect('/run/redis.sock');
         }
         if ($all_mounted === 1) {
             runelog('wrk_SY: all shares mounted successfully!');
-			// set mpd start volume
-			if ($redis->get('mpd_start_volume') !== '-1') {
-				sysCmd('mpc volume '.$redis->get('mpd_start_volume'));
-			}
             // start play if enabled
             if ($redis->get('mpd_autoplay') === '1') {
 				$redis->set('mpd_playback_laststate', 'playing');
