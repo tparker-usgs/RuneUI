@@ -12,8 +12,8 @@ set -x #echo all commands to cli
 #Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
 #
 # set up services
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk 
-systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_PL_wrk rune_SY_wrk sshd systemd-resolved
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk
+systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_SY_wrk sshd systemd-resolved
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli
 systemctl unmask systemd-journald
 #
