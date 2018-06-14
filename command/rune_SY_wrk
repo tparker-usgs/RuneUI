@@ -105,19 +105,27 @@ if (FALSE === $redis->get('audio_on_off')) {
     $redis->set('audio_on_off', '0');
 }
 // Start MPD in order to set the startup volume (if set) then kill MPD
+sysCmd('pgrep -x mpd || systemctl start mpd');
 $mpdstartvolume = $redis->get('mpd_start_volume');
 if ($mpdstartvolume != -1) {
-	sysCmd('pgrep -x mpd || systemctl start mpd');
 	do {
-		sleep(3);
+		sleep(2);
 		// retry until MPD is up and returns the requested volume
 		$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-		} while ($mpdstartvolume != $mpdvolume);
+	} while ($mpdstartvolume != $mpdvolume);
+	// When MPD is killed the state (including the volume) is saved
+	sysCmd('mpd --kill');
+} else {
+	do {
+		sleep(2);
+		// retry until MPD is up and returns the a volume value
+		$mpdvolume = trim(reset(sysCmd('mpc volume | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
+	} while (!is_numeric($mpdvolume));
+	// stop mpd
+	sysCmd('systemctl stop mpd');
 }
-// When MPD is killed the state (including the volume) is saved
-sysCmd('mpd --kill');
 // Save the last known MPD volume
-$redis->set('lastmpdvolume', $mpd_start_volume);
+$redis->set('lastmpdvolume', $mpdvolume);
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
@@ -271,27 +279,27 @@ if ($activePlayer === 'MPD') {
     // start upmpdcli
     if ($redis->hGet('dlna', 'enable') === '1') {
         runelog("service: UPMPDCLI start");
-        sysCmd('systemctl start upmpdcli');
+        sysCmd('pgrep -x upmpdcli || systemctl start upmpdcli');
     }
     // start mpdscribble
     if ($redis->hGet('lastfm','enable') === '1') {
         runelog("service: MPDSCRIBBLE start");
-        sysCmd('systemctl start mpdscribble');
+        sysCmd('pgrep -x mpdscribble || systemctl start mpdscribble');
     }
 } elseif ($activePlayer === 'Spotify') {
-    sysCmd('systemctl start spopd');
+    sysCmd('pgrep -x spopd || systemctl start spopd');
 }
 // refesh audio hardware status (soundcards and MPD config)
 wrk_mpdconf($redis,'refresh');
 // start shairport
 if ($redis->hGet('airplay', 'enable') === '1') {
     runelog("service: SHAIRPORT start",'');
-    sysCmd('systemctl start shairport-sync');
+    sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
 }
 // start udevil
 if ($redis->get('udevil') === '1') {
     runelog("service: UDEVIL start",'');
-    sysCmd('systemctl start udevil');
+    sysCmd('pgrep -x udevil || systemctl start udevil');
 }
 // read system network interfaces details
 // wrk_netconfig($redis,'setnics');
@@ -304,7 +312,8 @@ if ($redis->get('udevil') === '1') {
 runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
 sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
 // start php-fpm
-sysCmd('systemctl start php-fpm');
+sysCmd('pgrep -x php-fpm || systemctl start php-fpm');
+sleep(2);
 // PHP 5.5 OPCache
 if ($redis->get('dev') === '0') {
     // prime PHP OPCache
@@ -322,7 +331,7 @@ runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
 // call xinit for local browser
 if ($redis->get('local_browser') === '1' && file_exists('/usr/bin/xinit')) {
-    sysCmdAsync('systemctl start local-browser');
+    sysCmdAsync('pgrep -x local-browser || systemctl start local-browser');
 }
 
 // turn wifi power saving off
