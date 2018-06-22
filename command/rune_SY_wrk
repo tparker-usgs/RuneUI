@@ -50,25 +50,37 @@ if(file_exists('/srv/http/command/update_os'))
     updateOS();
 }
 
-// test if all services are enabled
+// test if important services are enabled/disabled
+$retval = sysCmd('systemctl is-enabled systemd-timesyncd');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable dhcpcd');
+	sysCmd('systemctl stop dhcpcd');
+}
 $retval = sysCmd('systemctl is-enabled ntpd');
-if ($retval[0] === 'disabled')
+if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable ntpd');
+    sysCmd('systemctl start ntpd');
+}
 $retval = sysCmd('systemctl is-enabled rune_PL_wrk');
 if ($retval[0] === 'enabled') {
     sysCmd('systemctl disable rune_PL_wrk');
     sysCmd('systemctl stop rune_PL_wrk');
 }
 $retval = sysCmd('systemctl is-enabled redis');
-if ($retval[0] === 'disabled')
+if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable redis');
+    sysCmd('systemctl start redis');
+}
 $retval = sysCmd('systemctl is-enabled nginx');
-if ($retval[0] === 'disabled')
+if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable nginx');
-//$retval = sysCmd('systemctl is-enabled dhcpcd');
-//if ($retval[0] === 'disabled')
-//    sysCmd('systemctl enable dhcpcd');
-
+    sysCmd('systemctl enable nginx');
+}
+$retval = sysCmd('systemctl is-enabled dhcpcd');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable dhcpcd');
+	sysCmd('systemctl stop dhcpcd');
+}
 // stop php-fpm
 sysCmd('systemctl stop php-fpm');
 // setup /run dir
@@ -107,25 +119,39 @@ if (FALSE === $redis->get('audio_on_off')) {
 // Start MPD in order to set the startup volume (if set) then kill MPD
 sysCmd('pgrep -x mpd || systemctl start mpd');
 $mpdstartvolume = $redis->get('mpd_start_volume');
+// sometimes mpd fails to start correctly (e.g. when the incorrect audio card overlay is specified)
+// then it will never return a volume value so limit the number of retries with a counter
+$retries_volume = 0;
 if ($mpdstartvolume != -1) {
 	do {
 		sleep(2);
 		// retry until MPD is up and returns the requested volume
 		$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-	} while ($mpdstartvolume != $mpdvolume);
+		$retries_volume++;
+	} while (($mpdstartvolume != $mpdvolume) && ($retries_volume < 20));
 	// When MPD is killed the state (including the volume) is saved
 	sysCmd('mpd --kill');
 } else {
 	do {
 		sleep(2);
-		// retry until MPD is up and returns the a volume value
+		// retry until MPD is up and returns the any valid volume value
 		$mpdvolume = trim(reset(sysCmd('mpc volume | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-	} while (!is_numeric($mpdvolume));
+		$retries_volume++;
+	} while ((!is_numeric($mpdvolume)) && ($retries_volume < 20));
 	// stop mpd
 	sysCmd('systemctl stop mpd');
 }
 // Save the last known MPD volume
-$redis->set('lastmpdvolume', $mpdvolume);
+if ($retries_volume < 20) {
+	// correctly set
+	$redis->set('lastmpdvolume', $mpdvolume);
+} else if ($mpdstartvolume != -1) {
+	// failed to set it, but start volume has a value
+	$redis->set('lastmpdvolume', $mpdstartvolume);
+} else {
+	// set it to 40% when we don't have a value
+	$redis->set('lastmpdvolume', 40);
+}
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
@@ -182,8 +208,7 @@ if ($playerid_db === '') {
     wrk_netconfig($redis,'reset');
     // reset sourcecfg to defaults
     runelog('reset sourcecfg to defaults');
-    sysCmd('systemctl stop mpd');
-	sysCmd('systemctl stop ashuffle');
+	wrk_mpdconf($redis,'stop');
     wrk_sourcecfg($redis,'reset');
     // reset Webradios
     $redis->del('webradios');
@@ -208,6 +233,28 @@ if ($playerid_db === '') {
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl restart rune_SY_wrk');
     // --- RUNEAUDIO FIRST RUN PROCESS //
+} else if ($redis->hGet('mpdconf', 'version') != trim(reset(sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '")))) {
+    // MPD VERSION HAS CHANGED PROCES--- //
+    runelog('>>>>>>MPD VERSION HAS CHANGED PROCESS ---');
+	// stop MPD and associated services
+    wrk_mpdconf($redis,'stop');
+    // reset mpdconf to defaults
+    runelog('reset mpdconf to defaults');
+    wrk_mpdconf($redis,'reset');
+	// reset sourcecfg to defaults
+    runelog('reset sourcecfg to defaults');
+    wrk_sourcecfg($redis,'reset');
+    // reconnect to new instance of MPD
+    sysCmd('pgrep -x mpd || systemctl start mpd');
+	// ashuffle gets started automatically
+    $mpd = openMpdSocket('/run/mpd.sock', 0);
+    // clear MPD database
+    sendMpdCommand($mpd,'update');
+    sleep(1);
+    runelog('--- MPD VERSION HAS CHANGED PROCESS');
+    // invoke rune_SY_wrk respawn
+    sysCmd('systemctl restart rune_SY_wrk');
+    // --- MPD VERSION HAS CHANGED PROCESS//
 } else {
     runelog('--- INITIALIZE ENVIRONMENT');
     // --- INITIALIZE ENVIRONMENT //
@@ -271,26 +318,12 @@ if ($redis->get('i2smodule') !== 'none') {
 	}
     if ($loadi2s === true) wrk_i2smodule($redis, $redis->get('i2smodule'));
 }
-// start player backend
-if ($activePlayer === 'MPD') {
-    sysCmd('pgrep -x mpd || systemctl start mpd');
-	// ashuffle gets started automatically
-    usleep(500000);
-    // start upmpdcli
-    if ($redis->hGet('dlna', 'enable') === '1') {
-        runelog("service: UPMPDCLI start");
-        sysCmd('pgrep -x upmpdcli || systemctl start upmpdcli');
-    }
-    // start mpdscribble
-    if ($redis->hGet('lastfm','enable') === '1') {
-        runelog("service: MPDSCRIBBLE start");
-        sysCmd('pgrep -x mpdscribble || systemctl start mpdscribble');
-    }
-} elseif ($activePlayer === 'Spotify') {
+// Start and refresh MPD (audio hardware status - soundcards and MPD config)
+wrk_mpdconf($redis,'refresh');
+// start Spotify
+if ($activePlayer === 'Spotify') {
     sysCmd('pgrep -x spopd || systemctl start spopd');
 }
-// refesh audio hardware status (soundcards and MPD config)
-wrk_mpdconf($redis,'refresh');
 // start shairport
 if ($redis->hGet('airplay', 'enable') === '1') {
     runelog("service: SHAIRPORT start",'');
@@ -1285,7 +1318,7 @@ $redis->pconnect('/run/redis.sock');
             usleep(500000);
         }
     }
-	// The following are heavy on cpu time, run then only on every 15th cycle (= every 7 seconds)
+	// The following parts are heavy on cpu time, run then only on every 15th cycle (= every +/-7 seconds)
 	// this will allow the normal queued actions to be more responsive, waiting only 0,5 seconds in sleep state
 	if ($savecpu++ > 15) {
 		$savecpu = 0;
@@ -1296,18 +1329,26 @@ $redis->pconnect('/run/redis.sock');
 			if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
 				// file found
 				$redis->set('last_pl_randomfile', 'exists');
+				// clear the cache for the next time round - the function file_exists() uses cached information
+				clearstatcache();
 			} else {
 				// no file found
 				if ($redis->get('last_pl_randomfile') === 'exists') {
 					// but the file was there the last time, so reset ashuffle
+					// first delete the symlink, could be the symlink points to a non existing playlist (the function file_exists() will return false for this)
+					// use unlink in place of rm to automatically clear the cache
+					unlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
 					// just stop ashuffle, it will start itself automatically (without a playlist random file)
 					sysCmd('systemctl stop ashuffle');
+					sleep(2);
 					sysCmd('systemctl daemon-reload');
+					sleep(2);
 				}
 				$redis->set('last_pl_randomfile', 'none');
+				// no cache is stored for non-existant files
 			}
 		}
-		// start Global Random if enabled - check continually ashuffle get stopped for lots of reasons
+		// start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
 		// this is the only place where ashuffle it is started
 		if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
 			if (sysCmd('systemctl is-active ashuffle') == 'active') {
@@ -1327,7 +1368,7 @@ $redis->pconnect('/run/redis.sock');
 		// test only when something is playing and at a maximum rate of once per 19,5 minutes (set by the value of $smartctl_check_minutes)
 		// why test only when something is playing?
 		//	a) someone needs see the error messages and 
-		//  b) most hard disks will be usb drives which sleep when not in use, let them sleep
+		//  b) most hard disks will be usb drives which go to sleep when not in use, let them sleep
 		$smartctl_delta_minutes = round((microtime(true) - $smartctl_microtime_then)/60);
 		if ($smartctl_delta_minutes > $smartctl_check_minutes) {
 			// more than check minutes have past
