@@ -1341,7 +1341,13 @@ function waitSyWrk($redis, $jobID)
 
 function getmac($nicname)
 {
-    $mac = file_get_contents('/sys/class/net/'.$nicname.'/address');
+    if (file_exists('/sys/class/net/'.$nicname.'/address')) {
+		// get the nic address if it exists
+		$mac = file_get_contents('/sys/class/net/'.$nicname.'/address');
+	} else {
+		// if not, get the first valid nic address (a Zero has no internal eth0 network adaptor)
+		$mac = trim(reset(sysCmd('cat /sys/class/net/*/address | grep -v 00:00:00:00')));
+	}
     $mac = strtolower($mac);
     runelog('getmac('.$nicname.'): ', $mac);
     return trim($mac);
@@ -2273,14 +2279,25 @@ if ($action === 'reset') {
             $redis->hSet('mpdconf', 'mixer_type', 'software');
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
-            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');			
-			// for soxr using MPD v0.19 it it difficult to see if the package has been built with the correct parameters
-			// when MPD v0.20 and higher is exclusively used the next line should be replaced with: 
-			// $count = sysCmd("mpd --version | grep -c 'soxr'")
-			$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
+            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			// if MPD has been built with SoXr support use it
+			// it was introduced in v0.19 but is difficult to detect, search for soxr in the binary
+			// for v0.20 and higher SoXr is reported in the --version list if it was included in the build
+			if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
+				// MPD version is higher than 0.20
+				$count = sysCmd("mpd --version | grep -c 'soxr'");
+			} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
+				// MPD version is higher than 0.19 but lower than 0.20
+				$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
+			} else {
+				// MPD version is lower than 0.19
+				$count = 0;
+			}
 			if ($count > 0) {
-				// the word soxr has been found in the mpd binary
+				// SoXr has been built with MPD, so use it
 				$redis->hSet('mpdconf', 'soxr', 'very high');
+			} else {
+				$redis->hDel('mpdconf', 'soxr');
 			}
             wrk_mpdconf($redis, 'writecfg');
             break;
@@ -2488,6 +2505,8 @@ if ($action === 'reset') {
             } else {
                 runelog('mpd.conf advanced mode ON');
             }
+			// write the changes to the Airplay (shairport-sync) configuration file
+            wrk_shairport($redis, $ao);
             break;
         case 'update':
             foreach ($args as $param => $value) {
@@ -2511,7 +2530,6 @@ if ($action === 'reset') {
                 // $mpdout = $interface_details->sysname;
             }
         	wrk_mpdconf($redis, 'writecfg');
-            wrk_shairport($redis, $args);
             // toggle playback state
             if (wrk_mpdPlaybackStatus($redis) === 'playing') {
                 syscmd('mpc toggle');
@@ -2540,23 +2558,26 @@ if ($action === 'reset') {
             wrk_mpdconf($redis, 'restart');
             break;
         case 'start':
+			// reload systemd daemon to activate any changed configuration files
+			sysCmd('systemctl daemon-reload');
             $activePlayer = $redis->get('activePlayer');
             if ($activePlayer === 'MPD') {
-                sysCmd('systemctl start mpd');
+                sysCmd('systemctl start mpd || systemctl restart mpd');
+				sleep(2);
 				// ashuffle gets started automatically
 				// restore the player status
 				wrk_mpdRestorePlayerStatus($redis);
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
-                    sysCmd('systemctl restart mpdscribble');
+                    sysCmd('systemctl start mpdscribble || systemctl restart mpdscribble');
                 }
                 // restart upmpdcli
                 if ($redis->hGet('dlna', 'enable') === '1') {
-                    sysCmd('systemctl restart upmpdcli');
+                    sysCmd('systemctl start upmpdcli || systemctl restart upmpdcli');
                 }
-                // set process priority
-                sysCmdAsync('sleep 1 && rune_prio nice');
-            }
+			}
+			// set process priority
+			sysCmdAsync('sleep 1 && rune_prio nice');
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
@@ -2566,6 +2587,8 @@ if ($action === 'reset') {
             sleep(1);
             sysCmd('systemctl stop mpd');
 			sysCmd('systemctl stop ashuffle');
+			sysCmd('systemctl stop mpdscribble');
+			sysCmd('systemctl stop upmpdcli');
             break;
         case 'restart':
             wrk_mpdconf($redis, 'stop');

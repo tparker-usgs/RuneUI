@@ -40,7 +40,7 @@ function redisDatastore($redis,$action) {
     switch ($action) {
         case 'reset':
             // kernel
-            $redis->set('kernel', 'Linux runeaudio 4.14.24-1-ARCH');
+            $redis->set('kernel', 'Linux runeaudio 4.14.34-1-ARCH');
             $redis->set('i2smodule', 'none');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
@@ -111,7 +111,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('lastfm', 'pass', 'pass');
             $redis->set('cmediafix', 0);
             $redis->set('globalrandom', 0);
-            $redis->set('stoppedPlayer', '');    
+            $redis->set('stoppedPlayer', '');
             // default MPD config
             $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
@@ -141,7 +141,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
 			// default lyrics and info
-			$redis->hSet('lyrics', 'currentartist', '']);
+			$redis->hSet('lyrics', 'currentartist', '');
 			$redis->hSet('lyrics', 'currentsong', '');
 			$redis->del('soxrmpdonoff');
 			$redis->set('localSStime', -1);
@@ -176,7 +176,7 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'gearhead-janui-20180512');
+            $redis->set('buildversion', 'gearhead-janui-20180618');
             $redis->set('release', '0.5');
             // HW platform data
             // $redis->set('playerid', '');
@@ -290,7 +290,7 @@ function redisDatastore($redis,$action) {
             break;
         case 'check':
             // kernel
-            $redis->get('kernel') || $redis->set('kernel', 'Linux runeaudio 4.14.24-1-ARCH');
+            $redis->get('kernel') || $redis->set('kernel', 'Linux runeaudio 4.14.34-1-ARCH');
             $redis->get('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->get('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->get('activePlayer') || $redis->set('activePlayer', 'MPD');
@@ -391,7 +391,7 @@ function redisDatastore($redis,$action) {
             $redis->get('debug') || $redis->set('debug', 0);
             $redis->get('debugdata') || $redis->set('debugdata', '');
             $redis->get('opcache') || $redis->set('opcache', 1);
-            $redis->get('buildversion') || $redis->set('buildversion', 'gearhead-janui-20180512');
+            $redis->get('buildversion') || $redis->set('buildversion', 'gearhead-janui-20180618');
             // HW platform data
             $redis->get('playerid') || $redis->set('playerid', '');
             $redis->get('hwplatform') || $redis->set('hwplatform', '');
