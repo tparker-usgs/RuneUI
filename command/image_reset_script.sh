@@ -38,6 +38,9 @@ redis-cli del jamendo
 redis-cli del dirble
 redis-cli del samba
 redis-cli del lyrics
+redis-cli del nics
+redis-cli del addons
+redis-cli del addo
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
@@ -54,11 +57,13 @@ git pull
 git stash
 cd /home
 #
-# remove any git or samba passwords/email
+# remove any git user-names & email
 cd /srv/http/
 git config user.name ""
 git config user.email ""
 cd /home
+#
+# remove any samba passwords
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 #
 # The following commands should also be run after a system update or any package updates
@@ -129,11 +134,21 @@ rm zero.file
 sync
 cd /home
 #
-# reset root password & host information (icon-name, chassis and hostname)
+# reset root password
 echo -e "rune\nrune" | passwd root
+#
+# reset host information (icon-name, chassis and hostname)
 hostnamectl --static --transient --pretty set-icon-name multimedia-player
 hostnamectl --static --transient --pretty set-chassis embedded
 hostnamectl --static --transient --pretty set-hostname RuneAudio
+#
+# set timezone to -11 hours of GMT - any user adjustment will always go forward
+timedatectl set-timezone Pacific/Pago_Pago
+redis-cli set timezone "Pacific/Pago_Pago"
+#
+# shutdown redis and force a write all in-memory keys to disk (purges any cached values)
+redis-cli save
+redis-cli shutdown save
 #
 # shutdown & poweroff
 shutdown -P now

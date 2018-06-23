@@ -502,8 +502,8 @@ $redis->pconnect('/run/redis.sock');
                     $sysoutput = sysCmd('cd /srv/http/ && git pull');
                     //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
-                    ui_notify_async('Update RuneUI', 'RuneUI updated successfully<br>'.implode('<br>', $sysoutput), $jobID);
-					sleep(5);
+                    ui_notify('Update RuneUI', 'RuneUI updated successfully<br>'.implode('<br>', $sysoutput));
+					sleep(3);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':
@@ -511,13 +511,15 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					ui_notify('Settings - Change Hostname', 'it takes some time .....');
                     wrk_changeHostname($redis, $job->args);
-                    $hn = sysCmd('hostname');
-                    $redis->set('hostname', $hn[0]);
+                    $hn = reset(sysCmd('hostname'));
+                    $redis->set('hostname', $hn);
                     // update hash
                     $hash = md5_file('/etc/mpd.conf');
                     $redis->set('mpdconfhash', $hash);
                     // send notfy to UI
-                    ui_notify_async('Hostname', 'Hostname changed to:'.$hn[0], $jobID);
+                    //ui_notify_async('Hostname', 'Hostname changed to:'.$hn, $jobID);
+                    ui_notify('Hostname', 'Hostname changed to:'.$hn);
+					sleep(2);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'i2smodule':
