@@ -3409,10 +3409,21 @@ function wrk_NTPsync($ntpserver)
 {
     //debug
     runelog('NTP SERVER', $ntpserver);
-    // if (sysCmd('ntpdate '.$ntpserver)) {
-    if (sysCmdAsync('ntpdate '.$ntpserver)) {
+	// check that it is a valid ntp server
+	$return = ' '.reset(sysCmd('chronyc -d add server '.$ntpserver.' | grep OK'));
+    if (strpos($return, 'OK')) {
+        // add the server name to chrony.conf
+		$file = '/etc/chrony.conf';
+		// replace the line with 'server ' in the line 1 line after a line containing '# First ntp server is set in the RuneAudio Settings''
+        $newArray = wrk_replaceTextLine($file, '', 'server ', 'server '.$ntpserver.' iburst', '# First ntp server is set in the RuneAudio Settings', 1);
+        // Commit changes to /boot/config.txt
+        $fp = fopen($file, 'w');
+        $return = fwrite($fp, implode("", $newArray));
+        fclose($fp);
+		// return the valid ntp server name
         return $ntpserver;
     } else {
+		// invalid ftp server name, false returns a '' value
         return false;
     }
 }

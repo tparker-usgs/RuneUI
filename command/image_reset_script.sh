@@ -13,8 +13,8 @@ set -x #echo all commands to cli
 #
 # set up services
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd
-systemctl enable avahi-daemon haveged nginx ntpd php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd
+systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli
 #
 # remove user files and logs
@@ -86,6 +86,7 @@ cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
 cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
 cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
+cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 #
 # network
 rm -f /etc/netctl/*

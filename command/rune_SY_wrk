@@ -57,9 +57,14 @@ if ($retval[0] === 'enabled') {
 	sysCmd('systemctl stop dhcpcd');
 }
 $retval = sysCmd('systemctl is-enabled ntpd');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable ntpd');
+    sysCmd('systemctl stop ntpd');
+}
+$retval = sysCmd('systemctl is-enabled chronyd');
 if ($retval[0] === 'disabled') {
-    sysCmd('systemctl enable ntpd');
-    sysCmd('systemctl start ntpd');
+    sysCmd('systemctl enable chronyd');
+    sysCmd('systemctl start chronyd');
 }
 $retval = sysCmd('systemctl is-enabled rune_PL_wrk');
 if ($retval[0] === 'enabled') {
