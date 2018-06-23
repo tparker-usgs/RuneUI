@@ -85,6 +85,7 @@ cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supp
 cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
 cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
+cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
 #
 # network
 rm -f /etc/netctl/*
