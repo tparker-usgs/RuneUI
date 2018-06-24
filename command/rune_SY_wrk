@@ -1332,7 +1332,7 @@ $redis->pconnect('/run/redis.sock');
 		// Detect deletion of playlist random file
 		// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
 		// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
-		if (sysCmd('systemctl is-active ashuffle') == 'active') {
+		if (reset(sysCmd('systemctl is-active ashuffle')) == 'active') {
 			if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
 				// file found
 				$redis->set('last_pl_randomfile', 'exists');
