@@ -1360,7 +1360,7 @@ function wrk_avahiconfig($hostname)
         sysCmd('/usr/bin/cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service');
     }
     $file = '/etc/avahi/services/runeaudio.service';
-    $newArray = wrk_replaceTextLine($file, [],'replace-wildcards', '<name replace-wildcards="yes">RuneAudio ['.$hostname.'] ['.getmac('eth0').']</name>');
+    $newArray = wrk_replaceTextLine($file, '','replace-wildcards', '<name replace-wildcards="yes">RuneAudio ['.$hostname.'] ['.getmac('eth0').']</name>');
     // Commit changes to /etc/avahi/services/runeaudio.service
     $fp = fopen($file, 'w');
     fwrite($fp, implode("", $newArray));
@@ -2567,6 +2567,8 @@ if ($action === 'reset') {
 				// ashuffle gets started automatically
 				// restore the player status
 				wrk_mpdRestorePlayerStatus($redis);
+				// restart rune_PL_wrk
+				sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
                     sysCmd('systemctl start mpdscribble || systemctl restart mpdscribble');
@@ -2581,9 +2583,10 @@ if ($action === 'reset') {
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
-            $mpd = openMpdSocket('/run/mpd.sock', 0);
-            sendMpdCommand($mpd, 'kill');
-            closeMpdSocket($mpd);
+            //$mpd = openMpdSocket('/run/mpd.sock', 0);
+            //sendMpdCommand($mpd, 'kill');
+            //closeMpdSocket($mpd);
+			sysCmd('mpd --kill');
             sleep(1);
             sysCmd('systemctl stop mpd');
 			sysCmd('systemctl stop ashuffle');
@@ -2956,6 +2959,8 @@ function wrk_sourcecfg($redis, $action, $args)
             sysCmd('systemctl start mpd');
 			// ashuffle gets started automatically
 			wrk_mpdRestorePlayerStatus($redis);
+			// restart rune_PL_wrk
+			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
@@ -3369,6 +3374,8 @@ function wrk_switchplayer($redis, $playerengine)
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl start upmpdcli');
             $redis->set('activePlayer', 'MPD');
 			wrk_mpdRestorePlayerStatus($redis);
+			// restart rune_PL_wrk
+			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $return = sysCmd('systemctl stop spopd');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3384,6 +3391,8 @@ function wrk_switchplayer($redis, $playerengine)
 			wrk_mpdPlaybackStatus($redis);
             $redis->set('activePlayer', 'Spotify');
             $return = sysCmd('systemctl stop mpd');
+			// restart rune_PL_wrk
+			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $redis->set('mpd_playback_status', 'stop');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3437,13 +3446,13 @@ function wrk_changeHostname($redis, $newhostname)
 		runelog('new hostname invalid', $newhostname);
 		return;
 	}
-	$shn = sysCmd('hostname');
-	$rhn = $redis->get('hostname');
-    runelog('current system hostname:', $shn[0]);
+	$shn = trim(reset(sysCmd('hostname')));
+	$rhn = trim($redis->get('hostname'));
+    runelog('current system hostname:', $shn);
 	runelog('current redis hostname :', $rhn);
 	runelog('new hostname           :', $newhostname);
     // update airplayname
-    if ($redis->hGet('airplay', 'name') === $rhn) {
+    if (trim($redis->hGet('airplay', 'name')) === $rhn) {
         $redis->hSet('airplay', 'name', $newhostname);
 		wrk_shairport($redis, $redis->get('ao'), $newhostname);
         if ($redis->hGet('airplay','enable') === '1') {
@@ -3452,7 +3461,7 @@ function wrk_changeHostname($redis, $newhostname)
 		}
     }
     // update dlnaname
-    if ($redis->hGet('dlna', 'name') === $rhn) {
+    if (trim($redis->hGet('dlna', 'name')) === $rhn) {
         $redis->hSet('dlna','name', $newhostname);
 		wrk_upmpdcli($redis, $newhostname);
 		if ($redis->hGet('dlna', 'enable') === '1') {
@@ -3462,9 +3471,9 @@ function wrk_changeHostname($redis, $newhostname)
     }
     // change system hostname
 	$redis->set('hostname', $newhostname);
-    sysCmd('hostnamectl  --static --transient --pretty set-hostname '.$newhostname);
+    sysCmd('hostnamectl  --static --transient --pretty set-hostname '.strtolower($newhostname));
     // update AVAHI serice data
-    wrk_avahiconfig($newhostname);
+    wrk_avahiconfig(strtolower($newhostname));
     // restart avahi-daemon
     sysCmd('systemctl restart avahi-daemon');
     // reconfigure MPD
@@ -3474,11 +3483,13 @@ function wrk_changeHostname($redis, $newhostname)
     // update zeroconfname in MPD configuration
     $redis->hMset('mpdconf','zeroconf_name', $newhostname);
     // rewrite mpd.conf file
-    wrk_mpdconf('/etc', $redis);
+    wrk_mpdconf($redis, 'refresh');
     // restart MPD
     sysCmd('pgrep -x mpd || systemctl start mpd');
 	// ashuffle gets started automatically
 	wrk_mpdRestorePlayerStatus($redis);
+	// restart rune_PL_wrk
+	sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
     // restart SAMBA
 	sysCmd('systemctl stop smbd nmbd');
 	if ($redis->get('dev') > 0) {

@@ -80,13 +80,15 @@ while (1) {
 			// store "lastsongid"
 			$redis->set('lastsongid', $status['songid']);
 			$redis->set('pl_length', $status['playlistlength']);
-			if (!empty($redis->get('lastmpdvolume'))) {
+			if ((!empty($redis->get('lastmpdvolume'))) && ($redis->hGet('mpdconf', 'mixer_type') != 'disabled')) {
 				$lastmpdvolume = $redis->get('lastmpdvolume');
+				$retries_volume = 0;
 				do {
 					sleep(3);
 					// retry until MPD is up and returns the requested volume
-					$mpdvolume = trim(reset(sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-				} while ($lastmpdvolume != $mpdvolume);
+					$mpdvolume = trim(reset(sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
+					$retries_volume++;
+				} while (($lastmpdvolume != $mpdvolume) && ($retries_volume < 20));
 			}
 			do {
 				// idle LOOP
@@ -143,7 +145,7 @@ while (1) {
 				$redis->set('act_player_info', json_encode($status));
 				$errorcode = socket_last_error($socket);
 				runelog('MPD last socket error = ', $errorcode);
-				$lastmpdvolume = preg_replace('/[^0-9]/', '', reset(sysCmd('mpc volume | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
+				$lastmpdvolume = preg_replace('/[^0-9]/', '', reset(sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
 				if (!empty($lastmpdvolume)) {
 					$redis->set('lastmpdvolume', $lastmpdvolume);
 				}

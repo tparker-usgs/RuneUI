@@ -140,7 +140,7 @@ echo -e "rune\nrune" | passwd root
 # reset host information (icon-name, chassis and hostname)
 hostnamectl --static --transient --pretty set-icon-name multimedia-player
 hostnamectl --static --transient --pretty set-chassis embedded
-hostnamectl --static --transient --pretty set-hostname RuneAudio
+hostnamectl --static --transient --pretty set-hostname runeaudio
 #
 # set timezone to -11 hours of GMT - any user adjustment will always go forward
 timedatectl set-timezone Pacific/Pago_Pago

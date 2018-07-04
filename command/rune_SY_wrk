@@ -126,25 +126,29 @@ sysCmd('pgrep -x mpd || systemctl start mpd');
 $mpdstartvolume = $redis->get('mpd_start_volume');
 // sometimes mpd fails to start correctly (e.g. when the incorrect audio card overlay is specified)
 // then it will never return a volume value so limit the number of retries with a counter
-$retries_volume = 0;
-if ($mpdstartvolume != -1) {
-	do {
-		sleep(2);
-		// retry until MPD is up and returns the requested volume
-		$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-		$retries_volume++;
-	} while (($mpdstartvolume != $mpdvolume) && ($retries_volume < 20));
-	// When MPD is killed the state (including the volume) is saved
-	sysCmd('mpd --kill');
+if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
+	$retries_volume = 0;
+	if ($mpdstartvolume != -1) {
+		do {
+			sleep(2);
+			// retry until MPD is up and returns the requested volume
+			$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
+			$retries_volume++;
+		} while (($mpdstartvolume != $mpdvolume) && ($retries_volume < 20));
+		// When MPD is killed the state (including the volume) is saved
+		sysCmd('mpd --kill');
+	} else {
+		do {
+			sleep(2);
+			// retry until MPD is up and returns the any valid volume value
+			$mpdvolume = trim(reset(sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
+			$retries_volume++;
+		} while ((!is_numeric($mpdvolume)) && ($retries_volume < 20));
+		// stop mpd
+		sysCmd('systemctl stop mpd');
+	}
 } else {
-	do {
-		sleep(2);
-		// retry until MPD is up and returns the any valid volume value
-		$mpdvolume = trim(reset(sysCmd('mpc volume | grep "volume: " | cut -d ":" -f 2 | cut -d "%" -f 1')));
-		$retries_volume++;
-	} while ((!is_numeric($mpdvolume)) && ($retries_volume < 20));
-	// stop mpd
-	sysCmd('systemctl stop mpd');
+	$retries_volume = 20;
 }
 // Save the last known MPD volume
 if ($retries_volume < 20) {
@@ -234,6 +238,8 @@ if ($playerid_db === '') {
         // wrk_sysEnvCheck($arch,1);
     // reset Redis Player Datastore
     runelog('invoke Redis player datastore reset', sysCmd('/var/www/db/redis_datastore_setup reset'));
+	// reset avahi-daemon by setting the player host name
+	wrk_changeHostname($redis, $redis->get('hostname'));
     runelog('--- RUNEAUDIO FIRST RUN PROCESS');
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl restart rune_SY_wrk');
@@ -272,10 +278,12 @@ if ($playerid_db === '') {
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
-    $hn = sysCmd('hostname');
-    wrk_avahiconfig($hn[0]);
-    $redis->set('hostname', $hn[0]);
-    // check ENV files
+    $hn = trim(reset(sysCmd('hostname')));
+    wrk_avahiconfig($hn);
+	if (strtolower($hn) != strtolower(trim($redis->get('hostname')))) {
+		$redis->set('hostname', $hn);
+	}
+	// check ENV files
     if ($arch !== '--') {
         // wrk_sysOBEnvCheck($arch,0);
     }
@@ -511,8 +519,12 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					ui_notify('Settings - Change Hostname', 'it takes some time .....');
                     wrk_changeHostname($redis, $job->args);
-                    $hn = reset(sysCmd('hostname'));
-                    $redis->set('hostname', $hn);
+                    $hn = trim(reset(sysCmd('hostname')));
+					if (strtolower($hn) === strtolower(trim($job->args))){
+						$redis->set('hostname', trim($job->args));
+					} else {
+						$redis->set('hostname', $hn);
+					}
                     // update hash
                     $hash = md5_file('/etc/mpd.conf');
                     $redis->set('mpdconfhash', $hash);
@@ -603,7 +615,7 @@ $redis->pconnect('/run/redis.sock');
                             fwrite($fp, implode("", $newArray));
                             fclose($fp);
                             if ($redis->get('activePlayer') === 'Spotify') {
-                                sysCmd('systemctl restart spopd');
+                                sysCmd('systemctl restart spopd || systemctl restart spopd');
                             }
                         }
                         sysCmd('systemctl stop mpdscribble');
@@ -1045,14 +1057,14 @@ $redis->pconnect('/run/redis.sock');
                     if ($job->action === 'enable') {
                         wrk_opcache('enable', $redis);
                         runelog('PHP 5.5 OPcache enabled');
-                        sysCmdAsync('systemctl restart php-fpm', 5);
+                        sysCmdAsync('systemctl restart php-fpm || systemctl start php-fpm', 5);
                         // wrk_opcache('forceprime');
                         // send notfy to UI
                         ui_notify_async('PHP OpCache', 'cache enabled', $jobID);
                     } else {
                         wrk_opcache('disable', $redis);
                         runelog('PHP 5.5 OPcache disabled');
-                        sysCmdAsync('systemctl restart php-fpm', 5);
+                        sysCmdAsync('systemctl restart php-fpm || systemctl start php-fpm', 5);
                         // send notfy to UI
                         ui_notify_async('PHP OpCache', 'cache disabled', $jobID);
                     }
@@ -1071,7 +1083,7 @@ $redis->pconnect('/run/redis.sock');
                 case 'phprestart':
 					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    sysCmd('systemctl restart php-fpm');
+                    sysCmd('systemctl restart php-fpm || systemctl start php-fpm');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'poweroff':

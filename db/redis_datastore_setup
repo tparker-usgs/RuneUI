@@ -140,6 +140,11 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			$redis->set('mpd_start_volume', 40);
+			$redis->set('lastmpdvolume', 40);
+			$redis->set('mpd_autoplay', 0);
+			$redis->set('globalrandom', 0);
+			$redis->set('addrandom', 0);
 			// default lyrics and info
 			$redis->hSet('lyrics', 'currentartist', '');
 			$redis->hSet('lyrics', 'currentsong', '');
@@ -386,6 +391,11 @@ function redisDatastore($redis,$action) {
             $redis->get('netconf_advanced') || $redis->set('netconf_advanced', 0);
             // MPD parameters
             $redis->get('mpd_playback_status') || $redis->set('mpd_playback_status', '');
+			$redis->get('mpd_start_volume') || $redis->set('mpd_start_volume', 40);
+			$redis->get('lastmpdvolume') || $redis->set('lastmpdvolume', 40);
+			$redis->get('mpd_autoplay') || $redis->set('mpd_autoplay', 0);
+			$redis->get('globalrandom') || $redis->set('globalrandom', 0);
+			$redis->get('addrandom') || $redis->set('addrandom', 0);
             // developer parameters
             $redis->get('dev') || $redis->set('dev', 0);
             $redis->get('debug') || $redis->set('debug', 0);

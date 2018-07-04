@@ -271,8 +271,8 @@ function debug_data($redis)
     $command = sysCmd('dmesg');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### systemd (journal) messages (journalctl | grep -i 'Starting\|Started\|Stopped\|Error\|Warning') ######\n";
-    $command = sysCmd('journalctl | grep -i "Starting\|Started\|Stopped\|Error\|Warning"');
+    $output .= "###### systemd (journal) messages (journalctl | grep -i 'start\|stop\|reached\|error\|warning\|loaded\|loading') ######\n";
+    $command = sysCmd('journalctl | grep -i "start\|stop\|reached\|error\|warning\|loaded\|loading"');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
     $output .= "###### PHP backend ######\n";
