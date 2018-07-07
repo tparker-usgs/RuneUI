@@ -428,8 +428,8 @@ function redisDatastore($redis,$action) {
             $redis->get('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
 			// pre-installed Rern's add-ons
 			$redis->hGet('addons', 'update') || $redis->hSet('addons', 'update', '0');
-			$redis->hGet('addons', 'back',) || $redis->hSet('addons', 'back', '20170901');
-			$redis->hGet('addons', 'font',) || $redis->hSet('addons', 'font', '20170901');
+			$redis->hGet('addons', 'back') || $redis->hSet('addons', 'back', '20170901');
+			$redis->hGet('addons', 'font') || $redis->hSet('addons', 'font', '20170901');
             break;
     }
 }
