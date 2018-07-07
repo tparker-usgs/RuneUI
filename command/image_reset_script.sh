@@ -27,6 +27,7 @@ rm -rf /mnt/MPD/LocalStorage/*
 rm -rf /mnt/MPD/Webradio/*
 rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
+rm -rf /srv/http/tmp/backup*
 #
 # redis reset
 redis-cli del AccessPoint
