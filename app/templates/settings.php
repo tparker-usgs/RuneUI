@@ -545,19 +545,19 @@
             </div>
         </fieldset>
     </form>
-    <form class="form-horizontal" method="post">
+    <form class="form-horizontal" id="restore">
         <fieldset>
             <div class="form-group">
                 <label class="control-label col-sm-2">Restore player config</label>
                 <div class="col-sm-10">
                     <p>
                         <span id="btn-backup-browse" class="btn btn-default btn-lg btn-file">
-                            Browse... <input type="file">
+                            Browse... <input type="file" name="filebackup">
                         </span> 
                         <span id="backup-file"></span>
                         <span class="help-block">Restore a previously exported backup</span>
                     </p>
-                    <button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" type="submit" disabled>Upload</button>
+                    <button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
                 </div>
             </div>
 		</fieldset>

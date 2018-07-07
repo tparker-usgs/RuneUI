@@ -1438,8 +1438,21 @@ function wrk_backup($bktype)
         $filepath = "/run/totalbackup_".date('Y-m-d').".tar.gz";
         $cmdstring = "tar -czf ".$filepath." /var/lib/mpd /boot/cmdline.txt /var/www /etc /var/lib/redis/rune.rdb";
     } else {
-        $filepath = "/run/backup_".date('Y-m-d').".tar.gz";
-        $cmdstring = "tar -czf ".$filepath." /var/lib/mpd /etc/mpd.conf /var/lib/redis/rune.rdb /etc/netctl /etc/mpdscribble.conf /etc/spop";
+        $filepath = "/srv/http/tmp/backup_".date("Y-m-d").".tar.gz";
+        $cmdstring = "rm -f /srv/http/tmp/backup_* &> /dev/null; ".
+            "redis-cli save; ".
+            "bsdtar -czpf $filepath".
+            " --exclude /etc/netctl/examples ".
+            "/etc/netctl ".
+            "/mnt/MPD/Webradio ".
+            "/var/lib/redis/rune.rdb ".
+            "/var/lib/mpd ".
+            "/etc/mpd.conf ".
+            "/etc/mpdscribble.conf ".
+            "/etc/spop"
+        ;
+//        $filepath = "/run/backup_".date('Y-m-d').".tar.gz";
+//        $cmdstring = "tar -czf ".$filepath." /var/lib/mpd /etc/mpd.conf /var/lib/redis/rune.rdb /etc/netctl /etc/mpdscribble.conf /etc/spop";
     }
     sysCmd($cmdstring);
     return $filepath;
