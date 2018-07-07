@@ -870,13 +870,7 @@ $redis->pconnect('/run/redis.sock');
 					unset($command);
 					$redis->hSet('addons', 'update', '0');
 					$redis->hSet('addons', 'back', '20170901');
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 					$redis->hSet('addons', 'font', '20170901');
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 					$redis->sRem('w_lock', $jobID);
 					break;
 				case 'rernreinstall':
@@ -900,13 +894,7 @@ $redis->pconnect('/run/redis.sock');
 					unset($command);
 					$redis->hSet('addons', 'update', '0');
 					$redis->hSet('addons', 'back', '20170901');
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 					$redis->hSet('addons', 'font', '20170901');
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 					$redis->sRem('w_lock', $jobID);
 					break;
                 case 'xorgserverstart':

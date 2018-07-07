@@ -221,13 +221,7 @@ function redisDatastore($redis,$action) {
 			// pre-installed Rern's add-ons
 			$redis->hSet('addons', 'update', '0');
 			$redis->hSet('addons', 'back', '20170901');
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 			$redis->hSet('addons', 'font', '20170901');
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
             // PHP precache (prime) scripts
             $redis->del('php_opcache_prime');
             $transaction = $redis->multi();
@@ -435,13 +429,7 @@ function redisDatastore($redis,$action) {
 			// pre-installed Rern's add-ons
 			$redis->hGet('addons', 'update') || $redis->hSet('addons', 'update', '0');
 			$redis->hGet('addons', 'back',) || $redis->hSet('addons', 'back', '20170901');
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 			$redis->hGet('addons', 'font',) || $redis->hSet('addons', 'font', '20170901');
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
             break;
     }
 }
