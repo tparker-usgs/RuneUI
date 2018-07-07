@@ -871,7 +871,10 @@ $redis->pconnect('/run/redis.sock');
 					$redis->hSet('addons', 'update', '0');
 					$redis->hSet('addons', 'back', '20170901');
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 					$redis->hSet('addons', 'font', '20170901');
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 					$redis->sRem('w_lock', $jobID);
@@ -898,7 +901,10 @@ $redis->pconnect('/run/redis.sock');
 					$redis->hSet('addons', 'update', '0');
 					$redis->hSet('addons', 'back', '20170901');
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 					$redis->hSet('addons', 'font', '20170901');
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 					$redis->sRem('w_lock', $jobID);
