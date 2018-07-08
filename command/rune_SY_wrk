@@ -448,7 +448,7 @@ $redis->pconnect('/run/redis.sock');
                     break;
                 case 'backup':
                     runelog('wrk_SY: ', $job->wrkcmd);
-                    $backup = wrk_backup();
+                    $backup = wrk_backup($redis);
                     $redis->hSet('w_msg', $jobID, $backup);
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -1122,11 +1122,11 @@ $redis->pconnect('/run/redis.sock');
                     sysCmd('export DISPLAY=:0; xset dpms force off');
                     $redis->sRem('w_lock', $jobID);
                     break;
-                // case 'restore':
-                    // runelog('wrk_SY: ', $job->wrkcmd);
-                    // wrk_restore("/run/".$job->args);
-                    // $redis->sRem('w_lock', $jobID);
-                    // break;
+                //case 'restore':
+                    //runelog('wrk_SY: ', $job->wrkcmd);
+                    //wrk_restore("/run/".$job->args);
+                    //$redis->sRem('w_lock', $jobID);
+                    //break;
                 case 'spotify':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -1217,7 +1217,7 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'webradio':
-                runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     $mpd = openMpdSocket('/run/mpd.sock');
                     if ($job->action === 'add') {

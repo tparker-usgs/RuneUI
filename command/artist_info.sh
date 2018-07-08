@@ -1,6 +1,6 @@
 #!/bin/bash
 
-artist_name=`redis-cli hget lyrics currentartist`
+artist_name=$( redis-cli hget lyrics currentartist )
 if [ -z "$artist_name" ]
 then
   artist_name=`mpc -f %name% | head -n 1`

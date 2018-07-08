@@ -1432,27 +1432,61 @@ function wrk_replaceTextLine($file, $inputArray, $strfind, $strrepl, $linelabel 
 }
 
 // make device TOTALBACKUP (with switch DEV copy all /etc)
-function wrk_backup($bktype)
+function wrk_backup($redis, $bktype = null)
 {
     if ($bktype === 'dev') {
-        $filepath = "/run/totalbackup_".date('Y-m-d').".tar.gz";
-        $cmdstring = "tar -czf ".$filepath." /var/lib/mpd /boot/cmdline.txt /var/www /etc /var/lib/redis/rune.rdb";
+        $filepath = "/srv/http/tmp/totalbackup_".date("Y-m-d").".tar.gz";
+        $cmdstring = "rm -f /srv/http/tmp/totalbackup_* &> /dev/null;".
+            " redis-cli save;".
+            " bsdtar -czpf ".$filepath.
+            " /etc".
+            " /mnt/MPD/Webradio".
+            " /var/lib/redis/rune.rdb".
+            " /var/lib/mpd".
+			" ".$redis->hGet('mpdconf', 'db_file').
+			" ".$redis->hGet('mpdconf', 'sticker_file').
+			" ".$redis->hGet('mpdconf', 'playlist_directory').
+			" ".$redis->hGet('mpdconf', 'state_file').
+			" /boot/config.txt".
+			" /boot/cmdline.txt".
+			" /var/www".
+			"";
     } else {
         $filepath = "/srv/http/tmp/backup_".date("Y-m-d").".tar.gz";
-        $cmdstring = "rm -f /srv/http/tmp/backup_* &> /dev/null; ".
-            "redis-cli save; ".
-            "bsdtar -czpf $filepath".
-            " --exclude /etc/netctl/examples ".
-            "/etc/netctl ".
-            "/mnt/MPD/Webradio ".
-            "/var/lib/redis/rune.rdb ".
-            "/var/lib/mpd ".
-            "/etc/mpd.conf ".
-            "/etc/mpdscribble.conf ".
-            "/etc/spop"
-        ;
-//        $filepath = "/run/backup_".date('Y-m-d').".tar.gz";
-//        $cmdstring = "tar -czf ".$filepath." /var/lib/mpd /etc/mpd.conf /var/lib/redis/rune.rdb /etc/netctl /etc/mpdscribble.conf /etc/spop";
+        $cmdstring = "rm -f /srv/http/tmp/backup_* &> /dev/null;".
+            " redis-cli save;".
+            " bsdtar -czpf ".$filepath.
+            " --exclude /etc/netctl/examples".
+            " /etc/netctl".
+            " /mnt/MPD/Webradio".
+            " /var/lib/redis/rune.rdb".
+			" ".$redis->hGet('mpdconf', 'db_file').
+			" ".$redis->hGet('mpdconf', 'sticker_file').
+			" ".$redis->hGet('mpdconf', 'playlist_directory').
+			" ".$redis->hGet('mpdconf', 'state_file').
+            " /etc/mpd.conf".
+            " /etc/mpdscribble.conf".
+            " /etc/spop".
+			" /boot/config.txt".
+			"";
+		if (file_exists('/etc/shairport-sync.conf')) {
+			$cmdstring .= " /etc/shairport-sync.conf";
+		}
+		if (file_exists('/etc/chrony.conf')) {
+			$cmdstring .= " /etc/chrony.conf";
+		}
+		if (file_exists('/etc/nsswitch.conf')) {
+			$cmdstring .= " /etc/nsswitch.conf";
+		}
+		if (file_exists('/etc/samba/smb-dev.conf')) {
+			$cmdstring .= " /etc/samba/smb-dev.conf";
+		}
+		if (file_exists('/etc/samba/smb-prod.conf')) {
+			$cmdstring .= " /etc/samba/smb-prod.conf";
+		}
+		if (file_exists('/etc/hostapd/hostapd.conf')) {
+			$cmdstring .= " /etc/hostapd/hostapd.conf";
+		}
     }
     sysCmd($cmdstring);
     return $filepath;
@@ -3425,6 +3459,8 @@ function wrk_sysAcl()
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');
     sysCmd('chown -R mpd.audio /var/lib/mpd');
+    sysCmd('chmod -R 755 /srv/http/*.php');
+    sysCmd('chmod -R 755 /srv/http/*.sh');
 }
 
 function wrk_NTPsync($ntpserver)
