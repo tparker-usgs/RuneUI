@@ -3461,6 +3461,7 @@ function wrk_sysAcl()
     sysCmd('chown -R mpd.audio /var/lib/mpd');
     sysCmd('chmod -R 755 /srv/http/*.php');
     sysCmd('chmod -R 755 /srv/http/*.sh');
+    sysCmd('chmod -R 755 /srv/http/*.js');
 }
 
 function wrk_NTPsync($ntpserver)

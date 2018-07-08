@@ -17,4 +17,4 @@ if ($restore == 0) {
 } else {
 	echo "Restore failed !";
 }
-sleep(2);
+

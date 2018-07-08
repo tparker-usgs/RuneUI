@@ -347,7 +347,7 @@ function redisDatastore($redis,$action) {
 			$redis->hGet('airplay', 'user_agent') || $redis->hSet('airplay', 'user_agent', '');
 			$redis->hGet('airplay', 'source_active_remote_token') || $redis->hSet('airplay', 'source_active_remote_token', '');
 			$redis->hGet('airplay', 'dacp_id') || $redis->hSet('airplay', 'dacp_id', '');
-			$redis->hGet('airplay', 'source_remote_control_port_number', '') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
+			$redis->hGet('airplay', 'source_remote_control_port_number') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
             $redis->hGet('dlna', 'enable') || $redis->hSet('dlna', 'enable', 0);
             $redis->hGet('dlna', 'name') || $redis->hSet('dlna', 'name', 'RuneAudio');
             $redis->hGet('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 0);
