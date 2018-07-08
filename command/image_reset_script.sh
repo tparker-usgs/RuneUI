@@ -119,7 +119,6 @@ chmod 755 /srv/http/db/redis_acards_details
 chown -R mpd.audio /var/lib/mpd
 chmod -R 755 /srv/http/*.php
 chmod -R 755 /srv/http/*.sh
-chmod -R 755 /srv/http/*.js
 #
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload
