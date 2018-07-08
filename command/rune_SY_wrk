@@ -511,7 +511,7 @@ $redis->pconnect('/run/redis.sock');
                     //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
                     ui_notify('Update RuneUI', 'RuneUI updated successfully<br>'.implode('<br>', $sysoutput));
-					sleep(3);
+					wrk_sysAcl();
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':
