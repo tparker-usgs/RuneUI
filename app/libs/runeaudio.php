@@ -3459,8 +3459,8 @@ function wrk_sysAcl()
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');
     sysCmd('chown -R mpd.audio /var/lib/mpd');
-    sysCmd('chmod -R 755 /srv/http/*.php');
-    sysCmd('chmod -R 755 /srv/http/*.sh');
+    sysCmd('chmod -R 755 /srv/http/restore.php');
+    sysCmd('chmod -R 755 /srv/http/restore.sh');
 }
 
 function wrk_NTPsync($ntpserver)

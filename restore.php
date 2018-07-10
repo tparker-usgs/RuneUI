@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 $file = $_FILES["filebackup"];
 $filename = $file["name"];
