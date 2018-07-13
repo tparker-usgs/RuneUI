@@ -53,8 +53,8 @@ if(file_exists('/srv/http/command/update_os'))
 // test if important services are enabled/disabled
 $retval = sysCmd('systemctl is-enabled systemd-timesyncd');
 if ($retval[0] === 'enabled') {
-    sysCmd('systemctl disable dhcpcd');
-	sysCmd('systemctl stop dhcpcd');
+    sysCmd('systemctl disable systemd-timesyncd');
+	sysCmd('systemctl stop systemd-timesyncd');
 }
 $retval = sysCmd('systemctl is-enabled ntpd');
 if ($retval[0] === 'enabled') {
@@ -126,8 +126,8 @@ sysCmd('pgrep -x mpd || systemctl start mpd');
 $mpdstartvolume = $redis->get('mpd_start_volume');
 // sometimes mpd fails to start correctly (e.g. when the incorrect audio card overlay is specified)
 // then it will never return a volume value so limit the number of retries with a counter
+$retries_volume = 0;
 if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
-	$retries_volume = 0;
 	if ($mpdstartvolume != -1) {
 		do {
 			sleep(2);
@@ -148,11 +148,12 @@ if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
 		sysCmd('systemctl stop mpd');
 	}
 } else {
-	$retries_volume = 20;
+	// mixer_type is disabled so set volume variable to 100%
+	$mpdvolume = 100;
 }
 // Save the last known MPD volume
 if ($retries_volume < 20) {
-	// correctly set
+	// correctly set or disabled
 	$redis->set('lastmpdvolume', $mpdvolume);
 } else if ($mpdstartvolume != -1) {
 	// failed to set it, but start volume has a value
@@ -341,6 +342,12 @@ if ($activePlayer === 'Spotify') {
 if ($redis->hGet('airplay', 'enable') === '1') {
     runelog("service: SHAIRPORT start",'');
     sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
+	// create a directory to use for airplay metadata
+	// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+    sysCmd('mkdir -p /srv/http/tmp/airplay');
+    sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
+	sysCmd('chown -R http.http /srv/http/tmp');
+	sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-default.png');
 }
 // start udevil
 if ($redis->get('udevil') === '1') {

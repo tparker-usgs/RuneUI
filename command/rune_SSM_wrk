@@ -69,7 +69,7 @@ runelog('WORKER rune_SSM_wrk START');
 $airplay_handle = FALSE;
 $mode = 'any';
 // delete any existing cover art
-sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
 // initialise the status array
 $status = array();
 $status['audio'] = "44100:16:2";
@@ -291,7 +291,7 @@ while (1) {
 						runelog('rune_SSM_wrk: Play stream end, no arguments - closing the metadata file');
 						// Set up the UI for switching
 						// close the pipe, wait and exit
-						sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+						sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
 						fclose($airplay_handle);
 						$airplay_handle = FALSE;
 						if ($status['time'] != 0) {
@@ -312,18 +312,17 @@ while (1) {
 						// flush request
 						runelog('rune_SSM_wrk: Flush request: ', $buf);
 						break;
-						//No break, let the selection for 'ssnc pfls' run
 					case 'ssnc pfls':
 						// play stream flush, no arguments
 						runelog('rune_SSM_wrk: Play stream flush, no arguments');
-//						break;
+						//break;
 					case 'ssnc pbeg':
 						// play stream begin, no arguments
 						runelog('rune_SSM_wrk: Play stream begin, no arguments');
-						sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
-						sysCmd('cp /srv/http/assets/img/cover-black.png /srv/http/assets/img/airplay-cover.png');
-						sysCmd('chown -f http.http /srv/http/assets/img/airplay-cover.*');
-						sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.*');
+						sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+						//sysCmd('cp /srv/http/assets/img/cover-black.png /srv/http/tmp/airplay/airplay-cover.png');
+						//sysCmd('chown -f http.http /srv/http/tmp/airplay/airplay-cover.*');
+						//sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-cover.*');
 						$status = array();
 						if (!empty($redis->get('lastmpdvolume'))) {
 							$status['volume'] = $redis->get('lastmpdvolume');
@@ -357,10 +356,10 @@ while (1) {
 					case 'ssnc pcst':
 						// start picture send, no arguments
 						runelog('rune_SSM_wrk: Start picture send, no arguments');
-						sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
-						//sysCmd('cp /srv/http/assets/img/cover-black.png /srv/http/assets/img/airplay-cover.png');
-						//sysCmd('chown -f http.http /srv/http/assets/img/airplayimg/airplay-cover.*');
-						//sysCmd('chmod 755 /srv/http/assets/img/airplayimg/airplay-cover.*');
+						sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+						//sysCmd('cp /srv/http/assets/img/cover-black.png /srv/http/tmp/airplay/airplay-cover.png');
+						//sysCmd('chown -f http.http /srv/http/tmp/airplay/airplay-cover.*');
+						//sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-cover.*');
 						//sysCmdAsync('/var/www/command/ui_update_async');
 						break;
 					case 'ssnc pcen':
@@ -427,26 +426,25 @@ while (1) {
 								$imgtype = 'jpg';
 							}
 							// delete the last image file
-							//sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+							//sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
 							// create a new image file
 							if (strlen($buf)>128) {
-								if (file_put_contents('/srv/http/assets/img/airplay-cover.'.$imgtype, $buf) === false) {
-									runelog('rune_SSM_wrk: Image file create failed, name: ', '/srv/http/assets/img/airplay-cover.'.$imgtype);
+								if (file_put_contents('/srv/http/tmp/airplay/airplay-cover.'.$imgtype, $buf) === false) {
+									runelog('rune_SSM_wrk: Image file create failed, name: ', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
 									runelog('rune_SSM_wrk: Image file create failed, buffer length: ', strlen($buf));
 									break;
 								}
 								else {
-									runelog('rune_SSM_wrk: Image file create created, name: ', '/srv/http/assets/img/airplay-cover.'.$imgtype);
+									runelog('rune_SSM_wrk: Image file create created, name: ', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
 									runelog('rune_SSM_wrk: Image file create created, buffer length: ', strlen($buf));
 									// make sure the impage file is readable for the UI (runs as user http)
-									sysCmd('chown -f http.http /srv/http/assets/img/airplay-cover.*');
-									sysCmd('chmod 755 /srv/http/assets/img/airplay-cover.*');
-									sysCmd('ln -s /srv/http/assets/img/airplay-cover.'.$imgtype.' /srv/http/assets/img/airplay-cover.'.$imgtype);
+									sysCmd('chown -f http.http /srv/http/tmp/airplay/airplay-cover.*');
+									sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-cover.*');
 								}
 							} else {
 								// no image file
 								runelog('rune_SSM_wrk: No image file, buffer length: ', strlen($buf));
-								//sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+								//sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
 							}
 							// (save and) post the playback data to the UI
 							sleep(1);

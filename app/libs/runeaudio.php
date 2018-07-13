@@ -979,9 +979,11 @@ function _parseStatusResponse($redis, $resp)
         if ($audio_format[2] === "1") $plistArray['audio_channels'] = "Mono";
         // if ($audio_format[2] > 2) $plistArray['audio_channels'] = "Multichannel";
 		//
-		// when bitrate is empty/0 use mediainfo to examine the file which is playing, but only when the filename is available
-		$status = sysCmd('mpc status');
-		if (($plistArray['bitrate'] == '0') && (count($status) == 3)) {
+		// when bitrate is empty/0 use mediainfo to examine the file which is playing
+		// but only when the filename is available and mediainfo is installed
+		// ignore any line returned by mpd status containing a 'update'
+		$status = sysCmd('mpc status | grep -vi updating');
+		if (($plistArray['bitrate'] == '0') && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
 			$bitrate = reset(sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($status[0]).'" | grep "Overall bit rate  "'));
 			$bitrate = preg_replace('/[^0-9]/', '', $bitrate);
 			If (!empty($bitrate)) {
@@ -3459,8 +3461,8 @@ function wrk_sysAcl()
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');
     sysCmd('chown -R mpd.audio /var/lib/mpd');
-    sysCmd('chmod -R 755 /srv/http/restore.php');
-    sysCmd('chmod -R 755 /srv/http/restore.sh');
+    sysCmd('chmod 755 /srv/http/restore.php');
+    sysCmd('chmod 755 /srv/http/restore.sh');
 }
 
 function wrk_NTPsync($ntpserver)

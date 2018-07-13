@@ -204,28 +204,24 @@ if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $requ
 	header('Content-Type: '.$spotify_cover_mime);
 	echo $spotify_cover;
 } else if ($activePlayer === 'Airplay') {
+	// clear the cache before testing for the existence of a file
+	clearstatcache();
+	// determine the file name and path
+	if (file_exists($_SERVER['HOME'].'/tmp/airplay/airplay-cover.jpg')) {
+		$imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-cover.jpg';
+	} else if (file_exists($_SERVER['HOME'].'/tmp/airplay/airplay-cover.png')) {
+		$imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-cover.png';
+	} else {
+		$imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-default.png';
+	}
 	// debug
+	runelog('Airplay coverart match: ', $imgfilename);
 	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, no-transform'); // HTTP 1.1.
 	header('Pragma: no-cache'); // HTTP 1.0.
 	header('Expires: 0'); // Proxies, pre-expired content
-	if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.jpg')) {
-		$imgfilename = $_SERVER['HOME'].'/assets/img/airplay-cover.jpg';
-		runelog('coverart match: ', $imgfilename);
-		header('Content-Type: ' .mime_content_type($imgfilename));
-		header('Content-Length: ' . filesize($imgfilename));
-		readfile($imgfilename);
-	} else if (is_file($_SERVER['HOME'].'/assets/img/airplay-cover.png')) {
-		$imgfilename = $_SERVER['HOME'].'/assets/img/airplay-cover.png';
-		runelog('coverart match: ', $imgfilename);
-		header('Content-Type: ' .mime_content_type($imgfilename));
-		header('Content-Length: ' . filesize($imgfilename));
-		readfile($imgfilename);
-	} else {
-		runelog("coverart match: shairport coverURL=/assets/img/airplay-default.png");
-		header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/airplay-default.png'));
-		header('Content-Length: ' . filesize($_SERVER['HOME'].'/assets/img/airplay-default.png'));
-		readfile($_SERVER['HOME'].'/assets/img/airplay-default.png');
-	}
+	header('Content-Type: '.mime_content_type($imgfilename));
+	header('Content-Length: '.filesize($imgfilename));
+	readfile($imgfilename);
 	$output = 1;
 } else {
 	// redirect to /covers NGiNX location

@@ -27,7 +27,7 @@ rm -rf /mnt/MPD/LocalStorage/*
 rm -rf /mnt/MPD/Webradio/*
 rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
-rm -rf /srv/http/tmp/backup*
+rm -rf /srv/http/tmp
 #
 # redis reset
 redis-cli del AccessPoint
@@ -42,9 +42,13 @@ redis-cli del lyrics
 redis-cli del nics
 redis-cli del addons
 redis-cli del addo
+redis-cli del usbmounts
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
+redis-cli hset addons update '0'
+redis-cli hset addons back '20170901'
+redis-cli hset addons font '20170901'
 #
 # update local git
 rm -f /var/www/command/mpd-watchdog
@@ -93,6 +97,7 @@ cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
 cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
+cp /var/www/app/config/defaults/fstab /etc/fstab
 #
 # network
 rm -f /etc/netctl/*
@@ -117,8 +122,8 @@ chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chown -R mpd.audio /var/lib/mpd
-chmod -R 755 /srv/http/restore.php
-chmod -R 755 /srv/http/restore.sh
+chmod 755 /srv/http/restore.php
+chmod 755 /srv/http/restore.sh
 #
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload
