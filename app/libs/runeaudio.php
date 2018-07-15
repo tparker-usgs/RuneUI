@@ -926,50 +926,60 @@ function _parseStatusResponse($redis, $resp)
             case 'DSD64':
 				$audio_format[2] = $audio_format[1];
 				$audio_format[1] = 'dsd';
-				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
 				$plistArray['bitrate'] = intval(44100 * 64 /1000);
 				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
 				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				unset($retval);
                 break;
             case 'dsd128':
                 // no break
             case 'DSD128':
 				$audio_format[2] = $audio_format[1];
 				$audio_format[1] = 'dsd';
-				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
 				$plistArray['bitrate'] = intval(44100 * 128 / 1000);
 				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
 				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				unset($retval);
                 break;
             case 'dsd256':
                 // no break
             case 'DSD256':
 				$audio_format[2] = $audio_format[1];
 				$audio_format[1] = 'dsd';
-				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
 				$plistArray['bitrate'] = intval(44100 * 256 / 1000);
 				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
 				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				unset($retval);
                 break;
             case 'dsd512':
                 // no break
             case 'DSD512':
 				$audio_format[2] = $audio_format[1];
 				$audio_format[1] = 'dsd';
-				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
 				$plistArray['bitrate'] = intval(44100 * 512 / 1000);
 				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
 				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				unset($retval);
                 break;
             case 'dsd1024':
                 // no break
             case 'DSD1024':
 				$audio_format[2] = $audio_format[1];
 				$audio_format[1] = 'dsd';
-				$audio_format[0] = intval(explode(' ', reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "')))[1]);
+				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
 				$plistArray['bitrate'] = intval(44100 * 1024 / 1000);
 				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
 				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				unset($retval);
                 break;
         }
         // format "audio_sample_depth" string
@@ -984,11 +994,12 @@ function _parseStatusResponse($redis, $resp)
 		// ignore any line returned by mpd status containing a 'update'
 		$status = sysCmd('mpc status | grep -vi updating');
 		if (($plistArray['bitrate'] == '0') && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
-			$bitrate = reset(sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($status[0]).'" | grep "Overall bit rate  "'));
-			$bitrate = preg_replace('/[^0-9]/', '', $bitrate);
+			$retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($status[0]).'" | grep "Overall bit rate  "');
+			$bitrate = preg_replace('/[^0-9]/', '', $retval[0]);
 			If (!empty($bitrate)) {
 				$plistArray['bitrate'] = $bitrate;
 			}
+			unset($retval);
 		}
     }
     return $plistArray;
@@ -1348,7 +1359,9 @@ function getmac($nicname)
 		$mac = file_get_contents('/sys/class/net/'.$nicname.'/address');
 	} else {
 		// if not, get the first valid nic address (a Zero has no internal eth0 network adaptor)
-		$mac = trim(reset(sysCmd('cat /sys/class/net/*/address | grep -v 00:00:00:00')));
+		$retval = sysCmd('cat /sys/class/net/*/address | grep -v 00:00:00:00');
+		$mac = trim($retval[0]);
+		unset($retval);
 	}
     $mac = strtolower($mac);
     runelog('getmac('.$nicname.'): ', $mac);
@@ -2617,7 +2630,7 @@ if ($action === 'reset') {
 				// restore the player status
 				wrk_mpdRestorePlayerStatus($redis);
 				// restart rune_PL_wrk
-				sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
+				//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
                     sysCmd('systemctl start mpdscribble || systemctl restart mpdscribble');
@@ -2652,8 +2665,12 @@ if ($action === 'reset') {
 
 function wrk_mpdPlaybackStatus($redis = null, $action = null)
 {
-    $status = trim(reset(sysCmd("mpc status | grep '^\[' | cut -d '[' -f 2 | cut -d ']' -f 1")));
-	$number = trim(reset(sysCmd("mpc status | grep '^\[' | cut -d '#' -f 2 | cut -d '/' -f 1")));
+    $retval = sysCmd("mpc status | grep '^\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
+	$status = trim($retval[0]);
+	unset($retval);
+	$retval = sysCmd("mpc status | grep '^\[' | cut -d '#' -f 2 | cut -d '/' -f 1");
+	$number = trim($retval[0]);
+	unset($retval);
     if (isset($action)) {
         switch ($action) {
             case 'record':
@@ -3009,7 +3026,7 @@ function wrk_sourcecfg($redis, $action, $args)
 			// ashuffle gets started automatically
 			wrk_mpdRestorePlayerStatus($redis);
 			// restart rune_PL_wrk
-			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
+			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
@@ -3403,6 +3420,7 @@ function wrk_playerID($arch)
     if (trim($playerid) === $arch) {
         $retval = sysCmd("grep -Po '^Serial\s*:\s*\K[[:xdigit:]]{16}' /proc/cpuinfo");
         $playerid = $arch.'CPU'.$retval[0];
+		unset($retval);
     }
     // And just in case...
     if (trim($playerid) === $arch) {
@@ -3424,7 +3442,7 @@ function wrk_switchplayer($redis, $playerengine)
             $redis->set('activePlayer', 'MPD');
 			wrk_mpdRestorePlayerStatus($redis);
 			// restart rune_PL_wrk
-			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
+			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $return = sysCmd('systemctl stop spopd');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3441,7 +3459,7 @@ function wrk_switchplayer($redis, $playerengine)
             $redis->set('activePlayer', 'Spotify');
             $return = sysCmd('systemctl stop mpd');
 			// restart rune_PL_wrk
-			sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
+			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $redis->set('mpd_playback_status', 'stop');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3470,7 +3488,9 @@ function wrk_NTPsync($ntpserver)
     //debug
     runelog('NTP SERVER', $ntpserver);
 	// check that it is a valid ntp server
-	$return = ' '.reset(sysCmd('chronyc -d add server '.$ntpserver.' | grep OK'));
+	$retval = sysCmd('chronyc -d add server '.$ntpserver.' | grep OK');
+	$return = ' '.$retval[0];
+	unset($retval);
     if (strpos($return, 'OK')) {
         // add the server name to chrony.conf
 		$file = '/etc/chrony.conf';
@@ -3497,7 +3517,9 @@ function wrk_changeHostname($redis, $newhostname)
 		runelog('new hostname invalid', $newhostname);
 		return;
 	}
-	$shn = trim(reset(sysCmd('hostname')));
+	$retval = sysCmd('hostname');
+	$shn = trim($retval[0]);
+	unset($retval);
 	$rhn = trim($redis->get('hostname'));
     runelog('current system hostname:', $shn);
 	runelog('current redis hostname :', $rhn);
@@ -3540,7 +3562,7 @@ function wrk_changeHostname($redis, $newhostname)
 	// ashuffle gets started automatically
 	wrk_mpdRestorePlayerStatus($redis);
 	// restart rune_PL_wrk
-	sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
+	//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
     // restart SAMBA
 	sysCmd('systemctl stop smbd nmbd');
 	if ($redis->get('dev') > 0) {

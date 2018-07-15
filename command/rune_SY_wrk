@@ -42,51 +42,68 @@ error_reporting(E_ALL & ~E_NOTICE);
 ini_set('error_log', '/var/log/runeaudio/rune_SY_wrk.log');
 define('APP', '/srv/http/app/');
 include('/srv/http/app/libs/runeaudio.php');
-
 // if os updates are needed
 if(file_exists('/srv/http/command/update_os')) 
 {
     include '/srv/http/command/update_os';
     updateOS();
 }
-
 // test if important services are enabled/disabled
+// systemd-timesyncd
 $retval = sysCmd('systemctl is-enabled systemd-timesyncd');
 if ($retval[0] === 'enabled') {
     sysCmd('systemctl disable systemd-timesyncd');
-	sysCmd('systemctl stop systemd-timesyncd');
 }
+unset($retval);
+sysCmd('systemctl stop systemd-timesyncd');
+// ntpd
 $retval = sysCmd('systemctl is-enabled ntpd');
 if ($retval[0] === 'enabled') {
     sysCmd('systemctl disable ntpd');
-    sysCmd('systemctl stop ntpd');
 }
+unset($retval);
+sysCmd('systemctl stop ntpd');
+// chronyd
 $retval = sysCmd('systemctl is-enabled chronyd');
 if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable chronyd');
-    sysCmd('systemctl start chronyd');
 }
+unset($retval);
+sysCmd('pgrep -x chronyd || systemctl start chronyd');
+// rune_PL_wrk
 $retval = sysCmd('systemctl is-enabled rune_PL_wrk');
 if ($retval[0] === 'enabled') {
     sysCmd('systemctl disable rune_PL_wrk');
-    sysCmd('systemctl stop rune_PL_wrk');
 }
+unset($retval);
+sysCmd('systemctl stop rune_PL_wrk');
+// redis
 $retval = sysCmd('systemctl is-enabled redis');
 if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable redis');
-    sysCmd('systemctl start redis');
 }
+unset($retval);
+sysCmd('pgrep -x redis || systemctl start redis');
+// nginx
 $retval = sysCmd('systemctl is-enabled nginx');
 if ($retval[0] === 'disabled') {
     sysCmd('systemctl enable nginx');
-    sysCmd('systemctl enable nginx');
 }
+unset($retval);
+sysCmd('pgrep -x nginx || systemctl start nginx');
+// dhcpcd
 $retval = sysCmd('systemctl is-enabled dhcpcd');
 if ($retval[0] === 'enabled') {
     sysCmd('systemctl disable dhcpcd');
-	sysCmd('systemctl stop dhcpcd');
 }
-// stop php-fpm
+unset($retval);
+sysCmd('systemctl stop dhcpcd');
+// php-fpm
+$retval = sysCmd('systemctl is-enabled php-fpm');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable php-fpm');
+}
+unset($retval);
 sysCmd('systemctl stop php-fpm');
 // setup /run dir
 sysCmd('chmod 777 /run');
@@ -131,9 +148,11 @@ if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
 	if ($mpdstartvolume != -1) {
 		do {
 			sleep(2);
-			// retry until MPD is up and returns the requested volume
-			$mpdvolume = trim(reset(sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
+			// retry until MPD is up and returns the any valid volume value
+			$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+			$mpdvolume = trim($retval[0]);
 			$retries_volume++;
+			unset($retval);
 		} while (($mpdstartvolume != $mpdvolume) && ($retries_volume < 20));
 		// When MPD is killed the state (including the volume) is saved
 		sysCmd('mpd --kill');
@@ -141,8 +160,10 @@ if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
 		do {
 			sleep(2);
 			// retry until MPD is up and returns the any valid volume value
-			$mpdvolume = trim(reset(sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1')));
+			$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+			$mpdvolume = trim($retval[0]);
 			$retries_volume++;
+			unset($retval);
 		} while ((!is_numeric($mpdvolume)) && ($retries_volume < 20));
 		// stop mpd
 		sysCmd('systemctl stop mpd');
@@ -162,19 +183,23 @@ if ($retries_volume < 20) {
 	// set it to 40% when we don't have a value
 	$redis->set('lastmpdvolume', 40);
 }
+// determine the actual mpd player version
+$retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '");
+$mpdversion = trim($retval[0]);
+unset($retval);
 // read activePlayer state
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
     // check MPD process
-    sysCmd('pgrep -x mpd || systemctl start mpd');
+    //sysCmd('pgrep -x mpd || systemctl start mpd');
 	// ashuffle gets started automatically
 } elseif ($activePlayer === 'Spotify') {
     // check MPD process
-    sysCmd('pgrep -x spopd || systemctl start spopd');
+    //sysCmd('pgrep -x spopd || systemctl start spopd');
 } else {
     // reset activePlayer state to MPD (default) & check MPD process
     $redis->set('activePlayer', 'MPD');
-    sysCmd('pgrep -x mpd || systemctl start mpd');
+    //sysCmd('pgrep -x mpd || systemctl start mpd');
 	// ashuffle gets started automatically
 }
 // read registered HW architecture
@@ -245,7 +270,7 @@ if ($playerid_db === '') {
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl restart rune_SY_wrk');
     // --- RUNEAUDIO FIRST RUN PROCESS //
-} else if ($redis->hGet('mpdconf', 'version') != trim(reset(sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '")))) {
+} else if ($redis->hGet('mpdconf', 'version') != $mpdversion) {
     // MPD VERSION HAS CHANGED PROCES--- //
     runelog('>>>>>>MPD VERSION HAS CHANGED PROCESS ---');
 	// stop MPD and associated services
@@ -279,11 +304,13 @@ if ($playerid_db === '') {
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
-    $hn = trim(reset(sysCmd('hostname')));
+	$retval = sysCmd('hostname');
+    $hn = trim($retval[0]);
     wrk_avahiconfig($hn);
 	if (strtolower($hn) != strtolower(trim($redis->get('hostname')))) {
 		$redis->set('hostname', $hn);
 	}
+	unset($retval);
 	// check ENV files
     if ($arch !== '--') {
         // wrk_sysOBEnvCheck($arch,0);
@@ -526,12 +553,14 @@ $redis->pconnect('/run/redis.sock');
                     $redis->sAdd('w_lock', $jobID);
 					ui_notify('Settings - Change Hostname', 'it takes some time .....');
                     wrk_changeHostname($redis, $job->args);
-                    $hn = trim(reset(sysCmd('hostname')));
+					$retval = sysCmd('hostname');
+                    $hn = trim($retval[0]);
 					if (strtolower($hn) === strtolower(trim($job->args))){
 						$redis->set('hostname', trim($job->args));
 					} else {
 						$redis->set('hostname', $hn);
 					}
+					unset($retval);
                     // update hash
                     $hash = md5_file('/etc/mpd.conf');
                     $redis->set('mpdconfhash', $hash);
@@ -757,6 +786,20 @@ $redis->pconnect('/run/redis.sock');
 					// call ashuffle to add the specified number of tracks to the queue
 					ui_notify('Add random tracks', implode("\n", sysCmd('ashuffle -o '.$job->args)));
 					sleep(3);
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+                case 'airplaymetadata':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('airplaymetadata action: ', $job->action);
+                    $redis->sAdd('w_lock', $jobID);
+					// start or stop rune_SSM_wrk
+					if ($job->action == 'start') {
+						sysCmd('systemctl start rune_SSM_wrk');
+						sleep(2);
+						sysCmd('renice 20 $(pgrep -w rune_SSM_wrk) || renice 20 $(pgrep -w rune_SSM_wrk)');
+					} else if ($job->action == 'stop') {
+						sysCmd('systemctl stop rune_SSM_wrk');
+					}
                     $redis->sRem('w_lock', $jobID);
                     break;
 				case 'sambaprodon':
@@ -1016,6 +1059,7 @@ $redis->pconnect('/run/redis.sock');
                             sysCmdAsync('systemctl reboot');
                             //$redis->sRem('w_lock', $jobID);
                         }
+						unset($retval);
                     }
                     // refresh network configuration
                     if ($job->action === 'refresh') {
@@ -1055,6 +1099,7 @@ $redis->pconnect('/run/redis.sock');
                             sysCmd('/var/www/command/rune_shutdown reboot');
                             sysCmdAsync('systemctl reboot');
                         }
+						unset($retval);
                     }
                     break;
                 case 'ntpserver':
@@ -1357,7 +1402,8 @@ $redis->pconnect('/run/redis.sock');
 		// Detect deletion of playlist random file
 		// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
 		// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
-		if (reset(sysCmd('systemctl is-active ashuffle')) == 'active') {
+		$retval = sysCmd('systemctl is-active ashuffle');
+		if ($retval[0] == 'active') {
 			if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
 				// file found
 				$redis->set('last_pl_randomfile', 'exists');
@@ -1380,6 +1426,7 @@ $redis->pconnect('/run/redis.sock');
 				// no cache is stored for non-existant files
 			}
 		}
+		unset($retval);
 		// start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
 		// this is the only place where ashuffle it is started
 		if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
@@ -1389,10 +1436,12 @@ $redis->pconnect('/run/redis.sock');
 				// seems to be a bug somewhere in MPD
 				// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
 				// wait until mpd has been running for a while before starting ashuffle
-				$mpd_uptime = trim(reset(sysCmd('ps -C mpd -o etimes=')));
+				$retval = sysCmd('ps -C mpd -o etimes=');
+				$mpd_uptime = trim($retval[0]);
 				if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
 					sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 				}
+				unset($retval);
 			}
 		}
 		// S.M.A.R.T. monitoring tools
@@ -1406,7 +1455,8 @@ $redis->pconnect('/run/redis.sock');
 			// more than check minutes have past
 			// store the microtime for the next cycle
 			$smartctl_microtime_then = microtime(true);
-			if (!empty(trim(reset(sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed'))))) {
+			$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed');
+			if (!empty(trim($retval[0]))) {
 				// something is playing
 				if (file_exists("/usr/bin/smartctl")) {
 					// monitoring tools software is installed
@@ -1435,6 +1485,7 @@ $redis->pconnect('/run/redis.sock');
 					}
 				}
 			}
+			unset($retval);
 		}
 	}
     // unload CPU: 0,5 second sleep

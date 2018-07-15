@@ -54,7 +54,9 @@ switch($status) {
         ui_notify('AirPlay', 'Playback has been switched to an incoming Airplay stream.');
 		// start and set the priority of the Airplay metadata decoder
 		if ($redis->hGet('airplay', 'metadata_enabled') == 'yes') {
-			sysCmd('systemctl start rune_SSM_wrk && sleep 3 && renice 20 $(pgrep -w rune_SSM_wrk)');
+			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaymetadata', 'action' => 'start'));
+			waitSyWrk($redis, $jobID);
+			//sysCmd('systemctl start rune_SSM_wrk && sleep 3 && renice 20 $(pgrep -w rune_SSM_wrk)');
 		}
         break;
     case "off":
@@ -63,7 +65,9 @@ switch($status) {
         // send notify
         ui_notify('AirPlay', 'Airplay playback has completed. The player is now unlocked.');
 		// stop the Airplay metadata decoder
-		sysCmd('systemctl stop rune_SSM_wrk');
+		$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaymetadata', 'action' => 'stop'));
+		waitSyWrk($redis, $jobID);
+		//sysCmd('systemctl stop rune_SSM_wrk');
         break;
 }
 
