@@ -1665,6 +1665,10 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     $updateh = 0;
     switch ($action) {
         case 'setnics':
+			// clear cache - redis, filesystem and php
+			$redis->save();
+			sysCmd("sync");
+			clearstatcache();
             // flush nics Redis hash table
             $transaction = $redis->multi();
             $transaction->del('nics');
@@ -1672,11 +1676,34 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             $interfaces = array_diff($interfaces, $excluded_nics);
             foreach ($interfaces as $interface) {
                 $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
+				// after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP lease expires
+				// in this situation both IP addresses are valid for a given interface
+				// when more than one IP address is valid the following code determines which one to use
+				// the first IP address is the default, but if one matches a predefined fixed address then that one is used
+				$ipidx = 0;
+				$countip = count($ip);
+				if ($countip > 1) {
+					// more than one valid IP address for this interface detected
+					// determine the fixed IP addresses (if any)
+					$command = 'cat /etc/netctl/* | grep -i "Address=(" | cut -d "'."'".'" -f 2 | cut -d "/" -f 1';
+					$fixedip = sysCmd($command);
+					// use another IP address if it matches one set up as a fixed IP address
+					for ($j = 0; $j < $countip; $j++) {
+						// report each valid IP address in the UI
+						ui_notify_async('More than one valid IP address for '.$interface, $ip[$j].'\n');
+						for ($i = 0, $countfixedip = count($fixedip); $i < $countfixedip; $i++) {
+							if ($ip[$j] == $fixedip[$i]) {
+								$ipidx = $j;
+							}
+						}
+					}
+				}
                 //***
                 // KEW: Do we need to assume this may be CIDR & may be Netmask notatation?
                 $netmask = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f2");
-                if (isset($netmask[0])) {
-                    $netmask = netmask($netmask[0]);
+                if (isset($netmask[$ipidx])) {
+                    //$netmask = netmask($netmask[$ipidx]);
+                    $netmask = net_CidrToNetmask($netmask[$ipidx]);
                 } else {
                     unset($netmask);
                 }
@@ -1687,12 +1714,12 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 // if (empty(sysCmd("iwlist ".$interface." scan 2>&1 | grep \"Interface doesn't support scanning\""))) {
                 if (empty($type[0])) {
                     $speed = sysCmd("iwconfig ".$interface." 2>&1 | grep 'Bit Rate' | cut -d '=' -f 2 | cut -d ' ' -f 1-2");
-                    $currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
+                    //$currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
                     $currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
                     $transaction->hSet('nics',
 						$interface,
 						json_encode(array(
-							'ip' => $ip[0],
+							'ip' => $ip[$ipidx],
 							'netmask' => $netmask,
 							'gw' => (isset($gw[0]) ? $gw[0] : null),
 							'dns1' => (isset($dns[0]) ? $dns[0] : null),
@@ -1706,7 +1733,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                     $transaction->hSet('nics',
 						$interface,
 						json_encode(array(
-							'ip' => $ip[0],
+							'ip' => $ip[$ipidx],
 							'netmask' => $netmask,
 							'gw' => (isset($gw[0]) ? $gw[0] : null),
 							'dns1' => (isset($dns[0]) ? $dns[0] : null),
@@ -1721,18 +1748,44 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
 		    $gw = array();
 			$dns = array();
 			$speed = array();
-		
+			// clear cache - filesystem and php
+			sysCmd("sync");
+			clearstatcache();
 		    $interfaces = sysCmd("ip addr |grep \"BROADCAST,\" |cut -d':' -f1-2 |cut -d' ' -f2");
             $interfaces = array_diff($interfaces, $excluded_nics);
             foreach ($interfaces as $interface) {
                 $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
+				// after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP lease expires
+				// in this situation both IP addresses are valid for a given interface
+				// when more than one IP address is valid the following code determines which one to use
+				// the first IP address is the default, but if one matches a predefined fixed address then that one is used
+				$ipidx = 0;
+				$countip = count($ip);
+				if ($countip > 1) {
+					// more than one valid IP address for this interface detected
+					// determine the fixed IP addresses (if any)
+					$command = 'cat /etc/netctl/* | grep -i "Address=(" | cut -d "'."'".'" -f 2 | cut -d "/" -f 1';
+					$fixedip = sysCmd($command);
+					// use another IP address if it matches one set up as a fixed IP address
+					for ($j = 0; $j < $countip; $j++) {
+						// report each valid IP address in the UI
+						ui_notify_async('More than one valid IP address for '.$interface, $ip[$j].'\n');
+						for ($i = 0, $countfixedip = count($fixedip); $i < $countfixedip; $i++) {
+							if ($ip[$j] == $fixedip[$i]) {
+								$ipidx = $j;
+							}
+						}
+					}
+				}
                 $netmask = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f2");
-                if (isset($netmask[0]) && isset($ip[0])) {
-                    $netmask = "255.255.255.0";//netmask($netmask[0]);
+                if (isset($netmask[$ipidx]) && isset($ip[$ipidx])) {
+                    //$netmask = "255.255.255.0";//netmask($netmask[$ipidx]);
+                    //$netmask = netmask($netmask[$ipidx]);
+                    $netmask = net_CidrToNetmask($netmask[$ipidx]);
                 } else {
                     unset($netmask);
                 }
-                if (isset($netmask[0])) {
+                if (isset($netmask)) {
                     $gw = sysCmd("route -n |grep \"0.0.0.0\" |grep \"UG\" |cut -d' ' -f10");
                     $dns = sysCmd("cat /etc/resolv.conf |grep \"nameserver\" |cut -d' ' -f2");
                 }
@@ -1741,7 +1794,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                     $speed = sysCmd("iwconfig ".$interface." 2>&1 | grep 'Bit Rate' | cut -d ':' -f 2 | cut -d ' ' -f 1-2");
                     $currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
                     $actinterfaces[$interface] = (object) [
-						'ip' => (isset($ip[0]) ? $ip[0] : null),
+						'ip' => (isset($ip[$ipidx]) ? $ip[$ipidx] : null),
                         'netmask' => (isset($netmask) ? $netmask : null),
                         'gw' => (isset($gw[0]) ? $gw[0] : null),
                         'dns1' => (isset($dns[0]) ? $dns[0] : null),
@@ -1753,7 +1806,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                     
                     $redis->hSet('nics', $interface,
 						json_encode(array(
-							'ip' => (isset($ip[0]) ? $ip[0] : null),
+							'ip' => (isset($ip[$ipidx]) ? $ip[$ipidx] : null),
 							'netmask' => (isset($netmask) ? $netmask : null),
 							'gw' => (isset($gw[0]) ? $gw[0] : null),
 							'dns1' => (isset($dns[0]) ? $dns[0] : null),
@@ -1764,8 +1817,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
 							)));
                 } else {
                     $speed = sysCmd("ethtool ".$interface." 2>&1 | grep -i speed | cut -d':' -f2");
-                    $actinterfaces[$interface] = (object) ['ip' => $ip[0], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0], 'wireless' => 0];
-                    $redis->hSet('nics', $interface , json_encode(array('ip' => $ip[0], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0],'wireless' => 0)));
+                    $actinterfaces[$interface] = (object) ['ip' => $ip[$ipidx], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0], 'wireless' => 0];
+                    $redis->hSet('nics', $interface , json_encode(array('ip' => $ip[$ipidx], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0],'wireless' => 0)));
                 }
             }
             return $actinterfaces;
@@ -2003,13 +2056,14 @@ function wrk_wifiprofile($redis, $action, $args)
     return $return;
 }
 
-function wrk_restore($backupfile)
+function wrk_restore($redis, $backupfile)
 {
-    $path = "/run/".$backupfile;
-    $cmdstring = "tar xzf ".$path." --overwrite --directory /";
-    if (sysCmd($cmdstring)) {
-        recursiveDelete($path);
-    }
+    //$path = "/run/".$backupfile;
+    //$cmdstring = "tar xzf ".$path." --overwrite --directory /";
+    //if (sysCmd($cmdstring)) {
+    //    recursiveDelete($path);
+    //}
+	return true;
 }
 
 function wrk_jobID()

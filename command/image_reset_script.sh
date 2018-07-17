@@ -46,9 +46,6 @@ redis-cli del usbmounts
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
-redis-cli hset addons update '0'
-redis-cli hset addons back '20170901'
-redis-cli hset addons font '20170901'
 #
 # update local git
 rm -f /var/www/command/mpd-watchdog
