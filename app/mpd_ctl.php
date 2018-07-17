@@ -34,19 +34,19 @@
  if (isset($_POST)) {
     // switch audio output
     if (isset($_POST['ao'])) {
-        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'switchao', 'args' => $_POST['ao']));
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'switchao', 'args' => $_POST['ao']));
     }
     // reset MPD configuration
     if (isset($_POST['reset'])) {
-        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'reset'));
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'reset'));
     }
     // update MPD configuration
     if (isset($_POST['conf'])) {
-        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'update', 'args' => $_POST['conf']));
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfg', 'action' => 'update', 'args' => $_POST['conf']));
     }
     // manual MPD configuration
     if (isset($_POST['mpdconf'])) {
-        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfgman', 'args' => $_POST['mpdconf']));
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdcfgman', 'args' => $_POST['mpdconf']));
     }
     // ----- FEATURES -----
     if (isset($_POST['mpdvol'])) {
@@ -66,12 +66,12 @@
 		if ($_POST['mpd']['globalrandom'] == "1") {
             if ($redis->get('globalrandom') != 1) {
 				$redis->set('globalrandom', 1);
-				$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
 			}
         } else {
             if ($redis->get('globalrandom') != 0) {
 				$redis->set('globalrandom', 0);
-				$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
 			}
         }
 		if (isset($_POST['mpd']['addrandom'])) {

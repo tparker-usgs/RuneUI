@@ -33,27 +33,27 @@
  */
 // inspect POST
 if (isset($_POST)) {    
-    // ----- HOSTNAME -----
-    if (isset($_POST['hostname'])) {
-        if (empty($_POST['hostname'])) {
-        $args = 'RuneAudio';
-        } else {
-        $args = $_POST['hostname'];
-        }
-        $redis->get('hostname') == $_POST['hostname'] || $jobID[] = wrk_control($redis, 'newjob', $data = array( 'wrkcmd' => 'hostname', 'args' => $args ));        
-    }
     // ----- TIME SETTINGS -----
     if (isset($_POST['ntpserver'])) {
         if (empty($_POST['ntpserver'])) {
-        $args = 'pool.ntp.org';
+			$args = 'pool.ntp.org';
         } else {
-        $args = $_POST['ntpserver'];
+			$args = $_POST['ntpserver'];
         }
         $redis->get('ntpserver') == $args || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ntpserver', 'args' => $args));        
     }
     if (isset($_POST['timezone'])) {      
         $args = $_POST['timezone'];
         $redis->get('timezone') == $args || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'timezone', 'args' => $args));        
+    }
+    // ----- HOSTNAME -----
+    if (isset($_POST['hostname'])) {
+        if (empty($_POST['hostname'])) {
+			$args = 'RuneAudio';
+        } else {
+			$args = $_POST['hostname'];
+        }
+        $redis->get('hostname') == $_POST['hostname'] || $jobID[] = wrk_control($redis, 'newjob', $data = array( 'wrkcmd' => 'hostname', 'args' => $args ));        
     }
     // ----- KERNEL -----
     if (isset($_POST['kernel'])) {        
