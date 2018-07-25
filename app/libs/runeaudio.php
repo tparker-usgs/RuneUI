@@ -259,7 +259,9 @@ function monitorMpdState($redis, $sock)
         $status['changed'] = substr($change[1], 0, -3);
         // runelog('monitorMpdState()', $status);
         return $status;
-    }
+    } else {
+		$status = false;
+	}
 }
 
 function getTrackInfo($sock, $songID)
@@ -1446,7 +1448,6 @@ function wrk_replaceTextLine($file, $inputArray, $strfind, $strrepl, $linelabel 
     return $newArray;
 }
 
-// make device TOTALBACKUP (with switch DEV copy all /etc)
 function wrk_backup($redis, $bktype = null)
 {
     if ($bktype === 'dev') {

@@ -383,7 +383,8 @@
                             <?php if($this->activePlayer === 'Spotify'): ?><input id="spotify" name="features[spotify][enable]" type="hidden" value="1"><?php endif; ?>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'Spotify'): ?>disabled<?php endif; ?>"></a>
                         </label>
-                        <span class="help-block">Enable Spotify client [EXPERIMENTAL]. You must have a <strong><a href="https://www.spotify.com/uk/premium/" target="_blank">Spotify PREMIUM</a></strong> account.</span>
+                        <span class="help-block">Due to the Spotify upgrade of May 2018 the Spotify client no longer works<br>
+						<i>Enable Spotify client. You must have a <strong><a href="https://www.spotify.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account.</i></span>
                     </div>
                 </div>
                 <div class="<?php if($this->spotify['enable'] != 1): ?>hide<?php endif ?>" id="spotifyAuth">

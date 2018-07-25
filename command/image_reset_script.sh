@@ -13,9 +13,9 @@ set -x #echo all commands to cli
 #
 # set up services
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd bluetooth
 systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
-systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli
+systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli bluetooth
 #
 # remove user files and logs
 rm -f /var/lib/mpd/mpd.db
@@ -28,6 +28,7 @@ rm -rf /mnt/MPD/Webradio/*
 rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
+rm -f /etc/sudoers.d/*
 #
 # redis reset
 redis-cli del AccessPoint
@@ -119,8 +120,6 @@ chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chown -R mpd.audio /var/lib/mpd
-chmod 755 /srv/http/restore.php
-chmod 755 /srv/http/restore.sh
 #
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload

@@ -139,14 +139,14 @@ if (FALSE === $redis->get('audio_on_off')) {
     $redis->set('audio_on_off', '0');
 }
 // clean up Rern's addons security
-// addons menu
+// Rern's addons menu
 if ($redis->hGet('addons', 'addo') != '') {
 	// do nothing
 } else {
 	// not set or is empty so delete the sudo enable all file for user http
 	sysCmd('rm /etc/sudoers.d/http');
 }
-// restore enable
+// Rern's restore enable
 if ($redis->hGet('addons', 'back') != '') {
 	// do nothing
 } else {

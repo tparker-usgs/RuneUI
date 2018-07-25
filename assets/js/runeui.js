@@ -3122,6 +3122,28 @@ if ($('#section-index').length) {
                 }
             });
             
+            // show/hide Samba on/off form
+            $('#samba').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#sambaAuth').removeClass('hide');
+                    $('#sambaBox').addClass('boxed-group');
+                } else {
+                    $('#sambaAuth').addClass('hide');
+                    $('#sambaBox').removeClass('boxed-group');
+                }
+            });
+            
+            // show/hide Bluetooth on/off form
+            $('#bluetooth').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#bluetoothAuth').removeClass('hide');
+                    $('#bluetoothBox').addClass('boxed-group');
+                } else {
+                    $('#bluetoothAuth').addClass('hide');
+                    $('#bluetoothBox').removeClass('boxed-group');
+                }
+            });
+            
             // file upload
             $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
                 var input = $(this).parents('.input-group').find(':text');
