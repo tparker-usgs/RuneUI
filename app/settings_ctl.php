@@ -156,16 +156,25 @@ if (isset($_POST)) {
             $redis->get('coverart') == 0 || $redis->set('coverart', 0);
         }
         if ($_POST['features']['lastfm']['enable'] == 1) {
-            // create worker job (start mpdscribble)
+            // create worker job (start lastfm)
             if (($_POST['features']['lastfm']['user'] != $redis->hGet('lastfm', 'user') OR $_POST['features']['lastfm']['pass'] != $redis->hGet('lastfm', 'pass')) OR $redis->hGet('lastfm', 'enable') != $_POST['features']['lastfm']['enable']) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'lastfm', 'action' => 'start', 'args' => $_POST['features']['lastfm']));
             }
         } else {
-            // create worker job (stop mpdscribble)
+            // create worker job (stop lastfm)
             $redis->hGet('lastfm','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'lastfm', 'action' => 'stop'));
+		}
+        if ($_POST['features']['samba']['enable'] == 1) {
+            // create worker job (start samba)
+            if (($_POST['features']['samba']['readwrite'] != $redis->hGet('samba', 'readwrite')) OR ($redis->hGet('samba', 'enable') != $_POST['features']['samba']['enable'])) {
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaonoff', 'action' => $_POST['features']['samba']['enable'], 'args' => $_POST['features']['samba']['readwrite']));
+            }
+        } else {
+            // create worker job (stop samba)
+            $redis->hGet('samba','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaonoff', 'action' => $_POST['features']['samba']['enable'], 'args' => $_POST['features']['samba']['readwrite']));
         }
-        if ($_POST['features']['spotify']['enable'] == 1) {
-            // create worker job (start mpdscribble)
+		if ($_POST['features']['spotify']['enable'] == 1) {
+            // create worker job (start spotify)
             if (($_POST['features']['spotify']['user'] != $redis->hGet('spotify', 'user') OR $_POST['features']['spotify']['pass'] != $redis->hGet('spotify', 'pass')) OR $redis->hGet('spotify', 'enable') != $_POST['features']['spotify']['enable']) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotify', 'action' => 'start', 'args' => $_POST['features']['spotify']));
             }
@@ -181,6 +190,7 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'display_off') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'display_off'));
         if ($_POST['syscmd'] === 'mpdrestart') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdrestart'));
         if ($_POST['syscmd'] === 'backup') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'backup'));
+        if ($_POST['syscmd'] === 'activate') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'restoreact'));
     }
 }
 waitSyWrk($redis,$jobID);
@@ -212,9 +222,11 @@ $template->coverart = $redis->get('coverart');
 $template->lastfm = $redis->hGetAll('lastfm');
 $template->proxy = $redis->hGetAll('proxy');
 $template->spotify = $redis->hGetAll('spotify');
+$template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');
 $template->local_browseronoff = file_exists('/usr/bin/xinit');
+$template->restoreact = $redis->get('restoreact');

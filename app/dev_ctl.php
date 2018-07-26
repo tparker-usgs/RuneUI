@@ -57,22 +57,6 @@ if (isset($_POST)) {
             // set debug off
             $redis->get('debug') == 0 || $redis->set('debug', 0);
         }
-    // ----- SAMBA DEV -----
-        if ($_POST['mode']['sambadevonoff']['enable'] == 1) {
-            // create worker job (set on and start samba)
-            $redis->hget('samba', 'devonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevon'));
-        } else {
-            // create worker job (set off and stop samba)
-            $redis->hget('samba', 'devonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambadevoff'));
-        }
-    // ----- SAMBA Prod -----
-        if ($_POST['mode']['sambaprodonoff']['enable'] == 1) {
-            // create worker job (set on and start samba)
-            $redis->hget('samba', 'prodonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodon'));
-        } else {
-            // create worker job (set off and start samba)
-            $redis->hget('samba', 'prodonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaprodoff'));
-        }
     // ----- SoXr MPD -----
         if ($_POST['mode']['soxrmpdonoff']['enable'] == 1) {
             // create worker job (set on and reset/restart MPD/Airplay)

@@ -11,7 +11,7 @@ if ($filesize === 0) die("File upload error !");
 exec("rm -f /srv/http/tmp/backup_*");
 if (! move_uploaded_file($filetmp, $filedest)) die("File move error !");
 
-$restore = exec("sudo /srv/http/restore.sh $filedest; echo $?");
+$restore = exec("sudo /srv/http/command/restore.sh $filedest; echo $?");
 
 if ($restore == 0) {
 	echo "Restored successfully. Reboot recommended";

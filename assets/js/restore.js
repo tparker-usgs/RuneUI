@@ -2,7 +2,7 @@
 $("#restore").submit(function() {
     var formData = new FormData($(this)[0]);
     $.ajax({
-        url: "../../restore.php",
+        url: "../../command/restore.php",
         type: "POST",
         data: formData,
         cache: false,
@@ -15,4 +15,3 @@ $("#restore").submit(function() {
     });
     return false
 });
-

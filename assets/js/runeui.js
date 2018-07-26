@@ -3111,6 +3111,39 @@ if ($('#section-index').length) {
                 }
             });
             
+            // show/hide UPnP/dlna Tidal name form
+            $('#dlnaTidal').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#dlnaTidalName').removeClass('hide');
+                    $('#dlnaTidalBox').addClass('boxed-group');
+                } else {
+                    $('#dlnaTidalName').addClass('hide');
+                    $('#dlnaTidalBox').removeClass('boxed-group');
+                }
+            });
+			
+            // show/hide UPnP/dlna Google Music name form
+            $('#dlnaGoogle').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#dlnaGoogleName').removeClass('hide');
+                    $('#dlnaGoogleBox').addClass('boxed-group');
+                } else {
+                    $('#dlnaGoogleName').addClass('hide');
+                    $('#dlnaGoogleBox').removeClass('boxed-group');
+                }
+            });
+			
+            // show/hide UPnP/dlna Qobuz streaming service name form
+            $('#dlnaQobuz').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#dlnaQobuzName').removeClass('hide');
+                    $('#dlnaQobuzBox').addClass('boxed-group');
+                } else {
+                    $('#dlnaQobuzName').addClass('hide');
+                    $('#dlnaQobuzBox').removeClass('boxed-group');
+                }
+            });
+            
             // show/hide Spotify auth form
             $('#spotify').change(function(){
                 if ($(this).prop('checked')) {

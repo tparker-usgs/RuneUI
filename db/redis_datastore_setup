@@ -158,6 +158,7 @@ function redisDatastore($redis,$action) {
 			$redis->set('mpd_playback_lastnumber', '');
 			$redis->set('last_pl_randomfile', 'exists');
 			$redis->set('local_browser', 0);
+			$redis->set('restoreact', 0);
             // plugins api-keys
             $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -198,8 +199,8 @@ function redisDatastore($redis,$action) {
             $redis->set('nextsongid', 0);
             $redis->set('lastsongid', 0);
 			// Samba parameters
-			$redis->hSet('samba', 'devonoff', 1);
-            $redis->hSet('samba', 'prodonoff', 0);
+			$redis->hSet('samba', 'enable', 0);
+            $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hSet('resolvconf', 'attempts', '1');
@@ -381,6 +382,7 @@ function redisDatastore($redis,$action) {
 			$redis->get('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
 			$redis->get('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
 			$redis->get('local_browser') || $redis->set('local_browser', 0);
+			$redis->get('restoreact') || $redis->set('restoreact', 0);
             // plugins api-keys
             $redis->get('lastfm_apikey') || $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hGet('lastfm', 'apikey') || $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -416,8 +418,8 @@ function redisDatastore($redis,$action) {
             $redis->get('nextsongid') || $redis->set('nextsongid', 0);
             $redis->get('lastsongid') || $redis->set('lastsongid', 0);
 			// Samba parameters
-			$redis->hGet('samba', 'devonoff') || $redis->hSet('samba', 'devonoff', 1);
-            $redis->hGet('samba', 'prodonoff') || $redis->hSet('samba', 'prodonoff', 0);
+			$redis->hGet('samba', 'enable') || $redis->hSet('samba', 'enable', 0);
+            $redis->hGet('samba', 'readwrite') || $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hGet('resolvconf', 'timeout') || $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hGet('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', '1');

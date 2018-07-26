@@ -1,9 +1,9 @@
 #!/bin/bash
-set -x #echo all commands to cli
+set -x # echo all commands to cli
+set +e # continue on errors
 #Image reset script
 
 #Use the next line only for a distribution build, do not use on development versions!!! It clears the pacman history, makes a lot of space free, but that history is useful.
-
 #pacman -Sc
 #---
 #Before running the script...
@@ -11,7 +11,7 @@ set -x #echo all commands to cli
 #Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources.
 #Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
 #
-# set up services
+# set up services and stop them
 systemctl unmask systemd-journald
 systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd bluetooth
 systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
@@ -95,6 +95,7 @@ cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
 cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
+cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
 #
 # network

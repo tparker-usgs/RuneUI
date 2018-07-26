@@ -105,6 +105,13 @@ if ($retval[0] === 'enabled') {
 }
 unset($retval);
 sysCmd('systemctl stop php-fpm');
+// bluetooth
+$retval = sysCmd('systemctl is-enabled bluetooth');
+if ($retval[0] === 'enabled') {
+    sysCmd('systemctl disable bluetooth');
+}
+unset($retval);
+sysCmd('systemctl stop bluetooth');
 // setup /run dir
 sysCmd('chmod 777 /run');
 // Connect to Redis backend
@@ -143,16 +150,13 @@ if (FALSE === $redis->get('audio_on_off')) {
 if ($redis->hGet('addons', 'addo') != '') {
 	// do nothing
 } else {
-	// not set or is empty so delete the sudo enable all file for user http
-	sysCmd('rm /etc/sudoers.d/http');
+	// not set or is empty so delete the sudo enable-all file for user http - used for addons menu
+	sysCmd('rm -f /etc/sudoers.d/http');
 }
 // Rern's restore enable
-if ($redis->hGet('addons', 'back') != '') {
-	// do nothing
-} else {
-	// not set or is empty so delete the sudo enable all file for user http-backup
-	sysCmd('rm /etc/sudoers.d/http-backup');
-}
+// always delete the sudo enable-all file for user http - used for backup restore
+sysCmd('rm -f /etc/sudoers.d/http-backup');
+
 // Start MPD in order to set the startup volume (if set) then kill MPD
 sysCmd('pgrep -x mpd || systemctl start mpd');
 $mpdstartvolume = $redis->get('mpd_start_volume');
@@ -330,36 +334,8 @@ if ($playerid_db === '') {
     if ($arch !== '--') {
         // wrk_sysOBEnvCheck($arch,0);
     }
-    // start samba services
-    if ($redis->get('dev') > 0) {
-		// dev mode on
-		if ($redis->hGet('samba', 'devonoff') > 0) {
-			// Samba for dev mode enabled
-			runelog("service: SAMBA start (DEV-Mode ON) and Samba Dev enabled");
-			// switch smb.conf (development)
-			sysCmd('rm /etc/samba/smb.conf');
-			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-			sysCmd('systemctl daemon-reload');
-			sysCmd('systemctl start nmbd');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep -x nmbd || systemctl start nmbd');
-			sysCmd('pgrep -x smbd || systemctl start smbd');
-		}
-    }  else {
-		// dev mode off, so prod mode on
-		if ($redis->hGet('samba', 'prodonoff') > 0) {
-			// Samba for prod mode enabled
-			runelog("service: SAMBA start (DEV-Mode OFF) and Samba Prod enabled");
-			// switch smb.conf (production)
-			sysCmd('rm /etc/samba/smb.conf');
-			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-			sysCmd('systemctl daemon-reload');
-			sysCmd('systemctl start nmbd');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep -x nmbd || systemctl start nmbd');
-			sysCmd('pgrep -x smbd || systemctl start smbd');
-		}
-	}
+    // start Samba services (if required)
+	wrk_restartSamba($redis);
 }
 $kernel = $redis->get('kernel');
 // load i2smodule
@@ -497,12 +473,31 @@ $redis->pconnect('/run/redis.sock');
                     break;
                 case 'backup':
                     runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
                     $backup = wrk_backup($redis);
                     $redis->hSet('w_msg', $jobID, $backup);
                     $redis->sRem('w_lock', $jobID);
                     break;
+                case 'restoreact':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+					// Activate the Restore function
+                    $redis->sAdd('w_lock', $jobID);
+					$redis->set('restoreact', ' 1');
+					sysCmd("echo 'http ALL=NOPASSWD: ALL' > /etc/sudoers.d/http-backup");
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+                // case 'restore':
+                    // runelog('wrk_SY: ', $job->wrkcmd);
+					// runelog('restore: ', $job->args);
+                    // $redis->sAdd('w_lock', $jobID);
+					// ui_notify_async('Restore backup', 'please wait for a restart...', $jobID);
+                    // wrk_restore($redis, "/run/".$job->args);
+					// this function never returns, it will stop most jobs restart redis and finally respawn rune_SY_wrk (this file)
+                    // $redis->sRem('w_lock', $jobID);
+                    // break;
                 case 'clearimg':
                     runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
                     // Clean IMG
                     runelog('Clean IMG');
                     // send notfy to UI
@@ -550,7 +545,7 @@ $redis->pconnect('/run/redis.sock');
 					$redis->sAdd('w_lock', $jobID);
                     // Update RuneUI
                     runelog('Update RuneUI');
-					// preperation: delete the MPD watchdog, set up git user-name and email (set to player ID), and stash
+					// preparation: delete the MPD watchdog, set up git user-name and email (set to player ID), and stash
 					sysCmd('rm -f /var/www/command/mpd-watchdog');
 					sysCmd('cd /srv/http/ && git config user.name "'.$redis->get('playerid').'"');
 					sysCmd('cd /srv/http/ && git config user.email "'.$redis->get('playerid').'@runeaudio.com"');
@@ -817,103 +812,20 @@ $redis->pconnect('/run/redis.sock');
 					}
                     $redis->sRem('w_lock', $jobID);
                     break;
-				case 'sambaprodon':
+				case 'sambaonoff':
                     runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('sambaonoff action: ', $job->action);
+					runelog('sambaonoff args: ', $job->args);
                     $redis->sAdd('w_lock', $jobID);
-					$redis->hSet('samba', 'prodonoff', 1);
-					if ($redis->get('dev') > 0) {
-						//dev mode
-					} else {
-						// prod mode
-						sysCmd('rm /etc/samba/smb.conf');
-						sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-						sysCmd('systemctl daemon-reload');
-						sysCmd('systemctl start nmbd');
-						sysCmd('systemctl start smbd');
-						sysCmd('pgrep -x nmbd || systemctl start nmbd');
-						sysCmd('pgrep -x smbd || systemctl start smbd');
-					}
-                    $redis->sRem('w_lock', $jobID);
-					break;
-				case 'sambaprodoff':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-					$redis->hSet('samba', 'prodonoff', 0);
-					if ($redis->get('dev') > 0) {
-						//dev mode
-					} else {
-						// prod mode
-						sysCmd('systemctl stop smbd');
-						sysCmd('systemctl stop nmbd');
-					}
-                    $redis->sRem('w_lock', $jobID);
-					break;
-				case 'sambadevon':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-					$redis->hSet('samba', 'devonoff', 1);
-					if ($redis->get('dev') > 0) {
-						//dev mode
-						sysCmd('rm /etc/samba/smb.conf');
-						sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-						sysCmd('systemctl daemon-reload');
-						sysCmd('systemctl start nmbd');
-						sysCmd('systemctl start smbd');
-						sysCmd('pgrep -x nmbd || systemctl start nmbd');
-						sysCmd('pgrep -x smbd || systemctl start smbd');
-					} else {
-						// prod mode
-					}
-                    $redis->sRem('w_lock', $jobID);
-					break;
-				case 'sambadevoff':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-					$redis->hSet('samba', 'devonoff', 0);
-					if ($redis->get('dev') > 0) {
-						//dev mode
-						sysCmd('systemctl stop smbd');
-						sysCmd('systemctl stop nmbd');
-					} else {
-						// prod mode
-					}
+					$redis->hSet('samba', 'enable', $job->action);
+					$redis->hSet('samba', 'readwrite', $job->args);
+					wrk_restartSamba($redis);
                     $redis->sRem('w_lock', $jobID);
 					break;
 				case 'sambarestart':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('systemctl stop smbd');
-					sysCmd('systemctl stop nmbd');
-					// restart samba services
-					if ($redis->get('dev') > 0) {
-						// dev mode on
-						if ($redis->hGet('samba', 'devonoff') > 0) {
-							// Samba dev mode enabled
-							runelog("service: SAMBA restart (DEV-Mode ON) and Samba Dev enabled");
-							// switch smb.conf (development)
-							sysCmd('rm /etc/samba/smb.conf');
-							sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-							sysCmd('systemctl daemon-reload');
-							sysCmd('systemctl start nmbd');
-							sysCmd('systemctl start smbd');
-							sysCmd('pgrep -x nmbd || systemctl start nmbd');
-							sysCmd('pgrep -x smbd || systemctl start smbd');
-						}
-					}  else {
-						// dev mode off, prod mode on
-						if ($redis->hGet('samba', 'prodonoff') > 0) {
-							// Samba prod mode enabled
-							runelog("service: SAMBA restart (DEV-Mode OFF) and Samba Prod enabled");
-							// switch smb.conf (production)
-							sysCmd('rm /etc/samba/smb.conf');
-							sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-							sysCmd('systemctl daemon-reload');
-							sysCmd('systemctl start nmbd');
-							sysCmd('systemctl start smbd');
-							sysCmd('pgrep -x nmbd || systemctl start nmbd');
-							sysCmd('pgrep -x smbd || systemctl start smbd');
-						}
-					}
+					wrk_restartSamba($redis);
                     $redis->sRem('w_lock', $jobID);
 					break;
 				case 'rerninstall':
@@ -927,15 +839,15 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
 					sleep(1);
-					$retval = sysCmd("cat /home/rern/Rern_Addons.log | grep -i 'installed\|please'");
-					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode("\n", $retval)));
+					$retval = sysCmd("cat /home/rern/Rern_Addons.log | grep -Ei 'installed|please'");
+					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode(" ", $retval)));
 					sleep(3);
 					ui_notify("Rern's Addons", "You may need to reboot...");
 					sleep(1);
 					unset($retval);
 					$redis->hSet('addons', 'update', '0');
-					$redis->hSet('addons', 'back', '20170901');
 					$redis->hSet('addons', 'font', '20170901');
+                    sysCmd('systemctl restart php-fpm || systemctl start php-fpm');
 					$redis->sRem('w_lock', $jobID);
 					break;
 				case 'rernreinstall':
@@ -951,15 +863,15 @@ $redis->pconnect('/run/redis.sock');
 					sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
 					sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
 					sleep(1);
-					$retval = sysCmd("cat /home/rern/Rern_Addons.log | grep -i 'installed\|please'");
-					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode("\n", $retval)));
+					$retval = sysCmd("cat /home/rern/Rern_Addons.log | grep -Ei 'installed|please'");
+					ui_notify("Rern's Addons", preg_replace('/[^A-Za-z0-9<>- ]/', '', implode(" ", $retval)));
 					sleep(3);
 					ui_notify("Rern's Addons", "You may need to reboot...");
 					sleep(1);
 					unset($retval);
 					$redis->hSet('addons', 'update', '0');
-					$redis->hSet('addons', 'back', '20170901');
 					$redis->hSet('addons', 'font', '20170901');
+                    sysCmd('systemctl restart php-fpm || systemctl start php-fpm');
 					$redis->sRem('w_lock', $jobID);
 					break;
                 case 'xorgserverstart':
@@ -1187,15 +1099,6 @@ $redis->pconnect('/run/redis.sock');
 					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     sysCmd('export DISPLAY=:0; xset dpms force off');
-                    $redis->sRem('w_lock', $jobID);
-                    break;
-                case 'restore':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-					runelog('restore: ', $job->args);
-                    $redis->sAdd('w_lock', $jobID);
-					ui_notify_async('Restore backup', 'please wait for a restart...', $jobID);
-                    wrk_restore($redis, "/run/".$job->args);
-					// this function never returns, it will stop most jobs restart redis and finally respawn rune_SY_wrk (this file)
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'spotify':

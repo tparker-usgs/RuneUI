@@ -43,18 +43,14 @@ set +e
 
 echo "Stop MPD and unmount shares..."
 mpc stop
+mpd --kill
 systemctl stop nginx
 sleep 1
 systemctl stop local-browser
 sleep 1
 ply-image "$splash"
-systemctl stop ashuffle
-systemctl stop shairport-sync
-sleep 1
-systemctl stop mpd
-systemctl stop spopd
-systemctl stop smbd
-systemctl stop nmbd
+redis-cli save
+systemctl stop ashuffle shairport-sync mpd spopd smbd nmbd rune_PL_wrk rune_SSM_wrk upmpdcli mpdscribble
 sleep 1
 export DISPLAY=:0
 xset dpms force off

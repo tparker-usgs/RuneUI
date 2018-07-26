@@ -30,7 +30,7 @@
 								<input id="opcache" name="opcache[enable]" type="checkbox" value="1"<?php if($this->opcache === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-						<span class="help-block">Enable PHP 5.5 OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment.</span>
+						<span class="help-block">Enable PHP 5.5 OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
 					</div>
 				</div>
 			</div>
@@ -64,8 +64,9 @@
                     <label class="col-sm-2 control-label">Reset the RuneAudio player</label>
                     <div class="col-sm-10">
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="blankplayerid" id="syscmd-blankplayerid" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-                        <span class="help-block">Reset playerID and hwplatformID. The player will perform initialisation configuration routines during the next reboot.<br>
-						Always <strong>de-install</strong> Rern's Addons <strong>before</strong> choosing this option!
+                        <span class="help-block">Reset playerID and hwplatformID. The player will perform configuration initialisation routines during the next reboot.<br>
+						This function can be used as an alternative to re-flashing your Micro-SD card if Rune stops working correctly. In many cases it will fix the problems.<br> 
+						Always <strong>de-install</strong> Rern's Addons <strong>before</strong> choosing this option!<br>
 						You will <strong>lose most of your settings</strong> after choosing this option!<br>
 						</span>
                     </div>
@@ -75,7 +76,7 @@
                     <div class="col-sm-10">
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="clearimg" id="syscmd-clearimg" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                         <span class="help-block">Clear command history, logs, reset image parameters to default settings.<br>
-                        NOTE: (Dev team function) Use this function prior to public a RuneOS image.<br>
+                        NOTE: (Dev team function) Use this function prior to publication of a RuneOS image.<br>
 						This function takes up to 20 minutes to complete, wait, be patient!<br>
                         WARNING: Automatic system shutdown after execution!</span>
                     </div>
@@ -89,7 +90,11 @@
 								<input id="opcache" name="mode[dev][enable]" type="checkbox" value="1"<?php if($this->dev === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-							<span class="help-block">Enable <i>developer mode</i>.</span>
+							<span class="help-block">Enable <i>developer mode</i>.<br>
+							When developer mode is ON:<br>
+							- The functions on this page are switched ON<br>
+							- Samba is switched on in read/write mode (default is without password control)<br>
+							- JavaScript uses the runeaudio.js insted of runeaudio.min.js which is normally used</span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -99,40 +104,14 @@
 								<input id="opcache" name="mode[debug][enable]" type="checkbox" value="1"<?php if($this->debug === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-						<span class="help-block">Activate debug data collection. (You will find all log files in <strong>/var/log/runeaudio/</strong> directory).</span>
+						<span class="help-block">Activate debug data collection. (You will find all log files in <strong>/var/log/runeaudio/</strong> directory)</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Check FS permissions</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="syschmod" id="syscmd-mpdrestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">Check and restore correct FS permissions, in important system areas.</span>
-					</div>
-				</div>
-            </div>
-            <div class="boxed-group">
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Samba status when in Dev mode</label>
-					<div class="col-sm-10">
-							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[sambadevonoff][enable]" type="checkbox" value="1"<?php if($this->sambadevonoff === '1'): ?> checked="checked" <?php endif ?>>
-								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-							</label>
-						<span class="help-block">Samba activated/deactivated when ReneAudio is running in <strong>Dev</strong> mode.<br>
-						By default Samba is <strong>ON</strong> in Dev mode.<br>
-						Default settings when set ON: <strong>Read and write</strong> access to system files is given to all local network users, <strong>no password</strong> is required.</span>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Samba status when in Production mode</label>
-					<div class="col-sm-10">
-							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[sambaprodonoff][enable]" type="checkbox" value="1"<?php if($this->sambaprodonoff === '1'): ?> checked="checked" <?php endif ?>>
-								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-							</label>
-						<span class="help-block">Samba activated/deactivated when ReneAudio is running in <strong>Production</strong> mode.<br>
-						By default Samba is <strong>OFF</strong> in Production mode.<br>
-						Default settings when set ON: <strong>Read only</strong> access to the music library's is given to all local network users, <strong>no password</strong> is required.</span>
+						<span class="help-block">Check and restore the correct FS ownership and permissions in important system areas</span>
 					</div>
 				</div>
             </div>
@@ -144,9 +123,9 @@
 								<input id="opcache" name="mode[soxrmpdonoff][enable]" type="checkbox" value="1"<?php if($this->soxrmpdonoff === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-						<span class="help-block">SoXr for MPD is set ON or OFF depending on processor type. It does nothing (and has no CPU overhead) unless sample-rate conversion is required.
-						This happens only in very special circumstances. It always reduces quality when it operates, but it is better than the built-in MPD sample-rate converter.
-						A higher CPU overhead is imposed than when using the built-in MPD sample-rate converter. You can can override the default setting here.</span>
+						<span class="help-block">SoXr for MPD is set ON or OFF depending on processor type. The MPD sample rate converter can not be switched off, it does nothing (and has no CPU overhead) unless sample rate conversion is required.
+						This happens only in special circumstances, MPD switches it on automatically when required. It always reduces quality when it operates, but SoXr is better than the built-in MPD sample-rate converter.
+						A higher CPU overhead is imposed by SoxR than when using the built-in MPD sample-rate converter. You can can override the default setting here</span>
 					</div>
 				</div>
             </div>
@@ -160,7 +139,7 @@
 							</label>
 						<span class="help-block">SoXr for Airplay is set OFF by default. Your system <strong>will crash</strong> if it is switched ON, please leave it switched OFF.<br>
 						<i>In theory it should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for details.
-						Unfortunately it imposes a too high CPU overhead for the processors used by RuneAudio.</i></span>
+						Unfortunately it imposes a too high CPU overhead for the processors used by RuneAudio</i></span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -172,7 +151,7 @@
 							</label>
 						<span class="help-block">Metadata for Airplay is set ON or OFF depending on processor type.
 						It imposes a medium CPU and memory overhead when Airplay is active.
-						You can can override the default setting here.</span>
+						You can can override the default setting here</span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -184,7 +163,7 @@
 							</label>
 						<span class="help-block">Cover Art for Airplay is set ON or OFF depending on processor type.
 						When set on it imposes a CPU overhead when Airplay is active. On less powerful processors it can fail to work properly.
-						Cover Art is automatically switched off when 'Metadata for Airplay' is off. You can can override the default setting here.</span>
+						You can can override the default setting here. Cover Art is also automatically switched off when 'Airplay Metadata' is off</span>
 					</div>
 				</div>
 			</div>
@@ -204,7 +183,7 @@
 					<label class="col-sm-2 control-label">Update RuneUI</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">&nbsp;</span>
+						<span class="help-block">Download and install the latest updates, a reboot is recommended after updating</span>
 					</div>
 				</div>
             </div>
@@ -220,7 +199,7 @@
 					<label class="col-sm-2 control-label">Restart Samba</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">If you change the Samba configuration files a restart is required to activate your changes.</span>
+						<span class="help-block">If you change the Samba configuration files a restart is required to activate your changes</span>
 					</div>
 				</div>
             </div>
@@ -243,7 +222,7 @@
 					<label class="col-sm-2 control-label">Reset Airplay config</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay.</span>
+						<span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay</span>
 					</div>
 				</div>
             </div>
@@ -253,17 +232,16 @@
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
 						<span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
-						Refresh the browser after installing, this should enable the Addons menu. However it is possible that a reboot is also required.<br>
+						Refresh the browser after installing, this should enable the Addons menu.<br>
 						You can remove the Rern's Addons menu via the Addons menu.<br>
-						The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum.</span>
+						The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Re-install Rern's Addons</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernreinstall" id="syscmd-rernreinstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot deinstall it; this may fix it.
-						A reboot will probably be required to make the Addons menu visible.</span>
+						<span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot de-install it; this may fix it</span>
 					</div>
 				</div>
 			</div>
@@ -309,7 +287,7 @@
 						<span class="help-block">This version of RuneAudio has a patched kernel which allows alsa to stream at a sample-rate up to 384k.
 						This is twice as high as the normal maximum rate of 192k.
 						Where necessary the parameters for selecting and setting up hardware audio cards have been adapted to give the best performance.<br>
-						If you manually update the kernel, not only will you lose the 384k feature but some of the setting for hardware audio cards will no longer be optimal.</span>
+						If you manually update the kernel, not only will you lose the 384k feature but some of the setting for hardware audio cards will no longer be optimal</span>
 					</div>
 				</div>    
 				<div class="form-group">
@@ -318,7 +296,7 @@
 						<span class="help-block">Only when you have a hard-disk drive attached to Rune:<br>
 						Hard disk health-check monitoring will automatically be carried out using 'smartmontools'.<br>
 						Normally you will not notice that this is taking place. In the debug listing there is a status display.<br>
-						Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI.</span>
+						Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI</span>
 					</div>
 				</div>    
 				<div class="form-group">
@@ -326,11 +304,10 @@
 					<div class="col-sm-10">
 						<span class="help-block">For some reason MPD is incapable of providing the bit-rate for some audio file types.
 						This results in the bit-rate not being displayed in the player UI.<br>
-						A solution for this problem has been implemented but not fully included in this version in order to keep the image smaller.
+						A solution for this problem has been implemented but not fully included in this version in order to minimise the image size.
 						If missing bit-rates is a problem for you, installing the package 'mediainfo' may provide a solution. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
 						You can find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
 						Then you can use the following command to install the 'mediainfo' package: <strong>pacman -Sy mediainfo</strong></span>
-						
 					</div>
 				</div>
 			</div>

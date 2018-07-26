@@ -6,6 +6,7 @@ After=mpd.service
 
 [Service]
 ExecStartPre=/bin/rm -f /var/log/runeaudio/upmpdcli.log
+ExecStartPre=/bin/mkdir -p /tmp/upmpdcli
 ExecStart=/usr/bin/upmpdcli -q 1 -d /var/log/runeaudio/upmpdcli.log -l 6 -f "RuneAudio"
 Restart=always
 

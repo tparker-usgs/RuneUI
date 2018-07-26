@@ -7,7 +7,7 @@
                 <label class="control-label col-sm-2">Check system status</label>
                 <div class="col-sm-10">
                     <a class="btn btn-default btn-lg" href="#modal-sysinfo" data-toggle="modal"><i class="fa fa-info-circle sx"></i>show status</a>
-                    <span class="help-block">See information regarding the system and its status.</span>
+                    <span class="help-block">See information regarding the system and its status</span>
                 </div>
             </div>
             <div class="form-group" id="environment">
@@ -15,14 +15,14 @@
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="hostname" name="hostname" value="<?php echo $this->hostname; ?>" placeholder="runeaudio" autocomplete="off">
                     <span class="help-block">Set the player hostname. This will change the address used to reach the RuneUI.<br>
-					No <strong>spaces</strong> or <strong>special charecters</strong> allowed in the name.</span>
+					No <strong>spaces</strong> or <strong>special charecters</strong> allowed in the name</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="control-label col-sm-2" for="ntpserver">NTP server</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="ntpserver" name="ntpserver" value="<?php echo $this->ntpserver; ?>" placeholder="pool.ntp.org" autocomplete="off">
-                    <span class="help-block">Set your reference time sync server <i>(NTP server)</i>.</span>
+                    <span class="help-block">Set your reference time sync server <i>(NTP server)</i></span>
                 </div>
             </div>
             <div class="form-group">
@@ -35,7 +35,7 @@
                       </option>
                     <?php endforeach; ?>
                     </select>
-                    <span class="help-block">Set the system timezone.</span>
+                    <span class="help-block">Set the system timezone</span>
                 </div>
             </div>
             <!-- <div <?php if($this->proxy['enable'] === 1): ?>class="boxed-group"<?php endif ?> id="proxyBox">
@@ -93,7 +93,7 @@
                         <option value="linux-rune-rpi_3.6.11-18-ARCH+" <?php if($this->kernel === 'linux-rune-rpi_3.6.11-18-ARCH+'): ?> selected <?php endif ?>>Linux kernel 3.6.11-18&nbsp;&nbsp;&nbsp;ARCH+&nbsp;[RuneAudio v0.1-beta/v0.2-beta]</option>
                         <option value="linux-rune-rpi_3.12.13-rt21_wosa" <?php if($this->kernel === 'linux-rune-rpi_3.12.13-rt21_wosa'): ?> selected <?php endif ?>>Linux kernel 3.12.13-rt&nbsp;&nbsp;&nbsp;RUNE-RT&nbsp;[Wolfson Audio Card]</option>
                     </select>
-                    <span class="help-block">Switch Linux Kernel version (REBOOT REQUIRED). <strong>Linux kernel 3.12.26-1</strong> is the default kernel in the current release, <strong>Linux kernel 3.12.19-2</strong> is the kernel used in RuneAudio v0.3-alpha, <strong>Linux kernel 3.6.11-18</strong> is the kernel used in RuneAudio v0.1-beta/v0.2-beta (it has no support for I&#178;S), <strong>Linux kernel 3.12.13-rt</strong> is an EXPERIMENTAL kernel (not suitable for all configurations), it is optimized for <strong>Wolfson Audio Card</strong> support and it is the default option for that type of soundcard.</span>
+                    <span class="help-block">Switch Linux Kernel version (REBOOT REQUIRED). <strong>Linux kernel 3.12.26-1</strong> is the default kernel in the current release, <strong>Linux kernel 3.12.19-2</strong> is the kernel used in RuneAudio v0.3-alpha, <strong>Linux kernel 3.6.11-18</strong> is the kernel used in RuneAudio v0.1-beta/v0.2-beta (it has no support for I&#178;S), <strong>Linux kernel 3.12.13-rt</strong> is an EXPERIMENTAL kernel (not suitable for all configurations), it is optimized for <strong>Wolfson Audio Card</strong> support and it is the default option for that type of soundcard</span>
                 </div>
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
@@ -114,7 +114,7 @@
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
-					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose.</span>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
             -->
@@ -124,7 +124,7 @@
                     <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
                         <option value="<?php echo $this->kernel; ?>"><?php echo $this->kernel; ?></option>
                     </select>
-                    <span class="help-block">No other kernels available.</span>
+                    <span class="help-block">No other kernels available</span>
                 </div>
             </div>
             <div class="form-group">
@@ -187,7 +187,7 @@
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
-					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose.</span>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
             <div class="form-group">
@@ -271,7 +271,7 @@
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. After rebooting the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
-					After selecting your hardware the 'best choice' driver will be used. Because some drivers are used for several different hardware types it is possible that the hardware which is displayed is not the one which you selected.</span>
+					After selecting your hardware the 'best choice' driver will be used. Because some drivers are used for several different hardware types it is possible that the hardware which is displayed is not the one which you selected</span>
                 </div>
             </div>
             <div class="form-group">
@@ -317,7 +317,7 @@
                         <option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
                         <option value="odroidhifishield" <?php if($this->i2smodule === 'odroidhifishield'): ?> selected <?php endif ?>>ODROID HiFi Shield</option>
                     </select>
-                    <span class="help-block">Enable I&#178;S output selecting one of the available sets of modules, specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot.</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available sets of modules, specific for each hardware. Once set, the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and modules will also auto-load from the next reboot</span>
                 </div>
             </div>
             <?php endif;?>
@@ -339,7 +339,7 @@
                     It happens that these parameters introduce an audible impact on the overall sound quality, acting on kernel latency parameters (and probably on the amount of overall 
                     <a href="http://www.thewelltemperedcomputer.com/KB/BitPerfectJitter.htm" title="Bit Perfect Jitter by Vincent Kars" target="_blank">jitter</a>).
                     Sound results may vary depending on where music is listened, so choose according to your personal taste.
-                    (If you can't hear any tangible differences... nevermind, just stick to the default settings.)</span>
+                    (If you can't hear any tangible differences... nevermind, just stick to the default settings)</span>
                 </div>
             </div>
             <div class="form-group form-actions">
@@ -352,7 +352,7 @@
     <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
         <fieldset id="features-management">
             <legend>Features management</legend>
-            <p>Enable/disable optional modules that best suit your needs. Disabling unused features will free system resources and might improve the overall performance.</p>
+            <p>Enable/disable optional modules that best suit your needs. Disabling unused features will free system resources and might improve the overall performance</p>
             <div <?php if($this->airplay['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="airplayBox">
                 <div class="form-group">
                     <label for="airplay" class="control-label col-sm-2">AirPlay</label>
@@ -384,7 +384,7 @@
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'Spotify'): ?>disabled<?php endif; ?>"></a>
                         </label>
                         <span class="help-block">Due to the Spotify upgrade of May 2018 the Spotify client no longer works<br>
-						<i>Enable Spotify client. You must have a <strong><a href="https://www.spotify.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account.</i></span>
+						<i>Enable Spotify client. You must have a <strong><a href="https://www.spotify.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account</i></span>
                     </div>
                 </div>
                 <div class="<?php if($this->spotify['enable'] != 1): ?>hide<?php endif ?>" id="spotifyAuth">
@@ -442,7 +442,7 @@
                         <input name="features[pwd_protection]" type="checkbox" value="1"<?php if($this->pwd_protection == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Protect the UI with a password (standard is "rune" can be changed on login screen).</span>
+                    <span class="help-block">Protect the UI with a password (standard is "rune" can be changed on login screen)</span>
                 </div>
             </div>
 			<?php if($this->local_browseronoff): ?>
@@ -453,29 +453,29 @@
                         <input name="features[local_browser]" type="checkbox" value="1"<?php if($this->local_browser == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Start a local browser on HDMI or TFT.</span>
+                    <span class="help-block">Start a local browser on HDMI or TFT</span>
                 </div>
 			</div>
             <?php else: ?>
 			<div class="form-group">
                 <label for="local-browser" class="control-label col-sm-2">Local browser</label>
                 <div class="col-sm-10">
-                    <span class="help-block"><br>Disabled, the required software not installed on this model.<br><br></span>
+                    <span class="help-block"><br>Disabled, the required software not installed on this model<br><br></span>
                 </div>
 			</div>
             <?php endif ?>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="localSStime">ScreenSaver time</label>
+                <label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
-                    <span class="help-block">Sets the time for the local screensaver (0-100, -1 disables the feature).</span>
+                    <span class="help-block">Sets the time for the local screensaver (0-100, -1 disables the feature)</span>
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="remoteSStime">ScreenSaver time</label>
+                <label class="col-sm-2 control-label" for="remoteSStime">Remote ScreenSaver time</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="remoteSStime" name="features[remoteSStime]" value="<?=$this->remoteSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
-                    <span class="help-block">Sets the time for the remote screensaver (0-100, -1 disables the feature).</span>
+                    <span class="help-block">Sets the time for the remote screensaver (0-100, -1 disables the feature)</span>
                 </div>
             </div>
             <div class="form-group">
@@ -526,6 +526,34 @@
                     </div>
                 </div>
             </div>
+            <div <?php if($this->samba['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="sambaBox">
+                <div class="form-group">
+                    <label for="samba" class="control-label col-sm-2">Samba File-Server</label>
+                    <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="samba" name="features[samba][enable]" type="checkbox" value="1"<?php if($this->samba['enable'] === '1'): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                        <span class="help-block">Enable Samba to share your music files on your network</span>
+                    </div>
+                </div>
+                <div class="<?php if($this->samba['enable'] != 1): ?>hide<?php endif ?>" id="sambaAuth">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="samba-readwrite">Read/Write access</label>
+                        <div class="col-sm-10">
+						
+							<label class="switch-light well" onclick="">
+								<input id="readwrite" name="features[samba][readwrite]" type="checkbox" value="1"<?php if($this->samba['readwrite'] === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">Choose Read-Only access (<strong>OFF</strong>) or Read/Write access (<strong>ON</strong>).<br>
+							By default <strong>no passwords</strong> are required to access the files. Note: Critical system files can be modified by <strong>anyone on your network</strong> after setting read/write access ON.<br>
+							Read/Write access allows you to update your music library over the network, it is convenient, but not very fast.<br>
+							You can modify the Samba configuration via your PC after setting Samba read/write access ON. Some instructions are included in the files</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="form-group form-actions">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button class="btn btn-primary btn-lg" value="1" name="features[submit]" type="submit">apply settings</button>
@@ -541,26 +569,40 @@
                 <label class="control-label col-sm-2">Backup player config</label>
                 <div class="col-sm-10">
                     <input class="btn btn-primary btn-lg" type="submit" name="syscmd" value="backup" id="syscmd-backup">
-					<span class="help-block">Export a compressed archive containing all the settings of this player</span>
+					<span class="help-block">Export a compressed archive containing all the settings of this player.</span>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <form class="form-horizontal" method="post">
+        <fieldset>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Activate Restore</label>
+                <div class="col-sm-10">
+                    <input class="btn btn-primary btn-lg" type="submit" name="syscmd" value="activate" id="syscmd-activate">
+					<span class="help-block">For security reasons restore must be activated before use</span>
                 </div>
             </div>
         </fieldset>
     </form>
     <form class="form-horizontal" id="restore">
         <fieldset>
-            <div class="form-group">
-                <label class="control-label col-sm-2">Restore player config</label>
-                <div class="col-sm-10">
-                    <p>
-                        <span id="btn-backup-browse" class="btn btn-default btn-lg btn-file">
-                            Browse... <input type="file" name="filebackup">
-                        </span> 
-                        <span id="backup-file"></span>
-                        <span class="help-block">Restore a previously exported backup</span>
-                    </p>
-                    <button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
-                </div>
-            </div>
+			<div <?php if($this->restoreact != 1): ?>hidden<?php endif ?>>
+				<div class="form-group">
+					<label class="control-label col-sm-2">Restore player config</label>
+					<div class="col-sm-10">
+						<p>
+							<span id="btn-backup-browse" class="btn btn-default btn-lg btn-file">
+								Browse... <input type="file" name="filebackup">
+							</span> 
+							<span id="backup-file"></span>
+							<span class="help-block">Restore a previously exported backup.<br>
+							<strong>The system will reboot</strong> after restoring the backup</span>
+						</p>
+						<button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
+					</div>
+				</div>
+			</div>
 		</fieldset>
     </form>
 </div>

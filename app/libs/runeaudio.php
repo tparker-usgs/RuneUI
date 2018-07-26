@@ -1503,6 +1503,9 @@ function wrk_backup($redis, $bktype = null)
 		if (file_exists('/etc/hostapd/hostapd.conf')) {
 			$cmdstring .= " /etc/hostapd/hostapd.conf";
 		}
+		if (file_exists('/etc/upmpdcli.conf')) {
+			$cmdstring .= " /etc/upmpdcli.conf";
+		}
     }
     sysCmd($cmdstring);
     return $filepath;
@@ -2684,8 +2687,6 @@ if ($action === 'reset') {
 				// ashuffle gets started automatically
 				// restore the player status
 				wrk_mpdRestorePlayerStatus($redis);
-				// restart rune_PL_wrk
-				//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
                     sysCmd('systemctl start mpdscribble || systemctl restart mpdscribble');
@@ -3080,8 +3081,6 @@ function wrk_sourcecfg($redis, $action, $args)
             sysCmd('systemctl start mpd');
 			// ashuffle gets started automatically
 			wrk_mpdRestorePlayerStatus($redis);
-			// restart rune_PL_wrk
-			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
@@ -3462,6 +3461,47 @@ function wrk_stopAirplay($redis)
     }
 }
 
+function wrk_startUpmpdcli($redis)
+{
+	// TO-DO
+	// If active player is Airplay toggle to MPD
+	// If active player is Spotify switch to MPD
+	// pause current track
+	// save current track in playlist
+	// save MPD state
+	// save current playlist in memory
+	// Set redis Upmpdcli running (this stops ashuffle from restarting)
+	// Stop ashuffle
+}
+
+function wrk_stopUpmpdcli($redis)
+{
+	// TO-DO
+	// if the saved playlist is still available
+	// delete current MPD playlist
+	// restore MPD playlist
+	// restore MPD state
+	// play saved playlist track
+	// endif
+	// unset redis Upmpdcli running (this allows ashuffle to restart)
+}
+
+function wrk_pausedUpmpdcli($redis)
+{
+	// TO-DO
+	// start the <Upmpdcli timer> for <Upmpdcli timeout time> minutes
+	// if the <Upmpdcli timer> times out
+	// restart Upmpdcli.service
+	// call wrk_stopUpmpdcli($redis)
+	// endif
+}
+
+function wrk_playUpmpdcli($redis)
+{
+	// TO-DO
+	// clear the <Upmpdcli timer>
+}
+
 function wrk_playerID($arch)
 {
     // $playerid = $arch.md5(uniqid(rand(), true)).md5(uniqid(rand(), true));
@@ -3496,8 +3536,6 @@ function wrk_switchplayer($redis, $playerengine)
             if ($redis->hGet('dlna','enable') === '1') sysCmd('systemctl start upmpdcli');
             $redis->set('activePlayer', 'MPD');
 			wrk_mpdRestorePlayerStatus($redis);
-			// restart rune_PL_wrk
-			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $return = sysCmd('systemctl stop spopd');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3513,8 +3551,6 @@ function wrk_switchplayer($redis, $playerengine)
 			wrk_mpdPlaybackStatus($redis);
             $redis->set('activePlayer', 'Spotify');
             $return = sysCmd('systemctl stop mpd');
-			// restart rune_PL_wrk
-			//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
             $redis->set('mpd_playback_status', 'stop');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
@@ -3563,6 +3599,53 @@ function wrk_NTPsync($ntpserver)
     }
 }
 
+function wrk_restartSamba($redis)
+{
+    // restart Samba
+	// first stop Samba
+	runelog('Samba Stopping...', '');
+	sysCmd('systemctl stop smbd nmbd');
+	runelog('Samba Dev/Prod   :', $redis->get('dev'));
+	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
+	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
+	if ($redis->get('dev')) {
+		// dev mode on
+		// switch smb.conf (development = read/write)
+		if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-dev.conf') {
+			// already set do nothing
+		} else {
+			sysCmd('rm -f /etc/samba/smb.conf');
+			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
+		}
+	} else if ($redis->hGet('samba', 'enable')) {
+		// Prod mode and Samba switched on
+		if ($redis->hGet('samba', 'readwrite')) {
+			// read/write switched on
+			if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-dev.conf') {
+				// already set do nothing
+			} else {
+				sysCmd('rm -f /etc/samba/smb.conf');
+				sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
+			}
+		} else {
+			// read/write switched off, so read-only switched on
+			if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-prod.conf') {
+				// already set do nothing
+			} else {
+				sysCmd('rm -f /etc/samba/smb.conf');
+				sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
+			}
+		}
+	}
+	if ($redis->get('dev') OR $redis->hGet('samba', 'enable')) {
+		runelog('Samba Restarting...', '');
+		sysCmd('systemctl daemon-reload');
+		sysCmd('systemctl start nmbd');
+		sysCmd('systemctl start smbd');
+		sysCmd('pgrep nmbd || systemctl start nmbd');
+		sysCmd('pgrep smbd || systemctl start smbd');
+	}
+}
 function wrk_changeHostname($redis, $newhostname)
 {
 	// new hostname can not have spaces or special characters
@@ -3616,39 +3699,8 @@ function wrk_changeHostname($redis, $newhostname)
     sysCmd('pgrep -x mpd || systemctl start mpd');
 	// ashuffle gets started automatically
 	wrk_mpdRestorePlayerStatus($redis);
-	// restart rune_PL_wrk
-	//sysCmd('systemctl restart rune_PL_wrk || systemctl start rune_PL_wrk');
-    // restart SAMBA
-	sysCmd('systemctl stop smbd nmbd');
-	if ($redis->get('dev') > 0) {
-		// dev mode on
-		if ($redis->hGet('samba', 'devonoff') > 0) {
-			// Samba dev mode enabled
-			runelog("service: SAMBA restart (DEV-Mode ON) and Samba Dev enabled");
-			// switch smb.conf (development)
-			sysCmd('rm /etc/samba/smb.conf');
-			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
-			sysCmd('systemctl daemon-reload');
-			sysCmd('systemctl start nmbd');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep nmbd || systemctl start nmbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
-		}
-	}  else {
-		// dev mode off, so prod mode is on
-		if ($redis->hGet('samba', 'prodonoff') > 0) {
-			// Samba prod mode enabled
-			runelog("service: SAMBA restart (DEV-Mode OFF) and Samba Prod enabled");
-			// switch smb.conf (production)
-			sysCmd('rm /etc/samba/smb.conf');
-			sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
-			sysCmd('systemctl daemon-reload');
-			sysCmd('systemctl start nmbd');
-			sysCmd('systemctl start smbd');
-			sysCmd('pgrep nmbd || systemctl start nmbd');
-			sysCmd('pgrep smbd || systemctl start smbd');
-		}
-	}
+	// restart SAMBA
+	wrk_restartSamba($redis);
     // set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
 }
