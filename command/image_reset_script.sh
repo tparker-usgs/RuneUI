@@ -86,6 +86,7 @@ cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.serv
 cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
 cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
+cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
