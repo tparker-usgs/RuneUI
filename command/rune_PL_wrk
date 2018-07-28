@@ -91,15 +91,24 @@ while (1) {
 			// set the mpd volume if a value is available
 			if ((!empty($redis->get('lastmpdvolume'))) && ($redis->hGet('mpdconf', 'mixer_type') != 'disabled')) {
 				$lastmpdvolume = $redis->get('lastmpdvolume');
-				$retries_volume = 0;
+				$retries_volume = 20;
 				do {
-					sleep(3);
+					sleep(2);
 					// retry until MPD is up and returns the requested volume
-					$retval = sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+					$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 					$mpdvolume = trim($retval[0]);
-					$retries_volume++;
 					unset($retval);
-				} while (($lastmpdvolume != $mpdvolume) && ($retries_volume < 20));
+					if ($lastmpdvolume == $mpdvolume) {
+						// do nothing
+					} else if ($mpdvolume == 'n/a') {
+						// something wrong, mismatch between redis and mpd 'disabled' values
+						$retries_volume = 0;
+					} else {
+						$retval = sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+						$mpdvolume = trim($retval[0]);
+						unset($retval);
+					}
+				} while (($lastmpdvolume != $mpdvolume) && (--$retries_volume > 0));
 			}
 			do {
 				// idle LOOP

@@ -38,10 +38,70 @@ include('/srv/http/app/config/config.php');
 // error_reporting('E_ALL');
 function redisDatastore($redis,$action) {
     switch ($action) {
+        case 'mpdreset':
+            // default MPD config
+            $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
+            $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
+            $redis->hSet('mpdconf', 'log_level', 'none');
+            $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hSet('mpdconf', 'port', '6600');
+            $redis->hSet('mpdconf', 'max_connections', '20');
+            $redis->hSet('mpdconf', 'user', 'mpd');
+            $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
+            $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
+            $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
+            $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
+            $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hSet('mpdconf', 'dsd_usb', 'no');
+            $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
+            $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
+            $redis->hSet('mpdconf', 'auto_update', 'no');
+            $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
+            $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
+            $redis->hSet('mpdconf', 'volume_normalization', 'no');
+            $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
+            $redis->hSet('mpdconf', 'buffer_before_play', '10%');
+            $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
+            $redis->hSet('mpdconf', 'mixer_type', 'software');
+            $redis->hSet('mpdconf', 'curl', 'yes');
+            $redis->hSet('mpdconf', 'ffmpeg', 'yes');
+            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			break;
+		case 'mpdcheck':
+            $redis->hGet('mpdconf', 'zeroconf_enabled') || $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
+            $redis->hGet('mpdconf', 'zeroconf_name') || $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
+            $redis->hGet('mpdconf', 'log_level') || $redis->hSet('mpdconf', 'log_level', 'none');
+            $redis->hGet('mpdconf', 'bind_to_address') || $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hGet('mpdconf', 'port') || $redis->hSet('mpdconf', 'port', '6600');
+            $redis->hGet('mpdconf', 'max_connections') || $redis->hSet('mpdconf', 'max_connections', '20');
+            $redis->hGet('mpdconf', 'user') || $redis->hSet('mpdconf', 'user', 'mpd');
+            $redis->hGet('mpdconf', 'db_file') || $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
+            $redis->hGet('mpdconf', 'sticker_file') || $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
+            $redis->hGet('mpdconf', 'pid_file') || $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hGet('mpdconf', 'music_directory') || $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
+            $redis->hGet('mpdconf', 'playlist_directory') || $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
+            $redis->hGet('mpdconf', 'state_file') || $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hGet('mpdconf', 'dsd_usb') || $redis->hSet('mpdconf', 'dsd_usb', 'no');
+            $redis->hGet('mpdconf', 'follow_outside_symlinks') || $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
+            $redis->hGet('mpdconf', 'follow_inside_symlinks') || $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
+            $redis->hGet('mpdconf', 'auto_update') || $redis->hSet('mpdconf', 'auto_update', 'no');
+            $redis->hGet('mpdconf', 'filesystem_charset') || $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
+            $redis->hGet('mpdconf', 'id3v1_encoding') || $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
+            $redis->hGet('mpdconf', 'volume_normalization') || $redis->hSet('mpdconf', 'volume_normalization', 'no');
+            $redis->hGet('mpdconf', 'audio_buffer_size') || $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
+            $redis->hGet('mpdconf', 'buffer_before_play') || $redis->hSet('mpdconf', 'buffer_before_play', '10%');
+            $redis->hGet('mpdconf', 'gapless_mp3_playback') ||$redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
+            $redis->hGet('mpdconf', 'mixer_type') || $redis->hSet('mpdconf', 'mixer_type', 'software');
+            $redis->hGet('mpdconf', 'curl') || $redis->hSet('mpdconf', 'curl', 'yes');
+            $redis->hGet('mpdconf', 'ffmpeg') || $redis->hSet('mpdconf', 'ffmpeg', 'yes');
+            $redis->hGet('mpdconf', 'log_file') || $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			break;
         case 'reset':
             // kernel
             $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
             $redis->set('i2smodule', 'none');
+			$redis->set('audio_on_off', '1');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
 			// UI login password 
@@ -94,7 +154,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('dlna', 'name', 'RuneAudio');
             $redis->hSet('dlna', 'queueowner', 0);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
-            $redis->hSet('dlna', 'loglevel', 6);
+            $redis->hSet('dlna', 'loglevel', 0);
 			$redis->hSet('dlna', 'radioname', '');
 			$redis->hSet('dlna', 'file', '');
             $redis->set('udevil', 1);
@@ -109,49 +169,24 @@ function redisDatastore($redis,$action) {
             $redis->hSet('lastfm', 'enable', 0);
             $redis->hSet('lastfm', 'user', 'user');
             $redis->hSet('lastfm', 'pass', 'pass');
-            $redis->set('cmediafix', 0);
             $redis->set('globalrandom', 0);
             $redis->set('stoppedPlayer', '');
-            // default MPD config
-            $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
-            $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
-            $redis->hSet('mpdconf', 'log_level', 'none');
-            $redis->hSet('mpdconf', 'bind_to_address', 'any');
-            $redis->hSet('mpdconf', 'port', '6600');
-            $redis->hSet('mpdconf', 'max_connections', '20');
-            $redis->hSet('mpdconf', 'user', 'mpd');
-            $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
-            $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
-            $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
-            $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
-            $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
-            $redis->hSet('mpdconf', 'dsd_usb', 'no');
-            $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
-            $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
-            $redis->hSet('mpdconf', 'auto_update', 'no');
-            $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
-            $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
-            $redis->hSet('mpdconf', 'volume_normalization', 'no');
-            $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
-            $redis->hSet('mpdconf', 'buffer_before_play', '10%');
-            $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
-            $redis->hSet('mpdconf', 'mixer_type', 'software');
-            $redis->hSet('mpdconf', 'curl', 'yes');
-            $redis->hSet('mpdconf', 'ffmpeg', 'yes');
-            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
 			$redis->set('mpd_start_volume', 40);
 			$redis->set('lastmpdvolume', 40);
 			$redis->set('mpd_autoplay', 0);
-			$redis->set('globalrandom', 0);
 			$redis->set('addrandom', 0);
+			$redis->set('dynVolumeKnob', '1');
+            $redis->set('cmediafix', 0);
+			$redis->set('mpdconfchange', 0);
+			$redis->set('sssconfchange', 0);
+			$redis->set('libaoconfchange', 0);
+			$redis->set('avahiconfchange', 0);
 			// default lyrics and info
 			$redis->hSet('lyrics', 'currentartist', '');
 			$redis->hSet('lyrics', 'currentsong', '');
 			$redis->del('soxrmpdonoff');
 			$redis->set('localSStime', -1);
 			$redis->set('remoteSStime', -1);
-            $redis->set('audio_on_off', '1');
             $redis->set('ashuffle_start_delay', '30');
 			$redis->set('ashuffle_wait_for_play', '0');
 			$redis->set('mpd_playback_laststate', '');
@@ -383,6 +418,12 @@ function redisDatastore($redis,$action) {
 			$redis->get('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
 			$redis->get('local_browser') || $redis->set('local_browser', 0);
 			$redis->get('restoreact') || $redis->set('restoreact', 0);
+			$redis->get('dynVolumeKnob') || $redis->set('dynVolumeKnob', '1');
+            $redis->get('cmediafix') || $redis->set('cmediafix', 0);
+			$redis->get('mpdconfchange') || $redis->set('mpdconfchange', 0);
+			$redis->get('sssconfchange') || $redis->set('sssconfchange', 0);
+			$redis->get('libaoconfchange') || $redis->set('libaoconfchange', 0);
+			$redis->get('avahiconfchange') || $redis->set('avahiconfchange', 0);
             // plugins api-keys
             $redis->get('lastfm_apikey') || $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hGet('lastfm', 'apikey') || $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -438,12 +479,26 @@ if (isset($argv[1])) {
     switch ($argv[1]) {
         case 'reset':
             redisDatastore($redis,'reset');
+            redisDatastore($redis,'mpdreset');
             sysCmd('/srv/http/db/redis_acards_details');
             break;
         case 'check':
             redisDatastore($redis,'check');
+            redisDatastore($redis,'mpdcheck');
             break;
+        case 'mpdreset':
+            redisDatastore($redis,'mpdreset');
+            sysCmd('/srv/http/db/redis_acards_details');
+            break;
+        case 'mpdcheck':
+            redisDatastore($redis,'mpdcheck');
+            break;
+		default:
+			echo "RuneAudio Datastore reset\nredis_datastore_setup {reset|check|mpdreset|mpdcheck}\n";
+			trigger_error("RuneAudio Datastore reset\nredis_datastore_setup {reset|check|mpdreset|mpdcheck}\n", E_USER_ERROR);
+			break;
     }
 } else {
-    echo "RuneAudio Datastore reset\nredis_datastore_setup {reset|check}\n";
+    echo "RuneAudio Datastore reset\nredis_datastore_setup {reset|check|mpdreset|mpdcheck}\n";
+	trigger_error("RuneAudio Datastore reset\nredis_datastore_setup {reset|check|mpdreset|mpdcheck}\n", E_USER_ERROR);
 }

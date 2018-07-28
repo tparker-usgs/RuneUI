@@ -2,8 +2,6 @@
 
 redis-cli shutdown save
 systemctl stop mpd redis rune_PL_wrk rune_SSM_wrk ashuffle spopd shairport-sync upmpdcli mpdscribble local-browser udevil
-umount -aft nfs
-umount -aft cifs
 bsdtar -xpf $1 -C /
 systemctl daemon-reload
 systemctl start redis mpd
@@ -19,4 +17,6 @@ redis-cli set restoreact '0'
 mpc update Webradio
 redis-cli shutdown save
 mpd --kill
+umount -aft nfs
+umount -aft cifs
 reboot

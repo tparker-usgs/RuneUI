@@ -40,6 +40,7 @@ include('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis.sock');
+
 // reset logfile
 sysCmd('echo "--------------- start: set_mpd_volume.php ---------------" > /var/log/runeaudio/set_mpd_volume.log');
 runelog('WORKER set_mpd_volume.php STARTING...');
@@ -81,7 +82,7 @@ if ($activePlayer === 'MPD') {
 			} while (($mpdstartvolume != $mpdvolume) && (--$retries_volume > 0));
 			// When MPD is killed the state (including the volume) is saved
 			if ($initvolume != $mpdvolume) {
-				// kill mpd if the volume was actually changed
+				// kill mpd only if the volume was actually changed
 				sysCmd('mpd --kill');
 			}
 		} else {

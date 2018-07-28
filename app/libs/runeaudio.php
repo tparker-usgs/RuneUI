@@ -1370,7 +1370,7 @@ function getmac($nicname)
     return trim($mac);
 }
 
-function wrk_avahiconfig($hostname)
+function wrk_avahiconfig($redis, $hostname)
 {
     if (!file_exists('/etc/avahi/services/runeaudio.service')) {
         runelog('avahi service descriptor not present, initializing...');
@@ -1378,10 +1378,22 @@ function wrk_avahiconfig($hostname)
     }
     $file = '/etc/avahi/services/runeaudio.service';
     $newArray = wrk_replaceTextLine($file, '','replace-wildcards', '<name replace-wildcards="yes">RuneAudio ['.$hostname.'] ['.getmac('eth0').']</name>');
-    // Commit changes to /etc/avahi/services/runeaudio.service
-    $fp = fopen($file, 'w');
+    // Commit changes to /tmp/runeaudio.service
+    $newfile = '/tmp/runeaudio.service';
+    $fp = fopen($newfile, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
+	// check that the conf file has changed
+	if (md5_file($file) == md5_file($newfile)) {
+		// nothing has changed, set avahiconfchange off
+		$redis->set('avahiconfchange', 0);
+		syscmd('rm -f '.$newfile);
+	} else {
+		// mpd configuration has changed, set avahiconfchange on
+		$redis->set('avahiconfchange', 1);
+		syscmd('cp '.$newfile.' '.$file);
+		syscmd('rm -f '.$newfile);
+	}
 }
 
 function wrk_control($redis, $action, $data)
@@ -1640,8 +1652,8 @@ function wrk_apconfig($redis, $action, $args = null)
                 fclose($fp);
                 sysCmd('ip addr flush dev wlan0');
                 sysCmd('ip addr add '.$args->{'ip-address'}.'/24 broadcast '.$args->{'broadcast'}.' dev wlan0');
-                sysCmd('systemctl restart hostapd');
-                sysCmd('systemctl restart dnsmasq');
+                sysCmd('systemctl reload-or-restart hostapd');
+                sysCmd('systemctl reload-or-restart dnsmasq');
                 if ($args->{'enable-NAT'} === '1') {
                     sysCmd('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
                     sysCmd('iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT');
@@ -2005,12 +2017,12 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 $return = 'reboot';
             } else {
                 runelog('**** no reboot requested ****', $args->name);
-                sysCmd('systemctl restart netctl-ifplugd@'.$args->name);
+                sysCmd('systemctl reload-or-restart netctl-ifplugd@'.$args->name);
                 $return[] = '';
             }
         } else {
             sysCmd('systemctl reenable netctl-auto@'.$args->name);
-            sysCmd('systemctl restart netctl-auto@'.$args->name);
+            sysCmd('systemctl reload-or-restart netctl-auto@'.$args->name);
             sysCmd('netctl-auto enable '.$args->newssid);
             sysCmd('netctl-auto switch-to '.$args->newssid);
             runelog('**** wireless => do not reboot ****', $args->name);
@@ -2041,7 +2053,7 @@ function wrk_wifiprofile($redis, $action, $args)
             $redis->Del($args->ssid);
             $redis->Del('stored_profiles');
             sysCmd("rm /etc/netctl/".escapeshellarg($args->ssid));
-            sysCmdAsync("systemctl restart netctl-auto@".$args->nic);
+            sysCmdAsync("systemctl reload-or-restart netctl-auto@".$args->nic);
             $return = 1;
             break;
         case 'connect':
@@ -2373,33 +2385,7 @@ if ($action === 'reset') {
 			$command = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '");
 			$redis->hSet('mpdconf', 'version', trim(reset($command)));
 			unset($command);
-            $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
-            $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
-            $redis->hSet('mpdconf', 'log_level', 'none');
-            $redis->hSet('mpdconf', 'bind_to_address', 'any');
-            $redis->hSet('mpdconf', 'port', '6600');
-            $redis->hSet('mpdconf', 'max_connections', '20');
-            $redis->hSet('mpdconf', 'user', 'mpd');
-            $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
-            $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
-            $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
-            $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
-            $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
-            $redis->hSet('mpdconf', 'dsd_usb', 'no');
-            $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
-            $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
-            $redis->hSet('mpdconf', 'auto_update', 'no');
-            $redis->hSet('mpdconf', 'filesystem_charset', 'UTF-8');
-            $redis->hSet('mpdconf', 'id3v1_encoding', 'UTF-8');
-            $redis->hSet('mpdconf', 'volume_normalization', 'no');
-            $redis->hSet('mpdconf', 'audio_buffer_size', '4096');
-            $redis->hSet('mpdconf', 'buffer_before_play', '10%');
-            $redis->hSet('mpdconf', 'gapless_mp3_playback', 'yes');
-            $redis->hSet('mpdconf', 'mixer_type', 'software');
-            $redis->hSet('mpdconf', 'curl', 'yes');
-            $redis->hSet('mpdconf', 'ffmpeg', 'yes');
-            $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+			sysCmd('/srv/http/db/redis_datastore_setup mpdreset');
 			// if MPD has been built with SoXr support use it
 			// it was introduced in v0.19 but is difficult to detect, search for soxr in the binary
 			// for v0.20 and higher SoXr is reported in the --version list if it was included in the build
@@ -2616,12 +2602,23 @@ if ($action === 'reset') {
                 } else {
                     runelog('mpd.conf advanced mode RESET STATE');
                 }
-                // write mpd.conf file
-                $fh = fopen('/etc/mpd.conf', 'w');
+                // write mpd.conf file to /tmp location
+                $fh = fopen('/tmp/mpd.conf', 'w');
                 fwrite($fh, $output);
                 fclose($fh);
-                // update hash
-                $redis->set('mpdconfhash', md5_file('/etc/mpd.conf'));
+				// check that the conf file has changed
+				if ($redis->get('mpdconfhash') == md5_file('/tmp/mpd.conf')) {
+					// nothing has changed, set mpdconfchange off
+					$redis->set('mpdconfchange', 0);
+					syscmd('rm -f /tmp/mpd.conf');
+				} else {
+					// mpd configuration has changed, set mpdconfchange on
+					$redis->set('mpdconfchange', 1);
+					syscmd('cp /tmp/mpd.conf /etc/mpd.conf');
+					syscmd('rm -f /tmp/mpd.conf');
+					// update hash
+					$redis->set('mpdconfhash', md5_file('/etc/mpd.conf'));
+				}
             } else {
                 runelog('mpd.conf advanced mode ON');
             }
@@ -2675,29 +2672,44 @@ if ($action === 'reset') {
         case 'refresh':
             wrk_audioOutput($redis, 'refresh');
             wrk_mpdconf($redis, 'writecfg');
-            wrk_mpdconf($redis, 'restart');
+			if ($redis->get('mpdconfchange')) {
+				// mpd.conf has changed so stop the mpd jobs
+				wrk_mpdconf($redis, 'stop');
+			}
+			// always run start to make sure the mpd jobs are running
+			// mpd will not be restarted if it was not stopped
+            wrk_mpdconf($redis, 'start');
             break;
         case 'start':
 			// reload systemd daemon to activate any changed configuration files
 			sysCmd('systemctl daemon-reload');
             $activePlayer = $redis->get('activePlayer');
             if ($activePlayer === 'MPD') {
-                sysCmd('systemctl start mpd || systemctl restart mpd');
+				sysCmd('systemctl daemon-reload');
+				$retval = sysCmd('systemctl is-active mpd');
+				if ($retval[0] === 'active') {
+					// do nothing
+				} else {
+					sysCmd('systemctl start mpd');
+				}
+				unset($retval);
 				sleep(2);
 				// ashuffle gets started automatically
 				// restore the player status
 				wrk_mpdRestorePlayerStatus($redis);
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
-                    sysCmd('systemctl start mpdscribble || systemctl restart mpdscribble');
+                    sysCmd('systemctl reload-or-restart mpdscribble || systemctl start mpdscribble');
                 }
                 // restart upmpdcli
                 if ($redis->hGet('dlna', 'enable') === '1') {
-                    sysCmd('systemctl start upmpdcli || systemctl restart upmpdcli');
+                    sysCmd('systemctl reload-or-restart upmpdcli || systemctl start upmpdcli');
                 }
 			}
+			// set mpdconfchange off
+			$redis->set('mpdconfchange', 0);
 			// set process priority
-			sysCmdAsync('sleep 1 && rune_prio nice');
+			sysCmdAsync('sleep 5 && rune_prio nice');
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
@@ -2706,14 +2718,10 @@ if ($action === 'reset') {
             //closeMpdSocket($mpd);
 			sysCmd('mpd --kill');
             sleep(1);
-            sysCmd('systemctl stop mpd');
-			sysCmd('systemctl stop ashuffle');
-			sysCmd('systemctl stop mpdscribble');
-			sysCmd('systemctl stop upmpdcli');
+            sysCmd('systemctl stop mpd ashuffle mpdscribble upmpdcli');
             break;
         case 'restart':
             wrk_mpdconf($redis, 'stop');
-            sleep(1);
             wrk_mpdconf($redis, 'start');
             break;
     }
@@ -2829,46 +2837,6 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$redis->hSet('airplay', 'interpolation', '');
 	}
-	if ($redis->hGet('airplay', 'output_backend') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'output_backend', 'alsa');
-	}
-	if ($redis->hGet('airplay', 'alac_decoder') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'alac_decoder', 'apple');
-	}
-	if ($redis->hGet('airplay', 'run_this_before_play_begins') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'run_this_before_play_begins', '/var/www/command/airplay_toggle on');
-	}
-	if ($redis->hGet('airplay', 'run_this_after_play_ends') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'run_this_after_play_ends', '/var/www/command/airplay_toggle off');
-	}
-	if ($redis->hGet('airplay', 'run_this_wait_for_completion') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'run_this_wait_for_completion', 'yes');
-	}
-	if ($redis->hGet('airplay', 'alsa_output_format') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'alsa_output_format', 'S16');
-	}
-	if ($redis->hGet('airplay', 'alsa_output_format') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'alsa_output_format', 'S16');
-	}
-	if ($redis->hGet('airplay', 'pipe_pipe_name') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
-	}
 	if ($redis->hGet('airplay', 'metadataonoff')) {
 		if ($redis->hGet('airplay', 'metadata_enabled') != '') {
 			// do nothing
@@ -2886,11 +2854,6 @@ function wrk_shairport($redis, $ao, $name = null)
 		}
 	} else {
 		$redis->hSet('airplay', 'metadata_include_cover_art', '');
-	}
-	if ($redis->hGet('airplay', 'metadata_pipe_name') != '') {
-		// do nothing
-	} else {
-		$redis->hSet('airplay', 'metadata_pipe_name', '/tmp/shairport-sync-metadata');
 	}
 	// update shairport-sync.conf
 	$file = '/etc/shairport-sync.conf';
@@ -2929,41 +2892,58 @@ function wrk_shairport($redis, $ao, $name = null)
 		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' metadata_pipe_name', 'pipe_name="'.$redis->hGet('airplay', 'metadata_pipe_name').'"; // metadata_pipe_name');
-    // Commit changes to shairport-sync.conf
-    $fp = fopen($file, 'w');
+    // Commit changes to /tmp/shairport-sync.conf
+	$newfile = '/tmp/shairport-sync.conf';
+    $fp = fopen($newfile, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
-	// update shairport-sync.service
-    //$file = '/usr/lib/systemd/system/shairport-sync.service';
-    //$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
-	//if ($acard->mixer_control != '')
-	//	$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->mixer_device.' -c '.$acard->mixer_control);
-	//else
-	//	$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/shairport-sync -c /etc/shairport-sync.conf --name="'.$name.'" -- -d '.$acard->device);
-    // runelog('shairport-sync.service :', $newArray);
-    // Commit changes to /usr/lib/systemd/system/shairport-sync.service
-    //$fp = fopen($file, 'w');
-    //fwrite($fp, implode("", $newArray));
-    //fclose($fp);
-    // update libao.conf
+	// check that the conf file has changed
+	if (md5_file($file) == md5_file($newfile)) {
+		// nothing has changed, set sssconfchange off
+		$redis->set('sssconfchange', 0);
+		syscmd('rm -f '.$newfile);
+	} else {
+		// mpd configuration has changed, set sssconfchange on
+		$redis->set('sssconfchange', 1);
+		syscmd('cp '.$newfile.' '.$file);
+		syscmd('rm -f '.$newfile);
+	}
+	// libio
     $file = '/etc/libao.conf';
     $newArray = wrk_replaceTextLine($file, '', 'dev=', 'dev='.$acard->device);
-    // Commit changes to /etc/libao.conf
-    $fp = fopen($file, 'w');
+    // Commit changes to /tmp/libao.conf
+	$newfile = '/tmp/libao.conf';
+    $fp = fopen($newfile, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
-	// stop spopd, shairport-sync and rune_SSM_wrk
-	sysCmd('systemctl stop spopd shairport-sync rune_SSM_wrk');
-    // update systemd
-    sysCmd('systemctl daemon-reload');
-    if ($redis->get('activePlayer') === 'Spotify') {
-        runelog('restart spopd');
-        sysCmd('systemctl restart spopd || systemctl start spopd');
-    }
-    if ($redis->hGet('airplay','enable')) {
-        runelog('restart shairport-sync');
-        sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
-    }
+	// check that the conf file has changed
+	if (md5_file($file) == md5_file($newfile)) {
+		// nothing has changed, set libaoconfchange off
+		$redis->set('libaoconfchange', 0);
+		syscmd('rm -f '.$newfile);
+	} else {
+		// mpd configuration has changed, set libaoconfchange on
+		$redis->set('libaoconfchange', 1);
+		syscmd('cp '.$newfile.' '.$file);
+		syscmd('rm -f '.$newfile);
+	}
+	// restart only if the conf files have changed
+	if (($redis->get('sssconfchange')) OR ($redis->get('libaoconfchange'))) {
+		// stop rune_SSM_wrk
+		sysCmd('systemctl stop rune_SSM_wrk');
+		// update systemd
+		sysCmd('systemctl daemon-reload');
+		if ($redis->get('activePlayer') === 'Spotify') {
+			runelog('restart spopd');
+			sysCmd('systemctl reload-or-restart spopd || systemctl start spopd');
+		}
+		if ($redis->hGet('airplay','enable')) {
+			runelog('restart shairport-sync');
+			sysCmd('systemctl reload-or-restart shairport-sync || systemctl start shairport-sync');
+		}
+	}
+	$redis->set('sssconfchange', 0);
+	$redis->set('libaoconfchange', 0);
 }
 
 function wrk_sourcemount($redis, $action, $id = null)
@@ -3065,9 +3045,8 @@ function wrk_sourcecfg($redis, $action, $args)
             break;
         case 'reset':
             $source = $redis->keys('mount_*');
-			sysCmd('systemctl stop ashuffle');
 			wrk_mpdPlaybackStatus($redis);
-            sysCmd('systemctl stop mpd');
+            sysCmd('systemctl stop mpd ashuffle');
             usleep(500000);
                 foreach ($source as $key) {
                     $mp = $redis->hGetAll($key);
@@ -3529,7 +3508,13 @@ function wrk_switchplayer($redis, $playerengine)
 {
     switch ($playerengine) {
         case 'MPD':
-            $return = sysCmd('pgrep -x mpd || systemctl start mpd');
+			$retval = sysCmd('systemctl is-active mpd');
+			if ($retval[0] === 'active') {
+				// do nothing
+			} else {
+				$return = sysCmd('systemctl start mpd');
+			}
+			unset($retval);
 			// ashuffle gets started automatically
             usleep(500000);
             if ($redis->hGet('lastfm','enable') === '1') sysCmd('systemctl start mpdscribble');
@@ -3663,45 +3648,45 @@ function wrk_changeHostname($redis, $newhostname)
 	runelog('current redis hostname :', $rhn);
 	runelog('new hostname           :', $newhostname);
     // update airplayname
-    if (trim($redis->hGet('airplay', 'name')) === $rhn) {
+    if ((trim($redis->hGet('airplay', 'name')) === $rhn) && ($newhostname != $rhn)) {
         $redis->hSet('airplay', 'name', $newhostname);
 		wrk_shairport($redis, $redis->get('ao'), $newhostname);
         if ($redis->hGet('airplay','enable') === '1') {
 			runelog("service: airplay restart",'');
-			sysCmd('systemctl restart shairport-sync || systemctl start shairport-sync');
+			sysCmd('systemctl reload-or-restart shairport-sync || systemctl start shairport-sync');
 		}
     }
     // update dlnaname
-    if (trim($redis->hGet('dlna', 'name')) === $rhn) {
+    if ((trim($redis->hGet('dlna', 'name')) === $rhn) && ($newhostname != $rhn)) {
         $redis->hSet('dlna','name', $newhostname);
 		wrk_upmpdcli($redis, $newhostname);
 		if ($redis->hGet('dlna', 'enable') === '1') {
 			runelog("service: UPMPDCLI restart");
-			sysCmd('systemctl restart upmpdcli || systemctl start upmpdcli');
+			sysCmd('systemctl reload-or-restart upmpdcli || systemctl start upmpdcli');
 		}
     }
     // change system hostname
 	$redis->set('hostname', $newhostname);
     sysCmd('hostnamectl  --static --transient --pretty set-hostname '.strtolower($newhostname));
     // update AVAHI serice data
-    wrk_avahiconfig(strtolower($newhostname));
-    // restart avahi-daemon
-    sysCmd('systemctl restart avahi-daemon');
-    // reconfigure MPD
-	sysCmd('systemctl stop ashuffle');
-	wrk_mpdPlaybackStatus($redis);
-    sysCmd('systemctl stop mpd');
-    // update zeroconfname in MPD configuration
-    $redis->hMset('mpdconf','zeroconf_name', $newhostname);
-    // rewrite mpd.conf file
-    wrk_mpdconf($redis, 'refresh');
-    // restart MPD
-    sysCmd('pgrep -x mpd || systemctl start mpd');
-	// ashuffle gets started automatically
-	wrk_mpdRestorePlayerStatus($redis);
-	// restart SAMBA
-	wrk_restartSamba($redis);
-    // set process priority
+    wrk_avahiconfig($redis, strtolower($newhostname));
+	// activate when a change has been made
+	if ($redis->set('avahiconfchange')) {
+		sysCmd('systemctl daemon-reload');
+		// restart avahi-daemon
+		sysCmd('systemctl reload-or-restart avahi-daemon');
+		// reconfigure MPD
+		wrk_mpdPlaybackStatus($redis);
+		// update zeroconfname in MPD configuration
+		$redis->hSet('mpdconf', 'zeroconf_name', $newhostname);
+		// rewrite mpd.conf file
+		wrk_mpdconf($redis, 'refresh');
+		wrk_mpdRestorePlayerStatus($redis);
+		// restart SAMBA
+		wrk_restartSamba($redis);
+	}
+	$redis->set('avahiconfchange', 0);
+	// set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
 }
 
@@ -3727,7 +3712,7 @@ function wrk_upmpdcli($redis, $name = null, $queueowner = null)
     sysCmd('systemctl daemon-reload');
     if ($redis->hGet('dlna','enable') === '1') {
         runelog('restart upmpdcli');
-        sysCmd('systemctl restart upmpdcli');
+        sysCmd('systemctl reload-or-restart upmpdcli');
     }
     // set process priority
     sysCmdAsync('sleep 1 && rune_prio nice');
