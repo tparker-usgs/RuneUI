@@ -45,11 +45,6 @@ include('/srv/http/app/libs/runeaudio.php');
 // setup /run dir
 sysCmd('chmod 777 /run');
 
-// call chrony to set the time
-sysCmd('chronyc makestep');
-sysCmd('chronyc refresh');
-sysCmd('chronyc reselect');
-
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis.sock');
@@ -376,6 +371,11 @@ if ($redis->get('udevil') === '1') {
 // initialize OrionProfile
 runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
 sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
+
+// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
+// the problem is that php-fpm will crash and core dump if a large time change takes place while it is running
+// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
+sysCmd('chronyc waitsync 12');
 
 // start php-fpm if required
 $retval = sysCmd('systemctl is-active php-fpm');
