@@ -210,7 +210,6 @@ function redisDatastore($redis,$action) {
             $redis->set('mpdconf_advanced', 0);
             $redis->set('netconf_advanced', 0);
             // MPD parameters
-            wrk_mpdconf($redis, 'writecfg');
             $redis->set('mpd_playback_status', '');
             // developer parameters
             $redis->set('dev', 0);
@@ -478,13 +477,14 @@ function redisDatastore($redis,$action) {
 if (isset($argv[1])) {
     switch ($argv[1]) {
         case 'reset':
-            redisDatastore($redis,'reset');
             redisDatastore($redis,'mpdreset');
+            redisDatastore($redis,'reset');
             sysCmd('/srv/http/db/redis_acards_details');
+            wrk_mpdconf($redis, 'writecfg');
             break;
         case 'check':
-            redisDatastore($redis,'check');
             redisDatastore($redis,'mpdcheck');
+            redisDatastore($redis,'check');
             break;
         case 'mpdreset':
             redisDatastore($redis,'mpdreset');

@@ -27,7 +27,7 @@
  * along with RuneAudio; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.txt>.
  *
- *  file: command/set_mpd_volume
+ *  file: command/set_mpd_volume.php
  *  version: 1.5
  *  date: 27 July 2018
  *  coder: janui
@@ -44,7 +44,11 @@ $redis->connect('/run/redis.sock');
 // reset logfile
 sysCmd('echo "--------------- start: set_mpd_volume.php ---------------" > /var/log/runeaudio/set_mpd_volume.log');
 runelog('WORKER set_mpd_volume.php STARTING...');
+// set priority low
+proc_nice(9);
 
+// what we are trying to do is set the mpd volume to preset start volume
+// and store a value of the last known mpd volume used when switching players
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
 	// Start MPD (if  not started) in order to set the startup volume (if needed and if set) then kill MPD (if required)
@@ -73,18 +77,23 @@ if ($activePlayer === 'MPD') {
 				} else if ($initvolume == 'n/a') {
 					// something wrong, mismatch between redis and mpd 'disabled' values
 					$retries_volume = 0;
+					// set values so that mpd is not restarted
+					$mpdvolume = $mpdstartvolume;
+					$initvolume = $mpdstartvolume;
 				} else {
-					// set the mpd volume
-					$retval = sysCmd('mpc volume '.$mpdstartvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+					// set the mpd volume, do a soft increase/decrease
+					$setvolume = round($mpdstartvolume-(($mpdstartvolume-$initvolume)/2), 0, PHP_ROUND_HALF_UP);
+					$retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 					$mpdvolume = trim($retval[0]);
+					unset($retval);
 				}
-				unset($retval);
 			} while (($mpdstartvolume != $mpdvolume) && (--$retries_volume > 0));
 			// When MPD is killed the state (including the volume) is saved
-			if ($initvolume != $mpdvolume) {
+			// ??? this causes lots of problems ???
+			//if ($initvolume != $mpdvolume) {
 				// kill mpd only if the volume was actually changed
-				sysCmd('mpd --kill');
-			}
+				//sysCmd('mpd --kill');
+			//}
 		} else {
 			do {
 				sleep(2);
@@ -92,6 +101,11 @@ if ($activePlayer === 'MPD') {
 				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 				$mpdvolume = trim($retval[0]);
 				unset($retval);
+				if ($mpdvolume == 'n/a') {
+					// mpd has returned something but, will not return an actual value
+					// default to 100%
+					$mpdvolume = 100;
+				}
 			} while ((!is_numeric($mpdvolume)) && (--$retries_volume > 0));
 		}
 	} else {

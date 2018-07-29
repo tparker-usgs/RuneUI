@@ -55,15 +55,17 @@ while (1) {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
         $socket = openMpdSocket('/run/mpd.sock', 0);
 		if (!$socket) {
-			sleep(1);
-			sysCmd('systemctl restart rune_PL_wrk');
+			$redis->close();
+			sleep(5);
+			continue;
 		}
     } else if ($activePlayer === 'Spotify') {
         runelog('rune_PL_wrk: open SPOP socket');
         $socket = openSpopSocket('localhost', 6602, 1);
 		if (!$socket) {
-			sleep(1);
-			sysCmd('systemctl restart rune_PL_wrk');
+			$redis->close();
+			sleep(5);
+			continue;
 		}
     }
 
@@ -214,7 +216,7 @@ while (1) {
 			if ($forceupdate !== 0) {
 				$forceupdate = 0;
 				runelog('---------------------------- FORCE UPDATE Airplay ----------------------------------');
-				sysCmd('rm -f /srv/http/assets/img/airplay-cover.*');
+				sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
 //				$status = array();
 				if (!empty($redis->get('lastmpdvolume'))) {
 					$status['volume'] = $redis->get('lastmpdvolume');

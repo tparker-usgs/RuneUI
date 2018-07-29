@@ -52,10 +52,12 @@ redis-cli set hwplatformid ""
 rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
 git stash
+git add .
 git pull
 git config user.email "any@body.com"
 git config user.name "anybody"
 git stash
+git add .
 git pull
 git stash
 cd /home

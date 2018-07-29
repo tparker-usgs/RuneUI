@@ -2405,6 +2405,8 @@ if ($action === 'reset') {
 			} else {
 				$redis->hDel('mpdconf', 'soxr');
 			}
+			// set mpd zeroconfig name to hostname
+            $redis->hSet('mpdconf', 'zeroconf_name', $redis->get('hostname'));
             wrk_mpdconf($redis, 'writecfg');
             break;
         case 'writecfg':
@@ -2681,10 +2683,9 @@ if ($action === 'reset') {
             wrk_mpdconf($redis, 'start');
             break;
         case 'start':
-			// reload systemd daemon to activate any changed configuration files
-			sysCmd('systemctl daemon-reload');
             $activePlayer = $redis->get('activePlayer');
             if ($activePlayer === 'MPD') {
+				// reload systemd daemon to activate any changed configuration files
 				sysCmd('systemctl daemon-reload');
 				$retval = sysCmd('systemctl is-active mpd');
 				if ($retval[0] === 'active') {
@@ -3570,8 +3571,10 @@ function wrk_NTPsync($ntpserver)
     if (strpos($return, 'OK')) {
         // add the server name to chrony.conf
 		$file = '/etc/chrony.conf';
-		// replace the line with 'server ' in the line 1 line after a line containing '# First ntp server is set in the RuneAudio Settings''
-        $newArray = wrk_replaceTextLine($file, '', 'server ', 'server '.$ntpserver.' iburst', '# First ntp server is set in the RuneAudio Settings', 1);
+		// replace the line with 'server ' in the line 1 line after a line containing '# First ntp server is set in the RuneAudio Settings'
+        $newArray = wrk_replaceTextLine($file, '', 'server ', 'server '.$ntpserver.' iburst prefer', '# First ntp server is set in the RuneAudio Settings', 1);
+		// replace the line with 'pool ' in the line 1 line after a line containing '# First ntp pool is set in the RuneAudio Settings'
+        $newArray = wrk_replaceTextLine('' , $newArray, 'pool ', 'pool '.$ntpserver.' iburst prefer', '# First ntp pool is set in the RuneAudio Settings', 1);
         // Commit changes to /boot/config.txt
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
@@ -3622,7 +3625,7 @@ function wrk_restartSamba($redis)
 			}
 		}
 	}
-	if ($redis->get('dev') OR $redis->hGet('samba', 'enable')) {
+	if (($redis->get('dev')) OR ($redis->hGet('samba', 'enable'))) {
 		runelog('Samba Restarting...', '');
 		sysCmd('systemctl daemon-reload');
 		sysCmd('systemctl start nmbd');
@@ -3708,9 +3711,9 @@ function wrk_upmpdcli($redis, $name = null, $queueowner = null)
     $fp = fopen($file, 'w');
     fwrite($fp, implode("", $newArray));
     fclose($fp);
-    // update systemd
-    sysCmd('systemctl daemon-reload');
     if ($redis->hGet('dlna','enable') === '1') {
+		// update systemd
+		sysCmd('systemctl daemon-reload');
         runelog('restart upmpdcli');
         sysCmd('systemctl reload-or-restart upmpdcli');
     }
