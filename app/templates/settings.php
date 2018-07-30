@@ -430,7 +430,7 @@
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
                             <span class="help-block">When ON: a UPnP / DLNA broadcast will clear the MPD queue and then add and play the song, clearing the queue with each successive song<br>
-							When OFF: UPnP / DLNA will add songs to the end of the MPD queue and then play them</span>
+							When OFF: UPnP / DLNA will add songs of the MPD queue (before the current play position) but MPD will continue to play the current song</span>
                         </div>
                     </div>
                 </div>

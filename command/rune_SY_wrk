@@ -1355,8 +1355,8 @@ $redis->pconnect('/run/redis.sock');
 		}
 		unset($retval);
 		// start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
-		// this is the only place where ashuffle it is started
-		if ('1' === $redis->get('globalrandom') && ($redis->get('ashuffle_wait_for_play') === '0')) {
+		// this is the only place where ashuffle it is started 
+		if (($redis->get('globalrandom')) && (!$redis->get('ashuffle_wait_for_play'))) {
 			if (sysCmd('systemctl is-active ashuffle') == 'active') {
 				// already started, do nothing
 			} else {

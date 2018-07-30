@@ -27,10 +27,10 @@
  * along with RuneAudio; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.txt>.
  *
- *  file: command/airplay_toggle
- *  version: 1.3
- *  coder: Simone De Gregori
- *  modified: Kevin Welsh and Frank Friedmann
+ *  file: command/upmpdcli_toggle
+ *  version: 1.5
+ *  date: july 2018
+ *  coder: janui
  */
 // common include
 ini_set('display_errors', '1');
@@ -42,6 +42,9 @@ include('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis.sock');
+
+// clear the log file
+sysCmd('echo "--------------- start: airplay_toggle ---------------" > /var/log/runeaudio/upmpdcli_toggle.log');
 
 // read status from /usr/lib/systemd/system/upmpdcli.service
 $status = $argv[1]; // "onstart", "onplay", "onpause", "onstop"

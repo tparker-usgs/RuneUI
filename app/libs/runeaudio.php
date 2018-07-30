@@ -3705,7 +3705,7 @@ function wrk_upmpdcli($redis, $name = null, $queueowner = null)
 		$queueowner = '0';
 	}
     $file = '/usr/lib/systemd/system/upmpdcli.service';
-    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/upmpdcli -q '.$queueowner.' -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
+    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/upmpdcli -c /etc/upmpdcli.conf -q '.$queueowner.' -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
     runelog('upmpdcli.service :', $newArray);
     // Commit changes to /usr/lib/systemd/system/upmpdcli.service
     $fp = fopen($file, 'w');
