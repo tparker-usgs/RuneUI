@@ -74,37 +74,6 @@ $retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d'
 $mpdversion = trim($retval[0]);
 unset($retval);
 
-// read activePlayer state
-$activePlayer = $redis->get('activePlayer');
-if ($activePlayer === 'MPD') {
-    // check MPD process
-	$retval = sysCmd('systemctl is-active mpd');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start mpd');
-	}
-	unset($retval);
-	// ashuffle gets started automatically
-} elseif ($activePlayer === 'Spotify') {
-    // check MPD process
-    sysCmd('pgrep -x spopd || systemctl start spopd');
-} else {
-    // reset activePlayer state to MPD (default) & check MPD process
-    $redis->set('activePlayer', 'MPD');
-	$retval = sysCmd('systemctl is-active mpd');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start mpd');
-	}
-	unset($retval);
-	// ashuffle gets started automatically
-}
-
-// set mpd volume
-sysCmdAsync('/var/www/command/set_mpd_volume.php');
-
 // read registered HW architecture
 $arch_db = $redis->get('hwplatformid');
 runelog('registered architecture: ', $arch_db);
@@ -309,6 +278,12 @@ if ($playerid_db === '') {
     //runelog('NTP sync', $redis->get('ntpserver'));
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
+
+	// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
+	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while it is running
+	// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
+	sysCmd('chronyc waitsync 12');
+
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
 	$retval = sysCmd('hostname');
     $hn = trim($retval[0]);
@@ -317,10 +292,43 @@ if ($playerid_db === '') {
 		$redis->set('hostname', $hn);
 	}
 	unset($retval);
+
+	// read activePlayer state
+	$activePlayer = $redis->get('activePlayer');
+	if ($activePlayer === 'MPD') {
+		// check MPD process
+		$retval = sysCmd('systemctl is-active mpd');
+		if ($retval[0] === 'active') {
+			// do nothing
+		} else {
+			sysCmd('systemctl start mpd');
+		}
+		unset($retval);
+		// ashuffle gets started automatically
+	} elseif ($activePlayer === 'Spotify') {
+		// check MPD process
+		sysCmd('pgrep -x spopd || systemctl start spopd');
+	} else {
+		// reset activePlayer state to MPD (default) & check MPD process
+		$redis->set('activePlayer', 'MPD');
+		$retval = sysCmd('systemctl is-active mpd');
+		if ($retval[0] === 'active') {
+			// do nothing
+		} else {
+			sysCmd('systemctl start mpd');
+		}
+		unset($retval);
+		// ashuffle gets started automatically
+	}
+
+	// set mpd volume
+	sysCmdAsync('/var/www/command/set_mpd_volume.php');
+
 	// check ENV files
     //if ($arch !== '--') {
         // wrk_sysOBEnvCheck($arch,0);
     //}
+
     // start Samba services (if required)
 	wrk_restartSamba($redis);
 }
@@ -371,11 +379,6 @@ if ($redis->get('udevil') === '1') {
 // initialize OrionProfile
 runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
 sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
-
-// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
-// the problem is that php-fpm will crash and core dump if a large time change takes place while it is running
-// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
-sysCmd('chronyc waitsync 12');
 
 // start php-fpm if required
 $retval = sysCmd('systemctl is-active php-fpm');

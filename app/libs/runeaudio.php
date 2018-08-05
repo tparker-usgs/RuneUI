@@ -3596,14 +3596,16 @@ function wrk_restartSamba($redis)
 	runelog('Samba Dev/Prod   :', $redis->get('dev'));
 	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
 	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
+	// clear the php cache
+	clearstatcache();
 	if ($redis->get('dev')) {
 		// dev mode on
 		// switch smb.conf (development = read/write)
 		if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-dev.conf') {
 			// already set do nothing
 		} else {
-			sysCmd('rm -f /etc/samba/smb.conf');
-			sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
+			unlink('/etc/samba/smb.conf');
+			symlink('/etc/samba/smb-dev.conf', '/etc/samba/smb.conf');
 		}
 	} else if ($redis->hGet('samba', 'enable')) {
 		// Prod mode and Samba switched on
@@ -3612,16 +3614,16 @@ function wrk_restartSamba($redis)
 			if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-dev.conf') {
 				// already set do nothing
 			} else {
-				sysCmd('rm -f /etc/samba/smb.conf');
-				sysCmd('ln -s /etc/samba/smb-dev.conf /etc/samba/smb.conf');
+				unlink('/etc/samba/smb.conf');
+				symlink('/etc/samba/smb-dev.conf', '/etc/samba/smb.conf');
 			}
 		} else {
 			// read/write switched off, so read-only switched on
 			if (readlink('/etc/samba/smb.conf') == '/etc/samba/smb-prod.conf') {
 				// already set do nothing
 			} else {
-				sysCmd('rm -f /etc/samba/smb.conf');
-				sysCmd('ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf');
+				unlink('/etc/samba/smb.conf');
+				symlink('/etc/samba/smb-prod.conf', '/etc/samba/smb.conf');
 			}
 		}
 	}
@@ -3634,6 +3636,7 @@ function wrk_restartSamba($redis)
 		sysCmd('pgrep smbd || systemctl start smbd');
 	}
 }
+
 function wrk_changeHostname($redis, $newhostname)
 {
 	// new hostname can not have spaces or special characters
