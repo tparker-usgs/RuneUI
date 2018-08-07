@@ -390,7 +390,7 @@ if ($retval[0] === 'active') {
 unset($retval);
 
 // PHP 5.5 OPCache
-if ($redis->get('dev') === '0') {
+if (!$redis->get('dev')) {
     // prime PHP OPCache
     runelog('prime PHP OPCache');
     sysCmdAsync("curl -s -X GET 'http://127.0.0.1/command/cachectl.php?action=prime'");
@@ -1358,14 +1358,25 @@ $redis->pconnect('/run/redis.sock');
 		}
 		unset($retval);
 		// start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
-		// this is the only place where ashuffle it is started 
+		// this is the only place where ashuffle it is started
+		// first check that it is enabled, not waiting for auto play to initialise and there are some songs to play
+		//$retval = sysCmd('mpc stats | grep -i songs');
+		//$mpdsongs = intval(preg_replace('/[^0-9]/', '', $retval[0]));
+		//unset($retval);
+		//$rerval = sysCmd('dir -l /mnt/MPD/*/* | grep -i total');
+		//$songdirs = intval(preg_replace('/[^0-9]/', '', $retval[0]));
+		//unset($retval);
+		//if (($redis->get('globalrandom')) && (!$redis->get('ashuffle_wait_for_play')) && ($mpdsongs > 0) && ($songdirs > 0)) {
 		if (($redis->get('globalrandom')) && (!$redis->get('ashuffle_wait_for_play'))) {
-			if (sysCmd('systemctl is-active ashuffle') == 'active') {
+			$retval = sysCmd('systemctl is-active ashuffle');
+			if ($retval[0] == 'active') {
 				// already started, do nothing
+				unset($retval);
 			} else {
 				// seems to be a bug somewhere in MPD
 				// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
 				// wait until mpd has been running for a while before starting ashuffle
+				unset($retval);
 				$retval = sysCmd('ps -C mpd -o etimes=');
 				$mpd_uptime = trim($retval[0]);
 				if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
@@ -1373,6 +1384,8 @@ $redis->pconnect('/run/redis.sock');
 				}
 				unset($retval);
 			}
+		//} else {
+		//	sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
 		}
 		// S.M.A.R.T. monitoring tools
 		// will test each attached hard disk and tape unit

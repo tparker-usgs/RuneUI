@@ -2163,8 +2163,11 @@ function wrk_audioOutput($redis, $action, $args = null)
                     // debug
                     runelog('wrk_audioOutput: in loop: (decoded) acards_details for: '.$card, $details);
                     if (isset($details->mixer_control)) {
-                        $volsteps = sysCmd("amixer -c ".$card_index." get \"".$details->mixer_control."\" | grep Limits | cut -d ':' -f 2 | cut -d ' ' -f 4,6");
-                        $volsteps = explode(' ',$volsteps[0]);
+                        //$volsteps = sysCmd("amixer -c ".$card_index." get \"".$details->mixer_control."\" | grep Limits | cut -d ':' -f 2 | cut -d ' ' -f 4,6");
+                        //$volsteps = sysCmd("amixer -c ".$card_index." get \"".$details->mixer_control."\" | grep Limits | cut -d ':' -f 2 | cut -d ' ' -f 3,5");
+						//$volsteps = explode(' ', $volsteps[0]);
+						$volsteps = sysCmd("amixer -c ".$card_index." get \"".$details->mixer_control."\" | grep -i limits");
+                        $volsteps = explode('-',preg_replace('/[^0-9-]/', '', $volsteps[0]));
                         if (isset($volsteps[0])) $data['volmin'] = $volsteps[0];
                         if (isset($volsteps[1])) $data['volmax'] = $volsteps[1];
                         // $data['mixer_device'] = "hw:".$details->mixer_numid;
@@ -2644,7 +2647,7 @@ if ($action === 'reset') {
             if (isset($interface_details->integrated_sub)) {
                 // execute special internal route command
                 sysCmd($interface_details->route_cmd);
-                // TODO: improove this function
+                // TODO: improve this function
                 sysCmd('amixer -c 0 set PCM unmute');
                 // $mpdout = $interface_details->sysname;
             }
@@ -2811,9 +2814,18 @@ function wrk_shairport($redis, $ao, $name = null)
 //    } else {
 //		$redis->hSet('airplay', 'name', $name);
 	}
-    $acard = json_decode($redis->hget('acards', $ao));
-    runelog('acard details: ', $acard);
-	$redis->hSet('airplay', 'alsa_output_device', $acard->device);
+	$redis->hSet('airplay', 'ao', $ao);
+	$acard = $redis->hGet('acards', $ao);
+    $acard = json_decode($acard);
+    //$acard = json_decode($redis->hGet('acards', $ao), true);
+	//$redis->hSet('airplay', 'acard', $acard);
+    runelog('wrk_shairport acard details      : ', $acard);
+    runelog('wrk_shairport acard name         : ', $acard->name);
+	runelog('wrk_shairport acard extlabel     : ', $acard->extlabel);
+	runelog('wrk_shairport acard type         : ', $acard->type);
+	runelog('wrk_shairport acard device       : ', $acard->device);
+    runelog('wrk_shairport acard mixer_device : ', $acard->mixer_device);
+    runelog('wrk_shairport acard mixer_control: ', $acard->mixer_control);
 	// shairport-sync output device is specified without a subdevice if only one subdevice exists
 	// determining the number of sub devices is done by counting the number of alsa info file for the device
 	// if (count(sysCmd('dir -l /proc/asound/card'.preg_split('/[\s,:]+/', $acard->device)[1].'/pcm?p/sub?/info')) > 1) {
@@ -2826,9 +2838,21 @@ function wrk_shairport($redis, $ao, $name = null)
 	// shairport-sync output device is always specified without a subdevice! Possible that this will need extra work for USB DAC's
 	$redis->hSet('airplay', 'alsa_output_device', preg_split('/[\s,]+/', $acard->device)[0]);
 	//
-	$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device) || $redis->hSet('airplay', 'alsa_mixer_device', '');
-	$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control) || $redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
-	$redis->hSet('airplay', 'extlabel', $acard->extlabel) || $redis->hSet('airplay', 'extlabel', '');
+	if (!empty($acard->mixer_device)) {
+		$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
+	} else {
+		$redis->hSet('airplay', 'alsa_mixer_device', '');
+	}
+	if (!empty($acard->mixer_control)) {
+		$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control);
+	} else {
+		$redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
+	}
+	if (!empty($acard->extlabel)) {
+		$redis->hSet('airplay', 'extlabel', $acard->extlabel);
+	} else {
+		$redis->hSet('airplay', 'extlabel', '');
+	}
 	if ($redis->hGet('airplay', 'soxronoff')) {
 		if ($redis->hGet('airplay', 'interpolation') != '') {
 			// do nothing
@@ -3590,9 +3614,9 @@ function wrk_NTPsync($ntpserver)
 function wrk_restartSamba($redis)
 {
     // restart Samba
-	// first stop Samba
-	runelog('Samba Stopping...', '');
-	sysCmd('systemctl stop smbd nmbd');
+	// first stop Samba ?
+	//runelog('Samba Stopping...', '');
+	//sysCmd('systemctl stop smbd nmbd');
 	runelog('Samba Dev/Prod   :', $redis->get('dev'));
 	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
 	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
@@ -3630,8 +3654,8 @@ function wrk_restartSamba($redis)
 	if (($redis->get('dev')) OR ($redis->hGet('samba', 'enable'))) {
 		runelog('Samba Restarting...', '');
 		sysCmd('systemctl daemon-reload');
-		sysCmd('systemctl start nmbd');
-		sysCmd('systemctl start smbd');
+		sysCmd('systemctl reload-or-restart nmbd');
+		sysCmd('systemctl reload-or-restart smbd');
 		sysCmd('pgrep nmbd || systemctl start nmbd');
 		sysCmd('pgrep smbd || systemctl start smbd');
 	}
