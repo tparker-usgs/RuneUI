@@ -4,7 +4,13 @@ set +e # continue on errors
 #Image reset script
 
 #Use the next line only for a distribution build, do not use on development versions!!! It clears the pacman history, makes a lot of space free, but that history is useful.
-#pacman -Sc
+if [ "$1" == "full" ]; then
+	echo "Running full cleanup and image initialisation"
+	echo "Removing pacman cache"
+	pacman -Sc --noconfirm
+else
+	echo "Running quick image initialisation"
+fi
 #---
 #Before running the script...
 #Connect via Wired ethernet, remove all WiFi profiles.
@@ -89,6 +95,7 @@ cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.
 cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
+cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
@@ -128,19 +135,23 @@ chown -R mpd.audio /var/lib/mpd
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload
 #
-# zero fill the file system
-cd /boot
-sync
-cat /dev/zero > zero.file
-sync
-rm zero.file
-sync
-cd /
-cat /dev/zero > zero.file
-sync
-rm zero.file
-sync
-cd /home
+#
+if [ "$1" == "full" ]; then
+	echo "Zero filling the file system"
+	# zero fill the file system
+	cd /boot
+	sync
+	cat /dev/zero > zero.file
+	sync
+	rm zero.file
+	sync
+	cd /
+	cat /dev/zero > zero.file
+	sync
+	rm zero.file
+	sync
+	cd /home
+fi
 #
 # reset root password
 echo -e "rune\nrune" | passwd root
