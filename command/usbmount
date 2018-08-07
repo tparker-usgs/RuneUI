@@ -57,14 +57,18 @@ foreach ($usbmounts as $line) {
     runelog('usbmount line: ', $line);
 }
 // connect to MPD daemon
-if ($redis->get('usb_db_autorebuild') == '1') {
-    $mpd = openMpdSocket('/run/mpd.sock');
+// check if usb autorebuild is set
+if ($redis->get('usb_db_autorebuild')) {
+    //$mpd = openMpdSocket('/run/mpd.sock');
+	sysCmd('mpc update USB');
 }
 // update MPD database
-sendMpdCommand($mpd, 'update USB');
+//sendMpdCommand($mpd, 'update USB');
 // update library panel
 ui_libraryHome($redis);
 // close MPD connection
-closeMpdSocket($mpd);
+//closeMpdSocket($mpd);
+// restart Samba
+wrk_restartSamba($redis);
 // close Redis connection
 $redis->close();
