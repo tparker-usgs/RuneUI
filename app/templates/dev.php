@@ -6,13 +6,13 @@
             <div class="boxed-group">
 				<p>Just some handy "tools" for PHP backend management.</p>
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Clear PHP 5.5 OPcache</label>
+					<label class="col-sm-2 control-label">Clear PHP 5 OPcache</label>
 					<div class="col-sm-10">
 						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if($this->opcache === '0'): ?> disabled <?php endif ?>>clear OPcache</a>
 					</div>
 				</div>            
 				<div class="form-group">
-					<label class="col-sm-2 control-label">View PHP 5.5 OPcache status</label>
+					<label class="col-sm-2 control-label">View PHP 5 OPcache status</label>
 					<div class="col-sm-10">
 						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/command/opcache.php" name="syscmd" id="syscmd-viewphpcache" target="_blank">php cache status</a>
 					</div>
@@ -24,13 +24,13 @@
 					</div>
 				</div> 
 			<div class="form-group">
-					<label class="col-sm-2 control-label">PHP 5.5 OPcache (persistent cache)</label>
+					<label class="col-sm-2 control-label">PHP 5 OPcache (persistent cache)</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
 								<input id="opcache" name="opcache[enable]" type="checkbox" value="1"<?php if($this->opcache === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-						<span class="help-block">Enable PHP 5.5 OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
+						<span class="help-block">Enable PHP 5 OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
 					</div>
 				</div>
 			</div>
@@ -77,8 +77,7 @@
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="clearimg" id="syscmd-clearimg" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
                         <span class="help-block">Clear command history, logs, reset image parameters to default settings.<br>
                         NOTE: (Dev team function) Use this function prior to publication of a RuneOS image.<br>
-						This function takes up to 20 minutes to complete, wait, be patient!<br>
-                        WARNING: Automatic system shutdown after execution!</span>
+                        WARNING: Automatic system shutdown and power-off after execution! Wait until it shuts down, it may take up to 5 minutes to complete!</span>
                     </div>
                 </div>
             </div>
@@ -253,21 +252,21 @@
             <div class="boxed-group">
 				<p>Just some handy "tools" for Background WORKERS management.</p>
 				<div class="form-group">
-					<label class="col-sm-2 control-label">RuneAudio SYstem Worker (rune_SY_wrk)</label>
+					<label class="col-sm-2 control-label">RuneAudio SYstem worker (rune_SY_wrk)</label>
 					<div class="col-sm-10">
 						<button class="btn btn-default btn-lg" value="rune_SY_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_SY_wrk</button>
 						<span class="help-block">&nbsp;</span>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-sm-2 control-label">RuneAudio PLayback Worker (rune_PL_wrk)</label>
+					<label class="col-sm-2 control-label">RuneAudio PLayback worker (rune_PL_wrk)</label>
 					<div class="col-sm-10">
 						<button class="btn btn-default btn-lg" value="rune_PL_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_PL_wrk</button>
 						<span class="help-block">&nbsp;</span>
 					</div>
 				</div>    
 				<div class="form-group">
-					<label class="col-sm-2 control-label">RuneAudio Shairport-sync Metadata decoder Worker (rune_SSM_wrk)</label>
+					<label class="col-sm-2 control-label">RuneAudio Shairport-Sync Metadata decoder worker (rune_SSM_wrk)</label>
 					<div class="col-sm-10">
 						<button class="btn btn-default btn-lg" value="rune_SSM_wrk" name="syscmd[wrkrestart]" type="submit">Restart rune_SSM_wrk</button>
 						<span class="help-block">&nbsp;</span>
