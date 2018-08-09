@@ -41,7 +41,7 @@ $redis = new Redis();
 $redis->connect('/run/redis.sock');
 include('/var/www/app/libs/runeaudio.php');
 // ---- end functions -----
-if (isset($argv[2]) && !isset($argv[3])) {
+if ((isset($argv[2])) && (!isset($argv[3]))) {
 // Connect to Redis backend
 //$redis = new Redis();
 //$redis->connect('/run/redis.sock');
@@ -56,7 +56,7 @@ if (isset($argv[2]) && !isset($argv[3])) {
 } else {
     usleep(500000);
 }
-if (isset($argv[3]) && $argv[3] === 'simplemessage') {
+if ((isset($argv[3])) && ($argv[3] === 'simplemessage')) {
     $output = json_encode(array( 'title' => $argv[1], 'text' => $argv[2], 'type' => null));
     ui_render('notify', $output);
 } else {

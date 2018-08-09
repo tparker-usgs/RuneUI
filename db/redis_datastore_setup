@@ -67,6 +67,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+            $redis->hSet('mpdconf', 'version', '0.20.20');
 			break;
 		case 'mpdcheck':
             $redis->hExists('mpdconf', 'zeroconf_enabled') || $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
@@ -96,6 +97,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'curl') || $redis->hSet('mpdconf', 'curl', 'yes');
             $redis->hExists('mpdconf', 'ffmpeg') || $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hExists('mpdconf', 'log_file') || $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
+            $redis->hExists('mpdconf', 'version') || $redis->hSet('mpdconf', 'version', '0.20.20');
 			break;
         case 'reset':
             // kernel
@@ -175,7 +177,7 @@ function redisDatastore($redis,$action) {
 			$redis->set('lastmpdvolume', 40);
 			$redis->set('mpd_autoplay', 0);
 			$redis->set('addrandom', 0);
-			$redis->set('dynVolumeKnob', '1');
+			$redis->set('dynVolumeKnob', '0');
             $redis->set('cmediafix', 0);
 			$redis->set('mpdconfchange', 0);
 			$redis->set('sssconfchange', 0);
@@ -417,7 +419,7 @@ function redisDatastore($redis,$action) {
 			$redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
 			$redis->exists('local_browser') || $redis->set('local_browser', 0);
 			$redis->exists('restoreact') || $redis->set('restoreact', 0);
-			$redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', '1');
+			$redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', 0);
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
 			$redis->exists('mpdconfchange') || $redis->set('mpdconfchange', 0);
 			$redis->exists('sssconfchange') || $redis->set('sssconfchange', 0);
