@@ -1682,7 +1682,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     switch ($action) {
         case 'setnics':
 			// clear cache - redis, filesystem and php
-			$redis->save();
+			$redis->bgSave();
 			sysCmd("sync");
 			clearstatcache();
             // flush nics Redis hash table
@@ -2121,7 +2121,7 @@ function wrk_audioOutput($redis, $action, $args = null)
     switch ($action) {
         case 'refresh':
             $redis->Del('acards');
-            // $redis->Save();
+            // $redis->bgSave();
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ']' -f 1");
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ':' -f 2");
             $acards = sysCmd("cat /proc/asound/cards | grep : | cut -b 1-3,21-");
@@ -2226,7 +2226,7 @@ function wrk_audioOutput($redis, $action, $args = null)
                 // acards loop
                 runelog('<<--------------------------- card: '.$card.' index: '.$card_index.' (finish) ---------------------------<<');
             }
-            // $redis->Save();
+            // $redis->bgSave();
             break;
         case 'setdetails':
             $redis->hSet('acards_details', $args['card'], json_encode($args['details']));
@@ -2360,7 +2360,7 @@ function wrk_kernelswitch($redis, $args)
 
     if ($return) {
         $redis->set('kernel', $args);
-        $redis->save();
+        $redis->bgSave();
     }
     return $return;
 }
@@ -2416,13 +2416,13 @@ if ($action === 'reset') {
             $mpdcfg = $redis->hGetAll('mpdconf');
             $current_out = $redis->Get('ao');
             // if (!$redis->hExists('acards', $current_out)) {
-            if (!$redis->hExists('acards', $current_out) && ($redis->Get('i2smodule') === 'none')) {
+            if (($redis->hLen('acards') === 1) OR ((!$redis->hExists('acards', $current_out)) && ($redis->Get('i2smodule') === 'none'))){
                 $stored_acards = $redis->hKeys('acards');
                 // debug
                 runelog('force audio output', $stored_acards[0]);
-                // force first output available if the current interface does not exists
+                // force first output available if the current interface does not exists or there is only one card available
                 $redis->Set('ao', $stored_acards[0]);
-                $redis->Save();
+                $redis->bgSave();
             }
             $output = null;
             // --- log settings ---
@@ -2839,82 +2839,97 @@ function wrk_shairport($redis, $ao, $name = null)
 	$redis->hSet('airplay', 'alsa_output_device', preg_split('/[\s,]+/', $acard->device)[0]);
 	//
 	if (!empty($acard->mixer_device)) {
-		$redis->hSet('airplay', 'alsa_mixer_device', $acard->mixer_device);
+		$mixer_device = trim($acard->mixer_device);
 	} else {
-		$redis->hSet('airplay', 'alsa_mixer_device', '');
+		$mixer_device = '';
 	}
+	$redis->hSet('airplay', 'alsa_mixer_device', $mixer_device);
+	//
 	if (!empty($acard->mixer_control)) {
-		$redis->hSet('airplay', 'alsa_mixer_control', $acard->mixer_control);
+		$mixer_control = trim($acard->mixer_control);
 	} else {
-		$redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
+		$mixer_control = 'PCM';
 	}
+	if ($mixer_control === '') {
+		$mixer_control = 'PCM';
+	}
+	$redis->hSet('airplay', 'alsa_mixer_control', $mixer_control);
+	//
 	if (!empty($acard->extlabel)) {
-		$redis->hSet('airplay', 'extlabel', $acard->extlabel);
+		$extlabel = trim($acard->extlabel);
 	} else {
-		$redis->hSet('airplay', 'extlabel', '');
+		$extlabel = '';
 	}
+	$redis->hSet('airplay', 'extlabel', $extlabel);
+	//
 	if ($redis->hGet('airplay', 'soxronoff')) {
 		if ($redis->hGet('airplay', 'interpolation') != '') {
-			// do nothing
+			$interpolation = $redis->hGet('airplay', 'interpolation');
 		} else {
-			$redis->hSet('airplay', 'interpolation', 'soxr');
+			$interpolation = 'soxr';
 		}
 	} else {
-		$redis->hSet('airplay', 'interpolation', '');
+		$interpolation = '';
 	}
+	$redis->hSet('airplay', 'interpolation', $interpolation);
+	//
 	if ($redis->hGet('airplay', 'metadataonoff')) {
 		if ($redis->hGet('airplay', 'metadata_enabled') != '') {
-			// do nothing
+			$metadata_enabled = $redis->hGet('airplay', 'metadata_enabled');
 		} else {
-			$redis->hSet('airplay', 'metadata_enabled', 'yes');
+			$metadata_enabled = 'yes';
 		}
 	} else {
-		$redis->hSet('airplay', 'metadata_enabled', '');
+		$metadata_enabled = '';
 	}
+	$redis->hSet('airplay', 'metadata_enabled', $metadata_enabled);
+	//
 	if ($redis->hGet('airplay', 'artworkonoff')) {
 		if ($redis->hGet('airplay', 'metadata_include_cover_art') != '') {
-			// do nothing
+			$metadata_include_cover_art = $redis->hGet('airplay', 'metadata_include_cover_art');
 		} else {
-			$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
+			$metadata_include_cover_art = 'yes';
 		}
 	} else {
-		$redis->hSet('airplay', 'metadata_include_cover_art', '');
+		$metadata_include_cover_art = '';
 	}
+	$redis->hSet('airplay', 'metadata_include_cover_art', $metadata_include_cover_art);
+	//
 	// update shairport-sync.conf
 	$file = '/etc/shairport-sync.conf';
     $newArray = wrk_replaceTextLine($file, '', ' general_name', 'name="'.$redis->hGet('airplay', 'name').'"; // general_name');
     $newArray = wrk_replaceTextLine('', $newArray, ' general_output_backend', 'output_backend="'.$redis->hGet('airplay', 'output_backend').'"; // general_output_backend');
-	if ($redis->hGet('airplay', 'interpolation') === '') {
-		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', '// interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+	if ($interpolation === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', '// interpolation="'.$interpolation.'"; // general_interpolation');
 	} else {
-		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', 'interpolation="'.$redis->hGet('airplay', 'interpolation').'"; // general_interpolation');
+		$newArray = wrk_replaceTextLine('', $newArray, ' general_interpolation', 'interpolation="'.$interpolation.'"; // general_interpolation');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' general_alac_decoder', 'alac_decoder="'.$redis->hGet('airplay', 'alac_decoder').'"; // general_alac_decoder');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_before_play_begins', 'run_this_before_play_begins="'.$redis->hGet('airplay', 'run_this_before_play_begins').'"; // run_this_before_play_begins');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_after_play_ends', 'run_this_after_play_ends="'.$redis->hGet('airplay', 'run_this_after_play_ends').'"; // run_this_after_play_ends');
     $newArray = wrk_replaceTextLine('', $newArray, ' run_this_wait_for_completion', 'wait_for_completion="'.$redis->hGet('airplay', 'run_this_wait_for_completion').'"; // run_this_wait_for_completion');
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_device', 'output_device="'.$redis->hGet('airplay', 'alsa_output_device').'"; // alsa_output_device');
-	if ($redis->hGet('airplay', 'alsa_mixer_control') === 'PCM') {
-		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', '// mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
+	if ($mixer_control === 'PCM') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', '// mixer_control_name="'.$mixer_control.'"; // alsa_mixer_control_name');
 	} else {
-		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$redis->hGet('airplay', 'alsa_mixer_control').'"; // alsa_mixer_control_name');
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_control_name', 'mixer_control_name="'.$mixer_control.'"; // alsa_mixer_control_name');
 	}
-	if ($redis->hGet('airplay', 'alsa_mixer_device') === '') {
-		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', '// mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+	if ($mixer_device === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', '// mixer_device="'.$mixer_device.'"; // alsa_mixer_device');
 	} else {
-		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$redis->hGet('airplay', 'alsa_mixer_device').'"; // alsa_mixer_device');
+		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$mixer_device.'"; // alsa_mixer_device');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
     $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
-	if ($redis->hGet('airplay', 'metadata_enabled') === '') {
-		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', '// enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
+	if ($metadata_enabled === '') {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', '// enabled="'.$metadata_enabled.'"; // metadata_enabled');
 	} else {
-		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$redis->hGet('airplay', 'metadata_enabled').'"; // metadata_enabled');
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', 'enabled="'.$metadata_enabled.'"; // metadata_enabled');
 	}
-	if (($redis->hGet('airplay', 'metadata_include_cover_art') === '') OR ($redis->hGet('airplay', 'metadata_enabled') === '')) {
-		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', '// include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+	if (($metadata_include_cover_art === '') OR ($metadata_enabled === '')) {
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', '// include_cover_art="'.$metadata_include_cover_art.'"; // metadata_include_cover_art');
 	} else {
-		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$redis->hGet('airplay', 'metadata_include_cover_art').'"; // metadata_include_cover_art');
+		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_include_cover_art', 'include_cover_art="'.$metadata_include_cover_art.'"; // metadata_include_cover_art');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' metadata_pipe_name', 'pipe_name="'.$redis->hGet('airplay', 'metadata_pipe_name').'"; // metadata_pipe_name');
     // Commit changes to /tmp/shairport-sync.conf
@@ -3589,9 +3604,12 @@ function wrk_NTPsync($ntpserver)
     //debug
     runelog('NTP SERVER', $ntpserver);
 	// check that it is a valid ntp server
-	$retval = sysCmd('chronyc -d add server '.$ntpserver.' | grep OK');
+	$retval = sysCmd('chronyc add server '.$ntpserver.' | grep OK');
 	$return = ' '.$retval[0];
 	unset($retval);
+	// servers seem to be valid as a chrony server or a chrony pool, so use the user defined server as a server and a pool in the config file
+	// chrony will look for a series of valid servers before deciding which one to use
+	// if the user defined server/pool is bad then the other predefined servers will be used
     if (strpos($return, 'OK')) {
         // add the server name to chrony.conf
 		$file = '/etc/chrony.conf';
@@ -3701,19 +3719,22 @@ function wrk_changeHostname($redis, $newhostname)
     // update AVAHI serice data
     wrk_avahiconfig($redis, strtolower($newhostname));
 	// activate when a change has been made
-	if ($redis->set('avahiconfchange')) {
+	if ($redis->get('avahiconfchange')) {
 		sysCmd('systemctl daemon-reload');
 		// restart avahi-daemon
 		sysCmd('systemctl reload-or-restart avahi-daemon');
 		// reconfigure MPD
 		wrk_mpdPlaybackStatus($redis);
+		wrk_mpdRestorePlayerStatus($redis);
+		// restart SAMBA
+		wrk_restartSamba($redis);
+	}
+	// update mpd if required
+	If ($redis->hGet('mpdconf', 'zeroconf_name') != $newhostname) {
 		// update zeroconfname in MPD configuration
 		$redis->hSet('mpdconf', 'zeroconf_name', $newhostname);
 		// rewrite mpd.conf file
 		wrk_mpdconf($redis, 'refresh');
-		wrk_mpdRestorePlayerStatus($redis);
-		// restart SAMBA
-		wrk_restartSamba($redis);
 	}
 	$redis->set('avahiconfchange', 0);
 	// set process priority
