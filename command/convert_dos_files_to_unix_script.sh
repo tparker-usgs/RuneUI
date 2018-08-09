@@ -1,0 +1,50 @@
+#!/bin/bash
+set -x # echo all commands to cli
+set +e # continue on errors
+# Convert important files from dos format to unix format  script
+# Parameter final removes the package dos2unix
+#
+# Install dos2unix if required
+pacman -Q dos2unix || pacman -Sy dos2unix --noconfirm
+#
+# Dos2Unix conversion
+cp /var/www/app/config/defaults/config.txt /tmp/config.txt
+cd /var/www/app/config/defaults
+dos2unix -k -s -o *
+cp /tmp/config.txt /var/www/app/config/defaults/config.txt
+rm /tmp/config.txt
+cd /srv/http/assets/js
+dos2unix -k -s -o *
+cd /srv/http/db
+dos2unix -k -s -o *
+cd /srv/http/app
+dos2unix -k -s -o *
+cd /srv/http/app/templates
+dos2unix -k -s -o *
+cd /srv/http/app/libs
+dos2unix -k -s -o *
+cd /srv/http/command
+dos2unix -k -s -o *
+cd /srv/http
+dos2unix -k -s -o *
+cd /etc
+dos2unix -k -s -o *.conf
+cd /home
+#
+# Check file protections and ownership
+chown -R http.http /srv/http/
+find /srv/http/ -type f -exec chmod 644 {} \;
+find /srv/http/ -type d -exec chmod 755 {} \;
+chmod 777 /run
+chmod 755 /srv/http/command/*
+chmod 755 /srv/http/db/redis_datastore_setup
+chmod 755 /srv/http/db/redis_acards_details
+chown -R mpd.audio /var/lib/mpd
+#
+# Remove dos2unix if requested
+if [ "$1" == "final" ]; then
+	echo "Removing dos2unix package"
+	pacman -Rs dos2unix --noconfirm
+fi
+#---
+#End script
