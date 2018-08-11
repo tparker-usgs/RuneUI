@@ -1393,6 +1393,13 @@ function wrk_avahiconfig($redis, $hostname)
 		$redis->set('avahiconfchange', 1);
 		syscmd('cp '.$newfile.' '.$file);
 		syscmd('rm -f '.$newfile);
+		// also modify /etc/hosts
+		$file = '/etc/hosts';
+		$newArray = wrk_replaceTextLine($file, '','127.0.0.1', '127.0.0.1       localhost localhost.localdomain '.$hostname.'.local '.$hostname);
+		// Commit changes to /etc/hosts
+		$fp = fopen($file, 'w');
+		fwrite($fp, implode("", $newArray));
+		fclose($fp);
 	}
 }
 
@@ -3633,8 +3640,8 @@ function wrk_restartSamba($redis)
 {
     // restart Samba
 	// first stop Samba ?
-	//runelog('Samba Stopping...', '');
-	//sysCmd('systemctl stop smbd nmbd');
+	runelog('Samba Stopping...', '');
+	sysCmd('systemctl stop smbd nmbd');
 	runelog('Samba Dev/Prod   :', $redis->get('dev'));
 	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
 	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
@@ -3672,10 +3679,10 @@ function wrk_restartSamba($redis)
 	if (($redis->get('dev')) OR ($redis->hGet('samba', 'enable'))) {
 		runelog('Samba Restarting...', '');
 		sysCmd('systemctl daemon-reload');
-		sysCmd('systemctl reload-or-restart nmbd');
-		sysCmd('systemctl reload-or-restart smbd');
-		sysCmd('pgrep nmbd || systemctl start nmbd');
-		sysCmd('pgrep smbd || systemctl start smbd');
+		sysCmd('systemctl start nmbd');
+		sysCmd('systemctl start smbd');
+		sysCmd('pgrep nmbd || systemctl reload-or-restart nmbd');
+		sysCmd('pgrep smbd || systemctl reload-or-restart smbd');
 	}
 }
 
@@ -3720,9 +3727,10 @@ function wrk_changeHostname($redis, $newhostname)
     wrk_avahiconfig($redis, strtolower($newhostname));
 	// activate when a change has been made
 	if ($redis->get('avahiconfchange')) {
-		sysCmd('systemctl daemon-reload');
 		// restart avahi-daemon
-		sysCmd('systemctl reload-or-restart avahi-daemon');
+		sysCmd('systemctl stop avahi-daemon');
+		sysCmd('systemctl daemon-reload');
+		sysCmd('systemctl start avahi-daemon || systemctl reload-or-restart avahi-daemon');
 		// reconfigure MPD
 		wrk_mpdPlaybackStatus($redis);
 		wrk_mpdRestorePlayerStatus($redis);
