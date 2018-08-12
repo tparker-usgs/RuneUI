@@ -95,7 +95,6 @@ function closeMpdSocket($sock)
     socket_close($sock);
 }
 
-
 function sendMpdCommand($sock, $cmd)
 {
     if (isset($sock['resource'])) {
@@ -906,6 +905,7 @@ function _parseStatusResponse($redis, $resp)
 
          // "audio format" output
         $audio_format = explode(":", $plistArray['audio']);
+		$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
         switch ($audio_format[0]) {
             case '48000':
                 // no break
@@ -926,64 +926,65 @@ function _parseStatusResponse($redis, $resp)
             case 'dsd64':
                 // no break
             case 'DSD64':
-				$audio_format[2] = $audio_format[1];
-				$audio_format[1] = 'dsd';
-				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-				$plistArray['bitrate'] = intval(44100 * 64 /1000);
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				unset($retval);
+				if (trim(retval[0]) != '') {
+					$audio_format[2] = $audio_format[1];
+					$audio_format[1] = 'dsd';
+					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+					$plistArray['bitrate'] = intval(44100 * 64 /1000);
+					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				}
                 break;
             case 'dsd128':
                 // no break
             case 'DSD128':
-				$audio_format[2] = $audio_format[1];
-				$audio_format[1] = 'dsd';
-				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-				$plistArray['bitrate'] = intval(44100 * 128 / 1000);
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				unset($retval);
+				if (trim(retval[0]) != '') {
+					$audio_format[2] = $audio_format[1];
+					$audio_format[1] = 'dsd';
+					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+					$plistArray['bitrate'] = intval(44100 * 128 / 1000);
+					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				}
                 break;
             case 'dsd256':
                 // no break
             case 'DSD256':
-				$audio_format[2] = $audio_format[1];
-				$audio_format[1] = 'dsd';
-				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-				$plistArray['bitrate'] = intval(44100 * 256 / 1000);
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				unset($retval);
+				if (trim(retval[0]) != '') {
+					$audio_format[2] = $audio_format[1];
+					$audio_format[1] = 'dsd';
+					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+					$plistArray['bitrate'] = intval(44100 * 256 / 1000);
+					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				}
                 break;
             case 'dsd512':
                 // no break
             case 'DSD512':
-				$audio_format[2] = $audio_format[1];
-				$audio_format[1] = 'dsd';
-				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-				$plistArray['bitrate'] = intval(44100 * 512 / 1000);
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				unset($retval);
+				if (trim(retval[0]) != '') {
+					$audio_format[2] = $audio_format[1];
+					$audio_format[1] = 'dsd';
+					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+					$plistArray['bitrate'] = intval(44100 * 512 / 1000);
+					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				}
                 break;
             case 'dsd1024':
                 // no break
             case 'DSD1024':
-				$audio_format[2] = $audio_format[1];
-				$audio_format[1] = 'dsd';
-				$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-				$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-				$plistArray['bitrate'] = intval(44100 * 1024 / 1000);
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-				$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				unset($retval);
+				if (trim(retval[0]) != '') {
+					$audio_format[2] = $audio_format[1];
+					$audio_format[1] = 'dsd';
+					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+					$plistArray['bitrate'] = intval(44100 * 1024 / 1000);
+					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+				}
                 break;
         }
+		unset($retval);
         // format "audio_sample_depth" string
         $plistArray['audio_sample_depth'] = $audio_format[1];
         // format "audio_channels" string
@@ -1003,6 +1004,7 @@ function _parseStatusResponse($redis, $resp)
 			}
 			unset($retval);
 		}
+		unset($status);
     }
     return $plistArray;
 }
@@ -1689,7 +1691,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     switch ($action) {
         case 'setnics':
 			// clear cache - redis, filesystem and php
-			$redis->bgSave();
+			$redis->save();
 			sysCmd("sync");
 			clearstatcache();
             // flush nics Redis hash table
@@ -2128,7 +2130,7 @@ function wrk_audioOutput($redis, $action, $args = null)
     switch ($action) {
         case 'refresh':
             $redis->Del('acards');
-            // $redis->bgSave();
+            // $redis->save();
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ']' -f 1");
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ':' -f 2");
             $acards = sysCmd("cat /proc/asound/cards | grep : | cut -b 1-3,21-");
@@ -2233,7 +2235,7 @@ function wrk_audioOutput($redis, $action, $args = null)
                 // acards loop
                 runelog('<<--------------------------- card: '.$card.' index: '.$card_index.' (finish) ---------------------------<<');
             }
-            // $redis->bgSave();
+            // $redis->save();
             break;
         case 'setdetails':
             $redis->hSet('acards_details', $args['card'], json_encode($args['details']));
@@ -2367,7 +2369,7 @@ function wrk_kernelswitch($redis, $args)
 
     if ($return) {
         $redis->set('kernel', $args);
-        $redis->bgSave();
+        $redis->save();
     }
     return $return;
 }
@@ -2429,7 +2431,7 @@ if ($action === 'reset') {
                 runelog('force audio output', $stored_acards[0]);
                 // force first output available if the current interface does not exists or there is only one card available
                 $redis->Set('ao', $stored_acards[0]);
-                $redis->bgSave();
+                $redis->save();
             }
             $output = null;
             // --- log settings ---
@@ -2828,11 +2830,8 @@ function wrk_shairport($redis, $ao, $name = null)
 	//$redis->hSet('airplay', 'acard', $acard);
     runelog('wrk_shairport acard details      : ', $acard);
     runelog('wrk_shairport acard name         : ', $acard->name);
-	runelog('wrk_shairport acard extlabel     : ', $acard->extlabel);
 	runelog('wrk_shairport acard type         : ', $acard->type);
 	runelog('wrk_shairport acard device       : ', $acard->device);
-    runelog('wrk_shairport acard mixer_device : ', $acard->mixer_device);
-    runelog('wrk_shairport acard mixer_control: ', $acard->mixer_control);
 	// shairport-sync output device is specified without a subdevice if only one subdevice exists
 	// determining the number of sub devices is done by counting the number of alsa info file for the device
 	// if (count(sysCmd('dir -l /proc/asound/card'.preg_split('/[\s,:]+/', $acard->device)[1].'/pcm?p/sub?/info')) > 1) {
@@ -2850,6 +2849,7 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$mixer_device = '';
 	}
+    runelog('wrk_shairport acard mixer_device : ', $mixer_device);
 	$redis->hSet('airplay', 'alsa_mixer_device', $mixer_device);
 	//
 	if (!empty($acard->mixer_control)) {
@@ -2860,6 +2860,7 @@ function wrk_shairport($redis, $ao, $name = null)
 	if ($mixer_control === '') {
 		$mixer_control = 'PCM';
 	}
+    runelog('wrk_shairport acard mixer_control: ', $mixer_control);
 	$redis->hSet('airplay', 'alsa_mixer_control', $mixer_control);
 	//
 	if (!empty($acard->extlabel)) {
@@ -2867,6 +2868,7 @@ function wrk_shairport($redis, $ao, $name = null)
 	} else {
 		$extlabel = '';
 	}
+	runelog('wrk_shairport acard extlabel     : ', $extlabel);
 	$redis->hSet('airplay', 'extlabel', $extlabel);
 	//
 	if ($redis->hGet('airplay', 'soxronoff')) {
@@ -4153,25 +4155,25 @@ function ui_mpd_response($mpd, $notify = null)
 function curlPost($url, $data, $proxy = null)
 {
     $ch = curl_init($url);
-    @curl_setopt($curl, CURLOPT_HTTPHEADER, array("Connection: close"));
-    @curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
-    @curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array("Connection: close"));
+    curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
+    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     if (isset($proxy)) {
         if ($proxy['enable'] === '1') {
-            $proxy['user'] === '' || @curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
-            @curl_setopt($ch, CURLOPT_PROXY, $proxy['host']);
+            $proxy['user'] === '' || curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
+            curl_setopt($ch, CURLOPT_PROXY, $proxy['host']);
             //runelog('cURL proxy HOST: ',$proxy['host']);
             //runelog('cURL proxy USER: ',$proxy['user']);
             //runelog('cURL proxy PASS: ',$proxy['pass']);
         }
     }
-    @curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 400);
-    @curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-    @curl_setopt($ch, CURLOPT_POST, 1);
-    @curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    @curl_setopt($ch, CURLOPT_HEADER, 0);  // DO NOT RETURN HTTP HEADERS
-    @curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  // RETURN THE CONTENTS OF THE CALL
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 400);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 0);  // DO NOT RETURN HTTP HEADERS
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  // RETURN THE CONTENTS OF THE CALL
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
@@ -4180,22 +4182,22 @@ function curlPost($url, $data, $proxy = null)
 function curlGet($url, $proxy = null)
 {
     $ch = curl_init($url);
-    @curl_setopt($curl, CURLOPT_HTTPHEADER, array("Connection: close"));
-    @curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
-    @curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array("Connection: close"));
+    curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
+    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     if (isset($proxy)) {
         if ($proxy['enable'] === '1') {
-            $proxy['user'] === '' || @curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
-            @curl_setopt($ch, CURLOPT_PROXY, $proxy['host']);
+            $proxy['user'] === '' || curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
+            curl_setopt($ch, CURLOPT_PROXY, $proxy['host']);
             // runelog('cURL proxy HOST: ',$proxy['host']);
             // runelog('cURL proxy USER: ',$proxy['user']);
             // runelog('cURL proxy PASS: ',$proxy['pass']);
         }
     }
-    @curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 400);
-    @curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-    @curl_setopt($ch, CURLOPT_HEADER, 0);
-    @curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, 400);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
