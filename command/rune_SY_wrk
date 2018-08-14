@@ -511,7 +511,8 @@ $redis->pconnect('/run/redis.sock');
                     // Clean IMG
                     runelog('Clean IMG');
                     // send notfy to UI
-                    ui_notify_async('Clean IMG', 'Started, this can take a while to complete', $jobID);
+                    //ui_notify_async('Clean IMG', 'Started, this can take a while to complete', $jobID);
+                    ui_notify('Clean IMG', 'Started, this can take a while to complete');
                     // enable OPcache
                     wrk_opcache('enable');
                     wrk_cleanDistro();
@@ -564,8 +565,9 @@ $redis->pconnect('/run/redis.sock');
                     //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
                     ui_notify('Update RuneUI', 'RuneUI update message<br>'.implode('<br>', $retval));
-					wrk_sysAcl();
+					unset($retval);
                     sysCmd('cd /srv/http/ && git stash');
+					wrk_sysAcl();
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':
