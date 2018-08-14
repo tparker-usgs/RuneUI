@@ -1402,6 +1402,17 @@ function wrk_avahiconfig($redis, $hostname)
 		$fp = fopen($file, 'w');
 		fwrite($fp, implode("", $newArray));
 		fclose($fp);
+		if ($hostname != 'runeaudio') {
+			// also modify /srv/http/app/templates/header.php
+			$file = '/srv/http/app/templates/header.php';
+			$newArray = wrk_replaceTextLine($file, '','<title>', '    <title>RuneAudio - '.$redis->get('hostname').' - RuneUI</title>');
+			// Commit changes to /srv/http/app/templates/header.php
+			$fp = fopen($file, 'w');
+			fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			sysCmd('chown http.http '.$file);
+			sysCmd('chmod 644 '.$file);
+		}
 	}
 }
 
