@@ -420,8 +420,8 @@ sysCmd('iwconfig wlan0 power off');
 
 // close startup Redis connection
 $redis->close();
-// refresh nics status and collect debug data
-sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/debug_collector');
+// refresh nics status and collect debug data set process priority (to nice)
+sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
 runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
 $all_mounted = 0;
@@ -1387,6 +1387,7 @@ $redis->pconnect('/run/redis.sock');
 				$mpd_uptime = trim($retval[0]);
 				if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
 					sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
+					sysCmd('renice 20 $(pgrep -w ashuffle) || renice 20 $(pgrep -w ashuffle)');
 				}
 				unset($retval);
 			}
