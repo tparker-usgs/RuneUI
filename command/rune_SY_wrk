@@ -420,16 +420,19 @@ sysCmd('iwconfig wlan0 power off');
 
 // close startup Redis connection
 $redis->close();
-// refresh nics status and collect debug data set process priority (to nice)
-sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+// refresh nics status, set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
+// mostly these commands will do nothing or very little, they are also not essential for startup
+sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice ; /srv/http/db/redis_datastore_setup check');
+runelog('--- NORMAL STARTUP');
+// --- NORMAL STARTUP //
 runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
 $all_mounted = 0;
 $retries_mounting = 0;
 while (1) {
-// Connect to Redis backend
-$redis->pconnect('/run/redis.sock');
-// runelog('[wrk] loop marker ',microtime(true));
+	// Connect to Redis backend
+	$redis->pconnect('/run/redis.sock');
+	// runelog('[wrk] loop marker ',microtime(true));
     // monitor loop
     if (!empty($redis->hGetAll('w_queue'))) {
         //debug

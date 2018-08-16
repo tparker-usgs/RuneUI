@@ -50,32 +50,25 @@ $redis->Del('usbmounts');
 $usbmounts = sysCmd("df -hl | grep '/mnt/MPD/USB'");
 foreach ($usbmounts as $line) {
     $line = array_values(array_filter(explode(' ', trim($line))));
-	if (isset($line[6])) {
-		if (!empty($line[6])) {
-			$line[5] .= " ".$line[6];
+	// fix any spaces in volume name
+	for ($cnt = 6; isset($line[$cnt]); $cnt++) {
+		if (!empty($line[$cnt])) {
+			$line[5] .= " ".$line[$cnt];
 		}
-		if (isset($line[7])) {
-			if (!empty($line[7])) {
-				$line[5] .= " ".$line[7];
-			}
+		// should not be needed, but break at cnt 16 just in case, this is 10 spaces
+		if ($cnt = 16 ) {
+			break;
 		}
 	}
     // debug
     // print_r($line);
-    $redis->hSet('usbmounts', $line[0], json_encode(array('device' => $line[0], 'size' => $line[1], 'use' => $line[4], 'name' => substr($line[5], 9))));
+    $redis->hSet('usbmounts', $line[0], json_encode(array('device' => $line[0], 'size' => $line[1], 'use' => $line[4], 'name' => substr(trim($line[5]), 9))));
     // debug
     runelog('usbmount line: ', $line);
 }
 // remove 'ghost' usb mounts
 // use udevil clean to remove any ghost entries
 sysCmd('udevil clean');
-if ($redis->exists('usbmounts')) {
-	// there are usb mounts, do nothing
-} else {
-	// there are no usb mounts
-	// delete all directories in /mnt/MPD/USB
-	sysCmd('rm /mnt/MPD/USB/*');
-}
 // connect to MPD daemon
 // check if usb autorebuild is set
 if ($redis->get('usb_db_autorebuild')) {

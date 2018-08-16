@@ -17,6 +17,9 @@ fi
 #Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources.
 #Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
 #
+# clean up any no longer valid mounts
+udevil clean
+#
 # set up services and stop them
 systemctl unmask systemd-journald
 systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd bluetooth
