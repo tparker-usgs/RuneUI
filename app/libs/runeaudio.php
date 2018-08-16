@@ -2436,6 +2436,12 @@ if ($action === 'reset') {
                 $redis->Set('ao', $stored_acards[0]);
                 $redis->save();
             }
+			// if there are no cards defined in acards, enable the built in bcm2835 cards for the following boot
+			// TO DO this code needs to be moved to a place where redis acards is actually set
+			if ((!$redis->exists('acards')) OR ($redis->hLen('acards') === 0)) {
+				$redis->set('audio_on_off', 1);
+				wrk_audio_on_off($redis, 1);
+			}
             $output = null;
             // --- log settings ---
             if ($mpdcfg['log_level'] === 'none') {
