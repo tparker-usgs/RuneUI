@@ -110,86 +110,10 @@ if ($playerid_db === '') {
     runelog('>>>>>>RUNEAUDIO FIRST RUN PROCESS ---');
     // reset critical file permissions to default
     runelog('reset critical file permissions to default');
-	// test if important services are enabled/disabled
-	// systemd-timesyncd
-	$retval = sysCmd('systemctl is-enabled systemd-timesyncd');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable systemd-timesyncd');
-	}
-	unset($retval);
-	sysCmd('systemctl stop systemd-timesyncd');
-	// ntpd
-	$retval = sysCmd('systemctl is-enabled ntpd');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable ntpd');
-	}
-	unset($retval);
-	sysCmd('systemctl stop ntpd');
-	// chronyd
-	$retval = sysCmd('systemctl is-enabled chronyd');
-	if ($retval[0] === 'disabled') {
-		sysCmd('systemctl enable chronyd');
-	}
-	unset($retval);
-	$retval = sysCmd('systemctl is-active chronyd');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start chronyd');
-	}
-	unset($retval);
-	// rune_PL_wrk
-	$retval = sysCmd('systemctl is-enabled rune_PL_wrk');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable rune_PL_wrk');
-	}
-	unset($retval);
-	sysCmd('systemctl stop rune_PL_wrk');
-	// redis
-	$retval = sysCmd('systemctl is-enabled redis');
-	if ($retval[0] === 'disabled') {
-		sysCmd('systemctl enable redis');
-	}
-	unset($retval);
-	$retval = sysCmd('systemctl is-active redis');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start redis');
-	}
-	unset($retval);
-	// nginx
-	$retval = sysCmd('systemctl is-enabled nginx');
-	if ($retval[0] === 'disabled') {
-		sysCmd('systemctl enable nginx');
-	}
-	unset($retval);
-	sysCmd('pgrep -x nginx || systemctl start nginx');
-	// dhcpcd
-	$retval = sysCmd('systemctl is-enabled dhcpcd');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable dhcpcd');
-	}
-	unset($retval);
-	sysCmd('systemctl stop dhcpcd');
-	// php-fpm
-	$retval = sysCmd('systemctl is-enabled php-fpm');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable php-fpm');
-	}
-	unset($retval);
-	sysCmd('systemctl stop php-fpm');
-	// bluetooth
-	$retval = sysCmd('systemctl is-enabled bluetooth');
-	if ($retval[0] === 'enabled') {
-		sysCmd('systemctl disable bluetooth');
-	}
-	unset($retval);
-	sysCmd('systemctl stop bluetooth');
-	// set up file protections and ownership
     wrk_sysAcl();
     // reset Redis Player Datastore
-    runelog('invoke Redis player datastore reset', sysCmd('/var/www/db/redis_datastore_setup reset'));
+    runelog('invoke Redis player datastore reset');
+	sysCmd('/var/www/db/redis_datastore_setup reset');
     // register HW architectureID and playerID
     runelog('register HW architectureID and playerID');
     wrk_setHwPlatform($redis);
@@ -197,6 +121,9 @@ if ($playerid_db === '') {
     runelog('reset netconf to defaults');
     // read system network interfaces details
     wrk_netconfig($redis,'reset');
+	// reset USB mounts
+	runelog('invoke USB mounts reset');
+	sysCmd('/srv/http/command/usbmount');
     // reset sourcecfg to defaults
     runelog('reset sourcecfg to defaults');
 	wrk_mpdconf($redis,'stop');
@@ -224,14 +151,8 @@ if ($playerid_db === '') {
     // system ENV files check and replace
         // runelog("system ENV files check and replace",'');
         // wrk_sysEnvCheck($arch,1);
-    // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
-	$retval = sysCmd('hostname');
-    $hn = trim($retval[0]);
-    wrk_avahiconfig($redis, $hn);
-	if (strtolower($hn) != strtolower(trim($redis->get('hostname')))) {
-		$redis->set('hostname', $hn);
-	}
-	unset($retval);
+    // set HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
+    wrk_avahiconfig($redis, strtolower(trim($redis->get('hostname'))));
     runelog('--- RUNEAUDIO FIRST RUN PROCESS');
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl daemon-reload');
@@ -243,7 +164,8 @@ if ($playerid_db === '') {
 	// set up file protections and ownership
     wrk_sysAcl();
     // check Redis Player Datastore
-    runelog('invoke Redis player datastore check', sysCmd('/var/www/db/redis_datastore_setup check'));
+    runelog('invoke Redis player datastore check');
+	sysCmd('/var/www/db/redis_datastore_setup check');
 	// stop MPD and associated services
     wrk_mpdconf($redis,'stop');
 	// reset mpdconf to defaults (also restarts mpd)
@@ -284,6 +206,7 @@ if ($playerid_db === '') {
     $start3 = microtime(true);
 
 	// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
+	// normally by this point time has been set, if not there is probably no internet connection
 	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while it is running
 	// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
 	sysCmd('chronyc waitsync 12');
@@ -300,20 +223,32 @@ if ($playerid_db === '') {
 	// read activePlayer state
 	$activePlayer = $redis->get('activePlayer');
 	if ($activePlayer === 'MPD') {
-		// check MPD process
+		// stop spotify, if started
+		sysCmd('pgrep -x spopd && systemctl stop spopd');
+		// check MPD process, it can be stared earlier
 		$retval = sysCmd('systemctl is-active mpd');
 		if ($retval[0] === 'active') {
 			// do nothing
 		} else {
+			// start mpd
 			sysCmd('systemctl start mpd');
 		}
 		unset($retval);
 		// ashuffle gets started automatically
-	} elseif ($activePlayer === 'Spotify') {
-		// check MPD process
+	} else if ($activePlayer === 'Spotify') {
+		// check MPD process, it can be started earlier
+		$retval = sysCmd('systemctl is-active mpd');
+		if ($retval[0] === 'active') {
+			// stop mpd with kill, this saves the state-file
+			sysCmd('mpd --kill');
+		}
+		unset($retval);
+		// start spotify, if not started
 		sysCmd('pgrep -x spopd || systemctl start spopd');
 	} else {
-		// reset activePlayer state to MPD (default) & check MPD process
+		// stop spotify, if started
+		sysCmd('pgrep -x spopd && systemctl stop spopd');
+		// reset activePlayer state to MPD (default) & check MPD process, it can be started earlier
 		$redis->set('activePlayer', 'MPD');
 		$retval = sysCmd('systemctl is-active mpd');
 		if ($retval[0] === 'active') {
@@ -324,9 +259,6 @@ if ($playerid_db === '') {
 		unset($retval);
 		// ashuffle gets started automatically
 	}
-
-	// set mpd volume
-	sysCmdAsync('/var/www/command/set_mpd_volume.php');
 
 	// check ENV files
     //if ($arch !== '--') {
@@ -402,15 +334,13 @@ if (!$redis->get('dev')) {
 
 // start rune_PL_wrk
 sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
-runelog('--- NORMAL STARTUP');
-// --- NORMAL STARTUP //
 $start4 = microtime(true);
 $smartctl_microtime_then = $start4;
 $starttime = ($start4-$start3)+$firstlap;
 runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
 
-// call xinit for local browser
+// start the local browser
 if (($redis->get('local_browser')) && (file_exists('/usr/bin/xinit'))) {
     sysCmdAsync('pgrep -x local-browser || systemctl start local-browser');
 }

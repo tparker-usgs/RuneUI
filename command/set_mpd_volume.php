@@ -44,11 +44,9 @@ $redis->connect('/run/redis.sock');
 // reset logfile
 sysCmd('echo "--------------- start: set_mpd_volume.php ---------------" > /var/log/runeaudio/set_mpd_volume.log');
 runelog('WORKER set_mpd_volume.php STARTING...');
-// set priority low
-proc_nice(9);
 
 // what we are trying to do is set the mpd volume to preset start volume
-// and store a value of the last known mpd volume used when switching players
+// and store a value of the last known mpd volume to be used when switching players
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
 	// Start MPD (if  not started) in order to set the startup volume (if needed and if set) then kill MPD (if required)

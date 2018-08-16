@@ -53,19 +53,19 @@ prio_nice () {
     # fi
 # count=$((count+1))
 # done
-renice -15 $(ps -Teo spid,pid,ni,pri,fname | grep -i ' mpd' | sed -e 's/^[[:space:]]*//' | cut -d ' ' -f 1)
-renice -15 $(pgrep -wx shairport-sync)
-renice -15 $(pgrep -wx spopd)
-renice -15 $(pgrep -wx upmpdcli)
-renice 20 $(pgrep -wx ashuffle)
-renice 20 $(pgrep -wx local-browser)
-renice 20 $(pgrep -wx mpdscribble)
-renice 19 $(pgrep -wx nmbd)
-renice 20 $(pgrep -wx rune_PL_wrk)
-renice 20 $(pgrep -wx rune_SSM_wrk)
-renice 20 $(pgrep -wx rune_SY_wrk)
-renice 19 $(pgrep -wx smbd)
-renice 18 $(pgrep -wx sshd)
+renice -1 $(ps -Teo spid,pid,ni,pri,fname | grep -i ' mpd' | sed -e 's/^[[:space:]]*//' | cut -d ' ' -f 1)
+renice -1 $(pgrep -wx shairport-sync)
+renice -1 $(pgrep -wx spopd)
+renice -1 $(pgrep -wx upmpdcli)
+renice 3 $(pgrep -wx ashuffle)
+renice 3 $(pgrep -wx local-browser)
+renice 3 $(pgrep -wx mpdscribble)
+renice 2 $(pgrep -wx nmbd)
+renice 3 $(pgrep -wx rune_PL_wrk)
+renice 3 $(pgrep -wx rune_SSM_wrk)
+renice 3 $(pgrep -wx rune_SY_wrk)
+renice 2 $(pgrep -wx smbd)
+renice 1 $(pgrep -wx sshd)
 }
 
 prio_default () {
