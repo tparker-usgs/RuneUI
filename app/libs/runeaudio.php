@@ -1391,27 +1391,19 @@ function wrk_avahiconfig($redis, $hostname)
 		$redis->set('avahiconfchange', 0);
 		syscmd('rm -f '.$newfile);
 	} else {
-		// mpd configuration has changed, set avahiconfchange on
+		// avahi configuration has changed, set avahiconfchange on
 		$redis->set('avahiconfchange', 1);
 		syscmd('cp '.$newfile.' '.$file);
 		syscmd('rm -f '.$newfile);
-		// also modify /etc/hosts
-		$file = '/etc/hosts';
-		$newArray = wrk_replaceTextLine($file, '','127.0.0.1', '127.0.0.1       localhost localhost.localdomain '.$hostname.'.local '.$hostname);
-		// Commit changes to /etc/hosts
-		$fp = fopen($file, 'w');
-		fwrite($fp, implode("", $newArray));
-		fclose($fp);
-		if ($hostname != 'runeaudio') {
-			// also modify /srv/http/app/templates/header.php
-			$file = '/srv/http/app/templates/header.php';
-			$newArray = wrk_replaceTextLine($file, '','<title>', '    <title>RuneAudio - '.$redis->get('hostname').' - RuneUI</title>');
-			// Commit changes to /srv/http/app/templates/header.php
-			$fp = fopen($file, 'w');
-			fwrite($fp, implode("", $newArray));
-			fclose($fp);
-			sysCmd('chown http.http '.$file);
-			sysCmd('chmod 644 '.$file);
+		// also modify /etc/hosts replace line beginning with 127.0.0.1, sed is fastest
+		syscmd('sed -i "/^127.0.0.1/c\127.0.0.1       localhost localhost.localdomain '.$hostname.'.local '.$hostname.'" /etc/hosts');
+		// also modify /srv/http/app/templates/header.php to set the web ui title, sed is fastest
+		if ($hostname == 'runeaudio') {
+			// set back to default with RuneAudio in the <title>
+			syscmd('sed -i "/<title>/c\    <title>RuneAudio - RuneUI</title>" /srv/http/app/templates/header.php');
+		} else {
+			// replace RuneAudio with the hostname in the <title>
+			syscmd('sed -i "/<title>/c\    <title>'.$redis->get('hostname').' - RuneUI</title>" /srv/http/app/templates/header.php');
 		}
 	}
 }

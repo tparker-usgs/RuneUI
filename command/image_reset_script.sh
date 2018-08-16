@@ -36,6 +36,9 @@ rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 #
+# reset web ui title back to default
+sed -i  '/<title>/c\    <title>RuneAudio - RuneUI</title>' /srv/http/app/templates/header.php
+#
 # redis reset
 redis-cli del AccessPoint
 redis-cli del airplay
@@ -107,6 +110,7 @@ cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
+cp /var/www/app/config/defaults/hosts /etc/hosts
 #
 # network
 rm -f /etc/netctl/*
