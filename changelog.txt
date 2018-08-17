@@ -1,18 +1,18 @@
 Changelog for 0.5b
 Previous changes for 0.1-0.4b are not inclued.
 
-•	Change HW-device name to 'RaspberryPi' for 01 and 08 hardware types, fixex Pi Zero W hardware identification, included Pi 3 B+ hardware identification. RuneAudio is now the same for all Pi hardware types. Some options are automatically disabled for the less powerful processor types.
+•	Change HW-device name to 'RaspberryPi' for 01 and 08 hardware types, fixed Pi Zero W hardware identification, included Pi 3 B+ hardware identification. RuneAudio UI is now the same for all Pi hardware types. Some options are automatically disabled for the less powerful processor types.
 •	Reimplemented Samba, on/off controls included in Settings UI, restart in the Dev UI, instructions in configuration files, changes work on the fly.
 •	Hostname changes work on the fly, all dependant variables modified, and dependant jobs restarted.
 •	Fixed some issues with Spotify, however Spotify no longer works due to changes made by Spotify in May 2018. Settings UI text included to explain this.
 •	Global Random works truly randomly using ashuffle for randomly playing playlists or the complete MPD library. On/off switches included in the Settings UI.
-•	Auto Play function works correctly in combination with Global Random. The song or webradio playing at shutdown will automatically play on restart. On/off switches included in the Settings UI.
+•	Auto Play function works correctly also in combination with Global Random. The song or webradio playing at shutdown will automatically play on restart. On/off switches included in the Settings UI.
 •	SoXr for MPD is independent of MPD version (v0.19.x or v0.20.x), on/off switch is included in the Dev UI. MPD V0.20.20 is installed.
 •	Corrected problems with MPD start-up volume and volume when switching between players.
 •	Chromium local browser implemented for Pi2/Pi3, starts/stops on the fly via controls in the Settings UI.
 •	Airplay implemented using shairport-sync, including metadata and cover-art. Metadata on/off switches and a reset function built into in the Dev IU. Default settings are based on the Pi type on initial start-up. Automatic output device configuration based on MPD settings. Artist-info, lyrics and screen-saver now work in the same way for MPD and Airplay. SoXr for Airplay is included but disabled. 
 •	Wider choice of Soundcard/DAC’s included in the Settings UI, most common models are listed. pcm510x DAC's also work acceptably with source audio files using bit-rates > 192k, automatic configuration from the Settings UI.
-•	UPnP / DLNA can optionally work as owner of the MPD queue, on/off switch is included in the Settings UI.
+•	UPnP/DLNA can optionally work as owner of the MPD queue, on/off switch is included in the Settings UI.
 •	Implemented Smartmontools for hard disk monitoring and alerting.
 •	The correct DSD playback rates are now shown in UI.
 •	Settings UI 'show status' display modified to include Hardware model type.
@@ -20,12 +20,13 @@ Previous changes for 0.1-0.4b are not inclued.
 •	Rune start-up sequence modified to minimise background job restarts.
 •	When a static IP address is chosen it will be correctly displayed after a refresh nics in the Network UI.
 •	Fixed WiFi with hidden SSID settings.
-•	USB auto-mount fixed (UI messages have disappeared - but it now works). Incorrectly reported ‘ghost’ USB devices are automatically removed. USB volume names with spaces are snow supported.
-•	Corrected git pull from the /dev UI.
-•	Replaced ntp (ntpd) with chrony (chronyd), a user defined NTP time server is now saved.
-•	Backup & restore (based on Rern's addon), included.
+•	USB auto-mount fixed (UI messages have disappeared - but it now works). Incorrectly reported ‘ghost’ USB devices are automatically removed. USB volume names with spaces are now supported.
+•	Corrected git pull in the /dev UI.
+•	Replaced ntp (ntpd) with chrony (chronyd), a user defined NTP time server is now saved and used.
 •	NAS connections can now use a ‘<hostname>.local’ name instead of a IP address. Fixed IP addresses are no longer a requirement for file servers. Added "vers=1.0" as default to the NAS CIFS mount flags.
+•	Backup & restore (based on Rern's addon), included.
 •	Rern’s Addons can now be installed from the Dev UI.
+•	Rern’s Addon 'RuneUI Fonts - Extended Characters' is pre-installed.
 •	All UI checked and updated. Extra notes added where required. Specifically, credits UI updated, Dev UI notes added for mediainfo, 384k kernel and smartmontools.
 
 Known problems:
@@ -33,4 +34,4 @@ Known problems:
 •	Jamendo is still not working (see forum for details).
 •	Alert messaging is not working correctly.
 •	Dim the volume control in UI when in Airplay mode is not working. There are also other screen refresh issues.
-•	Using DLNA when Global Random (ashuffle) is enabled will not work.
+•	Using UPnP/DLNA when Global Random (ashuffle) is enabled will not work. This is documented in the UI.
