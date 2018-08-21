@@ -8,6 +8,8 @@ systemctl start redis mpd
 hostnm=$( redis-cli get hostname )
 hostnm=${hostnm,,}
 hostnamectl set-hostname $hostnm
+timezn=$( redis-cli get timezone )
+timedatectl set-timezone $timezn
 sed -i "s/opcache.enable=./opcache.enable=$( redis-cli get opcache )/" /etc/php/conf.d/opcache.ini
 rm $1
 sleep 5
