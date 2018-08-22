@@ -42,9 +42,9 @@ function updateOS($redis) {
 	// even if an image is reset all patches will be applied sequentially
 	// patches should always be repeatable without causing problems
 	// when a new image is created the patch level will always be set to zero, the following code should also be reviewed
-	if ($redis->set('buildversion') === 'janui-20180805') {
+	if ($redis->get('buildversion') === 'janui-20180805') {
 		// only applicable for a specific build
-		if ($redis->set('patchlevel') < 1) {
+		if ($redis->get('patchlevel') < 1) {
 			// 1st update - copy a new version of the /etc/nginx/nginx-prod.conf from /var/www/app/config/defaults/nginx-prod.conf
 			if (file_exists('/var/www/app/config/defaults/nginx-prod.conf')) {
 				// the file will be delivered with a git pull, if it is there, use it
@@ -62,7 +62,7 @@ function updateOS($redis) {
 			}
 		}
 		// template for the update part replace x with the number
-		//if ($redis->set('patchlevel') < x) {
+		//if ($redis->get('patchlevel') < x) {
 			// xnd update
 			//
 			// set the patch level

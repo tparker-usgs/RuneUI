@@ -54,7 +54,7 @@ function debug_data($redis)
     $output .= "\n";
     $output .= "Linux version:\t".implode('\n', sysCmd('uname -r'));
     $output .= "\n";
-    $output .= "Build version:\t".$redis->get('buildversion')."\n";
+    $output .= "Build version:\t".$redis->get('buildversion')."-".$redis->get('patchlevel')."\n";
     $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";
     $output .= "PlayerID:\t".$redis->get('playerid')."\n";
     $output .= "\n";

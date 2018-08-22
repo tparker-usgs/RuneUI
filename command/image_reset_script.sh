@@ -102,6 +102,7 @@ cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcl
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
+cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf

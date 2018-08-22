@@ -50,10 +50,9 @@ $redis = new Redis();
 $redis->connect('/run/redis.sock');
 
 // if os updates are needed
-if(file_exists('/srv/http/command/update_os'))
-{
-    include '/srv/http/command/update_os';
-    updateOS();
+if (file_exists('/srv/http/command/update_os.php')) {
+    include '/srv/http/command/update_os.php';
+    updateOS($redis);
 }
 
 // clean up Rern's addons security

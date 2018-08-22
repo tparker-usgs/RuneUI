@@ -219,6 +219,7 @@ function redisDatastore($redis,$action) {
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
             $redis->set('buildversion', 'janui-20180805');
+			$redis->set('patchlevel', 0);
             $redis->set('release', '0.5');
             // HW platform data
             // $redis->set('playerid', '');
@@ -449,6 +450,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('debugdata') || $redis->set('debugdata', '');
             $redis->exists('opcache') || $redis->set('opcache', 1);
             $redis->exists('buildversion') || $redis->set('buildversion', 'janui-20180805');
+            $redis->exists('patchlevel') || $redis->set('patchlevel', 0);
             // HW platform data
             $redis->exists('playerid') || $redis->set('playerid', '');
             $redis->exists('hwplatform') || $redis->set('hwplatform', '');
