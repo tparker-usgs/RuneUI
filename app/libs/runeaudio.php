@@ -3159,11 +3159,11 @@ function wrk_getHwPlatform($redis)
             if (intval("0x".$revision, 16) < 16) {
                 // RaspberryPi1
                 $arch = '08';
-				$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
-				$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
-				$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
-				$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
-				$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+				$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+				$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+				$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+				$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+				$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
             }
             else {
                 $model = trim(substr($revision, -2, 1));
@@ -3171,11 +3171,11 @@ function wrk_getHwPlatform($redis)
                     case "0":
 						// 0 = A or B
                         $arch = '08';
-						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
-						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
-						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
-						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
-						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->exits('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         break;
                     case "1":
 						// 1 = B+, A+ or Compute module 1
@@ -3216,11 +3216,11 @@ function wrk_getHwPlatform($redis)
                     case "D":
 						// D = B+ Pi3
                         $arch = '08';
-						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
-						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
-						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
-						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
-						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
+						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
+						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
+						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
+						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
                         break;
                     case "5":
 						// 5 = Alpha,
@@ -3236,11 +3236,11 @@ function wrk_getHwPlatform($redis)
                         // no break;
                     default:
                         $arch = '--';
-						$redis->get('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
-						$redis->hGet('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
-						$redis->hGet('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
-						$redis->hGet('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
-						$redis->hGet('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
+						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
+						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         break;
                 }
             }
