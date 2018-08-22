@@ -50,13 +50,8 @@ function updateOS($redis) {
 				// the file will be delivered with a git pull, if it is there, use it
 				sysCmd('cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf');
 				sysCmd('chmod 644 /etc/nginx/nginx-prod.conf');
-				if ($redis->get('dev')) {
-					// in dev mode do nothing
-				} else {
-					// in prod mode replace the symlink to activate the new file
-					sysCmd('rm -f /etc/nginx/nginx.conf');
-					sysCmd('ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf');
-				}
+				sysCmd('rm -f /etc/nginx/nginx.conf');
+				sysCmd('ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf');
 				// set the patch level
 				$redis->set('patchlevel', 1);
 			}
