@@ -52,6 +52,7 @@ set +e
 
 echo "Stop MPD and unmount shares..."
 systemctl stop ashuffle upmpdcli mpdscribble
+mpc stop
 mpd --kill
 systemctl stop nginx
 sleep 1
