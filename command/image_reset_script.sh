@@ -44,17 +44,17 @@ sed -i  '/<title>/c\    <title>RuneAudio - RuneUI</title>' /srv/http/app/templat
 #
 # redis reset
 redis-cli del AccessPoint
-redis-cli del airplay
-redis-cli del dlna
-redis-cli del spotify
-redis-cli del mpdconf
-redis-cli del jamendo
-redis-cli del dirble
-redis-cli del samba
-redis-cli del lyrics
-redis-cli del nics
-redis-cli del addons
 redis-cli del addo
+redis-cli del addons
+redis-cli del airplay
+redis-cli del dirble
+redis-cli del dlna
+redis-cli del jamendo
+redis-cli del lyrics
+redis-cli del mpdconf
+redis-cli del nics
+redis-cli del samba
+redis-cli del spotify
 redis-cli del usbmounts
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
@@ -85,37 +85,37 @@ pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 #
 # The following commands should also be run after a system update or any package updates
 # Reset the service and configuration files to the distribution standard
+cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
+cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
+cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
+cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
+cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
+cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
+cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
+cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
+cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 rm -f /etc/samba/*.conf
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
-cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
-cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
-cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
-cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
-cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
-cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
-cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
-cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
-cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
+cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
 cp /var/www/app/config/defaults/hosts /etc/hosts
-cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
+cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
+cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
+cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
+cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
+cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
+cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
 cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
 cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
-cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
+cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
-cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
-cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
-cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
-cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
-cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
-cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
+cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 #
 # network
 rm -f /etc/netctl/*
