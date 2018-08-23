@@ -393,6 +393,13 @@ while (1) {
                     // start shairport
                     if ($job->action === 'start') {
                         runelog('service: SHAIRPORT start');
+						// create a directory to use for airplay metadata artwork
+						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+						// TO-DO: use the airplay redis variables to determine the metadata artwork directory
+						sysCmd('mkdir -p /srv/http/tmp/airplay');
+						sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
+						sysCmd('chown -R http.http /srv/http/tmp');
+						sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-default.png');
                         // start or re-start shairport-sync service
                         if (isset($restart)) {
                             sysCmd('systemctl reload-or-restart shairport-sync');
