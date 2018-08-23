@@ -89,6 +89,20 @@ rm -f /etc/samba/*.conf
 cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
+cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
+cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
+cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
+cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
+cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
+cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
+cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
+cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
+cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
+cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
+cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
+cp /var/www/app/config/defaults/fstab /etc/fstab
+cp /var/www/app/config/defaults/hosts /etc/hosts
 cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
 cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
 cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
@@ -102,19 +116,6 @@ cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcl
 cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
-cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
-cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
-cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
-cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
-cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
-cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
-cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
-cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
-cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
-cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
-cp /var/www/app/config/defaults/fstab /etc/fstab
-cp /var/www/app/config/defaults/hosts /etc/hosts
 #
 # network
 rm -f /etc/netctl/*

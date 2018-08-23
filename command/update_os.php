@@ -56,6 +56,16 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 1);
 			}
 		}
+		if ($redis->get('patchlevel') < 2) {
+			// 2nd update - copy a new version of the /etc/X11/xinit/start_chromium.sh from /var/www/app/config/defaults/start_chromium.sh
+			if (file_exists('/var/www/app/config/defaults/start_chromium.sh')) {
+				// the file will be delivered with a git pull, if it is there, use it
+				sysCmd('cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh');
+				sysCmd('chmod 644 /etc/X11/xinit/start_chromium.sh');
+				// set the patch level
+				$redis->set('patchlevel', 2);
+			}
+		}
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xnd update
