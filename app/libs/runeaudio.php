@@ -3729,6 +3729,13 @@ function wrk_changeHostname($redis, $newhostname)
 			sysCmd('systemctl reload-or-restart upmpdcli || systemctl start upmpdcli');
 		}
     }
+	// update mpd if required
+	If ($redis->hGet('mpdconf', 'zeroconf_name') != $newhostname) {
+		// update zeroconfname in MPD configuration
+		$redis->hSet('mpdconf', 'zeroconf_name', $newhostname);
+		// rewrite mpd.conf file
+		wrk_mpdconf($redis, 'refresh');
+	}
     // change system hostname
 	$redis->set('hostname', $newhostname);
     sysCmd('hostnamectl  --static --transient --pretty set-hostname '.strtolower($newhostname));
@@ -3736,22 +3743,20 @@ function wrk_changeHostname($redis, $newhostname)
     wrk_avahiconfig($redis, strtolower($newhostname));
 	// activate when a change has been made
 	if ($redis->get('avahiconfchange')) {
-		// restart avahi-daemon
-		sysCmd('systemctl stop avahi-daemon');
-		sysCmd('systemctl daemon-reload');
-		sysCmd('systemctl start avahi-daemon || systemctl reload-or-restart avahi-daemon');
+		// restart avahi-daemon if it is running (active), some users switch it off
+		// it is also started automatically when shairport-sync starts
+		$retval = sysCmd('systemctl is-active avahi-daemon');
+		if ($retval[0] === 'active') {
+			sysCmd('systemctl stop avahi-daemon');
+			sysCmd('systemctl daemon-reload');
+			sysCmd('systemctl start avahi-daemon || systemctl reload-or-restart avahi-daemon');
+		}
+		unset($retval);
 		// reconfigure MPD
-		wrk_mpdPlaybackStatus($redis);
+		//wrk_mpdPlaybackStatus($redis);
 		wrk_mpdRestorePlayerStatus($redis);
 		// restart SAMBA
 		wrk_restartSamba($redis);
-	}
-	// update mpd if required
-	If ($redis->hGet('mpdconf', 'zeroconf_name') != $newhostname) {
-		// update zeroconfname in MPD configuration
-		$redis->hSet('mpdconf', 'zeroconf_name', $newhostname);
-		// rewrite mpd.conf file
-		wrk_mpdconf($redis, 'refresh');
 	}
 	$redis->set('avahiconfchange', 0);
 	// set process priority
