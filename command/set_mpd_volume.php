@@ -86,12 +86,6 @@ if ($activePlayer === 'MPD') {
 					unset($retval);
 				}
 			} while (($mpdstartvolume != $mpdvolume) && (--$retries_volume > 0));
-			// When MPD is killed the state (including the volume) is saved
-			// ??? this causes lots of problems ???
-			//if ($initvolume != $mpdvolume) {
-				// kill mpd only if the volume was actually changed
-				//sysCmd('mpd --kill');
-			//}
 		} else {
 			do {
 				sleep(2);
@@ -114,12 +108,15 @@ if ($activePlayer === 'MPD') {
 	if ($retries_volume > 0) {
 		// correctly set or disabled
 		$redis->set('lastmpdvolume', $mpdvolume);
+		sysCmd('mpc volume '.$mpdvolume);
 	} else if ($mpdstartvolume != -1) {
 		// failed to set it, but start volume has a value
 		$redis->set('lastmpdvolume', $mpdstartvolume);
+		sysCmd('mpc volume '.$mpdstartvolume);
 	} else {
 		// set it to 40% when we don't have a value
 		$redis->set('lastmpdvolume', 40);
+		sysCmd('mpc volume 40');
 	}
 	// restart mpd if required
 	$retval = sysCmd('systemctl is-active mpd');
