@@ -102,7 +102,7 @@ while (1) {
 					unset($retval);
 					if ($lastmpdvolume == $mpdvolume) {
 						// make sure the UI has the correct value
-						sysCmd('mpc volume '.$mpdvolume.);
+						sysCmd('mpc volume '.$mpdvolume);
 					} else if ($mpdvolume == 'n/a') {
 						// something wrong, mismatch between redis and mpd 'disabled' values
 						$retries_volume = 0;
