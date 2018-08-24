@@ -213,9 +213,8 @@ if ($playerid_db === '') {
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
 	$retval = sysCmd('hostname');
     $hn = trim($retval[0]);
-    wrk_avahiconfig($redis, $hn);
 	if (strtolower($hn) != strtolower(trim($redis->get('hostname')))) {
-		$redis->set('hostname', $hn);
+		wrk_changeHostname($redis, $redis->get('hostname'));
 	}
 	unset($retval);
 
@@ -229,8 +228,8 @@ if ($playerid_db === '') {
 		if ($retval[0] === 'active') {
 			// do nothing
 		} else {
-			// start mpd
-			sysCmd('systemctl start mpd');
+			// Start and refresh MPD (audio hardware status - soundcards and MPD config)
+			wrk_mpdconf($redis,'refresh');
 		}
 		unset($retval);
 		// ashuffle gets started automatically
@@ -253,7 +252,8 @@ if ($playerid_db === '') {
 		if ($retval[0] === 'active') {
 			// do nothing
 		} else {
-			sysCmd('systemctl start mpd');
+			// Start and refresh MPD (audio hardware status - soundcards and MPD config)
+			wrk_mpdconf($redis,'refresh');
 		}
 		unset($retval);
 		// ashuffle gets started automatically
@@ -266,94 +266,89 @@ if ($playerid_db === '') {
 
     // start Samba services (if required)
 	wrk_restartSamba($redis);
-}
-$kernel = $redis->get('kernel');
-// load i2smodule
-if ($redis->get('i2smodule') !== 'none') {
-    switch($arch_db) {
-        case '01':
-            if ($kernel !== 'linux-rune-3.6.11-18-ARCH+') $loadi2s = true;
-            break;
-        case '10':
-            $loadi2s = true;
-            break;
+
+	$kernel = $redis->get('kernel');
+	// load i2smodule
+	if ($redis->get('i2smodule') !== 'none') {
+		switch($arch_db) {
+			case '01':
+				if ($kernel !== 'linux-rune-3.6.11-18-ARCH+') $loadi2s = true;
+				break;
+			case '10':
+				$loadi2s = true;
+				break;
+		}
+		if ($loadi2s === true) wrk_i2smodule($redis, $redis->get('i2smodule'));
 	}
-    if ($loadi2s === true) wrk_i2smodule($redis, $redis->get('i2smodule'));
-}
-// Start and refresh MPD (audio hardware status - soundcards and MPD config)
-wrk_mpdconf($redis,'refresh');
-// start Spotify
-if ($activePlayer === 'Spotify') {
-    sysCmd('pgrep -x spopd || systemctl start spopd');
-}
-// start shairport
-if ($redis->hGet('airplay', 'enable')) {
-    runelog("service: SHAIRPORT start",'');
-	// create a directory to use for airplay metadata artwork
-	// the location /srv/http/tmp is a tmpfs, see /etc/fstab
-	// TO-DO: use the airplay redis variables to determine the metadata artwork directory
-    sysCmd('mkdir -p /srv/http/tmp/airplay');
-    sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
-	sysCmd('chown -R http.http /srv/http/tmp');
-	sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-default.png');
-	// start shairport-sync if it is not already started
-    sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
-}
-// start udevil
-if ($redis->get('udevil') === '1') {
-    runelog("service: UDEVIL start",'');
-    sysCmd('pgrep -x udevil || systemctl start udevil');
-}
-// read system network interfaces details
-// wrk_netconfig($redis,'setnics');
-// check /etc/network/interfaces integrity
-// hashCFG('check_net',$redis);
-// check /etc/mpd.conf integrity
-// hashCFG('check_mpd',$redis);
+	// start shairport-sync
+	if ($redis->hGet('airplay', 'enable')) {
+		runelog("service: SHAIRPORT start",'');
+		// create a directory to use for airplay metadata artwork
+		// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+		// TO-DO: use the airplay redis variables to determine the metadata artwork directory
+		sysCmd('mkdir -p /srv/http/tmp/airplay');
+		sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
+		sysCmd('chown -R http.http /srv/http/tmp');
+		sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-default.png');
+		// start shairport-sync if it is not already started
+		sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
+	}
+	// start udevil
+	if ($redis->get('udevil') === '1') {
+		runelog("service: UDEVIL start",'');
+		sysCmd('pgrep -x udevil || systemctl start udevil');
+	}
+	// read system network interfaces details
+	// wrk_netconfig($redis,'setnics');
+	// check /etc/network/interfaces integrity
+	// hashCFG('check_net',$redis);
+	// check /etc/mpd.conf integrity
+	// hashCFG('check_mpd',$redis);
 
-// initialize OrionProfile
-runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
-sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
+	// initialize OrionProfile
+	runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
+	sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
 
-// start php-fpm if required
-$retval = sysCmd('systemctl is-active php-fpm');
-if ($retval[0] === 'active') {
-	// do nothing
-} else {
-	sysCmd('systemctl start php-fpm');
+	// start php-fpm if required
+	$retval = sysCmd('systemctl is-active php-fpm');
+	if ($retval[0] === 'active') {
+		// do nothing
+	} else {
+		sysCmd('systemctl start php-fpm');
+	}
+	unset($retval);
+
+	// PHP 5.5 OPCache
+	if (!$redis->get('dev')) {
+		// prime PHP OPCache
+		runelog('prime PHP OPCache');
+		sysCmdAsync("curl -s -X GET 'http://127.0.0.1/command/cachectl.php?action=prime'");
+	}
+
+	// start rune_PL_wrk
+	sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
+	$start4 = microtime(true);
+	$smartctl_microtime_then = $start4;
+	$starttime = ($start4-$start3)+$firstlap;
+	runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
+	ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
+
+	// start the local browser
+	if (($redis->get('local_browser')) && (file_exists('/usr/bin/xinit'))) {
+		sysCmdAsync('pgrep -x local-browser || systemctl start local-browser');
+	}
+
+	// turn wifi power saving off
+	sysCmd('iwconfig wlan0 power off');
+
+	// close startup Redis connection
+	$redis->close();
+	// refresh nics status, set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
+	// mostly these commands will do nothing or very little, they are also not essential for the startup sequence
+	sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice ; /srv/http/db/redis_datastore_setup check');
+	runelog('--- NORMAL STARTUP');
+	// --- NORMAL STARTUP //
 }
-unset($retval);
-
-// PHP 5.5 OPCache
-if (!$redis->get('dev')) {
-    // prime PHP OPCache
-    runelog('prime PHP OPCache');
-    sysCmdAsync("curl -s -X GET 'http://127.0.0.1/command/cachectl.php?action=prime'");
-}
-
-// start rune_PL_wrk
-sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
-$start4 = microtime(true);
-$smartctl_microtime_then = $start4;
-$starttime = ($start4-$start3)+$firstlap;
-runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
-ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
-
-// start the local browser
-if (($redis->get('local_browser')) && (file_exists('/usr/bin/xinit'))) {
-    sysCmdAsync('pgrep -x local-browser || systemctl start local-browser');
-}
-
-// turn wifi power saving off
-sysCmd('iwconfig wlan0 power off');
-
-// close startup Redis connection
-$redis->close();
-// refresh nics status, set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
-// mostly these commands will do nothing or very little, they are also not essential for startup
-sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice ; /srv/http/db/redis_datastore_setup check');
-runelog('--- NORMAL STARTUP');
-// --- NORMAL STARTUP //
 runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
 $all_mounted = 0;
