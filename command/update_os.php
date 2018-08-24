@@ -66,6 +66,16 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 2);
 			}
 		}
+		if ($redis->get('patchlevel') < 3) {
+			// 2nd update - copy a new version of the /etc/X11/xinit/start_chromium.sh from /var/www/app/config/defaults/start_chromium.sh
+			if (file_exists('/usr/lib/systemd/system/udevil.service')) {
+				// the file will be delivered with a git pull in /var/www/app/config/defaults for future use
+				// but use sed to modify the existing one
+				syscmd('sed -i "/Requires=mpd.service/c\#Requires=mpd.service" /usr/lib/systemd/system/udevil.service');
+				// set the patch level
+				$redis->set('patchlevel', 3);
+			}
+		}
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xnd update
