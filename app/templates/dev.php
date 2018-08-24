@@ -166,6 +166,20 @@
 					</div>
 				</div>
 			</div>
+            <div class="boxed-group">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Player name in Menu</label>
+					<div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="opcache" name="mode[playernamemenu][enable]" type="checkbox" value="1"<?php if($this->playernamemenu === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+						<span class="help-block">With this option you can add your player name (hostname) before the word '<strong>Menu</strong>' at the top right of your UI. 
+						It is useful when you are using several players.<br>
+						Default value is OFF, which results in the word 'Menu' being displayed. You can can override the default setting here</span>
+					</div>
+				</div>
+            </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button class="btn btn-primary btn-lg" value="1" name="mode[debug][submit]" type="submit">Save settings</button>

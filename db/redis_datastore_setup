@@ -196,6 +196,7 @@ function redisDatastore($redis,$action) {
 			$redis->set('last_pl_randomfile', 'exists');
 			$redis->set('local_browser', 0);
 			$redis->set('restoreact', 0);
+			$redis->set('playernamemenu', 0);
             // plugins api-keys
             $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -420,6 +421,7 @@ function redisDatastore($redis,$action) {
 			$redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
 			$redis->exists('local_browser') || $redis->set('local_browser', 0);
 			$redis->exists('restoreact') || $redis->set('restoreact', 0);
+			$redis->exists('playernamemenu') || $redis->set('playernamemenu', 0);
 			$redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', 0);
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
 			$redis->exists('mpdconfchange') || $redis->set('mpdconfchange', 0);
