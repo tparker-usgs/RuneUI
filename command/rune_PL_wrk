@@ -101,12 +101,15 @@ while (1) {
 					$mpdvolume = trim($retval[0]);
 					unset($retval);
 					if ($lastmpdvolume == $mpdvolume) {
-						// do nothing
+						// make sure the UI has the correct value
+						sysCmd('mpc volume '.$mpdvolume.);
 					} else if ($mpdvolume == 'n/a') {
 						// something wrong, mismatch between redis and mpd 'disabled' values
 						$retries_volume = 0;
 					} else {
-						$retval = sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+						// set the mpd volume, do a soft increase/decrease
+						$setvolume = round($lastmpdvolume-(($mpdvolume-$lastmpdvolume)/2), 0, PHP_ROUND_HALF_UP);
+						$retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 						$mpdvolume = trim($retval[0]);
 						unset($retval);
 					}
