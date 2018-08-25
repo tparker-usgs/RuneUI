@@ -82,6 +82,12 @@ function updateOS($redis) {
 			// set the patch level
 			$redis->set('patchlevel', 4);
 		}
+		if ($redis->get('patchlevel') < 5) {
+			// 5th update - make /etc/X11/xinit/start_chromium.sh executable
+			sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
+			// set the patch level
+			$redis->set('patchlevel', 5);
+		}
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xth update
