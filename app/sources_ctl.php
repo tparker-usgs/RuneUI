@@ -65,6 +65,8 @@ if (isset($_POST)) {
 waitSyWrk($redis, $jobID);
 // collect system status
 $template->db_autorebuild = $redis->get('usb_db_autorebuild');
+$template->hostname = $redis->get('hostname');
+
 
 $source = netMounts($redis, 'read');
 if($source !== true) { 

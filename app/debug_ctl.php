@@ -36,3 +36,5 @@
 $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'debug'));
 waitSyWrk($redis, $jobID);
 $template->debug = $redis->get('debugdata');
+$template->hostname = $redis->get('hostname');
+

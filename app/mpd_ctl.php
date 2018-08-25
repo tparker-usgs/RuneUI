@@ -92,6 +92,7 @@ $template->mpd['start_volume'] = $redis->get('mpd_start_volume');
 $template->mpd['mpd_autoplay'] = $redis->get('mpd_autoplay');
 $template->mpd['globalrandom'] = $redis->get('globalrandom');
 $template->mpd['addrandom'] = $redis->get('addrandom');
+$template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
 $template->mpd['crossfade'] = $crossfade[1];
 // check integrity of /etc/network/interfaces

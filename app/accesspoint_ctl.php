@@ -44,6 +44,7 @@ waitSyWrk($redis,$jobID);
 
 $template->enabled = $redis->hGet('AccessPoint', 'enabled');
 $template->accesspoint = $redis->hGetAll('AccessPoint');
+$template->hostname = $redis->get('hostname');
 $template->wifiavailable = (is_dir('/sys/class/net/wlan0')) ? 1 : 0;
 exec('iw phy phy0 info', $phyinfo);
 $template->wififeatureAP = (preg_match_all("/^.*\* AP$/m", implode("\n", $phyinfo))) ? 1 : 0;

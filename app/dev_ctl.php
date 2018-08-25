@@ -154,6 +154,7 @@ $template->playernamemenu = $redis->get('playernamemenu');
 $template->soxrairplayonoff = $redis->hGet('airplay', 'soxronoff');
 $template->metadataairplayonoff = $redis->hGet('airplay', 'metadataonoff');
 $template->artworkairplayonoff = $redis->hGet('airplay', 'artworkonoff');
+$template->hostname = $redis->get('hostname');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

@@ -78,6 +78,8 @@ waitSyWrk($redis,$jobID);
 
 $template->addprofile = 0;
 $template->stored = 0;
+$template->hostname = $redis->get('hostname');
+
 
 $template->nics = wrk_netconfig($redis, 'getnics');
 $template->wlan_autoconnect = $redis->Get('wlan_autoconnect');
