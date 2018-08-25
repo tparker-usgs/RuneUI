@@ -44,7 +44,7 @@ function updateOS($redis) {
 	// when a new image is created the patch level will always be set to zero, the following code should also be reviewed
 	if ($redis->get('buildversion') === 'janui-20180805') {
 		// only applicable for a specific build
-		if ($redis->get('patchlevel') < 1) {
+		if ($redis->get('patchlevel') == 0) {
 			// 1st update - copy a new version of the /etc/nginx/nginx-prod.conf from /var/www/app/config/defaults/nginx-prod.conf
 			if (file_exists('/var/www/app/config/defaults/nginx-prod.conf')) {
 				// the file will be delivered with a git pull, if it is there, use it
@@ -56,18 +56,18 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 1);
 			}
 		}
-		if ($redis->get('patchlevel') < 2) {
+		if ($redis->get('patchlevel') == 1) {
 			// 2nd update - copy a new version of the /etc/X11/xinit/start_chromium.sh from /var/www/app/config/defaults/start_chromium.sh
 			if (file_exists('/var/www/app/config/defaults/start_chromium.sh')) {
 				// the file will be delivered with a git pull, if it is there, use it
 				sysCmd('cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh');
-				sysCmd('chmod 644 /etc/X11/xinit/start_chromium.sh');
+				sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
 				// set the patch level
 				$redis->set('patchlevel', 2);
 			}
 		}
-		if ($redis->get('patchlevel') < 3) {
-			// 3rd update - copy a new version of the /etc/X11/xinit/start_chromium.sh from /var/www/app/config/defaults/start_chromium.sh
+		if ($redis->get('patchlevel') == 2) {
+			// 3rd update - edit /usr/lib/systemd/system/udevil.service to disable the required dependency on mpd
 			if (file_exists('/usr/lib/systemd/system/udevil.service')) {
 				// the file will be delivered with a git pull in /var/www/app/config/defaults for future use
 				// but use sed to modify the existing one
@@ -76,13 +76,13 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 3);
 			}
 		}
-		if ($redis->get('patchlevel') < 4) {
+		if ($redis->get('patchlevel') == 3) {
 			// 4th update - set new redis variable 'playernamemenu' to zero
 			$redis->set('playernamemenu', 0);
 			// set the patch level
 			$redis->set('patchlevel', 4);
 		}
-		if ($redis->get('patchlevel') < 5) {
+		if ($redis->get('patchlevel') == 4) {
 			// 5th update - make /etc/X11/xinit/start_chromium.sh executable
 			sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
 			// set the patch level
