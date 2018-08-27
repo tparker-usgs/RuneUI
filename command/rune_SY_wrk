@@ -757,7 +757,7 @@ while (1) {
 					if ($job->action == 'start') {
 						sysCmd('systemctl start rune_SSM_wrk');
 						sleep(2);
-						sysCmd('renice 20 $(pgrep -w rune_SSM_wrk) || renice 20 $(pgrep -w rune_SSM_wrk)');
+						sysCmd('renice 3 $(pgrep -w rune_SSM_wrk) || renice 3 $(pgrep -w rune_SSM_wrk)');
 					} else if ($job->action == 'stop') {
 						sysCmd('systemctl stop rune_SSM_wrk');
 					}
