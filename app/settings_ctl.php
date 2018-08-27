@@ -225,6 +225,17 @@ $template->spotify = $redis->hGetAll('spotify');
 $template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
+// if ($template->i2smodule == 'none') {
+	// $retval = sysCmd("grep -v '#.*=' /boot/config.txt | sed -n '/## RuneAudio I2S-Settings/,/#/p' | grep dtoverlay | cut -d '=' -f2");
+	// if (isset($retval[0])) {
+		// $retval[0] = trim($retval[0]);
+		// if (($retval[0] != 'none') && (!empty(retval[0]))) {
+			// $redis->set('i2smodule', $retval[0]);
+			// $template->i2smodule = $retval[0];
+		// }
+	// }
+	// unset($retval);
+// }
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');

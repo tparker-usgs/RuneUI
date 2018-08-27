@@ -39,9 +39,6 @@ rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 #
-# reset web ui title back to default
-sed -i  '/<title>/c\    <title>RuneAudio - RuneUI</title>' /srv/http/app/templates/header.php
-#
 # redis reset
 redis-cli del AccessPoint
 redis-cli del addo
@@ -56,6 +53,7 @@ redis-cli del nics
 redis-cli del samba
 redis-cli del spotify
 redis-cli del usbmounts
+redis-cli del debugdata
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""

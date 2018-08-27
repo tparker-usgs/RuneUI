@@ -133,8 +133,10 @@
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
 						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
+						<option value="allo-boss-dac-pcm512x-audio,slave" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio,slave'): ?> selected <?php endif ?>>Allo Boss DAC in slave mode</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
+						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
 						<option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
 						<option value="applepi-dac" <?php if($this->i2smodule === 'applepi-dac'): ?> selected <?php endif ?>>Apple Pi DAC</option>
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Addons</option>
@@ -178,6 +180,7 @@
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC Zero</option>
 						<option value="justboom-digi" <?php if($this->i2smodule === 'justboom-digi'): ?> selected <?php endif ?>>JustBoom Digi</option>
+						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Kali Reclocker with Allo Piano 2.1 DAC Plus</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>PIFi DAC Plus</option>
 						<option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
 						<option value="rra-digidac1-wm8741-audio" <?php if($this->i2smodule === 'rra-digidac1-wm8741-audio'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
@@ -217,8 +220,10 @@
                     <select class="selectpicker" name="i2smodule" data-style="btn-default btn-lg">
 						<option value="none" <?php if($this->i2smodule === 'none'): ?> selected <?php endif ?>>I&#178;S disabled (default)</option>
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
+						<option value="allo-boss-dac-pcm512x-audio,slave" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio,slave'): ?> selected <?php endif ?>>Allo Boss DAC in slave mode</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
+						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
 						<option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
 						<option value="applepi-dac" <?php if($this->i2smodule === 'applepi-dac'): ?> selected <?php endif ?>>Apple Pi DAC</option>
 						<option value="audioinjector-addons" <?php if($this->i2smodule === 'audioinjector-addons'): ?> selected <?php endif ?>>Audioinjector Addons</option>
@@ -262,6 +267,7 @@
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC HAT</option>
 						<option value="justboom-dac" <?php if($this->i2smodule === 'justboom-dac'): ?> selected <?php endif ?>>JustBoom DAC Zero</option>
 						<option value="justboom-digi" <?php if($this->i2smodule === 'justboom-digi'): ?> selected <?php endif ?>>JustBoom Digi</option>
+						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Kali Reclocker with Allo Piano 2.1 DAC Plus</option>
 						<option value="hifiberry-dacplus" <?php if($this->i2smodule === 'hifiberry-dacplus'): ?> selected <?php endif ?>>PIFi DAC Plus</option>
 						<option value="raspidac3" <?php if($this->i2smodule === 'raspidac3'): ?> selected <?php endif ?>>RaspiDAC3</option>
 						<option value="rra-digidac1-wm8741-audio" <?php if($this->i2smodule === 'rra-digidac1-wm8741-audio'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
