@@ -88,6 +88,17 @@ function updateOS($redis) {
 			// set the patch level
 			$redis->set('patchlevel', 5);
 		}
+		if ($redis->get('patchlevel') == 5) {
+			// 6th update - reload the acards database with /srv/http/db/redis_acards_details when it is updated
+			$count = sysCmd("grep format /srv/http/db/redis_acards_details | grep -i 'allo piano dac 2.1' | grep -c '*:32:*'");
+			if ($count > 0) {
+				// the new version of /srv/http/db/redis_acards_details has been delivered via a git pull so use it
+				sysCmd('redis-cli del acards');
+				sysCmd('php /srv/http/db/redis_acards_details');
+				// set the patch level
+				$redis->set('patchlevel', 6);
+			}
+		}
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xth update

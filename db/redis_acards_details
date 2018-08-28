@@ -53,7 +53,7 @@ $redis->hSet('acards_details', 'NuForce USB Audio', '{"sysname":"NuForce USB Aud
 $redis->hSet('acards_details', 'ODROID-DAC', '{"sysname":"ODROID-DAC","extlabel":"ODROID HifiShield (I&#178;S)","mixer_numid":"1","hwplatformid":"10","type":"i2s"}');
 $redis->hSet('acards_details', 'ODROID-HDMI', '{"sysname":"ODROID-HDMI","extlabel":"ODROID-C2 HDMI","mixer_numid":"1","hwplatformid":"10","type":"integrated"}');
 $redis->hSet('acards_details', 'PianoDAC', '{"sysname":"PianoDAC","extlabel":"ALLO Piano DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
-$redis->hSet('acards_details', 'PianoDACPlus', '{"sysname":"PianoDACPlus","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
+$redis->hSet('acards_details', 'PianoDACPlus', '{"sysname":"PianoDACPlus","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","card_option":"format\t\"*:32:*\"","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 $redis->hSet('acards_details', 'Rotel PC-USB', '{"sysname":"Rotel PC-USB","extlabel":"Rotel USB","type":"usb"}');
 $redis->hSet('acards_details', 'SA9023 USB Audio', '{"sysname":"SA9023 USB Audio","extlabel":"HiFimeDIY SABRE U2","mixer_numid":"4","mixer_control":"PCM","type":"usb"}');
 $redis->hSet('acards_details', 'UAC1 DAC', '{"sysname":"UAC1 DAC","extlabel":"ObjectiveDAC (ODAC)","mixer_numid":"3","mixer_control":"PCM","type":"usb"}');
@@ -85,7 +85,7 @@ $redis->hSet('acards_details', 'snd_rpi_wsp', '{"sysname":"snd_rpi_wsp","extlabe
 // These lines should only be switched on if something does NOT work, it it actually fixes something then please post the results in the forum
 //$redis->hSet('acards_details', 'snd_rpi_allo_boss_dac', '{"sysname":"snd_rpi_allo_boss_dac","extlabel":"ALLO Boss DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 //$redis->hSet('acards_details', 'snd_rpi_allo_piano_dac', '{"sysname":"snd_rpi_allo_piano_dac","extlabel":"ALLO Piano DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
-//$redis->hSet('acards_details', 'snd_rpi_allo_piano_dac_plus', '{"sysname":"snd_rpi_allo_piano_dac_plus","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
+//$redis->hSet('acards_details', 'snd_rpi_allo_piano_dac_plus', '{"sysname":"snd_rpi_allo_piano_dac_plus","card_option":"format\t\"*:32:*\"","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 //$redis->hSet('acards_details', 'snd_rpi_justboom_dac', '{"sysname":"snd_rpi_justboom_dac","extlabel":"JustBoom DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"01","type":"i2s"}');
 //$redis->hSet('acards_details', 'snd_rpi_dionaudio_loco', '{"sysname":"snd_rpi_dionaudio_loco","extlabel":"Dionaudio Loco DAC-AMP (I&#178;S)","hwplatformid":"01","type":"i2s"}');
 //$redis->hSet('acards_details', 'snd_rpi_dionaudio_loco_v2', '{"sysname":"snd_rpi_dionaudio_loco_v2","extlabel":"Dionaudio Loco V2 DAC-AMP (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"01","type":"i2s"}');
