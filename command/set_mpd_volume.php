@@ -80,7 +80,7 @@ if ($activePlayer === 'MPD') {
 					$initvolume = $mpdstartvolume;
 				} else {
 					// set the mpd volume, do a soft increase/decrease
-					$setvolume = round($mpdstartvolume-(($mpdstartvolume-$initvolume)/2), 0, PHP_ROUND_HALF_UP);
+					$setvolume = $initvolume-round((($initvolume-$mpdstartvolume)/2), 0, PHP_ROUND_HALF_UP);
 					$retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 					$mpdvolume = trim($retval[0]);
 					unset($retval);

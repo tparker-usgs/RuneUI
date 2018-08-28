@@ -108,7 +108,7 @@ while (1) {
 						$retries_volume = 0;
 					} else {
 						// set the mpd volume, do a soft increase/decrease
-						$setvolume = round($mpdvolume-(($mpdvolume-$lastmpdvolume)/2), 0, PHP_ROUND_HALF_UP);
+						$setvolume = $mpdvolume-round((($mpdvolume-$lastmpdvolume)/2), 0, PHP_ROUND_HALF_UP);
 						$retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
 						$mpdvolume = trim($retval[0]);
 						unset($retval);
