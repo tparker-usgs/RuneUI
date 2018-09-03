@@ -241,23 +241,40 @@
             </div>
             <div class="boxed-group">
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Install Rern's Addons</label>
+					<label class="col-sm-2 control-label">Install Rern's Addons Menu</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
 						<span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
-						Refresh the browser after installing, this should enable the Addons menu.<br>
-						You can remove the Rern's Addons menu via the Addons menu.<br>
-						The functionality within Rern's Addons menu is not supported by the RuneAudio team, but you can get help via the forum</span>
+						We had intended to pre-install Rern's very popular Addons Menu in this image.
+						However we discovered that by installing the Addons Menu a significant security risk was created effectively giving the http user (this is the user which owns the web-server) root privileges.
+						This is done by creating the /etc/sudoers.d/http file containing 'http ALL=NOPASSWD: ALL'. We feel it is inappropriate to distribute an image with this included.<br>
+						Nevertheless, you can choose, it's a trade-off between security and easy additional functionality. You could also choose to remove Rern's Addons Menu after installing the parts which you need.<br>
+						Parts of Rern's Addons are pre-installed in this image or are no longer applicable: Midori has been replaced by Chromium, MPD has been upgraded to V0.20.20, Backup Restore is available, Extend the Linux partition is available, Boot Logo is pre-installed on the Pi2 image, Samba has been upgraded to V4.8.1, Rune UI password is available and RuneUI Fonts (Extended Characters) is pre-installed.<br>
+						Refresh the browser after installing, this should enable the Addons Menu.<br>
+						You can remove the Rern's Addons Menu via the Addons Menu.<br>
+						The functionality within Rern's Addons Menu is not supported by the RuneAudio team, but you can get help via the forum</span>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Re-install Rern's Addons</label>
+					<label class="col-sm-2 control-label">Remove Rern's Addons Menu</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernreinstall" id="syscmd-rernreinstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">If Rern's Addons menu stops working, or the install command above fails, or you cannot de-install it; this may fix it</span>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernremove" id="syscmd-rernremove" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<span class="help-block">If Rern's Addons Menu stops working, or the install command fails, or you cannot de-install it; this may fix it</span>
 					</div>
 				</div>
 			</div>
+            <div class="boxed-group">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Extend the Linux Partition</label>
+					<div class="col-sm-10">
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="extendpartition" id="syscmd-extendpartition" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<span class="help-block">This RuneAudio image is designed to fit on a 4Gb Micro-SD card even though most SD-cards are now 16Gb or greater.
+						In most cases RuneAudio will work fine without extending the Linux Partition.
+						If you want to utilise the extra available space on the Micro-SD card you can use this option to extend the Linux Partition to its maximum size.
+						This is useful if you wish add extra Arch Linux packages or to make use the local storage option. Music files in local storage can easily be managed with the Samba options via your PC.</span>
+					</div>
+				</div>
+            </div>
         </fieldset>
     </form>
     <form class="form-horizontal" method="post">
@@ -293,11 +310,11 @@
         <fieldset>
             <legend>Notes</legend>
             <div class="boxed-group">
-				<p>Just some notes concerning features and options</p>
+				<p>Some notes concerning features and options</p>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Patched Linux kernel for audio output up to 384k</label>
 					<div class="col-sm-10">
-						<span class="help-block">This version of RuneAudio has a patched kernel which allows alsa to stream at a sample-rate up to 384k.
+						<span class="help-block">This version of RuneAudio incluses a patched kernel which allows alsa to stream at a sample-rate up to 384k.
 						This is twice as high as the normal maximum rate of 192k.
 						Where necessary the parameters for selecting and setting up hardware audio cards have been adapted to give the best performance.<br>
 						If you manually update the kernel, not only will you lose the 384k feature but some of the setting for hardware audio cards will no longer be optimal</span>
@@ -306,7 +323,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Hard-disk drive monitoring</label>
 					<div class="col-sm-10">
-						<span class="help-block">Only when you have a hard-disk drive attached to Rune:<br>
+						<span class="help-block">Only applicable when you have a hard-disk drive attached to RuneAudio:<br>
 						Hard disk health-check monitoring will automatically be carried out using 'smartmontools'.<br>
 						Normally you will not notice that this is taking place. In the debug listing there is a status display.<br>
 						Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI</span>
@@ -319,8 +336,8 @@
 						This results in the bit-rate not being displayed in the player UI.<br>
 						A solution for this problem has been implemented but not fully included in this version in order to minimise the image size.
 						If missing bit-rates is a problem for you, installing the package 'mediainfo' may provide a solution. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
-						You can find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
-						Then you can use the following command to install the 'mediainfo' package: <strong>pacman -Sy mediainfo</strong></span>
+						See the Extend the Linux Partition System Command above. You can also find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
+						You can then use the following command to install the 'mediainfo' package: <strong>pacman -Sy mediainfo</strong></span>
 					</div>
 				</div>
 			</div>

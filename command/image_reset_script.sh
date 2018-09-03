@@ -26,6 +26,20 @@ systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd sha
 systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli bluetooth
 #
+# remove rerns addons (if installed)
+systemctl stop addons
+systemctl disable addons
+rm -f /etc/systemd/system/addons.service
+rm -f /etc/sudoers.d/http
+rm -f /etc/sudoers.d/http-backup
+rm -fr /home/rern
+/usr/local/bin/uninstall_addo.sh
+rm -f ./install.sh
+rm -f /usr/local/bin/uninstall_addo.sh
+redis-cli del addons
+redis-cli del addo
+
+#
 # remove user files and logs
 rm -f /var/lib/mpd/mpd.db
 rm -f /var/lib/mpd/mpdstate
@@ -41,8 +55,6 @@ rm -f /etc/sudoers.d/*
 #
 # redis reset
 redis-cli del AccessPoint
-redis-cli del addo
-redis-cli del addons
 redis-cli del airplay
 redis-cli del dirble
 redis-cli del dlna

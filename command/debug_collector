@@ -255,8 +255,12 @@ function debug_data($redis)
     $command = sysCmd('iwconfig');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### Network wifi Access Point (redis-cli hgetall AccessPoint) ######\n";
+    $output .= "###### Network WiFi Access Point (redis-cli hgetall AccessPoint) ######\n";
 	$command = sysCmd('redis-cli hgetall AccessPoint');
+	$output .= implode("\n", $command)."\n\n";
+    unset($command);
+    $output .= "###### Rern's Addons (redis-cli hgetall addons) ######\n";
+	$command = sysCmd('redis-cli hgetall addons');
 	$output .= implode("\n", $command)."\n\n";
     unset($command);
     // $output .= "###### Network wifi site-scan (iwlist scan) ######\n";
