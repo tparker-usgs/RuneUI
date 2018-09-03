@@ -25,9 +25,12 @@ Previous changes for 0.1-0.4b are not inclued.
 •	Replaced ntp (ntpd) with chrony (chronyd), a user defined NTP time server is now saved and used.
 •	NAS connections can now use a ‘<hostname>.local’ name instead of a IP address. Fixed IP addresses are no longer a requirement for file servers. Added "vers=1.0" as default to the NAS CIFS mount flags.
 •	Backup & restore (based on Rern's addon), included.
-•	Rern’s Addons can now be installed from the Dev UI.
+•	Rern’s Addons can now be installed and removed from the Dev UI.
 •	Rern’s Addon 'RuneUI Fonts - Extended Characters' is pre-installed.
+•	The player name is included in the browser tab and can optionally be included in 'Menu' text. The control to switch ON/OFF is included in the /dev UI.
+•	Extend the Linux Partition is now an option in the /dev UI.
 •	All UI checked and updated. Extra notes added where required. Specifically, credits UI updated, Dev UI notes added for mediainfo, 384k kernel and smartmontools.
+•	No sound/hissing problems with Allo Piano 2.1 with Kali Reclocker fixed (32 bit is now forced by default).
 
 Known problems:
 •	Spotify has stopped working (see forum for details).
@@ -35,3 +38,5 @@ Known problems:
 •	Alert messaging is not working correctly.
 •	Dim the volume control in UI when in Airplay mode is not working. There are also other screen refresh issues.
 •	Using UPnP/DLNA when Global Random (ashuffle) is enabled will not work. This is documented in the UI.
+•	Rern's Addons Menu no longer works. The latest changes to the install script cause problems.
+•	The library navigation based on Artist, Composer and Genre do not work correctly. This functionality is unchanged in 0.5b, the same problems are also in 0.4b. It occurs when the metadata album name differs from the directory name containing the song files from the album.
