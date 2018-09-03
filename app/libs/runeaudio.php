@@ -3600,10 +3600,13 @@ function wrk_sysAcl()
     sysCmd('chown -R http.http /srv/http/');
     sysCmd('find /srv/http/ -type f -exec chmod 644 {} \;');
     sysCmd('find /srv/http/ -type d -exec chmod 755 {} \;');
+	sysCmd('find /etc -name *.conf -exec chmod 644 {} \;');
+	sysCmd('find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;');
     sysCmd('chmod 777 /run');
     sysCmd('chmod 755 /srv/http/command/*');
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');
+    sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
     sysCmd('chown -R mpd.audio /var/lib/mpd');
 }
 

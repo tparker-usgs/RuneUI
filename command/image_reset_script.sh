@@ -99,7 +99,9 @@ cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
+rm -f /etc/nginx/nginx.conf
 cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
+ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
 cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
 cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
@@ -145,10 +147,13 @@ rm -rf /mnt/MPD/NAS/*
 chown -R http.http /srv/http/
 find /srv/http/ -type f -exec chmod 644 {} \;
 find /srv/http/ -type d -exec chmod 755 {} \;
+find /etc -name *.conf -exec chmod 644 {} \;
+find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;
 chmod 777 /run
 chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
+chmod 755 /etc/X11/xinit/start_chromium.sh
 chown -R mpd.audio /var/lib/mpd
 #
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
