@@ -26,7 +26,7 @@ systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd sha
 systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli bluetooth
 #
-# remove rerns addons (if installed)
+# remove rerns addons menu (if installed)
 systemctl stop addons
 systemctl disable addons
 rm -f /etc/systemd/system/addons.service
@@ -38,7 +38,6 @@ rm -f ./install.sh
 rm -f /usr/local/bin/uninstall_addo.sh
 redis-cli del addons
 redis-cli del addo
-
 #
 # remove user files and logs
 rm -f /var/lib/mpd/mpd.db
@@ -161,6 +160,7 @@ systemctl daemon-reload
 #
 #
 if [ "$1" == "full" ]; then
+	redis-cli save
 	echo "Zero filling the file system"
 	# zero fill the file system
 	cd /boot
