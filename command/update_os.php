@@ -44,61 +44,37 @@ function updateOS($redis) {
 	// when a new image is created the patch level will always be set to zero, the following code should also be reviewed
 	if ($redis->get('buildversion') === 'janui-20180805') {
 		// only applicable for a specific build
+		// final update for this build - move to a new build ID
+		$count = sysCmd("cat /srv/http/db/redis_datastore_setup | grep -c -i 'janui-20180805'");
+		if ($count == 0) {
+			// the new version of /srv/http/db/redis_datastore_setup has been delivered via a git pull so use it
+			// carry out/repeat all previous 'janui-20180805' updates first
+			sysCmd('cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf');
+			sysCmd('rm -f /etc/nginx/nginx.conf');
+			sysCmd('ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf');
+			sysCmd('cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh');
+			sysCmd('cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service');
+			sysCmd('cp /var/www/app/config/defaults/50x.html /etc/nginx/html/50x.html');
+			$redis->del('acards');
+			sysCmd('php -f /srv/http/db/redis_acards_details');
+			// check the variables in new version of redis_datastore_setup
+			sysCmd('php -f /srv/http/db/redis_datastore_setup check');
+			// set file protections and ownership
+			wrk_sysAcl();
+			// set the patch level to 0 and set the next valid build version
+			$redis->set('patchlevel', 0);
+			$redis->set('buildversion', 'janui-20180903');
+		}
+	}
+	if ($redis->get('buildversion') === 'janui-20180903') {
+		// only applicable for a specific build
 		if ($redis->get('patchlevel') == 0) {
-			// 1st update - copy a new version of the /etc/nginx/nginx-prod.conf from /var/www/app/config/defaults/nginx-prod.conf
-			if (file_exists('/var/www/app/config/defaults/nginx-prod.conf')) {
-				// the file will be delivered with a git pull, if it is there, use it
-				sysCmd('cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf');
-				sysCmd('chmod 644 /etc/nginx/nginx-prod.conf');
-				sysCmd('rm -f /etc/nginx/nginx.conf');
-				sysCmd('ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf');
+			// 1st update - description
+			// tests and actions go here
 				// set the patch level
-				$redis->set('patchlevel', 1);
-			}
+				//$redis->set('patchlevel', 1);
 		}
-		if ($redis->get('patchlevel') == 1) {
-			// 2nd update - copy a new version of the /etc/X11/xinit/start_chromium.sh from /var/www/app/config/defaults/start_chromium.sh
-			if (file_exists('/var/www/app/config/defaults/start_chromium.sh')) {
-				// the file will be delivered with a git pull, if it is there, use it
-				sysCmd('cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh');
-				sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
-				// set the patch level
-				$redis->set('patchlevel', 2);
-			}
-		}
-		if ($redis->get('patchlevel') == 2) {
-			// 3rd update - edit /usr/lib/systemd/system/udevil.service to disable the required dependency on mpd
-			if (file_exists('/usr/lib/systemd/system/udevil.service')) {
-				// the file will be delivered with a git pull in /var/www/app/config/defaults for future use
-				// but use sed to modify the existing one
-				syscmd('sed -i "/Requires=mpd.service/c\#Requires=mpd.service" /usr/lib/systemd/system/udevil.service');
-				// set the patch level
-				$redis->set('patchlevel', 3);
-			}
-		}
-		if ($redis->get('patchlevel') == 3) {
-			// 4th update - set new redis variable 'playernamemenu' to zero
-			$redis->set('playernamemenu', 0);
-			// set the patch level
-			$redis->set('patchlevel', 4);
-		}
-		if ($redis->get('patchlevel') == 4) {
-			// 5th update - make /etc/X11/xinit/start_chromium.sh executable
-			sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
-			// set the patch level
-			$redis->set('patchlevel', 5);
-		}
-		if ($redis->get('patchlevel') == 5) {
-			// 6th update - reload the acards database with /srv/http/db/redis_acards_details when it is updated
-			$count = sysCmd("grep format /srv/http/db/redis_acards_details | grep -i 'allo piano dac 2.1' | grep -c '*:32:*'");
-			if ($count > 0) {
-				// the new version of /srv/http/db/redis_acards_details has been delivered via a git pull so use it
-				sysCmd('redis-cli del acards');
-				sysCmd('php /srv/http/db/redis_acards_details');
-				// set the patch level
-				$redis->set('patchlevel', 6);
-			}
-		}
+		//
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xth update
