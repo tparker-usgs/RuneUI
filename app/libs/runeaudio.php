@@ -2404,14 +2404,15 @@ if ($action === 'reset') {
 				$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
 			} else {
 				// MPD version is lower than 0.19
-				$count = 0;
+				$count[0] = 0;
 			}
-			if ($count > 0) {
+			if ($count[0] > 0) {
 				// SoXr has been built with MPD, so use it
 				$redis->hSet('mpdconf', 'soxr', 'very high');
 			} else {
 				$redis->hDel('mpdconf', 'soxr');
 			}
+			unset($count);
 			// set mpd zeroconfig name to hostname
             $redis->hSet('mpdconf', 'zeroconf_name', $redis->get('hostname'));
             wrk_mpdconf($redis, 'writecfg');

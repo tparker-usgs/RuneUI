@@ -46,7 +46,7 @@ function updateOS($redis) {
 		// only applicable for a specific build
 		// final update for this build - move to a new build ID
 		$count = sysCmd("cat /srv/http/db/redis_datastore_setup | grep -c -i 'janui-20180805'");
-		if ($count == 0) {
+		if ($count[0] == 0) {
 			// the new version of /srv/http/db/redis_datastore_setup has been delivered via a git pull so use it
 			// carry out/repeat all previous 'janui-20180805' updates first
 			sysCmd('cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf');
@@ -65,15 +65,16 @@ function updateOS($redis) {
 			$redis->set('patchlevel', 0);
 			$redis->set('buildversion', 'janui-20180903');
 		}
+		unset($count);
 	}
-	if ($redis->get('buildversion') === 'janui-20180903') {
+	//if ($redis->get('buildversion') === 'janui-20180903') {
 		// only applicable for a specific build
-		if ($redis->get('patchlevel') == 0) {
+		//if ($redis->get('patchlevel') == 0) {
 			// 1st update - description
 			// tests and actions go here
 				// set the patch level
 				//$redis->set('patchlevel', 1);
-		}
+		//}
 		//
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
@@ -82,5 +83,5 @@ function updateOS($redis) {
 			// set the patch level
 			//$redis->set('patchlevel', x);
 		//}
-	}
+	//}
 }
