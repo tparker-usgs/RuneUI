@@ -3602,6 +3602,7 @@ function wrk_sysAcl()
     sysCmd('find /srv/http/ -type d -exec chmod 755 {} \;');
 	sysCmd('find /etc -name *.conf -exec chmod 644 {} \;');
 	sysCmd('find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;');
+	sysCmd('chmod 644 /etc/nginx/html/50x.html');
     sysCmd('chmod 777 /run');
     sysCmd('chmod 755 /srv/http/command/*');
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
