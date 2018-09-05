@@ -603,7 +603,9 @@
 							</span> 
 							<span id="backup-file"></span>
 							<span class="help-block">Restore a previously exported backup.<br>
-							<strong>The system will reboot</strong> after restoring the backup</span>
+							<strong>The system will reboot</strong> after restoring the backup.<br>
+							<strong>Tip:</strong> Make a new backup after checking and correcting each restore.
+							Otherwise information concerning any new feature will be missing and the feature will be automatically switched off</span>
 						</p>
 						<button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
 					</div>
