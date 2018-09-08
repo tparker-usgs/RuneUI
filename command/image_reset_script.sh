@@ -22,7 +22,7 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd ntpd bluetooth
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth
 systemctl enable avahi-daemon haveged nginx php-fpm redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk upmpdcli bluetooth
 #

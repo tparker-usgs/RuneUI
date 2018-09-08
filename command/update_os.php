@@ -59,6 +59,7 @@ function updateOS($redis) {
 			sysCmd('php -f /srv/http/db/redis_acards_details');
 			// check the variables in new version of redis_datastore_setup
 			sysCmd('php -f /srv/http/db/redis_datastore_setup check');
+			sysCmd('systemctl disable php-fpm');
 			// set file protections and ownership
 			wrk_sysAcl();
 			// set the patch level to 0 and set the next valid build version

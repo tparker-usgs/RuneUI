@@ -942,7 +942,7 @@ while (1) {
 					}
 					$file = '/srv/http/app/templates/header.php';
 					$newArray = wrk_replaceTextLine($file, '', '<!--- playernamemenu -->', $newline);
-					// Commit changes to //srv/http/app/templates/header.php
+					// Commit changes to /srv/http/app/templates/header.php
 					$fp = fopen($file, 'w');
 					fwrite($fp, implode("", $newArray));
 					fclose($fp);

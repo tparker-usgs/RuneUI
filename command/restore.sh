@@ -15,9 +15,18 @@ rm $1
 sleep 5
 /srv/http/db/redis_datastore_setup check
 set +e
+count=$( cat /srv/http/app/templates/header.php | grep -c '$this->hostname' )
+if [ $count -gt 2 ]
+then
+	redis-cli set playernamemenu '1'
+else
+	redis-cli set playernamemenu '0'
+fi
 redis-cli set restoreact '0'
 mpc update Webradio
+sleep 5
 redis-cli shutdown save
+sleep 5
 mpd --kill
 umount -aft nfs
 umount -aft cifs
