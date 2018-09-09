@@ -151,6 +151,13 @@ if ($playerid_db === '') {
         // runelog("system ENV files check and replace",'');
         // wrk_sysEnvCheck($arch,1);
     // set HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
+	// check that MPD only has one output enabled
+	$count = sysCmd('mpc outputs | grep -c -i enabled');
+	$countmpdenabled = $count[0];
+	unset($count);
+	if ($countmpdenabled != 1) {
+		sysCmd("mpc enable only 1");
+	}
     wrk_avahiconfig($redis, strtolower(trim($redis->get('hostname'))));
     runelog('--- RUNEAUDIO FIRST RUN PROCESS');
     // invoke rune_SY_wrk respawn
@@ -187,6 +194,13 @@ if ($playerid_db === '') {
     //sendMpdCommand($mpd,'update');
 	sysCmd('mpc update');
     sleep(1);
+	// check that MPD only has one output enabled
+	$count = sysCmd('mpc outputs | grep -c -i enabled');
+	$countmpdenabled = $count[0];
+	unset($count);
+	if ($countmpdenabled != 1) {
+		sysCmd("mpc enable only 1");
+	}
     runelog('--- MPD VERSION HAS CHANGED PROCESS');
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl daemon-reload');
@@ -257,6 +271,27 @@ if ($playerid_db === '') {
 		}
 		unset($retval);
 		// ashuffle gets started automatically
+	}
+
+	// check that MPD only has one output enabled
+	// it is possible that an output pipe has been defined which is always active, so be careful
+	$count = sysCmd('mpc outputs | grep -c -i enabled');
+	$countmpdenabled = $count[0];
+	unset($count);
+	if ($countmpdenabled != 1) {
+		$count = sysCmd('mpc outputs | grep -c -i output');
+		$countmpdoutput = $count[0];
+		unset($count);
+		if ($countmpdenabled == $countmpdoutput) {
+			// only enable/disable them when all are enabled
+			// otherwise assume that the settings are correct
+			if ($countmpdoutput == 2) {
+				sysCmd("mpc disable 'bcm2835 ALSA_1'");
+			} else {
+				sysCmd("mpc disable 'bcm2835 ALSA_1'");
+				sysCmd("mpc disable 'bcm2835 ALSA_2'");
+			}
+		}
 	}
 
 	// check ENV files
