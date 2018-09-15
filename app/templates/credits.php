@@ -3,12 +3,13 @@
     <div class="row">
         <div class="col-md-8">
             <div class="alert alert-info">
-                Release version: <strong id="release-version"><?=$this->release ?></strong> (<a href="http://www.runeaudio.com/changelog/" target="_blank">build: <?=$this->buildversion ?></a>)
+                Release version: <strong id="release-version"><?=$this->release ?></strong> (<a href="http://www.runeaudio.com/forum/runeaudio-0-5-beta-for-all-raspberry-pi-models-t6532.html#p25819" target="_blank">build: <?=$this->buildversion ?></a>)
             </div>
             <h2>RuneAudio team</h2><h3>Version 0.5</h3>
             <div class="alert alert-info">
             <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio support and Chromium local browser</span><br>
-            <a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>Janui</strong></a> <span class="help-block">- RuneUI - Shairport sync with metadata, random play and autostart optimisation, Samba optimisation and 101 bugfixes</span><br>
+            <a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>Janui</strong></a> <span class="help-block">- RuneUI - Shairport sync with metadata, random play and autostart rework, Samba optimisation and 101 bugfixes</span><br>
+			<span class="help-block"><i>A special thanks to our test team: englishtim, ianhaynes, nic, R101, Stephane & tml3nr</i></span><br>
             </div>
             <h3>Version 0.4</h3>
             <div class="alert alert-info">
