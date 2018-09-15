@@ -44,7 +44,7 @@ function updateOS($redis) {
 	// when a new image is created the patch level will always be set to zero, the following code should also be reviewed
 	if ($redis->get('buildversion') === 'janui-20180805') {
 		// only applicable for a specific build
-		// final update for this build - move to a new build ID
+		// final update for this build - move to a new buildversion
 		$count = sysCmd("cat /srv/http/db/redis_datastore_setup | grep -c -i 'janui-20180805'");
 		if ($count[0] == 0) {
 			// the new version of /srv/http/db/redis_datastore_setup has been delivered via a git pull so use it
@@ -68,14 +68,17 @@ function updateOS($redis) {
 		}
 		unset($count);
 	}
-	//if ($redis->get('buildversion') === 'janui-20180903') {
+	if ($redis->get('buildversion') === 'janui-20180903') {
 		// only applicable for a specific build
-		//if ($redis->get('patchlevel') == 0) {
-			// 1st update - description
-			// tests and actions go here
-				// set the patch level
-				//$redis->set('patchlevel', 1);
-		//}
+		if ($redis->get('patchlevel') == 0) {
+			// 1st update - modify /etc/chrony.conf new version of chrony.conf delivered via git pull
+			// disable initstepslew, this is already done due to the iburst parameter on the servers and pool in combination with makestep
+			sysCmd("sed -i 's/^initstepslew.*/! initstepslew 30 0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org/' /etc/chrony.conf");
+			// enable logging of time changes of over 20 seconds
+			sysCmd("sed -i 's/^! logchange.*/logchange 20/' /etc/chrony.conf");
+			// set the patch level
+			$redis->set('patchlevel', 1);
+		}
 		//
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
@@ -84,5 +87,5 @@ function updateOS($redis) {
 			// set the patch level
 			//$redis->set('patchlevel', x);
 		//}
-	//}
+	}
 }
