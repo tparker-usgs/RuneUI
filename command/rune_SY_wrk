@@ -220,7 +220,7 @@ if ($playerid_db === '') {
 
 	// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
 	// normally by this point time has been set, if not there is probably no internet connection
-	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while it is running
+	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while they are running
 	// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
 	sysCmd('chronyc waitsync 12');
 
@@ -275,21 +275,36 @@ if ($playerid_db === '') {
 
 	// check that MPD only has one output enabled
 	// it is possible that an output pipe has been defined which is always active, so be careful
-	$count = sysCmd('mpc outputs | grep -c -i enabled');
-	$countmpdenabled = $count[0];
-	unset($count);
+	$retval = sysCmd('mpc outputs | grep -c -i enabled');
+	$countmpdenabled = $retval[0];
+	unset($retval);
 	if ($countmpdenabled != 1) {
-		$count = sysCmd('mpc outputs | grep -c -i output');
-		$countmpdoutput = $count[0];
-		unset($count);
-		if ($countmpdenabled == $countmpdoutput) {
-			// only enable/disable them when all are enabled
-			// otherwise assume that the settings are correct
-			if ($countmpdoutput == 2) {
-				sysCmd("mpc disable 'bcm2835 ALSA_1'");
-			} else {
-				sysCmd("mpc disable 'bcm2835 ALSA_1'");
-				sysCmd("mpc disable 'bcm2835 ALSA_2'");
+		// none or more than one outputs enabled
+		$retval = sysCmd('mpc outputs | grep -c -i output');
+		$countmpdoutput = $retval[0];
+		unset($retval);
+		if ($countmpdoutput == 1) {
+			// only one output device so enable it
+			sysCmd("mpc enable only 1");
+		} else {
+			// more than one output devices
+			if ($countmpdenabled == 0) {
+				// no output enabled and there are more than one, enable all except the 3,5mm output (this may not exit, that's OK)
+				// this will enable a pipe if one is defined
+				sysCmd("mpc disable only 'bcm2835 ALSA_1'");
+				// do as if all outputs are (were) enabled
+				$countmpdenabled = $countmpdoutput;
+			}
+			if ($countmpdenabled == $countmpdoutput) {
+				// all outputs are (were) enabled
+				if ($countmpdoutput == 2) {
+					// two outputs enabled so disable the the 3,5mm output (this may not exit, that's OK)
+					sysCmd("mpc disable 'bcm2835 ALSA_1'");
+				} else {
+					// more than 2 outputs enabled, disable some (these may not exit, that's OK)
+					sysCmd("mpc disable 'bcm2835 ALSA_1'");
+					sysCmd("mpc disable 'bcm2835 ALSA_2'");
+				}
 			}
 		}
 	}
