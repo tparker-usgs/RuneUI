@@ -2618,17 +2618,23 @@ if ($action === 'reset') {
                 } else {
                     runelog('mpd.conf advanced mode RESET STATE');
                 }
+				// many users need to add an extra output device to MPD
+				// this can be specified in the file /home/your-extra-mpd.conf
+				// see the example file: /var/www/app/config/defaults/your-extra-mpd.conf
+				if (file_exists('/home/your-extra-mpd.conf')) {
+					$output .= file_get_contents('/home/your-extra-mpd.conf');
+				}
                 // write mpd.conf file to /tmp location
                 $fh = fopen('/tmp/mpd.conf', 'w');
                 fwrite($fh, $output);
                 fclose($fh);
-				// check that the conf file has changed
+				// check whether the mpd.conf file has changed
 				if ($redis->get('mpdconfhash') == md5_file('/tmp/mpd.conf')) {
 					// nothing has changed, set mpdconfchange off
 					$redis->set('mpdconfchange', 0);
 					syscmd('rm -f /tmp/mpd.conf');
 				} else {
-					// mpd configuration has changed, set mpdconfchange on
+					// mpd configuration has changed, set mpdconfchange on, to indicate that MPD needs to be restarted
 					$redis->set('mpdconfchange', 1);
 					syscmd('cp /tmp/mpd.conf /etc/mpd.conf');
 					syscmd('rm -f /tmp/mpd.conf');
