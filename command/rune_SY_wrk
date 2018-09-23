@@ -1449,14 +1449,48 @@ while (1) {
 							// for each connected drive
 							$drive = trim($drive);
 							if ($drive != "") {
-								$command = "smartctl ".$drive." | grep -E 'Model:|Capacity:|-health self-'";
+								$command = "smartctl ".$drive." | grep -i -E 'Model:|Capacity:|-health self-|SMART support is'";
 								$self_check = sysCmd($command);
-								// the self check variable has 3 lines the third line must contain the word 'PASSED' or 'OK'
-								if ((strpos(' '.$self_check[2], 'OK') === false) && (strpos(' '.$self_check[2], 'PASSED') === false)) {
-									// there is a disk error, set the check frequency to 1,5 minutes and notify the UI
-									ui_notify('Disk errors - Action required', implode("\n", $self_check));
-									// set the disk check frquency to 1,5 minutes
-									$smartctl_check_minutes = 2;
+								// the self_check variable now has 5 lines the 1st line must contain the word 'Available' - 'SMART support is: Available...'
+								If (!empty($self_check)) {
+									$smart_avalable = false;
+									$smart_enabled = false;
+									$smart_result = false;
+									$smart_good = false;
+									foreach ($self_check as $self_check_line) {
+										$self_check_line = trim($self_check_line);
+										if ($self_check_line != "") {
+											// now looking for the lines
+											// 'SMART support is: Available...' and
+											// 'SMART support is: Enabled'
+											if (strpos(' '.$self_check_line, 'SMART support is')) {
+												if (strpos(' '.$self_check_line, 'Available')) {
+													$smart_avalable = true;
+												} else if (strpos(' '.$self_check_line, 'Enabled')) {
+													$smart_enabled = true;
+												}
+											}
+											// now looking for the line containing something like this:
+											// 'SMART overall-health self-assessment test result: PASSED'
+											// actually looking for '-health self-' together with 'OK' or 'PASSED'
+											if (strpos(' '.$self_check_line, '-health self-')) {
+												// there is a result
+												$smart_result = true;
+												if (strpos(' '.$self_check_line, 'OK')) {
+													$smart_good = true;
+												} else if (strpos(' '.$self_check_line, 'PASSED')) {
+													$smart_good = true;
+												}
+											}
+										}
+									}
+									if ($smart_avalable && $smart_enabled && $smart_result && !$smart_good) {
+										// SMART is available, enabled, there is a result and it is not good
+										// display the information
+										ui_notify('Disk errors - Action required', implode("\n", $self_check));
+										// set the disk check frequency to 1.5 minutes
+										$smartctl_check_minutes = 2;
+									}
 								}
 							}
 							unset($self_check);
