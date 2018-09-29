@@ -168,7 +168,9 @@
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,auto_mute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,auto_mute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with auto mute</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with unmute</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>
@@ -255,7 +257,9 @@
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,auto_mute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,auto_mute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with auto mute</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with unmute</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>
