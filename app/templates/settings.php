@@ -168,7 +168,9 @@
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,auto_mute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,auto_mute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with auto mute</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with unmute</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>
@@ -189,7 +191,7 @@
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, where you will need to select the output interface to make it work.<br>
 					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
@@ -255,7 +257,9 @@
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi</option>
 						<option value="hifiberry-digi" <?php if($this->i2smodule === 'hifiberry-digi'): ?> selected <?php endif ?>>HiFIBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro" <?php if($this->i2smodule === 'hifiberry-digi-pro'): ?> selected <?php endif ?>>HiFIBerry Digi Pro</option>
-						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO Amp</option>
+						<option value="iqaudio-dacplus,auto_mute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,auto_mute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with auto mute</option>
+						<option value="iqaudio-dacplus,unmute_amp" <?php if($this->i2smodule === 'iqaudio-dacplus,unmute_amp'): ?> selected <?php endif ?>>IQaudIO Amp - with unmute</option>
 						<option value="iqaudio-dac" <?php if($this->i2smodule === 'iqaudio-dac'): ?> selected <?php endif ?>>IQaudIO DAC</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Plus</option>
 						<option value="iqaudio-dacplus" <?php if($this->i2smodule === 'iqaudio-dacplus'): ?> selected <?php endif ?>>IQaudIO DAC Pro</option>
@@ -276,8 +280,8 @@
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
-					After selecting your hardware the 'best choice' driver will be used. Because some drivers are used for several different hardware types it is possible that the hardware which is displayed is not the one which you selected</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, where you will need to select the output interface to make it work.<br>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
             <div class="form-group">

@@ -2618,17 +2618,23 @@ if ($action === 'reset') {
                 } else {
                     runelog('mpd.conf advanced mode RESET STATE');
                 }
+				// many users need to add an extra output device to MPD
+				// this can be specified in the file /home/your-extra-mpd.conf
+				// see the example file: /var/www/app/config/defaults/your-extra-mpd.conf
+				if (file_exists('/home/your-extra-mpd.conf')) {
+					$output .= file_get_contents('/home/your-extra-mpd.conf');
+				}
                 // write mpd.conf file to /tmp location
                 $fh = fopen('/tmp/mpd.conf', 'w');
                 fwrite($fh, $output);
                 fclose($fh);
-				// check that the conf file has changed
+				// check whether the mpd.conf file has changed
 				if ($redis->get('mpdconfhash') == md5_file('/tmp/mpd.conf')) {
 					// nothing has changed, set mpdconfchange off
 					$redis->set('mpdconfchange', 0);
 					syscmd('rm -f /tmp/mpd.conf');
 				} else {
-					// mpd configuration has changed, set mpdconfchange on
+					// mpd configuration has changed, set mpdconfchange on, to indicate that MPD needs to be restarted
 					$redis->set('mpdconfchange', 1);
 					syscmd('cp /tmp/mpd.conf /etc/mpd.conf');
 					syscmd('rm -f /tmp/mpd.conf');
@@ -3004,39 +3010,91 @@ function wrk_sourcemount($redis, $action, $id = null)
             $mp = $redis->hGetAll('mount_'.$id);
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-            if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
-            // smb/cifs mount
-            $auth = 'guest';
-                if (!empty($mp['username'])) {
-                    $auth = "username=".$mp['username'].",password=".$mp['password'];
-                }
-                if ($mp['type'] === 'cifs') {
-                    $mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",sec=ntlm,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-                } else {
-                    $mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",nounix,sec=ntlmssp,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-                }
-            } elseif ($mp['type'] === 'nfs') {
+            if ($mp['type'] === 'nfs') {
                 // nfs mount
                 $mountstr = "mount -t nfs -o soft,retry=0,actimeo=1,retrans=2,timeo=50,nofsc,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
                 // $mountstr = "mount -t nfs -o soft,retry=1,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
+            if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
+				// smb/cifs mount
+				$auth = 'guest';
+                if (!empty($mp['username'])) {
+                    $auth = "username=".$mp['username'].",password=".$mp['password'];
+                }
+				if ($mp['options'] === '') {
+					// no mount options given by the user, set to defaults and latest cifs version and try
+					// valid cifs versions
+					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
+					$mp['options'] = 'cache=none,noserverino,ro,vers=3.1.1';
+				}
+				if ($mp['type'] === 'cifs') {
+					$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",sec=ntlm,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+				} else {
+					$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",nounix,sec=ntlmssp,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+				}
+			}
             // debug
             runelog('mount string', $mountstr);
             $sysoutput = sysCmd($mountstr);
-            // -- REWORK NEEDED --
             runelog('system response',var_dump($sysoutput));
             if (empty($sysoutput)) {
+				// mounted OK
                 if (!empty($mp['error'])) {
-                $mp['error'] = '';
-                $redis->hMSet('mount_'.$id, $mp);
+					$mp['error'] = '';
                 }
+				// save the mount information
+				$redis->hMSet('mount_'.$id, $mp);
                 $return = 1;
             } else {
-                if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+				// mount failed
                 $mp['error'] = implode("\n", $sysoutput);
                 $redis->hMSet('mount_'.$id, $mp);
-                $return = 0;
             }
+            if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
+				for ($i = 1; $i <= 9; $i++) {
+					// try all valid cifs versions, this happens only when no mount options are provided
+					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
+					//
+					if ($mp['options'] === 'cache=none,noserverino,ro') {
+						$mp['options'] = '';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=1.0') {
+						$mp['options'] = 'cache=none,noserverino,ro';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=2.0') {
+						$mp['options'] = 'cache=none,noserverino,ro,vers=1.0';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=2.1') {
+						$mp['options'] = 'cache=none,noserverino,ro,vers=2.0';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.0') {
+						$mp['options'] = 'cache=none,noserverino,ro,vers=2.1';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.02') {
+						$mp['options'] = 'cache=none,noserverino,ro,vers=3.0';
+					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.1.1') {
+						$mp['options'] = 'cache=none,noserverino,ro,vers=3.02';
+					} else {
+						$return = 0;
+					}
+					if ($mp['type'] === 'cifs') {
+						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",sec=ntlm,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+					} else {
+						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",nounix,sec=ntlmssp,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+					}
+					// debug
+					runelog('mount string', $mountstr);
+					$sysoutput = sysCmd($mountstr);
+					runelog('system response',var_dump($sysoutput));
+					if (empty($sysoutput)) {
+						// mounted OK
+						if (!empty($mp['error'])) {
+							$mp['error'] = '';
+						}
+						// save the mount information
+						$redis->hMSet('mount_'.$id, $mp);
+						$return = 1;
+					}
+				}
+			}
+			// mount failed
+            if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+			$return = 0;
             break;
         case 'mountall':
             $test = 1;
