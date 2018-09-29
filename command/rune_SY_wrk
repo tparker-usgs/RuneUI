@@ -218,6 +218,10 @@ if ($playerid_db === '') {
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
 
+	// refresh nics, check redis datastore status - run this while waiting for chrony (see below)
+	// mostly these commands should do nothing or very little, they are also not essential for the startup sequence
+	sysCmdAsync('/var/www/command/refresh_nics ; /srv/http/db/redis_datastore_setup check');
+
 	// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
 	// normally by this point time has been set, if not there is probably no internet connection
 	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while they are running
@@ -315,7 +319,7 @@ if ($playerid_db === '') {
     //}
 
     // start Samba services (if required)
-	wrk_restartSamba($redis);
+	//wrk_restartSamba($redis);
 
 	$kernel = $redis->get('kernel');
 	// load i2smodule
@@ -393,9 +397,8 @@ if ($playerid_db === '') {
 
 	// close startup Redis connection
 	$redis->close();
-	// refresh nics status, set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
-	// mostly these commands will do nothing or very little, they are also not essential for the startup sequence
-	sysCmdAsync('/var/www/command/refresh_nics ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice ; /srv/http/db/redis_datastore_setup check');
+	// reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
+	sysCmdAsync('/var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
 	runelog('--- NORMAL STARTUP');
 	// --- NORMAL STARTUP //
 }
