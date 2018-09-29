@@ -191,7 +191,7 @@
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, where you will need to select the output interface to make it work.<br>
 					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
@@ -280,8 +280,8 @@
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
-                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, and drivers will also auto-load from the next reboot.<br>
-					After selecting your hardware the 'best choice' driver will be used. Because some drivers are used for several different hardware types it is possible that the hardware which is displayed is not the one which you selected</span>
+                    <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware. <strong>After rebooting</strong> the output interface will appear in the <a href="/mpd/">MPD configuration select menu</a>, where you will need to select the output interface to make it work.<br>
+					After selecting your hardware the 'best choice' driver will be selected. Because some drivers are used for different hardware types it is possible, after a screen refresh, that the hardware which is displayed is not the one which you chose</span>
                 </div>
             </div>
             <div class="form-group">
