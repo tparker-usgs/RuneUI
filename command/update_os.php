@@ -79,6 +79,18 @@ function updateOS($redis) {
 			// set the patch level
 			$redis->set('patchlevel', 1);
 		}
+		if ($redis->get('patchlevel') == 1) {
+			// 2nd update - settings for the justboom dac - run the new version of /srv/http/db/redis_acards_details after it has been delivered by git pull
+			// count then number of lines with the active justboom dac string in /srv/http/db/redis_acards_details
+			$count = sysCmd("grep 'snd_rpi_justboom_dac' /srv/http/db/redis_acards_details | grep -c '^\$redis->hSet('");
+			if ($count[0] == 1) {
+				// the just boom dac entry is active in the file, so run the script
+				sysCmd("/srv/http/db/redis_acards_details");
+				// set the patch level
+				$redis->set('patchlevel', 2);
+			}
+			unset($count);
+		}
 		//
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {

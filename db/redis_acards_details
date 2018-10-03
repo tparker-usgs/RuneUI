@@ -74,6 +74,7 @@ $redis->hSet('acards_details', 'snd_rpi_hifiberry_dacplus', '{"sysname":"snd_rpi
 $redis->hSet('acards_details', 'snd_rpi_hifiberry_digi', '{"sysname":"snd_rpi_hifiberry_digi","extlabel":"HiFiBerry Digi (I&#178;S)","hwplatformid":"01","type":"i2s"}');
 $redis->hSet('acards_details', 'snd_rpi_iqaudio_dac', '{"sysname":"snd_rpi_iqaudio_dac","extlabel":"IQaudIO Pi-DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Playback Digital","hwplatformid":"01","type":"i2s"}');
 $redis->hSet('acards_details', 'snd_rpi_rpi_dac', '{"sysname":"snd_rpi_rpi_dac","extlabel":"RPi DAC (I&#178;S)","hwplatformid":"08","type":"i2s"}');
+$redis->hSet('acards_details', 'snd_rpi_justboom_dac', '{"sysname":"snd_rpi_justboom_dac","extlabel":"JustBoom DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"01","type":"i2s"}');
 // Two alternative versions of the rpi-dac configuration specifically for the es9023 DAC - in principal this DAC will only work for bitrates up to 192k
 // The above line will provide bitrates up to 384k, these below are limited to 192k - if all your music is less than 192k then do nothing (most is 44.1k)
 // Test each for your personal preference - comment out the previous line and uncomment one of the following lines
@@ -86,7 +87,6 @@ $redis->hSet('acards_details', 'snd_rpi_wsp', '{"sysname":"snd_rpi_wsp","extlabe
 //$redis->hSet('acards_details', 'snd_rpi_allo_boss_dac', '{"sysname":"snd_rpi_allo_boss_dac","extlabel":"ALLO Boss DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 //$redis->hSet('acards_details', 'snd_rpi_allo_piano_dac', '{"sysname":"snd_rpi_allo_piano_dac","extlabel":"ALLO Piano DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 //$redis->hSet('acards_details', 'snd_rpi_allo_piano_dac_plus', '{"sysname":"snd_rpi_allo_piano_dac_plus","card_option":"format\t\"*:32:*\"","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
-//$redis->hSet('acards_details', 'snd_rpi_justboom_dac', '{"sysname":"snd_rpi_justboom_dac","extlabel":"JustBoom DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"01","type":"i2s"}');
 //$redis->hSet('acards_details', 'snd_rpi_dionaudio_loco', '{"sysname":"snd_rpi_dionaudio_loco","extlabel":"Dionaudio Loco DAC-AMP (I&#178;S)","hwplatformid":"01","type":"i2s"}');
 //$redis->hSet('acards_details', 'snd_rpi_dionaudio_loco_v2', '{"sysname":"snd_rpi_dionaudio_loco_v2","extlabel":"Dionaudio Loco V2 DAC-AMP (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"01","type":"i2s"}');
 //$redis->hSet('acards_details', 'snd_rpi_allo_digione', '{"sysname":"snd_rpi_allo_digione","extlabel":"Allo DigiOne (I&#178;S)","hwplatformid":"01","type":"i2s"}');
