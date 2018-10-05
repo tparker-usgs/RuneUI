@@ -71,7 +71,7 @@ function updateOS($redis) {
 	if ($redis->get('buildversion') === 'janui-20180903') {
 		// only applicable for a specific build
 		if ($redis->get('patchlevel') == 0) {
-			// 1st update - modify /etc/chrony.conf new version of chrony.conf delivered via git pull
+			// 1st update - modify /etc/chrony.conf, a new version of chrony.conf is delivered via git pull, don't wait for it, just do the update
 			// disable initstepslew, this is already done due to the iburst parameter on the servers and pool in combination with makestep
 			sysCmd("sed -i 's/^initstepslew.*/! initstepslew 30 0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org/' /etc/chrony.conf");
 			// enable logging of time changes of over 20 seconds
@@ -90,6 +90,24 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 2);
 			}
 			unset($count);
+		}
+		if ($redis->get('patchlevel') == 2) {
+			// 3rd update - copy a new version of avahi-daemon.conf to /etc/avahi/ after it is delivered by git pull
+			// check that the file exists in /var/www/app/config/defaults/
+			if (file_exists('/var/www/app/config/defaults/avahi-daemon.conf')) {
+				// the file is there, copy it and set the correct protection
+				sysCmd("cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf");
+				sysCmd("chmod 644 /etc/avahi/avahi-daemon.conf");
+				// restart avahi
+				sysCmd("systemctl daemon-reload");
+				sysCmd("systemctl restart avahi-daemon");
+				// clean up the pacnew version of the config file is it exists
+				if (file_exists('/etc/avahi/avahi-daemon.conf.pacnew')) {
+					sysCmd("rm -f /etc/avahi/avahi-daemon.conf.pacnew");
+				}
+				// set the patch level
+				$redis->set('patchlevel', 3);
+			}
 		}
 		//
 		// template for the update part replace x with the number

@@ -51,6 +51,7 @@ rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
+rm -rf /home/*
 #
 # redis reset
 redis-cli del AccessPoint
@@ -94,6 +95,7 @@ pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 #
 # The following commands should also be run after a system update or any package updates
 # Reset the service and configuration files to the distribution standard
+cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
