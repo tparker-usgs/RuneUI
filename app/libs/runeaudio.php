@@ -3118,7 +3118,7 @@ function wrk_sourcemount($redis, $action, $id = null)
     return $return;
 }
 
-function wrk_sourcecfg($redis, $action, $args)
+function wrk_sourcecfg($redis, $action, $args=null)
 {
     runelog('function wrk_sourcecfg('.$action.')', $args);
     switch ($action) {
