@@ -8,8 +8,10 @@ set +e # continue on errors
 #
 # copy the config file
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
+chmod 644 /etc/chrony.conf
 #
 # stop and disable systemd-timesyncd
+timedatectl set-ntp false
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 #
@@ -20,5 +22,6 @@ redis-cli del ntpserver
 # start and enable chrony
 systemctl enable chronyd
 systemctl start chronyd
+timedatectl set-ntp true
 #---
 #End script
