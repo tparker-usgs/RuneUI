@@ -222,11 +222,16 @@ if ($playerid_db === '') {
 	// mostly these commands should do nothing or very little, they are also not essential for the startup sequence
 	sysCmdAsync('/var/www/command/refresh_nics ; /srv/http/db/redis_datastore_setup check');
 
-	// call chrony and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
+	// if chrony is active call chronyc and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
 	// normally by this point time has been set, if not there is probably no internet connection
 	// the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while they are running
 	// beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
-	sysCmd('chronyc waitsync 12');
+	$retval = sysCmd('systemctl is-active chronyd');
+	if ($retval[0] === 'active') {
+		// chrony is running
+		sysCmd('chronyc waitsync 12');
+	}
+	unset($retval);
 
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
 	$retval = sysCmd('hostname');

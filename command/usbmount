@@ -66,6 +66,11 @@ foreach ($usbmounts as $line) {
     // debug
     runelog('usbmount line: ', $line);
 }
+// set file protection and ownership of USB mounts
+sysCmd('chown mpd.audio /mnt/MPD/USB');
+sysCmd('chown mpd.audio /mnt/MPD/USB/*');
+sysCmd('chmod 777 /mnt/MPD/USB');
+sysCmd('chmod 777 /mnt/MPD/USB/*');
 // remove 'ghost' usb mounts
 // use udevil clean to remove any ghost entries
 sysCmd('udevil clean');

@@ -51,6 +51,7 @@ rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
+rm -rf /home/*
 #
 # redis reset
 redis-cli del AccessPoint
@@ -94,6 +95,7 @@ pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 #
 # The following commands should also be run after a system update or any package updates
 # Reset the service and configuration files to the distribution standard
+cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
@@ -111,6 +113,7 @@ cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
 cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
+cp /var/www/app/config/defaults/timesyncd.conf /etc/systemd/timesyncd.conf
 cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
@@ -155,12 +158,15 @@ chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chmod 755 /etc/X11/xinit/start_chromium.sh
+chown -R mpd.audio /mnt/MPD
+find /mnt/MPD/USB -type d -exec chmod 777 {} \;
+find /mnt/MPD/USB -type f -exec chmod 644 {} \;
 chown -R mpd.audio /var/lib/mpd
 #
 # reset services so that any cached files are replaced by the latest ones (in case you don't want to reboot)
 systemctl daemon-reload
 #
-#
+# zero fill the file system if parameter full is selected
 if [ "$1" == "full" ]; then
 	redis-cli save
 	echo "Zero filling the file system"

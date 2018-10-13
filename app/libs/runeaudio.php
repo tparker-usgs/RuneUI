@@ -3118,7 +3118,7 @@ function wrk_sourcemount($redis, $action, $id = null)
     return $return;
 }
 
-function wrk_sourcecfg($redis, $action, $args)
+function wrk_sourcecfg($redis, $action, $args=null)
 {
     runelog('function wrk_sourcecfg('.$action.')', $args);
     switch ($action) {
@@ -3667,6 +3667,10 @@ function wrk_sysAcl()
     sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
     sysCmd('chmod 755 /srv/http/db/redis_acards_details');
     sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
+    sysCmd('chown mpd.audio /mnt/MPD/*');
+    sysCmd('chown mpd.audio /mnt/MPD/USB/*');
+    sysCmd('chmod 777 /mnt/MPD/USB');
+    sysCmd('chmod 777 /mnt/MPD/USB/*');
     sysCmd('chown -R mpd.audio /var/lib/mpd');
 }
 
@@ -3674,30 +3678,62 @@ function wrk_NTPsync($ntpserver)
 {
     //debug
     runelog('NTP SERVER', $ntpserver);
-	// check that it is a valid ntp server
-	$retval = sysCmd('chronyc add server '.$ntpserver.' | grep OK');
-	$return = ' '.$retval[0];
-	unset($retval);
-	// servers seem to be valid as a chrony server or a chrony pool, so use the user defined server as a server and a pool in the config file
-	// chrony will look for a series of valid servers before deciding which one to use
-	// if the user defined server/pool is bad then the other predefined servers will be used
-    if (strpos($return, 'OK')) {
-        // add the server name to chrony.conf
-		$file = '/etc/chrony.conf';
-		// replace the line with 'server ' in the line 1 line after a line containing '# First ntp server is set in the RuneAudio Settings'
-        $newArray = wrk_replaceTextLine($file, '', 'server ', 'server '.$ntpserver.' iburst prefer', '# First ntp server is set in the RuneAudio Settings', 1);
-		// replace the line with 'pool ' in the line 1 line after a line containing '# First ntp pool is set in the RuneAudio Settings'
-        $newArray = wrk_replaceTextLine('' , $newArray, 'pool ', 'pool '.$ntpserver.' iburst prefer', '# First ntp pool is set in the RuneAudio Settings', 1);
-        // Commit changes to /boot/config.txt
-        $fp = fopen($file, 'w');
-        $return = fwrite($fp, implode("", $newArray));
-        fclose($fp);
-		// return the valid ntp server name
-        return $ntpserver;
-    } else {
-		// invalid ftp server name, false returns a '' value
-        return false;
-    }
+	// support for chrony and systemd-time
+	$retval = sysCmd('systemctl is-active chronyd');
+	$return = $retval[0];
+   	unset($retval);
+	if ($return === 'active') {
+		// chrony is running
+		// check that it is a valid ntp server
+		$retval = sysCmd('chronyc add server '.$ntpserver.' | grep OK');
+		$return = ' '.$retval[0];
+		unset($retval);
+		// servers seem to be valid as a chrony server or a chrony pool, so use the user defined server as a server and a pool in the config file
+		// chrony will look for a series of valid servers before deciding which one to use
+		// if the user defined server/pool is bad then the other predefined servers will be used
+		if (strpos($return, 'OK')) {
+			// add the server name to chrony.conf
+			$file = '/etc/chrony.conf';
+			// replace the line with 'server ' in the line 1 line after a line containing '# First ntp server is set in the RuneAudio Settings'
+			$newArray = wrk_replaceTextLine($file, '', 'server ', 'server '.$ntpserver.' iburst prefer', '# First ntp server is set in the RuneAudio Settings', 1);
+			// replace the line with 'pool ' in the line 1 line after a line containing '# First ntp pool is set in the RuneAudio Settings'
+			$newArray = wrk_replaceTextLine('' , $newArray, 'pool ', 'pool '.$ntpserver.' iburst prefer', '# First ntp pool is set in the RuneAudio Settings', 1);
+			// Commit changes to /etc/chrony.conf
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			// return the valid ntp server name
+			return $ntpserver;
+		} else {
+			// invalid ftp server name, false returns a '' value
+			return false;
+	   }
+	} else {
+		$retval = sysCmd('systemctl is-active systemd-timesyncd');
+		$return = $retval[0];
+		unset($retval);
+		if ($return === 'active') {
+			// systemd-timesyncd is running
+			// with systemd-timesyncd the new ntp server can not be validated
+			// add the server name to timesyncd.conf
+			$file = '/etc/systemd/timesyncd.conf';
+			// replace the line with 'NTP=' in the line 1 line after a line containing '# Next line is set in RuneAudio Settings'
+			// but add the valid pool.ntp.org ntp server to the line in case the new server is invalid
+			$newArray = wrk_replaceTextLine($file, '', 'NTP=', 'NTP='.$ntpserver.' pool.ntp.org', '# Next line is set in RuneAudio Settings', 1);
+			// Commit changes to /etc/systemd/timesyncd.conf
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			// restart systemd-timesyncd
+			sysCmd('systemctl daemon-reload');
+			sysCmd('systemctl restart systemd-timesyncd');
+			sysCmd('timedatectl set-ntp true');
+			// return the valid ntp server name
+			return $ntpserver;
+		} else {
+			return false;
+		}
+	}
 }
 
 function wrk_restartSamba($redis)
