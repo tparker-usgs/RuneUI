@@ -110,6 +110,22 @@ function updateOS($redis) {
 			}
 		}
 		//
+		// if ($redis->get('patchlevel') == x) {
+			// // xth update - install runeaudio.cron in /etc/cron.d/ after it is delivered by git pull
+			// // check that the file exists in /var/www/app/config/defaults/
+			// if (file_exists('/var/www/app/config/defaults/runeaudio.cron')) {
+				// // the file is there, copy it and set the correct protection
+				// sysCmd("cp /var/www/app/config/defaults/runeaudio.cron /etc/cron.d/runeaudio.cron");
+				// sysCmd("chown root.root /etc/avahi/runeaudio.cron");
+				// sysCmd("chmod 644 /etc/avahi/runeaudio.cron");
+				// // clean up any cron avahi jobs owned by root
+				// if (file_exists('/var/spool/cron/crontabs/root')) {
+					// sysCmd("sed -i '/systemctl restart avahi-daemon/d' /var/spool/cron/crontabs/root");
+				// }
+				// // set the patch level
+				// $redis->set('patchlevel', x);
+			// }
+		//
 		// template for the update part replace x with the number
 		//if ($redis->get('patchlevel') < x) {
 			// xth update
