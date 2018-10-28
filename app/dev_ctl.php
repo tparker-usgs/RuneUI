@@ -140,6 +140,10 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'extendpartition') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'extendpartition'));
         // ----- RESET AIRPLAY CONFIG -----
         if ($_POST['syscmd'] === 'airplayconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayconfreset'));
+        // ----- RESET / SWITCH ON CHRONYD-TIME -----
+        if ($_POST['syscmd'] === 'chronydon') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'NTPswitch', 'action' => 'chronyd'));
+        // ----- RESET / SWITCH ON SYSTEMD-TIME -----
+        if ($_POST['syscmd'] === 'systemdon') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'NTPswitch', 'action' => 'systemd'));
     }
 }
 waitSyWrk($redis, $jobID);
@@ -157,6 +161,8 @@ $template->soxrairplayonoff = $redis->hGet('airplay', 'soxronoff');
 $template->metadataairplayonoff = $redis->hGet('airplay', 'metadataonoff');
 $template->artworkairplayonoff = $redis->hGet('airplay', 'artworkonoff');
 $template->hostname = $redis->get('hostname');
+$template->chronydstatus = $redis->hGet('NTPtime', 'chronyd');
+$template->systemdstatus = $redis->hGet('NTPtime', 'systemd');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

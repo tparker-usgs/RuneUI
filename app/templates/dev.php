@@ -275,6 +275,20 @@
 					</div>
 				</div>
             </div>
+            <div class="boxed-group">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Network Time Protocol Service</label>
+					<div class="col-sm-10">
+                        <input class="form-control input-lg" type="text" id="chronydstatus" name="chronydstatus" value="<?php echo $this->chronydstatus; ?>" disabled autocomplete="off"><br>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="chronydon" id="syscmd-chronydon" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>><br><br>
+                        <input class="form-control input-lg" type="text" id="systemdstatus" name="systemdstatus" value="<?php echo $this->systemdstatus; ?>" disabled autocomplete="off"><br>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="systemdon" id="syscmd-systemdon" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<span class="help-block">With this option you can reset the NTP service or switch between the chronyd and systemd-timesyncd services.<br>
+						By default systemd-timesyncd is used which provides a fast start-up time. Using chronyd results in less Micro-SD card wear and is therefore be more reliable in the long term, but results in a much slower start-up times.<br>
+						You can can override the default setting here</span>
+					</div>
+				</div>
+            </div>
         </fieldset>
     </form>
     <form class="form-horizontal" method="post">

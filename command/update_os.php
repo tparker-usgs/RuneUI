@@ -109,6 +109,15 @@ function updateOS($redis) {
 				$redis->set('patchlevel', 3);
 			}
 		}
+		if ($redis->get('patchlevel') == 3) {
+			// 4th update - various updates
+			// clean up incorrectly set redis variable
+			$redis->exists('ahuffle_start_delay') && $redis->del('ahuffle_start_delay');
+			// switch to systemd_time - new default
+			sysCmd("/srv/http/command/switch_systemd_time_on.sh");
+			// set the patch level
+			$redis->set('patchlevel', 4);
+		}
 		//
 		// if ($redis->get('patchlevel') == x) {
 			// // xth update - install runeaudio.cron in /etc/cron.d/ after it is delivered by git pull

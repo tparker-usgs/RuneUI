@@ -2120,6 +2120,26 @@ function wrk_cleanDistro()
     sysCmd('/srv/http/command/image_reset_script.sh');
 }
 
+function wrk_playernamemenu($action)
+{
+	if ($action) {
+		// on - player name and "Menu"
+		$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#"><?=$this->hostname ?> MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
+	} else {
+		// off - "Menu" (default)
+		$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#">MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
+	}
+	$file = '/srv/http/app/templates/header.php';
+	$newArray = wrk_replaceTextLine($file, '', '<!--- playernamemenu -->', $newline);
+	// Commit changes to /srv/http/app/templates/header.php
+	$fp = fopen($file, 'w');
+	fwrite($fp, implode("", $newArray));
+	fclose($fp);
+	unset($newArray);
+	sysCmd('chown http.http '.$file);
+	sysCmd('chmod 644 '.$file);
+}
+
 function wrk_audioOutput($redis, $action, $args = null)
 {
     switch ($action) {
@@ -3021,21 +3041,25 @@ function wrk_sourcemount($redis, $action, $id = null)
                 if (!empty($mp['username'])) {
                     $auth = "username=".$mp['username'].",password=".$mp['password'];
                 }
-				if ($mp['options'] === '') {
-					// no mount options given by the user, set to defaults and latest cifs version and try
-					// valid cifs versions
-					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
-					$mp['options'] = 'cache=none,noserverino,ro,vers=3.1.1';
+				if (trim($mp['options']) == '') {
+					// no mount options set by the user or from previous auto mount, so set it to a value
+					$mp['options'] = 'cache=none,noserverino,ro,vers=3.1.1,sec=ntlm';
 				}
-				if ($mp['type'] === 'cifs') {
-					$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",sec=ntlm,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-				} else {
-					$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",nounix,sec=ntlmssp,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-				}
+				$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
 			}
             // debug
             runelog('mount string', $mountstr);
-            $sysoutput = sysCmd($mountstr);
+			$count = 10;
+			$busy = 1;
+			while ($busy && $count--) {
+				usleep(100000);
+				$busy = 0;
+				unset($sysoutput);
+				$sysoutput = sysCmd($mountstr);
+				foreach ($sysoutput as $line) {
+					$busy += substr_count($line, 'resource busy');
+				}
+			}
             runelog('system response',var_dump($sysoutput));
             if (empty($sysoutput)) {
 				// mounted OK
@@ -3044,57 +3068,141 @@ function wrk_sourcemount($redis, $action, $id = null)
                 }
 				// save the mount information
 				$redis->hMSet('mount_'.$id, $mp);
-                $return = 1;
+                return 1;
             } else {
-				// mount failed
-                $mp['error'] = implode("\n", $sysoutput);
-                $redis->hMSet('mount_'.$id, $mp);
+				unset($sysoutput);
+				$sysoutput = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+				if ($sysoutput[0]) {
+					// mounted OK
+					if (!empty($mp['error'])) {
+						$mp['error'] = '';
+					}
+					// save the mount information
+					$redis->hMSet('mount_'.$id, $mp);
+					return 1;
+				} else {
+					// mount failed
+					$mp['error'] = implode("\n", $sysoutput);
+					$redis->hMSet('mount_'.$id, $mp);
+				}
+				unset($sysoutput);
             }
             if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
-				for ($i = 1; $i <= 9; $i++) {
+				for ($i = 1; $i <= 8; $i++) {
 					// try all valid cifs versions, this happens only when no mount options are provided
 					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
 					//
-					if ($mp['options'] === 'cache=none,noserverino,ro') {
-						$mp['options'] = '';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=1.0') {
-						$mp['options'] = 'cache=none,noserverino,ro';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=2.0') {
-						$mp['options'] = 'cache=none,noserverino,ro,vers=1.0';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=2.1') {
-						$mp['options'] = 'cache=none,noserverino,ro,vers=2.0';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.0') {
-						$mp['options'] = 'cache=none,noserverino,ro,vers=2.1';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.02') {
-						$mp['options'] = 'cache=none,noserverino,ro,vers=3.0';
-					} elseif ($mp['options'] == 'cache=none,noserverino,ro,vers=3.1.1') {
-						$mp['options'] = 'cache=none,noserverino,ro,vers=3.02';
-					} else {
-						$return = 0;
+					switch ($i) {
+						case 1:
+					        ui_notify('CIFS mount', 'Attempting automatic negotiation');
+							$options = 'cache=none,noserverino,ro';
+							break;
+						case 2:
+					        ui_notify('CIFS mount', 'Attempting vers=3.1.1');
+							$options = 'cache=none,noserverino,ro,vers=3.1.1';
+							break;
+						case 3:
+					        ui_notify('CIFS mount', 'Attempting vers=3.02');
+							$options = 'cache=none,noserverino,ro,vers=3.02';
+							break;
+						case 4:
+					        ui_notify('CIFS mount', 'Attempting vers=3.0');
+							$options = 'cache=none,noserverino,ro,vers=3.0';
+							break;
+						case 5:
+					        ui_notify('CIFS mount', 'Attempting vers=2.1');
+							$options = 'cache=none,noserverino,ro,vers=2.1';
+							break;
+						case 6:
+					        ui_notify('CIFS mount', 'Attempting vers=2.0');
+							$options = 'cache=none,noserverino,ro,vers=2.0';
+							break;
+						case 7:
+					        ui_notify('CIFS mount', 'Attempting vers=1.0');
+							$options = 'cache=none,noserverino,ro,vers=1.0';
+							break;
+						default:
+							if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+							return 0;
+							break;
 					}
-					if ($mp['type'] === 'cifs') {
-						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",sec=ntlm,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-					} else {
-						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",nounix,sec=ntlmssp,soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
-					}
-					// debug
-					runelog('mount string', $mountstr);
-					$sysoutput = sysCmd($mountstr);
-					runelog('system response',var_dump($sysoutput));
-					if (empty($sysoutput)) {
-						// mounted OK
-						if (!empty($mp['error'])) {
-							$mp['error'] = '';
+					for ($j = 1; $j <= 6; $j++) {
+						switch ($j) {
+							case 1:
+								$mp['options'] = $options.',sec=ntlm';
+								break;
+							case 2:
+								$mp['options'] = $options.',sec=ntlmssp';
+								break;
+							case 3:
+								$mp['options'] = $options.',sec=ntlm,nounix';
+								break;
+							case 4:
+								$mp['options'] = $options.',sec=ntlmssp,nounix';
+								break;
+							case 5:
+								$mp['options'] = $options;
+								break;
+							case 6:
+								$mp['options'] = $options.',nounix';
+								break;
+							default:
+								$j = 10;
+								break;
 						}
-						// save the mount information
-						$redis->hMSet('mount_'.$id, $mp);
-						$return = 1;
+						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+						// debug
+						runelog('mount string', $mountstr);
+						$count = 10;
+						$busy = 1;
+						while ($busy && $count--) {
+							usleep(100000);
+							$busy = 0;
+							unset($sysoutput);
+							$sysoutput = sysCmd($mountstr);
+							foreach ($sysoutput as $line) {
+								$busy += substr_count($line, 'resource busy');
+							}
+						}
+						runelog('system response',var_dump($sysoutput));
+						if (empty($sysoutput)) {
+							// mounted OK
+							if (!empty($mp['error'])) {
+								$mp['error'] = '';
+							}
+							// save the mount information
+							$redis->hMSet('mount_'.$id, $mp);
+							ui_notify('CIFS mount', 'Mounted');
+							sleep(3);
+							return 1;
+						} else {
+							unset($sysoutput);
+							$sysoutput = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+							if ($sysoutput[0]) {
+								// mounted OK
+								if (!empty($mp['error'])) {
+									$mp['error'] = '';
+								}
+								// save the mount information
+								$redis->hMSet('mount_'.$id, $mp);
+								ui_notify('CIFS mount', 'Mounted');
+								sleep(3);
+								return 1;
+							} else {
+								// mount failed
+								$mp['error'] = implode("\n", $sysoutput);
+								$redis->hMSet('mount_'.$id, $mp);
+							}
+							unset($sysoutput);
+						}
 					}
 				}
 			}
 			// mount failed
             if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-			$return = 0;
+			ui_notify('CIFS mount', 'Failed');
+			sleep(3);
+			return 0;
             break;
         case 'mountall':
             $test = 1;

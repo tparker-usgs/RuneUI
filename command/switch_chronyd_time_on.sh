@@ -2,7 +2,7 @@
 set -x # echo all commands to cli
 set +e # continue on errors
 #
-# switch chrony on script (switch_chrony_time_on.sh)
+# switch chrony on script (switch_chronyd_time_on.sh)
 # ----------------------- --------------------------
 # also see switch systemd-time on (switch_systemd_time_on.sh)
 #
@@ -14,6 +14,7 @@ chmod 644 /etc/chrony.conf
 timedatectl set-ntp false
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
+redis-cli hSet NTPtime systemd 'systemd time: stopped, disabled'
 #
 # set the ntp server values to default
 redis-cli del ntpserver
@@ -22,6 +23,8 @@ redis-cli del ntpserver
 # start and enable chrony
 systemctl enable chronyd
 systemctl start chronyd
+redis-cli hSet NTPtime chronyd 'chronyd time: active, enabled'
 timedatectl set-ntp true
+redis-cli set ashuffle_start_delay 30
 #---
 #End script

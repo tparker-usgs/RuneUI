@@ -22,9 +22,9 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth
-systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald chronyd
-systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth
+systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd
+systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
+systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd
 #
 # remove rerns addons menu (if installed)
 systemctl stop addons
@@ -36,6 +36,7 @@ rm -fr /home/rern
 /usr/local/bin/uninstall_addo.sh
 rm -f ./install.sh
 rm -f /usr/local/bin/uninstall_addo.sh
+rm -f /usr/local/bin/uninstall_enha.sh
 redis-cli del addons
 redis-cli del addo
 #
@@ -158,7 +159,8 @@ chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chmod 755 /etc/X11/xinit/start_chromium.sh
-chown -R mpd.audio /mnt/MPD
+chown mpd.audio /mnt/MPD/*
+chown mpd.audio /mnt/MPD/USB/*
 find /mnt/MPD/USB -type d -exec chmod 777 {} \;
 find /mnt/MPD/USB -type f -exec chmod 644 {} \;
 chown -R mpd.audio /var/lib/mpd
