@@ -36,6 +36,7 @@ rm -fr /home/rern
 /usr/local/bin/uninstall_addo.sh
 rm -f ./install.sh
 rm -f /usr/local/bin/uninstall_addo.sh
+rm -f /usr/local/bin/uninstall_enha.sh
 redis-cli del addons
 redis-cli del addo
 #

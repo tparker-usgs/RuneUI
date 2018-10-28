@@ -855,6 +855,7 @@ while (1) {
 					sysCmd('/usr/local/bin/uninstall_addo.sh');
 					sysCmd('rm -f ./install.sh');
 					sysCmd('rm -f /usr/local/bin/uninstall_addo.sh');
+					sysCmd('rm -f /usr/local/bin/uninstall_enha.sh');
 					$redis->del('addons');
 					$redis->del('addo');
 					sysCmd('wget -vN --no-check-certificate https://github.com/rern/RuneAudio_Addons/raw/master/install.sh --output-file=/home/rern/Rern_Addons.log');
@@ -885,6 +886,7 @@ while (1) {
 					sysCmd('/usr/local/bin/uninstall_addo.sh');
 					sysCmd('rm -f ./install.sh');
 					sysCmd('rm -f /usr/local/bin/uninstall_addo.sh');
+					sysCmd('rm -f /usr/local/bin/uninstall_enha.sh');
 					$redis->del('addons');
 					$redis->del('addo');
 					ui_notify("Rern's Addons", "You may need to reboot...");
