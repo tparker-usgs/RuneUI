@@ -562,6 +562,8 @@ while (1) {
 					unset($retval);
                     sysCmd('cd /srv/http/ && git stash');
 					wrk_sysAcl();
+					$playernamemenu = $redis->get('playernamemenu');
+					wrk_playernamemenu($playernamemenu);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':
@@ -1000,22 +1002,7 @@ while (1) {
                     runelog('wrk_SY: ', $job->wrkcmd);
                     runelog('playernamemenu action: ', $job->action);
                     $redis->sAdd('w_lock', $jobID);
-					if ($job->action) {
-						// on - player name and "Menu"
-						$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#"><?=$this->hostname ?> MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
-					} else {
-						// off - "Menu" (default)
-						$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#">MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
-					}
-					$file = '/srv/http/app/templates/header.php';
-					$newArray = wrk_replaceTextLine($file, '', '<!--- playernamemenu -->', $newline);
-					// Commit changes to /srv/http/app/templates/header.php
-					$fp = fopen($file, 'w');
-					fwrite($fp, implode("", $newArray));
-					fclose($fp);
-					unset($newArray);
-					sysCmd('chown http.http '.$file);
-					sysCmd('chmod 644 '.$file);
+					wrk_playernamemenu($job->action);
 					$redis->set('playernamemenu', $job->action);
                     sysCmd('systemctl restart php-fpm || systemctl start php-fpm');
 					$redis->sRem('w_lock', $jobID);

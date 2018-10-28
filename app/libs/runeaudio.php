@@ -2120,6 +2120,26 @@ function wrk_cleanDistro()
     sysCmd('/srv/http/command/image_reset_script.sh');
 }
 
+function wrk_playernamemenu($action)
+{
+	if ($action) {
+		// on - player name and "Menu"
+		$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#"><?=$this->hostname ?> MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
+	} else {
+		// off - "Menu" (default)
+		$newline = '        <a id="menu-settings" class="dropdown-toggle" role="button" data-toggle="dropdown" data-target="#" href="#">MENU <i class="fa fa-bars dx"></i></a> <!--- playernamemenu -->';
+	}
+	$file = '/srv/http/app/templates/header.php';
+	$newArray = wrk_replaceTextLine($file, '', '<!--- playernamemenu -->', $newline);
+	// Commit changes to /srv/http/app/templates/header.php
+	$fp = fopen($file, 'w');
+	fwrite($fp, implode("", $newArray));
+	fclose($fp);
+	unset($newArray);
+	sysCmd('chown http.http '.$file);
+	sysCmd('chmod 644 '.$file);
+}
+
 function wrk_audioOutput($redis, $action, $args = null)
 {
     switch ($action) {
