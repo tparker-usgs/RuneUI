@@ -43,7 +43,8 @@ chmod 755 /srv/http/command/*
 chmod 755 /srv/http/db/redis_datastore_setup
 chmod 755 /srv/http/db/redis_acards_details
 chmod 755 /etc/X11/xinit/start_chromium.sh
-chown -R mpd.audio /mnt/MPD
+chown mpd.audio /mnt/MPD/*
+chown mpd.audio /mnt/MPD/USB/*
 chmod 777 /mnt/MPD/USB
 chmod 777 /mnt/MPD/USB/*
 chown -R mpd.audio /var/lib/mpd
