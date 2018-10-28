@@ -114,11 +114,11 @@ if ($activePlayer === 'MPD') {
 		$redis->set('lastmpdvolume', $mpdstartvolume);
 		sysCmd('mpc volume '.$mpdstartvolume);
 	} else {
-		// set it to 40% when we don't have a value
-		$redis->set('lastmpdvolume', 40);
-		sysCmd('mpc volume 40');
+		// set it to 100% when we don't have a value
+		$redis->set('lastmpdvolume', 100);
+		sysCmd('mpc volume 100');
 	}
-	// restart mpd if required
+	// start mpd if required
 	$retval = sysCmd('systemctl is-active mpd');
 	if ($retval[0] === 'active') {
 		// do nothing
