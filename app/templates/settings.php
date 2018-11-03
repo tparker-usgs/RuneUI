@@ -135,6 +135,7 @@
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-boss-dac-pcm512x-audio,slave" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio,slave'): ?> selected <?php endif ?>>Allo Boss DAC in slave mode</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
+						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne Signature</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
 						<option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
@@ -153,6 +154,8 @@
 						<option value="dionaudio-loco" <?php if($this->i2smodule === 'dionaudio-loco'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2" <?php if($this->i2smodule === 'dionaudio-loco-v2'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
+						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
 						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
@@ -233,6 +236,7 @@
 						<option value="allo-boss-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Boss DAC</option>
 						<option value="allo-boss-dac-pcm512x-audio,slave" <?php if($this->i2smodule === 'allo-boss-dac-pcm512x-audio,slave'): ?> selected <?php endif ?>>Allo Boss DAC in slave mode</option>
 						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne</option>
+						<option value="allo-digione" <?php if($this->i2smodule === 'allo-digione'): ?> selected <?php endif ?>>Allo DigiOne Signature</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk" <?php if($this->i2smodule === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
 						<option value="allo-piano-dac-pcm512x-audio" <?php if($this->i2smodule === 'allo-piano-dac-pcm512x-audio'): ?> selected <?php endif ?>>Allo Piano DAC</option>
@@ -251,6 +255,8 @@
 						<option value="dionaudio-loco" <?php if($this->i2smodule === 'dionaudio-loco'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2" <?php if($this->i2smodule === 'dionaudio-loco-v2'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio" <?php if($this->i2smodule === 'fe-pi-audio'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
+						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
 						<option value="hifiberry-dac,384k" <?php if($this->i2smodule === 'hifiberry-dac,384k'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
 						<option value="rpi-dac" <?php if($this->i2smodule === 'rpi-dac'): ?> selected <?php endif ?>>Generic ES9023</option>
