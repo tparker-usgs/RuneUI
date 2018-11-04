@@ -67,4 +67,5 @@ xset dpms force off
 sleep 1
 umount -aft nfs
 umount -aft cifs
+rmdir /mnt/MPD/NAS/*
 return 0

@@ -3028,6 +3028,14 @@ function wrk_sourcemount($redis, $action, $id = null)
     switch ($action) {
         case 'mount':
             $mp = $redis->hGetAll('mount_'.$id);
+			// check that the mount server is on-line
+			$retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
+			if ($retval[0] == 0) {
+				// the mount server is not visible, so don't even try to mount it
+				$mp['error'] = 'Network Mount off-line';
+				return 0;
+			}
+			unset($retval);
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
             if ($mp['type'] === 'nfs') {
@@ -3043,7 +3051,7 @@ function wrk_sourcemount($redis, $action, $id = null)
                 }
 				if (trim($mp['options']) == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
-					$mp['options'] = 'cache=none,noserverino,ro,vers=3.1.1,sec=ntlm';
+					$mp['options'] = 'cache=none,noserverino,ro,sec=ntlmssp';
 				}
 				$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
 			}
@@ -3054,14 +3062,14 @@ function wrk_sourcemount($redis, $action, $id = null)
 			while ($busy && $count--) {
 				usleep(100000);
 				$busy = 0;
-				unset($sysoutput);
-				$sysoutput = sysCmd($mountstr);
-				foreach ($sysoutput as $line) {
+				unset($retval);
+				$retval = sysCmd($mountstr);
+				foreach ($retval as $line) {
 					$busy += substr_count($line, 'resource busy');
 				}
 			}
-            runelog('system response',var_dump($sysoutput));
-            if (empty($sysoutput)) {
+            runelog('system response',var_dump($retval));
+            if (empty($retval)) {
 				// mounted OK
                 if (!empty($mp['error'])) {
 					$mp['error'] = '';
@@ -3070,9 +3078,9 @@ function wrk_sourcemount($redis, $action, $id = null)
 				$redis->hMSet('mount_'.$id, $mp);
                 return 1;
             } else {
-				unset($sysoutput);
-				$sysoutput = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
-				if ($sysoutput[0]) {
+				unset($retval);
+				$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+				if ($retval[0]) {
 					// mounted OK
 					if (!empty($mp['error'])) {
 						$mp['error'] = '';
@@ -3082,10 +3090,10 @@ function wrk_sourcemount($redis, $action, $id = null)
 					return 1;
 				} else {
 					// mount failed
-					$mp['error'] = implode("\n", $sysoutput);
+					$mp['error'] = implode("\n", $retval);
 					$redis->hMSet('mount_'.$id, $mp);
 				}
-				unset($sysoutput);
+				unset($retval);
             }
             if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
 				for ($i = 1; $i <= 8; $i++) {
@@ -3158,14 +3166,14 @@ function wrk_sourcemount($redis, $action, $id = null)
 						while ($busy && $count--) {
 							usleep(100000);
 							$busy = 0;
-							unset($sysoutput);
-							$sysoutput = sysCmd($mountstr);
-							foreach ($sysoutput as $line) {
+							unset($retval);
+							$retval = sysCmd($mountstr);
+							foreach ($retval as $line) {
 								$busy += substr_count($line, 'resource busy');
 							}
 						}
-						runelog('system response',var_dump($sysoutput));
-						if (empty($sysoutput)) {
+						runelog('system response',var_dump($retval));
+						if (empty($retval)) {
 							// mounted OK
 							if (!empty($mp['error'])) {
 								$mp['error'] = '';
@@ -3176,9 +3184,9 @@ function wrk_sourcemount($redis, $action, $id = null)
 							sleep(3);
 							return 1;
 						} else {
-							unset($sysoutput);
-							$sysoutput = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
-							if ($sysoutput[0]) {
+							unset($retval);
+							$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+							if ($retval[0]) {
 								// mounted OK
 								if (!empty($mp['error'])) {
 									$mp['error'] = '';
@@ -3190,10 +3198,10 @@ function wrk_sourcemount($redis, $action, $id = null)
 								return 1;
 							} else {
 								// mount failed
-								$mp['error'] = implode("\n", $sysoutput);
+								$mp['error'] = implode("\n", $retval);
 								$redis->hMSet('mount_'.$id, $mp);
 							}
-							unset($sysoutput);
+							unset($retval);
 						}
 					}
 				}
