@@ -100,6 +100,8 @@ cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
 cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
 cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
 cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
+cp /var/www/app/config/defaults/lircd.conf /etc/conf.d/lircd.conf
+cp /var/www/app/config/defaults/lirc_options.conf /etc/lirc/lirc_options.conf
 cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 rm -f /etc/nginx/nginx.conf
 cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
@@ -119,6 +121,7 @@ cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
 cp /var/www/app/config/defaults/hosts /etc/hosts
+cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
 cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service

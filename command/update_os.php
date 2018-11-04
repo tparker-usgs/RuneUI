@@ -118,6 +118,20 @@ function updateOS($redis) {
 			// set the patch level
 			$redis->set('patchlevel', 4);
 		}
+		if ($redis->get('patchlevel') == 4) {
+			// 5th update - remove lirc if installed and install lirc-rune
+			$retval = sysCmd("uname -m");
+			if ($retval[0] == 'armv6l') {
+				sysCmd("pacman -Syy lirc --noconfirm");
+			}
+			unset($retval);
+			sysCmd("cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service");
+			sysCmd("cp /var/www/app/config/defaults/lirc_options.conf /etc/lirc/lirc_options.conf");
+			sysCmd("cp /var/www/app/config/defaults/lircd.conf /etc/conf.d/lircd.conf");
+			wrk_sysAcl();
+			// set the patch level
+			$redis->set('patchlevel', 5);
+		}
 		//
 		// if ($redis->get('patchlevel') == x) {
 			// // xth update - install runeaudio.cron in /etc/cron.d/ after it is delivered by git pull
