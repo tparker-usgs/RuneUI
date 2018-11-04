@@ -21,7 +21,7 @@ After=lircd.service mpd.service
 ; ProtectSystem=full
 
 Type=simple
-ExecStart=/usr/bin/irexec /etc/lirc/irexec.lircrc
+ExecStart=/usr/bin/irexec /etc/conf.d/lircrc
 TimeoutSec=0
 Restart=always
 RestartSec=10
