@@ -1406,18 +1406,11 @@ while (1) {
 		// first check that it is enabled, not waiting for auto play to initialise and there are some songs to play
 		if (($redis->get('globalrandom')) && (!$redis->get('ashuffle_wait_for_play'))) {
 			// count the number of NAS Mounts
-			unset($retval);
-			$retval = sysCmd("dir -ld /mnt/MPD/NAS/* | grep -c -i '^drwx'");
-			$nasmounts = $retval[0];
+			$nasmounts = count(scandir("/mnt/MPD/NAS"))-2;
 			// count the number of USB Mounts
-			unset($retval);
-			$retval = sysCmd("dir -ld /mnt/MPD/USB/* | grep -c -i '^drwx'");
-			$usbmounts = $retval[0];
+			$usbmounts = count(scandir("/mnt/MPD/USB"))-2;
 			// count the number of local storage files
-			unset($retval);
-			$retval = sysCmd("dir -l /mnt/MPD/LocalStorage | grep -i total | cut -d ' ' -f2");
-			$localstoragefiles = $retval[0];
-			unset($retval);
+			$localstoragefiles = count(scandir("/mnt/MPD/LocalStorage"))-2;
 			$retval = sysCmd('systemctl is-active ashuffle');
 			if ($retval[0] == 'active') {
 				// ashuffle already started
