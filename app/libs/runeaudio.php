@@ -3029,13 +3029,13 @@ function wrk_sourcemount($redis, $action, $id = null)
         case 'mount':
             $mp = $redis->hGetAll('mount_'.$id);
 			// check that the mount server is on-line
-			$retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
-			if ($retval[0] == 0) {
-				// the mount server is not visible, so don't even try to mount it
-				$mp['error'] = 'Network Mount off-line';
-				return 0;
-			}
-			unset($retval);
+			// $retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
+			// if ($retval[0] == 0) {
+				// // the mount server is not visible, so don't even try to mount it
+				// $mp['error'] = 'Network Mount off-line';
+				// return 0;
+			// }
+			// unset($retval);
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
             if ($mp['type'] === 'nfs') {
