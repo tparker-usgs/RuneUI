@@ -294,8 +294,8 @@
 					'<span class="osk-off">=</span>' +
 					'<span class="osk-on">+</span>' +
 				'</li>' +
-				'<li class="osk-backspace osk-last-item">backspace</li>' +
-				'<li class="osk-tab">tab</li>' +
+				'<li class="osk-backspace osk-last-item">←</li>' +
+				'<li class="osk-tab">⇆</li>' +
 				'<li class="osk-letter">q</li>' +
 				'<li class="osk-letter">w</li>' +
 				'<li class="osk-letter">e</li>' +
@@ -318,7 +318,7 @@
 					'<span class="osk-off">\\</span>' +
 					'<span class="osk-on">|</span>' +
 				'</li>' +
-				'<li class="osk-capslock">caps lock</li>' +
+				'<li class="osk-capslock">🅰</li>' +
 				'<li class="osk-letter">a</li>' +
 				'<li class="osk-letter">s</li>' +
 				'<li class="osk-letter">d</li>' +
@@ -336,8 +336,8 @@
 					'<span class="osk-off">\'</span>' +
 					'<span class="osk-on">@</span>' +
 				'</li>' +
-				'<li class="osk-return osk-last-item">return</li>' +
-				'<li class="osk-shift">shift</li>' +
+				'<li class="osk-return osk-last-item">⮠</li>' +
+				'<li class="osk-shift">⇑</li>' +
 				'<li class="osk-letter">z</li>' +
 				'<li class="osk-letter">x</li>' +
 				'<li class="osk-letter">c</li>' +
