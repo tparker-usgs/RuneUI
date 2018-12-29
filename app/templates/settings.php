@@ -469,6 +469,66 @@
                     </div>
                 </div>
             </div>
+            <div <?php if($this->local_browser['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="local_browserBox">
+				<?php if($this->local_browseronoff): ?>
+				<div class="form-group">
+					<label for="local_browser" class="control-label col-sm-2">Local browser</label>
+					<div class="col-sm-10">
+						<label class="switch-light well" onclick="">
+							<input id="local_browser" name="features[local_browser][enable]" type="checkbox" value="1"<?php if($this->local_browser['enable'] == 1): ?> checked="checked" <?php endif ?>>
+							<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+						</label>
+						<span class="help-block">Start a local browser on HDMI or TFT</span>
+					</div>
+				</div>
+                <div class="<?php if($this->local_browser['enable'] != 1): ?>hide<?php endif ?>" id="local_browserName">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="zoomfactor">Display zoom factor</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="zoomfactor" name="features[local_browser][zoomfactor]" value="<?php echo $this->local_browser['zoomfactor']; ?>" data-trigger="change" placeholder="1.8">
+                            <span class="help-block">Zoom factor for the local browser screen. A value of something like <strong>.5</strong> is correct for a 2.8 inch screen and something like <strong>.7</strong> is correct for a 7 inch screen.<br>
+							You will need to experiment in order to find the optimum value</span>
+                        </div>
+                    </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="rotate">Display rotation</label>
+						<div class="col-sm-10">
+							<select id="rotate" class="selectpicker" name="features[local_browser][rotate]" data-style="btn-default btn-lg">
+								<option value="NORMAL" <?php if($this->local_browser['rotate'] === 'NORMAL'): ?> selected <?php endif ?>> normal</option>
+								<option value="CW" <?php if($this->local_browser['rotate'] === 'CW'): ?> selected <?php endif ?>> rotate 90° right (clockwise)</option>
+								<option value="CCW" <?php if($this->local_browser['rotate'] === 'CCW'): ?> selected <?php endif ?>> rotate 90° left (counter clockwise)</option>
+								<option value="UD" <?php if($this->local_browser['rotate'] === 'UD'): ?> selected <?php endif ?>> rotate 180° (upside down/inverted)</option>
+							</select>
+							<span class="help-block">Use this function to rotate the local browser display</span>
+						</div>
+					</div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="mouse_cursor">Mouse-cursor visible</label>
+                        <div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="mouse_cursor" name="features[local_browser][mouse_cursor]" type="checkbox" value="1"<?php if($this->local_browser['mouse_cursor'] === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">Switch this ON if you use a mouse with your local browser display, this is not normally used with a touchscreen</span>
+                        </div>
+                    </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
+						<div class="col-sm-10">
+							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+							<span class="help-block">Sets the activation time for the local browser screensaver (0-100 seconds, -1 disables the feature)</span>
+						</div>
+					</div>
+				</div>
+				<?php else: ?>
+				<div class="form-group">
+					<label for="local_browser" class="control-label col-sm-2">Local browser</label>
+					<div class="col-sm-10">
+						<span class="help-block"><br>Disabled, the required software not installed on this model<br><br></span>
+					</div>
+				</div>
+				<?php endif ?>
+			</div>
 			<div class="form-group">
                 <label for="pwd-protection" class="control-label col-sm-2">Password protection</label>
                 <div class="col-sm-10">
@@ -479,37 +539,11 @@
                     <span class="help-block">Protect the UI with a password (standard is "rune" can be changed on login screen)</span>
                 </div>
             </div>
-			<?php if($this->local_browseronoff): ?>
-			<div class="form-group">
-                <label for="local-browser" class="control-label col-sm-2">Local browser</label>
-                <div class="col-sm-10">
-                    <label class="switch-light well" onclick="">
-                        <input name="features[local_browser]" type="checkbox" value="1"<?php if($this->local_browser == 1): ?> checked="checked" <?php endif ?>>
-                        <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
-                    </label>
-                    <span class="help-block">Start a local browser on HDMI or TFT</span>
-                </div>
-			</div>
-            <?php else: ?>
-			<div class="form-group">
-                <label for="local-browser" class="control-label col-sm-2">Local browser</label>
-                <div class="col-sm-10">
-                    <span class="help-block"><br>Disabled, the required software not installed on this model<br><br></span>
-                </div>
-			</div>
-            <?php endif ?>
-            <div class="form-group">
-                <label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
-                <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
-                    <span class="help-block">Sets the time for the local screensaver (0-100, -1 disables the feature)</span>
-                </div>
-            </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="remoteSStime">Remote ScreenSaver time</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="remoteSStime" name="features[remoteSStime]" value="<?=$this->remoteSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
-                    <span class="help-block">Sets the time for the remote screensaver (0-100, -1 disables the feature)</span>
+                    <span class="help-block">Sets the activation time for the remote screensaver (0-100 seconds, -1 disables the feature)</span>
                 </div>
             </div>
             <div class="form-group">

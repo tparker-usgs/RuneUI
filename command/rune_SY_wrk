@@ -389,14 +389,15 @@ if ($playerid_db === '') {
 	// start rune_PL_wrk
 	sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
 	$start4 = microtime(true);
-	$smartctl_microtime_then = $start4;
 	$starttime = ($start4-$start3)+$firstlap;
 	runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
 	ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
 
 	// start the local browser
-	if (($redis->get('local_browser')) && (file_exists('/usr/bin/xinit'))) {
-		sysCmdAsync('pgrep -x local-browser || systemctl start local-browser');
+	if (($redis->hGet('local_browser', 'enable')) && (file_exists('/usr/bin/xinit'))) {
+		sysCmdAsync('systemctl start local-browser');
+	} else {
+		sysCmdAsync('systemctl stop local-browser');
 	}
 
 	// turn wifi power saving off
@@ -914,18 +915,48 @@ while (1) {
 					sysCmd('/srv/http/command/switch_'.$job->action.'_time_on.sh');
 					$redis->sRem('w_lock', $jobID);
 					break;
-                case 'xorgserverstart':
+                case 'xorgserver':
                     runelog('wrk_SY: ', $job->wrkcmd);
+					runelog('xorgserver action: ', $job->action);
+					runelog('xorgserver args: ', $job->args);
                     $redis->sAdd('w_lock', $jobID);
-					$redis->set('local_browser', 1);
-					sysCmd('systemctl start local-browser');
-					$redis->sRem('w_lock', $jobID);
-					break;
-                case 'xorgserverstop':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-					$redis->set('local_browser', 0);
-					sysCmd('systemctl stop local-browser');
+					if ($job->action === 'start') {
+						$redis->hSet('local_browser', 'enable', $job->args);
+						sysCmd('systemctl start local-browser');
+					} else if ($job->action === 'stop') {
+						$redis->hSet('local_browser', 'enable', $job->args);
+						sysCmd('systemctl stop local-browser');
+					} else if ($job->action === 'zoomfactor') {
+						// zoomfactor
+						// reformat zoomfactor (characters 0 to 9 and decimal point are valid) and floatval will clean up any second decimal points
+						$zoomfactor = floatval(preg_replace("/[^0-9.]/", "", $job->args));
+						// check range of zoomfactor
+						if (($zoomfactor >= 0.1) && ($zoomfactor <= 10)) {
+							// strip a leading zero if needed
+							if (substr($zoomfactor, 0, 1) === '0') {
+								$zoomfactor = substr($zoomfactor, 1);
+							}
+							$redis->hSet('local_browser', $job->action, $zoomfactor);
+							wrk_xorgconfig($redis, $job->action, $zoomfactor);
+							if ($redis->hGet('local_browser', 'enable')) {
+								sysCmd('systemctl stop local-browser');
+								sysCmd('systemctl daemon-reload');
+								sysCmd('systemctl start local-browser');
+							}
+						} else {
+							ui_notify('Invalid zoomfactor', $job->args.' value must be between 0.1 and 10');
+							sleep(3);
+						}
+					} else {
+						// rotate or mouse_cursor
+						$redis->hSet('local_browser', $job->action, $job->args);
+						wrk_xorgconfig($redis, $job->action, $job->args);
+						if ($redis->hGet('local_browser', 'enable')) {
+							sysCmd('systemctl stop local-browser');
+							sysCmd('systemctl daemon-reload');
+							sysCmd('systemctl start local-browser');
+						}
+					}
 					$redis->sRem('w_lock', $jobID);
 					break;
                 case 'airplayconfreset':

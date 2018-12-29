@@ -1372,6 +1372,40 @@ function getmac($nicname)
     return trim($mac);
 }
 
+function wrk_xorgconfig($redis, $action, $args)
+{
+	switch ($action) {
+		case 'zoomfactor':
+			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
+			$file = '/etc/X11/xinit/start_chromium.sh';
+			// replace the line with 'force-device-scale-factor='
+			$newArray = wrk_replaceTextLine($file, '', 'force-device-scale-factor', 'chromium --app=http://localhost --start-fullscreen --force-device-scale-factor='.$args);
+			// Commit changes to /etc/X11/xinit/start_chromium.sh
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
+		case 'rotate':
+			sysCmd('/srv/http/command/raspi-rotate-screen.sh '.$args);
+			break;
+		case 'mouse_cursor':
+			if ($args){
+				$usecursorno = '';
+			} else {
+				$usecursorno = '-use_cursor no ';
+			}
+			// modify the mouse on/off setting in /etc/X11/xinit/xinitrc
+			$file = '/etc/X11/xinit/xinitrc';
+			// replace the line with 'matchbox-window-manager'
+			$newArray = wrk_replaceTextLine($file, '', 'matchbox-window-manager', 'matchbox-window-manager -use_titlebar no '.$usecursorno.'&');
+			// Commit changes to /etc/X11/xinit/xinitrc
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
+	}
+}
+
 function wrk_avahiconfig($redis, $hostname)
 {
     if (!file_exists('/etc/avahi/services/runeaudio.service')) {

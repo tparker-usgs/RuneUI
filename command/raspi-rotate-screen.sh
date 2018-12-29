@@ -22,19 +22,19 @@ function usage
 #Parse argument and set variables
 if [ "$#" -gt 0 ]; then
         case "$1" in
-        normal)
+        normal|NORMAL)
                 ROTATE="NORMAL"
 		MATRIX="1 0 0 0 1 0 0 0 1"
                 ;;
-        cw|clockwise)
+        cw|clockwise|CW|CLOCKWISE)
                 ROTATE="CW"
 		MATRIX="0 1 0 -1 0 1 0 0 1"
                 ;;
-        ccw|counter-clockwise)
+        ccw|counter-clockwise|CCW|COUNTER-CLOCKWISE)
                 ROTATE="CCW"
 		MATRIX="0 -1 1 1 0 0 0 0 1"
                 ;;
-        ud|upside-down)
+        ud|upside-down|UD|UPSIDE-DOWN)
                 ROTATE="UD"
 		MATRIX="-1 0 1 0 -1 1 0 0 1"
                 ;;
@@ -69,7 +69,7 @@ mv "$TMP_FILE" "$XORG_CONF_FILE"
 #	done
 #	unset f
 #fi
-$HOOKS_SPLASH_FILE $1
+eval $HOOKS_SPLASH_FILE $1
 
 echo "Rotation set to $ROTATE"
 

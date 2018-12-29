@@ -3111,6 +3111,17 @@ if ($('#section-index').length) {
                 }
             });
             
+            // show/hide local browser name form
+            $('#local_browser').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#local_browserName').removeClass('hide');
+                    $('#local_browserBox').addClass('boxed-group');
+                } else {
+                    $('#local_browserName').addClass('hide');
+                    $('#local_browserBox').removeClass('boxed-group');
+                }
+            });
+            
             // show/hide UPnP/dlna Tidal name form
             $('#dlnaTidal').change(function(){
                 if ($(this).prop('checked')) {
