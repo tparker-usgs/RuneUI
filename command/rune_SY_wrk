@@ -412,8 +412,6 @@ if ($playerid_db === '') {
 }
 runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
-$all_mounted = 0;
-$retries_mounting = 0;
 while (1) {
 	// Connect to Redis backend
 	$redis->pconnect('/run/redis.sock');
@@ -1381,29 +1379,38 @@ while (1) {
         } // end foreach loop
     } // end if loop
     // mount all sources
-    if ($all_mounted === 0) {
-        runelog('wrk_SY: try to mount all shares!');
-        $all_mounted = wrk_sourcemount($redis, 'mountall');
-        if ($retries_mounting > 20) {
-            $all_mounted = 1;
-        }
-        if ($all_mounted === 1) {
+    if ((!$allmounted) && ($retriesmounting = 100)) {
+        runelog('wrk_SY: try to mount all shares! - First time');
+		// first time, so call directly
+		// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
+		$allmounted = wrk_sourcemount($redis, 'mountall', null, true, true);
+		$redis->set('allmounted', $allmounted);
+        if ($allmounted) {
             runelog('wrk_SY: all shares mounted successfully!');
             // start play if enabled
             if ($redis->get('mpd_autoplay')) {
 				$redis->set('mpd_playback_laststate', 'playing');
 				wrk_mpdRestorePlayerStatus($redis);
             }
-        } else {
-            $retries_mounting++;
-            runelog('wrk_SY: error mounting shares, try it again! Count: '.$retries_mounting);
-            usleep(500000);
         }
+		// this sets the number of times mounting is to be retried, 99 @ 4 times per hour is +/-25 hours
+		// you can change the number of retries here, maximum 99
+		$retriesmounting = 99;
     }
-	// The following parts are heavy on cpu time, run then only on every 15th cycle (= every +/-7 seconds)
+	$allmounted = $redis->get('allmounted');
+	// If mounting is unsuccessful retry mounting the first time on the 1st cycle, then every +/-1800th cycle (= every +/-15 minutes), first time it is set to zero
+	if ((!$allmounted) && ($savecpu_mnt-- === 0)) {
+		$savecpu_mnt = 1750 + rand(0, 100);
+		if ($retriesmounting-- > 0) {
+			runelog('wrk_SY: error mounting shares, try it again! Count: '.$retriesmounting);
+			// run asynchronous mount script
+			sysCmdAsync('/var/www/command/mount_async.php');
+		}
+	}
+	// The following parts are a bit heavy on cpu time, run then only on every +/-15th cycle (= every +/-7 seconds)
 	// this will allow the normal queued actions to be more responsive, waiting only 0,5 seconds in sleep state
-	if ($savecpu++ > 15) {
-		$savecpu = 0;
+	if ($savecpu_rp-- === 0) {
+		$savecpu_rp = 10 + rand(0, 10);
 		// Detect deletion of playlist random file
 		// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
 		// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php
