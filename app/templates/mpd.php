@@ -45,7 +45,7 @@
                     <span class="help-block">Sets a forced playback volume at startup (0-100, -1 disables the feature).</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="realtime-volume">Volume knob</label>
                 <div class="col-sm-10">
                     <select id="realtime-volume" name="mpdvol[realtime_volume]" class="selectpicker" data-style="btn-default btn-lg">
@@ -66,14 +66,14 @@
         </div>
         <fieldset>
             <legend>General music daemon options</legend>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Port</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="port" name="conf[port]" value="<?=$this->conf['port'] ?>" data-trigger="change" disabled>
                     <span class="help-block">This setting is the TCP port that is desired for the daemon to get assigned to.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="daemon-user">Daemon user : group</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[user]" class="selectpicker" data-style="btn-default btn-lg">
@@ -83,7 +83,7 @@
                     <span class="help-block">This specifies the system user : group that MPD will run as.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="log-level">Log level</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[log_level]" class="selectpicker" data-style="btn-default btn-lg">
@@ -96,7 +96,7 @@
 					The "verbose" setting argument is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="state-file">State file</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[state_file]" class="selectpicker" data-style="btn-default btn-lg">
@@ -106,7 +106,7 @@
                     <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
                 </div>
             </div>                   
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="ffmpeg">FFmpeg decoder plugin</label>
                 <div class="col-sm-10">
                     <select id="ffmpeg" name="conf[ffmpeg]" class="selectpicker" data-style="btn-default btn-lg">
@@ -116,7 +116,8 @@
                     <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php if(!$this->conf['mpdv21']): ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 playback</label>
                 <div class="col-sm-10">
                     <select id="gapless-mp3-playback" name="conf[gapless_mp3_playback]" class="selectpicker" data-style="btn-default btn-lg">
@@ -127,7 +128,8 @@
                     it is highly recommended to fix the MP3 files with vbrfix (available as vbrfix in the debian archive), at which point gapless MP3 playback can be enabled.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php endif ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">DSD support</label>
                 <?php if($this->hwplatformid === '08' || $this->hwplatformid === '10'): ?>
 				<div class="col-sm-10">
@@ -148,7 +150,7 @@
                 </div>
                 <?php endif;?>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="replaygain">ReplayGain</label>
                 <div class="col-sm-10">
                     <select id="replaygain" name="conf[replaygain]" class="selectpicker" data-style="btn-default btn-lg">
@@ -163,7 +165,7 @@
                     Currently only FLAC, Ogg Vorbis, Musepack, and MP3 (through ID3v2 ReplayGain tags, not APEv2) are supported.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="volume-normalization">Volume normalization</label>
                 <div class="col-sm-10">
                     <select id="volume-normalization" name="conf[volume_normalization]" class="selectpicker" data-style="btn-default btn-lg">
@@ -173,14 +175,15 @@
                     <span class="help-block">If yes, mpd will normalize the volume of songs as they play. The default is no. NOTE: Enabling this feature means your audio will no longer be bit perfect.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Audio buffer size</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="audio-buffer-size" name="conf[audio_buffer_size]" value="<?=$this->conf['audio_buffer_size'] ?>" data-trigger="change" min="512" />
                     <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php if(!$this->conf['mpdv21']): ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">Buffer before play</label>
                 <div class="col-sm-10">
                     <select id="buffer-before-play" name="conf[buffer_before_play]" class="selectpicker" data-style="btn-default btn-lg">
@@ -189,9 +192,10 @@
                         <option value="20%" <?php if($this->conf['buffer_before_play'] == '20%'): ?> selected <?php endif ?>>20%</option>\n";    
                         <option value="30%" <?php if($this->conf['buffer_before_play'] == '30%'): ?> selected <?php endif ?>>30%</option>\n";                    
                     </select>
-                    <span class="help-block"> This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
+                    <span class="help-block">This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
                 </div>
             </div>
+			<?php endif ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="auto-update">Auto update</label>
                 <div class="col-sm-10">
@@ -227,7 +231,7 @@
                         <input name="mpd[mpd_autoplay]" type="checkbox" value="1"<?php if($this->mpd['mpd_autoplay'] == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">If set to ON the player starts automatically after boot.</span>
+                    <span class="help-block">If set to ON the player starts automatically after boot</span>
                 </div>
             </div>
             <div class="form-group">
@@ -238,18 +242,23 @@
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
-					When you select a playlist as source for random play this option is switched on automatically.<br>
-					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF.</span>
+					You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
+					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF</span>
+					<div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
+						<input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
+					</div>
                 </div>
+				<div class="form-group form-actions">
+					<div class="col-sm-offset-2 col-sm-10">
+						<br><a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
+						<button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+						<button type="submit" class="btn btn-primary btn-lg" name="resetrp" value="1" id="resetrp">Reset Random Play</button>
+						<span class="help-block">Select Cancel, Save and apply or Reset Random Play.<br>
+						Selecting <strong>Reset Random Play</strong> will reset global random and will remove random play based on a selected playlist, the full MPD library will then be used</span>
+					</div>
+				</div>
             </div>
         </fieldset>
-        <div class="form-group form-actions">
-            <div class="col-sm-offset-2 col-sm-10">
-                <a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
-				<span class="help-block">Use Save and apply to cancel random play from a playlist. It takes a little while before random play uses your full MPD library.</span>
-            </div>
-        </div>
     </form>
 </div>
 <div id="mpd-config-defaults" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mpd-config-defaults-label" aria-hidden="true">

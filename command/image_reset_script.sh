@@ -26,6 +26,9 @@ systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd sha
 systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
 systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd
 #
+# install raspi-rotate
+/var/www/command/raspi-rotate-install.sh
+#
 # remove rerns addons menu (if installed)
 systemctl stop addons
 systemctl disable addons
@@ -67,6 +70,7 @@ redis-cli del samba
 redis-cli del spotify
 redis-cli del usbmounts
 redis-cli del debugdata
+redis-cli del local_browser
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""

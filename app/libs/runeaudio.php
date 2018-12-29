@@ -1372,6 +1372,40 @@ function getmac($nicname)
     return trim($mac);
 }
 
+function wrk_xorgconfig($redis, $action, $args)
+{
+	switch ($action) {
+		case 'zoomfactor':
+			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
+			$file = '/etc/X11/xinit/start_chromium.sh';
+			// replace the line with 'force-device-scale-factor='
+			$newArray = wrk_replaceTextLine($file, '', 'force-device-scale-factor', 'chromium --app=http://localhost --start-fullscreen --force-device-scale-factor='.$args);
+			// Commit changes to /etc/X11/xinit/start_chromium.sh
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
+		case 'rotate':
+			sysCmd('/srv/http/command/raspi-rotate-screen.sh '.$args);
+			break;
+		case 'mouse_cursor':
+			if ($args){
+				$usecursorno = '';
+			} else {
+				$usecursorno = '-use_cursor no ';
+			}
+			// modify the mouse on/off setting in /etc/X11/xinit/xinitrc
+			$file = '/etc/X11/xinit/xinitrc';
+			// replace the line with 'matchbox-window-manager'
+			$newArray = wrk_replaceTextLine($file, '', 'matchbox-window-manager', 'matchbox-window-manager -use_titlebar no '.$usecursorno.'&');
+			// Commit changes to /etc/X11/xinit/xinitrc
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
+	}
+}
+
 function wrk_avahiconfig($redis, $hostname)
 {
     if (!file_exists('/etc/avahi/services/runeaudio.service')) {
@@ -2433,6 +2467,12 @@ if ($action === 'reset') {
 				$redis->hDel('mpdconf', 'soxr');
 			}
 			unset($count);
+			// some MPD options are no longer valid for version 0.21.00 and later
+			if ($redis->hGet('mpdconf', 'version') >= '0.21.00') {
+				$redis->hDel('mpdconf', 'id3v1_encoding');
+				$redis->hDel('mpdconf', 'buffer_before_play');
+				$redis->hDel('mpdconf', 'gapless_mp3_playback');
+			}
 			// set mpd zeroconfig name to hostname
             $redis->hSet('mpdconf', 'zeroconf_name', $redis->get('hostname'));
             wrk_mpdconf($redis, 'writecfg');
@@ -2497,12 +2537,14 @@ if ($action === 'reset') {
                 }
                 if ($param === 'user' && $value === 'mpd') {
                     $output .= $param." \t\"".$value."\"\n";
-                    $output .= "group \t\"audio\"\n";
+					// group is not valid in MPD v0.21.00 or higher
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"audio\"\n";
                     continue;
                 }
                 if ($param === 'user' && $value === 'root') {
                     $output .= $param." \t\"".$value."\"\n";
-                    $output .= "group \t\"root\"\n";
+					// group is not valid in MPD v0.21.00 or higher
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"root\"\n";
                     continue;
                 }
                 if ($param === 'bind_to_address') {
@@ -2957,6 +2999,7 @@ function wrk_shairport($redis, $ao, $name = null)
 		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$mixer_device.'"; // alsa_mixer_device');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_rate', 'output_rate="'.$redis->hGet('airplay', 'alsa_output_rate').'"; // alsa_output_rate');
     $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
 	if ($metadata_enabled === '') {
 		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', '// enabled="'.$metadata_enabled.'"; // metadata_enabled');
@@ -3023,24 +3066,37 @@ function wrk_shairport($redis, $ao, $name = null)
 	$redis->set('libaoconfchange', 0);
 }
 
-function wrk_sourcemount($redis, $action, $id = null)
+function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
 {
     switch ($action) {
         case 'mount':
             $mp = $redis->hGetAll('mount_'.$id);
-			// check that the mount server is on-line
-			$retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
-			if ($retval[0] == 0) {
-				// the mount server is not visible, so don't even try to mount it
-				$mp['error'] = 'Network Mount off-line';
-				return 0;
+			// check that it is not already mounted
+			$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+			if ($retval[0]) {
+				// already mounted, do nothing and return
+				return 1;
 			}
 			unset($retval);
+			// check that the mount server is on-line
+			// $retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
+			// if ($retval[0] == 0) {
+				// // the mount server is not visible, so don't even try to mount it
+				// $mp['error'] = 'Network Mount off-line';
+				// return 0;
+			// }
+			// unset($retval);
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
             if ($mp['type'] === 'nfs') {
                 // nfs mount
-                $mountstr = "mount -t nfs -o soft,retry=0,actimeo=1,retrans=2,timeo=50,nofsc,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
+				if (trim($mp['options']) == '') {
+					// no mount options set by the user or from previous auto mount, so set it to a value
+					$mp['options'] = 'ro,nocto';
+				}
+                // janui nfs mount string modified, old invalid options removed, no longer use nfsvers='xx' - let it auto-negotiate
+				$mountstr = "mount -t nfs -o soft,retry=0,retrans=2,timeo=50,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
+				// $mountstr = "mount -t nfs -o soft,retry=0,actimeo=1,retrans=2,timeo=50,nofsc,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
                 // $mountstr = "mount -t nfs -o soft,retry=1,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
             if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
@@ -3051,83 +3107,108 @@ function wrk_sourcemount($redis, $action, $id = null)
                 }
 				if (trim($mp['options']) == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
-					$mp['options'] = 'cache=none,noserverino,ro,sec=ntlmssp';
+					$options2 = 'cache=none,noserverino,ro,sec=ntlmssp';
+				} else {
+					// mount options provided so use them
+					if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting previous mount options');
+					$options2 = $mp['options'];
 				}
-				$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+				$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"/mnt/MPD/NAS/".$mp['name']."\"";
 			}
             // debug
             runelog('mount string', $mountstr);
 			$count = 10;
 			$busy = 1;
-			while ($busy && $count--) {
+			$unresolved = 0;
+			$noaddress = 0;
+			while ($busy && !$unresolved && !$noaddress && $count--) {
 				usleep(100000);
 				$busy = 0;
 				unset($retval);
 				$retval = sysCmd($mountstr);
 				foreach ($retval as $line) {
 					$busy += substr_count($line, 'resource busy');
+					$unresolved += substr_count($line, 'could not resolve address');
+					$noaddress += substr_count($line, 'Unable to find suitable address');
 				}
 			}
             runelog('system response',var_dump($retval));
             if (empty($retval)) {
 				// mounted OK
-                if (!empty($mp['error'])) {
-					$mp['error'] = '';
-                }
+				$mp['error'] = '';
+				// only save mount options when mounted OK
+				$mp['options'] = $options2;
 				// save the mount information
 				$redis->hMSet('mount_'.$id, $mp);
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+					sleep(3);
+				}
                 return 1;
             } else {
+				$mp['error'] = implode("\n", $retval);
 				unset($retval);
 				$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
 				if ($retval[0]) {
 					// mounted OK
-					if (!empty($mp['error'])) {
-						$mp['error'] = '';
-					}
+					$mp['error'] = '';
+					// only save mount options when mounted OK
+					$mp['options'] = $options2;
 					// save the mount information
 					$redis->hMSet('mount_'.$id, $mp);
+					if (!$quiet) {
+						ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+						sleep(3);
+					}
 					return 1;
-				} else {
-					// mount failed
-					$mp['error'] = implode("\n", $retval);
-					$redis->hMSet('mount_'.$id, $mp);
 				}
-				unset($retval);
-            }
+				// mount failed
+				$redis->hMSet('mount_'.$id, $mp);
+			}
+			unset($retval);
+			if ($unresolved OR $noaddress OR $quick) {
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', $mp['error']);
+					sleep(3);
+					ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+					sleep(3);
+				}
+				if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+				return 0;
+			}
             if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
 				for ($i = 1; $i <= 8; $i++) {
-					// try all valid cifs versions, this happens only when no mount options are provided
+					// try all valid cifs versions
 					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
 					//
 					switch ($i) {
 						case 1:
-					        ui_notify('CIFS mount', 'Attempting automatic negotiation');
-							$options = 'cache=none,noserverino,ro';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting automatic negotiation');
+							$options1 = 'cache=none,noserverino,ro';
 							break;
 						case 2:
-					        ui_notify('CIFS mount', 'Attempting vers=3.1.1');
-							$options = 'cache=none,noserverino,ro,vers=3.1.1';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.1.1');
+							$options1 = 'cache=none,noserverino,ro,vers=3.1.1';
 							break;
 						case 3:
-					        ui_notify('CIFS mount', 'Attempting vers=3.02');
-							$options = 'cache=none,noserverino,ro,vers=3.02';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.02');
+							$options1 = 'cache=none,noserverino,ro,vers=3.02';
 							break;
 						case 4:
-					        ui_notify('CIFS mount', 'Attempting vers=3.0');
-							$options = 'cache=none,noserverino,ro,vers=3.0';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.0');
+							$options1 = 'cache=none,noserverino,ro,vers=3.0';
 							break;
 						case 5:
-					        ui_notify('CIFS mount', 'Attempting vers=2.1');
-							$options = 'cache=none,noserverino,ro,vers=2.1';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=2.1');
+							$options1 = 'cache=none,noserverino,ro,vers=2.1';
 							break;
 						case 6:
-					        ui_notify('CIFS mount', 'Attempting vers=2.0');
-							$options = 'cache=none,noserverino,ro,vers=2.0';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=2.0');
+							$options1 = 'cache=none,noserverino,ro,vers=2.0';
 							break;
 						case 7:
-					        ui_notify('CIFS mount', 'Attempting vers=1.0');
-							$options = 'cache=none,noserverino,ro,vers=1.0';
+					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=1.0');
+							$options1 = 'cache=none,noserverino,ro,vers=1.0';
 							break;
 						default:
 							if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
@@ -3137,28 +3218,28 @@ function wrk_sourcemount($redis, $action, $id = null)
 					for ($j = 1; $j <= 6; $j++) {
 						switch ($j) {
 							case 1:
-								$mp['options'] = $options.',sec=ntlm';
+								$options2 = $options1.',sec=ntlm';
 								break;
 							case 2:
-								$mp['options'] = $options.',sec=ntlmssp';
+								$options2 = $options1.',sec=ntlmssp';
 								break;
 							case 3:
-								$mp['options'] = $options.',sec=ntlm,nounix';
+								$options2 = $options1.',sec=ntlm,nounix';
 								break;
 							case 4:
-								$mp['options'] = $options.',sec=ntlmssp,nounix';
+								$options2 = $options1.',sec=ntlmssp,nounix';
 								break;
 							case 5:
-								$mp['options'] = $options;
+								$options2 = $options1;
 								break;
 							case 6:
-								$mp['options'] = $options.',nounix';
+								$options2 = $options1.',nounix';
 								break;
 							default:
 								$j = 10;
 								break;
 						}
-						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$mp['options']." \"/mnt/MPD/NAS/".$mp['name']."\"";
+						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"/mnt/MPD/NAS/".$mp['name']."\"";
 						// debug
 						runelog('mount string', $mountstr);
 						$count = 10;
@@ -3175,32 +3256,35 @@ function wrk_sourcemount($redis, $action, $id = null)
 						runelog('system response',var_dump($retval));
 						if (empty($retval)) {
 							// mounted OK
-							if (!empty($mp['error'])) {
-								$mp['error'] = '';
-							}
+							$mp['error'] = '';
+							// only save mount options when mounted OK
+							$mp['options'] = $options2;
 							// save the mount information
 							$redis->hMSet('mount_'.$id, $mp);
-							ui_notify('CIFS mount', 'Mounted');
-							sleep(3);
+							if (!$quiet) {
+								ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+								sleep(3);
+							}
 							return 1;
 						} else {
+							$mp['error'] = implode("\n", $retval);
 							unset($retval);
 							$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
 							if ($retval[0]) {
 								// mounted OK
-								if (!empty($mp['error'])) {
-									$mp['error'] = '';
-								}
+								$mp['error'] = '';
+								// only save mount options when mounted OK
+								$mp['options'] = $options2;
 								// save the mount information
 								$redis->hMSet('mount_'.$id, $mp);
-								ui_notify('CIFS mount', 'Mounted');
-								sleep(3);
+								if (!$quiet) {
+									ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+									sleep(3);
+								}
 								return 1;
-							} else {
-								// mount failed
-								$mp['error'] = implode("\n", $retval);
-								$redis->hMSet('mount_'.$id, $mp);
 							}
+							// mount failed
+							$redis->hMSet('mount_'.$id, $mp);
 							unset($retval);
 						}
 					}
@@ -3208,8 +3292,12 @@ function wrk_sourcemount($redis, $action, $id = null)
 			}
 			// mount failed
             if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-			ui_notify('CIFS mount', 'Failed');
-			sleep(3);
+			if (!$quiet) {
+				ui_notify($mp['type'].' mount', $mp['error']);
+				sleep(3);
+				ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+				sleep(3);
+			}
 			return 0;
             break;
         case 'mountall':
@@ -3221,7 +3309,8 @@ function wrk_sourcemount($redis, $action, $id = null)
 					if ($key != '') {
 						$mp = $redis->hGetAll($key);
 						if (!wrk_checkMount($mp['name'])) {
-							if (wrk_sourcemount($redis, 'mount', $mp['id']) === 0) {
+							// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
+							if (wrk_sourcemount($redis, 'mount', $mp['id'], $quiet, $quick) === 0) {
 								$test = 0;
 							}
 						}
@@ -3269,27 +3358,51 @@ function wrk_sourcecfg($redis, $action, $args=null)
             $return = $redis->del('mount_'.$args->id);
             break;
         case 'reset':
-            $source = $redis->keys('mount_*');
-			wrk_mpdPlaybackStatus($redis);
+			sysCmd('mpc stop');
             sysCmd('systemctl stop mpd ashuffle');
             usleep(500000);
-                foreach ($source as $key) {
-                    $mp = $redis->hGetAll($key);
-                    runelog('wrk_sourcecfg() internal loop $mp[name]',$mp['name']);
-                    sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
-                    sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-                    $return = $redis->del($key);
-                }
+            $source = $redis->keys('mount_*');
+			foreach ($source as $key) {
+				$mp = $redis->hGetAll($key);
+				runelog('wrk_sourcecfg() umount loop $mp[name]',$mp['name']);
+				sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
+				sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+				$return = $redis->del($key);
+			}
             // reset mount index
             if ($return) $redis->del('mountidx');
             sysCmd('systemctl start mpd');
 			// ashuffle gets started automatically
-			wrk_mpdRestorePlayerStatus($redis);
+            // set process priority
+            sysCmdAsync('sleep 1 && rune_prio nice');
+            break;
+        case 'umountall':
+			sysCmd('mpc stop');
+            sysCmd('systemctl stop mpd ashuffle');
+            usleep(500000);
+            $source = $redis->keys('mount_*');
+			foreach ($source as $key) {
+				$mp = $redis->hGetAll($key);
+				runelog('wrk_sourcecfg() umount loop $mp[name]',$mp['name']);
+				sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
+				sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+			}
+            sysCmd('systemctl start mpd');
+			// ashuffle gets started automatically
             // set process priority
             sysCmdAsync('sleep 1 && rune_prio nice');
             break;
         case 'mountall':
+			// Note: wrk_sourcemount() will not do anything for existing mounts
+			// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
             $return = wrk_sourcemount($redis, 'mountall');
+            break;
+        case 'remountall':
+			// remove all mounts first
+			wrk_sourcecfg($redis, 'umountall');
+			// then mount them all again
+			// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
+			wrk_sourcecfg($redis, 'mountall');
             break;
         case 'umountusb':
             $return = sysCmd('udevil umount '.$args);

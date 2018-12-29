@@ -103,6 +103,7 @@ function redisDatastore($redis,$action) {
             // kernel
             $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
             $redis->set('i2smodule', 'none');
+            $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
 			$redis->set('audio_on_off', '1');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
@@ -140,6 +141,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('airplay', 'alsa_mixer_device', 'default');
 			$redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
 			$redis->hSet('airplay', 'alsa_output_format', 'S16');
+			$redis->hSet('airplay', 'alsa_output_rate', '48100');
 			$redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
 			$redis->hSet('airplay', 'metadata_enabled', 'yes');
 			$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
@@ -156,7 +158,7 @@ function redisDatastore($redis,$action) {
 			$redis->hDel('airplay', 'artworkonoff');
             $redis->hSet('dlna', 'enable', 0);
             $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hSet('dlna', 'queueowner', 0);
+            $redis->hSet('dlna', 'queueowner', 1);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 2);
 			$redis->hSet('dlna', 'radioname', '');
@@ -191,12 +193,16 @@ function redisDatastore($redis,$action) {
 			$redis->del('soxrmpdonoff');
 			$redis->set('localSStime', -1);
 			$redis->set('remoteSStime', -1);
-            $redis->set('ashuffle_start_delay', '30');
+            $redis->set('ashuffle_start_delay', '10');
 			$redis->set('ashuffle_wait_for_play', '0');
 			$redis->set('mpd_playback_laststate', '');
 			$redis->set('mpd_playback_lastnumber', '');
 			$redis->set('last_pl_randomfile', 'exists');
-			$redis->set('local_browser', 0);
+			$redis->hSet('local_browser', 'enable', 0);
+			$redis->hSet('local_browser', 'zoomfactor', '1.8');
+			$redis->hSet('local_browser', 'rotate', 'NORMAL');
+			$redis->hSet('local_browser', 'mouse_cursor', 0);
+			$redis->set('restoreact', 0);
 			$redis->set('restoreact', 0);
 			$redis->set('playernamemenu', 0);
             // plugins api-keys
@@ -258,6 +264,7 @@ function redisDatastore($redis,$action) {
             $redis->set('wlans', '');
             $redis->del('acards');
             $redis->set('mountidx', 1);
+			$redis->set('allmounted', 0);
             $redis->set('debugdata', '');
 			// pre-installed Rern's add-ons
 			$redis->hSet('addons', 'update', '0');
@@ -341,6 +348,7 @@ function redisDatastore($redis,$action) {
             // kernel
             $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
             $redis->exists('i2smodule') || $redis->set('i2smodule', 'none');
+            $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->exists('activePlayer') || $redis->set('activePlayer', 'MPD');
 			// UI login password
@@ -376,6 +384,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('airplay', 'alsa_mixer_device') || $redis->hSet('airplay', 'alsa_mixer_device', 'default');
 			$redis->hExists('airplay', 'alsa_mixer_control') || $redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
 			$redis->hExists('airplay', 'alsa_output_format') || $redis->hSet('airplay', 'alsa_output_format', 'S16');
+			$redis->hExists('airplay', 'alsa_output_rate') || $redis->hSet('airplay', 'alsa_output_rate', '48100');
 			$redis->hExists('airplay', 'pipe_pipe_name') || $redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
 			$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
 			$redis->hExists('airplay', 'metadata_include_cover_art') || $redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
@@ -392,7 +401,7 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('airplay', 'source_remote_control_port_number') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
             $redis->hExists('dlna', 'enable') || $redis->hSet('dlna', 'enable', 0);
             $redis->hExists('dlna', 'name') || $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hExists('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 0);
+            $redis->hExists('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 1);
             $redis->hExists('dlna', 'logfile') || $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hExists('dlna', 'loglevel') || $redis->hSet('dlna', 'loglevel', 2);
 			$redis->hExists('dlna', 'radioname') || $redis->hSet('dlna', 'radioname', '');
@@ -418,12 +427,16 @@ function redisDatastore($redis,$action) {
 			$redis->exists('localSStime') || $redis->set('localSStime', -1);
 			$redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
             $redis->exists('audio_on_off') || $redis->set('audio_on_off', '1');
-			$redis->exists('ashuffle_start_delay') || $redis->set('ashuffle_start_delay', '30');
+			$redis->exists('ashuffle_start_delay') || $redis->set('ashuffle_start_delay', '10');
 			$redis->exists('ashuffle_wait_for_play') || $redis->set('ashuffle_wait_for_play', '0');
 			$redis->exists('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
 			$redis->exists('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
 			$redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
 			$redis->exists('local_browser') || $redis->set('local_browser', 0);
+			$redis->hExists('local_browser', 'enable') || $redis->hSet('local_browser', 'enable', 0);
+			$redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', '1.8');
+			$redis->hExists('local_browser', 'rotate') || $redis->hSet('local_browser', 'rotate', 'NORMAL');
+			$redis->hExists('local_browser', 'mouse_cursor') || $redis->hSet('local_browser', 'mouse_cursor', 0);
 			$redis->exists('restoreact') || $redis->set('restoreact', 0);
 			$redis->exists('playernamemenu') || $redis->set('playernamemenu', 0);
 			$redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', 0);
@@ -477,6 +490,11 @@ function redisDatastore($redis,$action) {
             $redis->exists('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             $redis->exists('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);
             $redis->exists('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
+            // env settings
+            $redis->exists('wlans') || $redis->set('wlans', '');
+            $redis->exists('mountidx') || $redis->set('mountidx', 1);
+			$redis->exists('allmounted') || $redis->set('allmounted', 0);
+            $redis->exists('debugdata') || $redis->set('debugdata', '');
 			// pre-installed Rern's add-ons
 			$redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', '0');
 			$redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20170901');

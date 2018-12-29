@@ -71,16 +71,18 @@ if (isset($_POST)) {
         // submit worker job
         $redis->get('orionprofile') == $_POST['orionprofile'] || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => $_POST['orionprofile']));
     }
-    if (isset($_POST['i2smodule'])) {
+    if (isset($_POST['i2smodule_select'])) {
         // submit worker job
-        if ($redis->get('i2smodule') !== $_POST['i2smodule']) {
+        if ($redis->get('i2smodule_select') !== $_POST['i2smodule_select']) {
+			$redis->set('i2smodule_select', $_POST['i2smodule_select']);
             $notification = new stdClass();
-            if ($_POST['i2smodule'] !== 'none') {
+			list($i2smodule, $i2sselectedname) = explode('|', $_POST['i2smodule_select'], 2);
+            if ($i2smodule !== 'none') {
                 $notification->title = 'Loading I&#178;S kernel module';
             } else {
                 $notification->title = 'Unloading I&#178;S kernel module';
             }
-            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'i2smodule', 'args' => $_POST['i2smodule']));
+            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'i2smodule', 'args' => $i2smodule));
             $notification->text = 'Please wait';
             wrk_notify($redis, 'startjob', $notification, $job);
             $jobID[] = $job;
@@ -127,10 +129,21 @@ if (isset($_POST)) {
             // create worker job (stop upmpdcli)
             $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']));
         }
-        if ($_POST['features']['local_browser'] == 1) {
-            $redis->get('local_browser') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstart'));
+        if ($_POST['features']['local_browser']['enable'] == 1) {
+            $redis->hGet('local_browser', 'enable') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'start', 'args' => 1));
         } else {
-            $redis->get('local_browser') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserverstop'));
+            $redis->hGet('local_browser', 'enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'stop', 'args' => 0));
+        }
+		if ($_POST['features']['local_browser']['zoomfactor'] != $redis->get('local_browser', 'zoomfactor')) {
+			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'zoomfactor', 'args' => $_POST['features']['local_browser']['zoomfactor']));
+		}
+		if ($_POST['features']['local_browser']['rotate'] != $redis->get('local_browser', 'rotate')) {
+			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'rotate', 'args' => $_POST['features']['local_browser']['rotate']));
+		}
+        if ($_POST['features']['local_browser']['mouse_cursor'] == 1) {
+            $redis->hGet('local_browser', 'mouse_cursor') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 1));
+        } else {
+            $redis->hGet('local_browser', 'mouse_cursor') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 0));
         }
         if ($_POST['features']['pwd_protection'] == 1) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
@@ -206,7 +219,7 @@ $template->sysstate['uptime'] = date('d:H:i:s', strtok(file_get_contents('/proc/
 $template->sysstate['HWplatform'] = $redis->get('hwplatform')." (".$redis->get('hwplatformid').")";
 $template->sysstate['HWmodel'] = implode('\n', sysCmd('cat /proc/device-tree/model'));
 $template->sysstate['playerID'] = $redis->get('playerid');
-$template->sysstate['buildversion'] = $redis->get('buildversion');
+$template->sysstate['buildversion'] = $redis->get('buildversion')."-".$redis->get('patchlevel');
 $template->sysstate['release'] = $redis->get('release');
 $template->hostname = $redis->get('hostname');
 $template->ntpserver = $redis->get('ntpserver');
@@ -214,7 +227,7 @@ $template->timezone = $redis->get('timezone');
 $template->orionprofile = $redis->get('orionprofile');
 $template->airplay = $redis->hGetAll('airplay');
 $template->dlna = $redis->hGetAll('dlna');
-$template->local_browser = $redis->get('local_browser');
+$template->local_browser = $redis->hGetAll('local_browser');
 $template->localSStime = $redis->get('localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
 $template->udevil = $redis->get('udevil');
@@ -225,6 +238,7 @@ $template->spotify = $redis->hGetAll('spotify');
 $template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
+$template->i2smodule_select = $redis->get('i2smodule_select');
 // if ($template->i2smodule == 'none') {
 	// $retval = sysCmd("grep -v '#.*=' /boot/config.txt | sed -n '/## RuneAudio I2S-Settings/,/#/p' | grep dtoverlay | cut -d '=' -f2");
 	// if (isset($retval[0])) {

@@ -119,7 +119,7 @@ function updateOS($redis) {
 			$redis->set('patchlevel', 4);
 		}
 		if ($redis->get('patchlevel') == 4) {
-			// 5th update - remove lirc if installed and install lirc-rune
+			// 5th update - install lirc for the Pi 1 image
 			$retval = sysCmd("uname -m");
 			if ($retval[0] == 'armv6l') {
 				sysCmd("pacman -Syy lirc --noconfirm");
@@ -131,6 +131,42 @@ function updateOS($redis) {
 			wrk_sysAcl();
 			// set the patch level
 			$redis->set('patchlevel', 5);
+		}
+		if ($redis->get('patchlevel') == 5) {
+			// 6th update - reassign local browser redis variables & initialise a few new redis variables
+			// activate fix for Allo Piano 2.0 & activate some shairport-sync options
+			// install raspi-rotate
+			$retval = sysCmd("grep -c 'Allo Piano 2.0' /srv/http/app/templates/settings.php");
+			if ($retval[0] != 0) {
+				$local_browser = $redis->get('local_browser');
+				$redis->del('local_browser');
+				$redis->hSet('local_browser', 'enable', $local_browser);
+				if (file_exists('/usr/bin/xinit')) {
+					$zoomfactor = sysCmd("grep -i 'force-device-scale-factor=' /etc/X11/xinit/start_chromium.sh | cut -d'=' -f3");
+					$redis->hSet('local_browser', 'zoomfactor', $zoomfactor[0]);
+					unset($zoomfactor);
+				}
+				sysCmd("/srv/http/db/redis_datastore_setup check");
+				sysCmd("/srv/http/db/redis_acards_details");
+				sysCmd("cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf");
+				sysCmd("chmod 644 /etc/shairport-sync.conf");
+				sysCmd("/srv/http/command/raspi-rotate-install.sh");
+				wrk_sysAcl();
+				// set the patch level
+				$redis->set('patchlevel', 6);
+			}
+			unset($retval);
+		}
+		if ($redis->get('patchlevel') == 6) {
+			// 7th update - set a value to the redis variable i2smodule_select
+			if (file_exists('/var/www/app/config/defaults/i2s_table.txt')) {
+				$retval = $redis->get('i2smodule');
+				$retval = sysCmd("grep -i '".$retval."' /var/www/app/config/defaults/i2s_table.txt");
+				$redis->set('i2smodule_select', $retval[0]);
+				unset($retval);
+				// set the patch level
+				$redis->set('patchlevel', 7);
+			}
 		}
 		//
 		// if ($redis->get('patchlevel') == x) {

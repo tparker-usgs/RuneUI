@@ -13,11 +13,14 @@
     <p>List of configured network mounts. Click an existing entry to edit it, or add a new one.</p>
     <form id="mount-list" class="button-list" action="" method="post">
         <?php if( !empty($this->mounts) ): ?>
-        <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="mountall" value="1" id="mountall"><i class="fa fa-refresh sx"></i> Remount all sources</button></p>
+        <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="mountall" value="1" id="mountall"><i class="fa fa-refresh sx"></i> Retry mounting unmounted sources</button></p>
+        <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="remountall" value="1" id="remountall"><i class="fa fa-refresh sx"></i> Unmount and Remount all sources</button></p>
         <?php foreach($this->mounts as $mount): ?>
         <p><a href="/sources/edit/<?php echo $mount['id']; ?>" class="btn btn-lg btn-default btn-block"> <i class="fa <?php if ($mount['status'] == 1): ?> fa-check green <?php else: ?> fa-times red <?php endif ?> sx"></i> <?php echo $mount['name']; ?>&nbsp;&nbsp;&nbsp;&nbsp;<span>//<?php echo $mount['address']; ?>/<?php echo $mount['remotedir']; ?></span></a></p>
         <?php endforeach; endif; ?>
         <p><a href="/sources/add" class="btn btn-lg btn-primary btn-block" data-ajax="false"><i class="fa fa-plus sx"></i> Add new mount</a></p>
+        <!-- <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="umountall" value="1" id="umountall"><i class="fa fa-refresh sx"></i> Unmount all sources</button></p>
+        <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="reset" value="1" id="reset"><i class="fa fa-refresh sx"></i> Remove all sources</button></p> -->
     </form>
     
     <h2>USB mounts</h2>
