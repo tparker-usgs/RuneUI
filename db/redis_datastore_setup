@@ -140,6 +140,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('airplay', 'alsa_mixer_device', 'default');
 			$redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
 			$redis->hSet('airplay', 'alsa_output_format', 'S16');
+			$redis->hSet('airplay', 'alsa_output_rate', '48100');
 			$redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
 			$redis->hSet('airplay', 'metadata_enabled', 'yes');
 			$redis->hSet('airplay', 'metadata_include_cover_art', 'yes');
@@ -376,6 +377,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('airplay', 'alsa_mixer_device') || $redis->hSet('airplay', 'alsa_mixer_device', 'default');
 			$redis->hExists('airplay', 'alsa_mixer_control') || $redis->hSet('airplay', 'alsa_mixer_control', 'PCM');
 			$redis->hExists('airplay', 'alsa_output_format') || $redis->hSet('airplay', 'alsa_output_format', 'S16');
+			$redis->hExists('airplay', 'alsa_output_rate') || $redis->hSet('airplay', 'alsa_output_rate', '48100');
 			$redis->hExists('airplay', 'pipe_pipe_name') || $redis->hSet('airplay', 'pipe_pipe_name', '/tmp/shairport-sync-output-pipe');
 			$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
 			$redis->hExists('airplay', 'metadata_include_cover_art') || $redis->hSet('airplay', 'metadata_include_cover_art', 'yes');

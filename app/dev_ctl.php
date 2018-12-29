@@ -60,34 +60,44 @@ if (isset($_POST)) {
     // ----- SoXr MPD -----
         if ($_POST['mode']['soxrmpdonoff']['enable'] == 1) {
             // create worker job (set on and reset/restart MPD/Airplay)
-            $redis->get('soxrmpdonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpdon'));
+            $redis->get('soxrmpdonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpd', 'action' => 1));
         } else {
             // create worker job (set off and reset/restart MPD/Airplay)
-            $redis->get('soxrmpdonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpdoff'));
+            $redis->get('soxrmpdonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrmpd', 'action' => 0));
         }
     // ----- SoXr Airplay -----
         if ($_POST['mode']['soxrairplayonoff']['enable'] == 1) {
             // create worker job (set on and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'soxronoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplayon'));
+            $redis->hget('airplay', 'soxronoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplay', 'action' => 1));
         } else {
             // create worker job (set off and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'soxronoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplayoff'));
+            $redis->hget('airplay', 'soxronoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'soxrairplay', 'action' => 0));
         }
     // ----- Airplay Metadata -----
         if ($_POST['mode']['metadataairplayonoff']['enable'] == 1) {
             // create worker job (set on and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'metadataonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplayon'));
+            $redis->hget('airplay', 'metadataonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplay', 'action' => 1));
         } else {
             // create worker job (set off and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'metadataonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplayoff'));
+            $redis->hget('airplay', 'metadataonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'metadataairplay', 'action' => 0));
         }
     // ----- Airplay Artwork -----
         if ($_POST['mode']['artworkairplayonoff']['enable'] == 1) {
             // create worker job (set on and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'artworkonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplayon'));
+            $redis->hget('airplay', 'artworkonoff') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplay', 'action' => 1));
         } else {
             // create worker job (set off and reset/restart MPD/Airplay)
-            $redis->hget('airplay', 'artworkonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplayoff'));
+            $redis->hget('airplay', 'artworkonoff') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'artworkairplay', 'action' => 0));
+        }
+    // ----- Airplay output format -----
+        if ($_POST['mode']['airplayof'] != $redis->hget('airplay', 'alsa_output_format')) {
+            // create worker job (set value and reset/restart MPD/Airplay)
+            $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayoutputformat', 'args' => $_POST['mode']['airplayof']));
+        }
+		// ----- Airplay output rate -----
+        if ($_POST['mode']['airplayor'] != $redis->hget('airplay', 'alsa_output_rate')) {
+            // create worker job (set on and reset/restart MPD/Airplay)
+            $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayoutputrate', 'args' => $_POST['mode']['airplayor']));
         }
     // ----- Player name Menu-----
         if ($_POST['mode']['playernamemenu']['enable'] == 1) {
@@ -163,6 +173,8 @@ $template->artworkairplayonoff = $redis->hGet('airplay', 'artworkonoff');
 $template->hostname = $redis->get('hostname');
 $template->chronydstatus = $redis->hGet('NTPtime', 'chronyd');
 $template->systemdstatus = $redis->hGet('NTPtime', 'systemd');
+$template->airplayof = $redis->hGet('airplay', 'alsa_output_format');
+$template->airplayor = $redis->hGet('airplay', 'alsa_output_rate');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);
