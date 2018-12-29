@@ -574,8 +574,11 @@ while (1) {
 						ui_notify('Update RuneUI', 'Rebooting');
 						$playernamemenu = $redis->get('playernamemenu');
 						wrk_playernamemenu($playernamemenu);
+						$redis->set('dev', 0);
+						sleep(3);
+						sysCmd('systemctl reload-or-restart php-fpm || systemctl start php-fpm');
 						sysCmd('/var/www/command/rune_shutdown reboot');
-						sysCmdAsync('systemctl reboot');
+						sysCmd('systemctl reboot');
 					} else {
 						sleep(3);
 					}

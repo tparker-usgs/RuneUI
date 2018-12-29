@@ -228,9 +228,8 @@
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
 						<span class="help-block">Download and install the latest updates, a reboot is recommended after updating<br>
-						After selecting <strong>wait</strong> until the screen refreshes, this can take a while.<br>
-						A gitpull will effectively remove Rern's Addons, you will need to reinstall the after upgrading.<br>
-						An <strong>automatic reboot</strong> will be initiated after upgrading</span>
+						A gitpull will effectively remove Rern's Addons, you will need to reinstall it after an update.<br>
+						An <strong>automatic reboot</strong> will be initiated after an update and Dev Mode will then be automatically switched OFF</span>
 					</div>
 				</div>
             </div>
