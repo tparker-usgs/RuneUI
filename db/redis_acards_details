@@ -52,7 +52,7 @@ $redis->hSet('acards_details', 'IQaudIODAC', '{"sysname":"snd_rpi_iqaudio_dac","
 $redis->hSet('acards_details', 'NuForce USB Audio', '{"sysname":"NuForce USB Audio","extlabel":"NuForce DDA-100","mixer_numid":"4","mixer_control":"PCM","type":"usb"}');
 $redis->hSet('acards_details', 'ODROID-DAC', '{"sysname":"ODROID-DAC","extlabel":"ODROID HifiShield (I&#178;S)","mixer_numid":"1","hwplatformid":"10","type":"i2s"}');
 $redis->hSet('acards_details', 'ODROID-HDMI', '{"sysname":"ODROID-HDMI","extlabel":"ODROID-C2 HDMI","mixer_numid":"1","hwplatformid":"10","type":"integrated"}');
-$redis->hSet('acards_details', 'PianoDAC', '{"sysname":"PianoDAC","extlabel":"ALLO Piano DAC (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
+$redis->hSet('acards_details', 'PianoDAC', '{"sysname":"PianoDAC","extlabel":"ALLO Piano DAC (I&#178;S)","card_option":"format\t\"*:32:*\"","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 $redis->hSet('acards_details', 'PianoDACPlus', '{"sysname":"PianoDACPlus","extlabel":"ALLO Piano DAC 2.1(I&#178;S)","card_option":"format\t\"*:32:*\"","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"08","type":"i2s"}'); 
 $redis->hSet('acards_details', 'Rotel PC-USB', '{"sysname":"Rotel PC-USB","extlabel":"Rotel USB","type":"usb"}');
 $redis->hSet('acards_details', 'SA9023 USB Audio', '{"sysname":"SA9023 USB Audio","extlabel":"HiFimeDIY SABRE U2","mixer_numid":"4","mixer_control":"PCM","type":"usb"}');
