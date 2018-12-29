@@ -103,6 +103,7 @@ function redisDatastore($redis,$action) {
             // kernel
             $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
             $redis->set('i2smodule', 'none');
+            $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
 			$redis->set('audio_on_off', '1');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
@@ -347,6 +348,7 @@ function redisDatastore($redis,$action) {
             // kernel
             $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
             $redis->exists('i2smodule') || $redis->set('i2smodule', 'none');
+            $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->exists('activePlayer') || $redis->set('activePlayer', 'MPD');
 			// UI login password

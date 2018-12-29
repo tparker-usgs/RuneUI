@@ -71,16 +71,18 @@ if (isset($_POST)) {
         // submit worker job
         $redis->get('orionprofile') == $_POST['orionprofile'] || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => $_POST['orionprofile']));
     }
-    if (isset($_POST['i2smodule'])) {
+    if (isset($_POST['i2smodule_select'])) {
         // submit worker job
-        if ($redis->get('i2smodule') !== $_POST['i2smodule']) {
+        if ($redis->get('i2smodule_select') !== $_POST['i2smodule_select']) {
+			$redis->set('i2smodule_select', $_POST['i2smodule_select']);
             $notification = new stdClass();
-            if ($_POST['i2smodule'] !== 'none') {
+			list($i2smodule, $i2sselectedname) = explode('|', $_POST['i2smodule_select'], 2);
+            if ($i2smodule !== 'none') {
                 $notification->title = 'Loading I&#178;S kernel module';
             } else {
                 $notification->title = 'Unloading I&#178;S kernel module';
             }
-            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'i2smodule', 'args' => $_POST['i2smodule']));
+            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'i2smodule', 'args' => $i2smodule));
             $notification->text = 'Please wait';
             wrk_notify($redis, 'startjob', $notification, $job);
             $jobID[] = $job;
@@ -236,6 +238,7 @@ $template->spotify = $redis->hGetAll('spotify');
 $template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
+$template->i2smodule_select = $redis->get('i2smodule_select');
 // if ($template->i2smodule == 'none') {
 	// $retval = sysCmd("grep -v '#.*=' /boot/config.txt | sed -n '/## RuneAudio I2S-Settings/,/#/p' | grep dtoverlay | cut -d '=' -f2");
 	// if (isset($retval[0])) {

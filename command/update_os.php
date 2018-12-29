@@ -157,6 +157,17 @@ function updateOS($redis) {
 			}
 			unset($retval);
 		}
+		if ($redis->get('patchlevel') == 6) {
+			// 7th update - set a value to the redis variable i2smodule_select
+			if (file_exists('/var/www/app/config/defaults/i2s_table.txt')) {
+				$retval = $redis->get('i2smodule');
+				$retval = sysCmd("grep -i '".$retval."' /var/www/app/config/defaults/i2s_table.txt");
+				$redis->set('i2smodule_select', $retval[0]);
+				unset($retval);
+				// set the patch level
+				$redis->set('patchlevel', 7);
+			}
+		}
 		//
 		// if ($redis->get('patchlevel') == x) {
 			// // xth update - install runeaudio.cron in /etc/cron.d/ after it is delivered by git pull
