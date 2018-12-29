@@ -242,18 +242,23 @@
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
-					When you select a playlist as source for random play this option is switched on automatically.<br>
-					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF.</span>
+					You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
+					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF</span>
+					<div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
+						<input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
+					</div>
                 </div>
+				<div class="form-group form-actions">
+					<div class="col-sm-offset-2 col-sm-10">
+						<br><a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
+						<button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+						<button type="submit" class="btn btn-primary btn-lg" name="resetrp" value="1" id="resetrp">Reset Random Play</button>
+						<span class="help-block">Select Cancel, Save and apply or Reset Random Play.<br>
+						Selecting <strong>Reset Random Play</strong> will reset global random and will remove random play based on a selected playlist, the full MPD library will then be used</span>
+					</div>
+				</div>
             </div>
         </fieldset>
-        <div class="form-group form-actions">
-            <div class="col-sm-offset-2 col-sm-10">
-                <a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
-				<span class="help-block">Use Save and apply to cancel random play from a playlist. It takes a little while before random play uses your full MPD library.</span>
-            </div>
-        </div>
     </form>
 </div>
 <div id="mpd-config-defaults" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mpd-config-defaults-label" aria-hidden="true">

@@ -83,6 +83,8 @@
             $redis->get('mpd_autoplay') == 0 || $redis->set('mpd_autoplay', 0);
         }
     }
+	// ----- RESET GLOBAL RANDOM -----
+    if ($_POST['resetrp'] == 1) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
  }
 waitSyWrk($redis, $jobID);
 // collect system status
@@ -95,6 +97,21 @@ $template->mpd['addrandom'] = $redis->get('addrandom');
 $template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
 $template->mpd['crossfade'] = $crossfade[1];
+if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+	// random source is a playlist
+	$playlist = readlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+	$first_pl = strripos($playlist, '/') + 1;
+	$length_pl = stripos($playlist, '.m3u') - $first_pl;
+	$playlist = trim(substr($playlist, $first_pl, $length_pl));
+	if ($playlist != '') {
+		$template->ramdomsource = "Playlist '".$playlist."' is selected as random source";
+	} else {
+		$template->ramdomsource = 'Full MPD library is selected as random source';
+	}
+} else {
+	$template->ramdomsource = 'Full MPD library is selected as random source';
+}
+if ($redis->hGet('mpdconf', 'version') >= '0.21.00') $template->mpdv21 = true;
 // check integrity of /etc/network/interfaces
 if(!hashCFG('check_mpd', $redis)) {
     $template->mpdconf = file_get_contents('/etc/mpd.conf');
