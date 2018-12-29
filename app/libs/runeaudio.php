@@ -2467,6 +2467,12 @@ if ($action === 'reset') {
 				$redis->hDel('mpdconf', 'soxr');
 			}
 			unset($count);
+			// some MPD options are no longer valid for version 0.21.00 and later
+			if ($redis->hGet('mpdconf', 'version') >= '0.21.00') {
+				$redis->hDel('mpdconf', 'id3v1_encoding');
+				$redis->hDel('mpdconf', 'buffer_before_play');
+				$redis->hDel('mpdconf', 'gapless_mp3_playback');
+			}
 			// set mpd zeroconfig name to hostname
             $redis->hSet('mpdconf', 'zeroconf_name', $redis->get('hostname'));
             wrk_mpdconf($redis, 'writecfg');
@@ -2531,12 +2537,14 @@ if ($action === 'reset') {
                 }
                 if ($param === 'user' && $value === 'mpd') {
                     $output .= $param." \t\"".$value."\"\n";
-                    $output .= "group \t\"audio\"\n";
+					// group is not valid in MPD v0.21.00 or higher
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"audio\"\n";
                     continue;
                 }
                 if ($param === 'user' && $value === 'root') {
                     $output .= $param." \t\"".$value."\"\n";
-                    $output .= "group \t\"root\"\n";
+					// group is not valid in MPD v0.21.00 or higher
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"root\"\n";
                     continue;
                 }
                 if ($param === 'bind_to_address') {

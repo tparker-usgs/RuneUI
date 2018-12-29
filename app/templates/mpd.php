@@ -116,7 +116,8 @@
                     <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php if(!$this->conf['mpdv21']): ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 playback</label>
                 <div class="col-sm-10">
                     <select id="gapless-mp3-playback" name="conf[gapless_mp3_playback]" class="selectpicker" data-style="btn-default btn-lg">
@@ -127,7 +128,8 @@
                     it is highly recommended to fix the MP3 files with vbrfix (available as vbrfix in the debian archive), at which point gapless MP3 playback can be enabled.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php endif ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">DSD support</label>
                 <?php if($this->hwplatformid === '08' || $this->hwplatformid === '10'): ?>
 				<div class="col-sm-10">
@@ -173,14 +175,15 @@
                     <span class="help-block">If yes, mpd will normalize the volume of songs as they play. The default is no. NOTE: Enabling this feature means your audio will no longer be bit perfect.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Audio buffer size</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="audio-buffer-size" name="conf[audio_buffer_size]" value="<?=$this->conf['audio_buffer_size'] ?>" data-trigger="change" min="512" />
                     <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
                 </div>
             </div>
-            <div class="form-group" >
+			<?php if(!$this->conf['mpdv21']): ?>
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">Buffer before play</label>
                 <div class="col-sm-10">
                     <select id="buffer-before-play" name="conf[buffer_before_play]" class="selectpicker" data-style="btn-default btn-lg">
@@ -189,9 +192,10 @@
                         <option value="20%" <?php if($this->conf['buffer_before_play'] == '20%'): ?> selected <?php endif ?>>20%</option>\n";    
                         <option value="30%" <?php if($this->conf['buffer_before_play'] == '30%'): ?> selected <?php endif ?>>30%</option>\n";                    
                     </select>
-                    <span class="help-block"> This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
+                    <span class="help-block">This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
                 </div>
             </div>
+			<?php endif ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="auto-update">Auto update</label>
                 <div class="col-sm-10">
