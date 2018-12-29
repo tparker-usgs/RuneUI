@@ -40,7 +40,9 @@ Previous changes for 0.1 to 0.4b are not included.
 •	Added bitrate and output format controls for shairport-sync
 •	Added Random Play reset and current random play source display
 •	Network mount improvements including Async retries
-•	Added extra local browser controls for zoomfactor, rotate and mouse cursor
+•	Added extra local browser controls for zoomfactor, rotate and mouse cursor (including raspi-rotate)
+•	Added some small modifications for the on-screen keyboard
+•	Modified the I2S audio card selector in the Settings UI to remember the selected card type
 
 Known problems:
 •	Spotify has stopped working (see forum for details).
