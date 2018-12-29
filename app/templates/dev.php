@@ -89,9 +89,9 @@
 								<input id="opcache" name="mode[dev][enable]" type="checkbox" value="1"<?php if($this->dev === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-							<span class="help-block">Enable <i>developer mode</i>.<br>
+							<span class="help-block">Enable <i>developer mode (Set ON, Save setting and then refresh the screen)</i>.<br>
 							When developer mode is ON:<br>
-							- The functions on this page are switched ON<br>
+							- Many functions on this page are switched ON<br>
 							- Samba is switched on in read/write mode (default is without password control)<br>
 							- JavaScript uses the runeaudio.js insted of runeaudio.min.js which is normally used</span>
 					</div>
@@ -227,7 +227,10 @@
 					<label class="col-sm-2 control-label">Update RuneUI</label>
 					<div class="col-sm-10">
 						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
-						<span class="help-block">Download and install the latest updates, a reboot is recommended after updating</span>
+						<span class="help-block">Download and install the latest updates, a reboot is recommended after updating<br>
+						After selecting <strong>wait</strong> until the screen refreshes, this can take a while.<br>
+						A gitpull will effectively remove Rern's Addons, you will need to reinstall the after upgrading.<br>
+						An <strong>automatic reboot</strong> will be initiated after upgrading</span>
 					</div>
 				</div>
             </div>
@@ -280,7 +283,7 @@
 						However we discovered that by installing the Addons Menu a significant security risk was created effectively giving the http user (this is the user which owns the web-server) root privileges.
 						This is done by creating the /etc/sudoers.d/http file containing 'http ALL=NOPASSWD: ALL'. We feel it is inappropriate to distribute an image with this included.<br>
 						Nevertheless, you can choose, it's a trade-off between security and easy additional functionality. You could also choose to remove Rern's Addons Menu after installing the parts which you need.<br>
-						Parts of Rern's Addons are pre-installed in this image or are no longer applicable: Midori has been replaced by Chromium, MPD has been upgraded to V0.20.20, Backup Restore is available, Extend the Linux partition is available, Boot Logo is pre-installed on the Pi2 image, Samba has been upgraded to V4.8.1, Rune UI password is available and RuneUI Fonts (Extended Characters) is pre-installed.<br>
+						Parts of Rern's Addons are pre-installed in this image or are no longer applicable: Midori has been replaced by Chromium, MPD has been already been upgraded to V0.20.20, Backup Restore is available (see Settings UI), Extend the Linux partition is available (above), Boot Logo is pre-installed on the Pi2 image, Samba has already been upgraded to V4.8.1, Rune UI password is available and RuneUI Fonts (Extended Characters) is pre-installed.<br>
 						Refresh the browser after installing, this should enable the Addons Menu.<br>
 						You can remove the Rern's Addons Menu via the Addons Menu.<br>
 						The functionality within Rern's Addons Menu is not supported by the RuneAudio team, but you can get help via the forum</span>

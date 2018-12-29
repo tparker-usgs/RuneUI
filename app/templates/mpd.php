@@ -45,7 +45,7 @@
                     <span class="help-block">Sets a forced playback volume at startup (0-100, -1 disables the feature).</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="realtime-volume">Volume knob</label>
                 <div class="col-sm-10">
                     <select id="realtime-volume" name="mpdvol[realtime_volume]" class="selectpicker" data-style="btn-default btn-lg">
@@ -66,14 +66,14 @@
         </div>
         <fieldset>
             <legend>General music daemon options</legend>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Port</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="port" name="conf[port]" value="<?=$this->conf['port'] ?>" data-trigger="change" disabled>
                     <span class="help-block">This setting is the TCP port that is desired for the daemon to get assigned to.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="daemon-user">Daemon user : group</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[user]" class="selectpicker" data-style="btn-default btn-lg">
@@ -83,7 +83,7 @@
                     <span class="help-block">This specifies the system user : group that MPD will run as.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="log-level">Log level</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[log_level]" class="selectpicker" data-style="btn-default btn-lg">
@@ -96,7 +96,7 @@
 					The "verbose" setting argument is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="state-file">State file</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[state_file]" class="selectpicker" data-style="btn-default btn-lg">
@@ -106,7 +106,7 @@
                     <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
                 </div>
             </div>                   
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="ffmpeg">FFmpeg decoder plugin</label>
                 <div class="col-sm-10">
                     <select id="ffmpeg" name="conf[ffmpeg]" class="selectpicker" data-style="btn-default btn-lg">
@@ -150,7 +150,7 @@
                 </div>
                 <?php endif;?>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="replaygain">ReplayGain</label>
                 <div class="col-sm-10">
                     <select id="replaygain" name="conf[replaygain]" class="selectpicker" data-style="btn-default btn-lg">
@@ -165,7 +165,7 @@
                     Currently only FLAC, Ogg Vorbis, Musepack, and MP3 (through ID3v2 ReplayGain tags, not APEv2) are supported.</span>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group">
                 <label class="col-sm-2 control-label" for="volume-normalization">Volume normalization</label>
                 <div class="col-sm-10">
                     <select id="volume-normalization" name="conf[volume_normalization]" class="selectpicker" data-style="btn-default btn-lg">
@@ -231,7 +231,7 @@
                         <input name="mpd[mpd_autoplay]" type="checkbox" value="1"<?php if($this->mpd['mpd_autoplay'] == 1): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">If set to ON the player starts automatically after boot.</span>
+                    <span class="help-block">If set to ON the player starts automatically after boot</span>
                 </div>
             </div>
             <div class="form-group">

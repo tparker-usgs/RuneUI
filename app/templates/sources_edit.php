@@ -24,14 +24,15 @@
                     <option value="osx" <?php if($this->mount['type'] == 'osx'): ?> selected <?php endif ?>>SMB/CIFS (OS X share)</option>
                     <option value="nfs" <?php if($this->mount['type'] == 'nfs'): ?> selected <?php endif ?>>NFS</option>
                     </select>
-                    <span class="help-block">Select SMB/CIFS for connect Windows file shares or NFS for unix file shares</span>
+                    <span class="help-block">Select SMB/CIFS for Windows or Samba file shares or NFS for unix file shares</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="nas-ip">IP address</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="nas-ip" name="mount[address]" value="<?=$this->mount['address']?>" data-trigger="change" autocomplete="off" placeholder="es: 192.168.1.250">
-                    <span class="help-block">Specify your NAS address</span>
+                    <span class="help-block">Specify your NAS address. For fixed IP addresses enter the IP address.<br>
+					You can also specify <i>hostname</i>.local, this works well for many devices which do not have a fixed IP address. For example, another RuneAudio player with Samba enabled</span>
                 </div>
             </div>
             <div class="form-group">
@@ -113,7 +114,8 @@
 				<div class="col-sm-10">
 					<input class="form-control osk-trigger input-lg" type="text" id="options" name="mount[options]" value="<?=$this->mount['options']?>" data-trigger="change" autocomplete="off" placeholder="cache=none,noserverino,ro,sec=ntlmssp">
 					<input type="hidden" name="mount[error]" value="<?=$this->mount['error']?>">
-					<span class="help-block">Advanced mount flags. Don't use this field if you don't know what you are doing.</span>
+					<span class="help-block">Advanced mount flags. Don't use this field if you don't know what you are doing.<br>
+					Empty this field if you are experiencing mount problems</span>
 				</div>
             </div>
         </fieldset>

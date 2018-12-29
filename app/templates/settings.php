@@ -255,8 +255,8 @@
                     It does not have anything to do with DSPs or other sound effects: the output is kept untouched (bit perfect).
                     It happens that these parameters introduce an audible impact on the overall sound quality, acting on kernel latency parameters (and probably on the amount of overall 
                     <a href="http://www.thewelltemperedcomputer.com/KB/BitPerfectJitter.htm" title="Bit Perfect Jitter by Vincent Kars" target="_blank">jitter</a>).
-                    Sound results may vary depending on where music is listened, so choose according to your personal taste.
-                    (If you can't hear any tangible differences... nevermind, just stick to the default settings)</span>
+                    Sound results may vary depending on where music is listened to, so choose according to your personal taste.
+                    (If you can't hear any tangible differences... never mind, just stick to the default settings)</span>
                 </div>
             </div>
             <div class="form-group form-actions">
@@ -492,7 +492,6 @@
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="samba-readwrite">Read/Write access</label>
                         <div class="col-sm-10">
-						
 							<label class="switch-light well" onclick="">
 								<input id="readwrite" name="features[samba][readwrite]" type="checkbox" value="1"<?php if($this->samba['readwrite'] === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
