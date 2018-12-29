@@ -157,7 +157,7 @@ function redisDatastore($redis,$action) {
 			$redis->hDel('airplay', 'artworkonoff');
             $redis->hSet('dlna', 'enable', 0);
             $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hSet('dlna', 'queueowner', 0);
+            $redis->hSet('dlna', 'queueowner', 1);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 2);
 			$redis->hSet('dlna', 'radioname', '');
@@ -263,6 +263,7 @@ function redisDatastore($redis,$action) {
             $redis->set('wlans', '');
             $redis->del('acards');
             $redis->set('mountidx', 1);
+			$redis->set('allmounted', 0);
             $redis->set('debugdata', '');
 			// pre-installed Rern's add-ons
 			$redis->hSet('addons', 'update', '0');
@@ -398,7 +399,7 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('airplay', 'source_remote_control_port_number') || $redis->hSet('airplay', 'source_remote_control_port_number', '');
             $redis->hExists('dlna', 'enable') || $redis->hSet('dlna', 'enable', 0);
             $redis->hExists('dlna', 'name') || $redis->hSet('dlna', 'name', 'RuneAudio');
-            $redis->hExists('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 0);
+            $redis->hExists('dlna', 'queueowner') || $redis->hSet('dlna', 'queueowner', 1);
             $redis->hExists('dlna', 'logfile') || $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hExists('dlna', 'loglevel') || $redis->hSet('dlna', 'loglevel', 2);
 			$redis->hExists('dlna', 'radioname') || $redis->hSet('dlna', 'radioname', '');
@@ -487,6 +488,11 @@ function redisDatastore($redis,$action) {
             $redis->exists('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             $redis->exists('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);
             $redis->exists('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
+            // env settings
+            $redis->exists('wlans') || $redis->set('wlans', '');
+            $redis->exists('mountidx') || $redis->set('mountidx', 1);
+			$redis->exists('allmounted') || $redis->set('allmounted', 0);
+            $redis->exists('debugdata') || $redis->set('debugdata', '');
 			// pre-installed Rern's add-ons
 			$redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', '0');
 			$redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20170901');
