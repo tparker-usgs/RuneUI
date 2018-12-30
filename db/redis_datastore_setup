@@ -193,7 +193,7 @@ function redisDatastore($redis,$action) {
 			$redis->del('soxrmpdonoff');
 			$redis->set('localSStime', -1);
 			$redis->set('remoteSStime', -1);
-            $redis->set('ashuffle_start_delay', '10');
+            $redis->set('ashuffle_start_delay', '5');
 			$redis->set('ashuffle_wait_for_play', '0');
 			$redis->set('mpd_playback_laststate', '');
 			$redis->set('mpd_playback_lastnumber', '');
@@ -427,7 +427,7 @@ function redisDatastore($redis,$action) {
 			$redis->exists('localSStime') || $redis->set('localSStime', -1);
 			$redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
             $redis->exists('audio_on_off') || $redis->set('audio_on_off', '1');
-			$redis->exists('ashuffle_start_delay') || $redis->set('ashuffle_start_delay', '10');
+			$redis->exists('ashuffle_start_delay') || $redis->set('ashuffle_start_delay', '5');
 			$redis->exists('ashuffle_wait_for_play') || $redis->set('ashuffle_wait_for_play', '0');
 			$redis->exists('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
 			$redis->exists('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
