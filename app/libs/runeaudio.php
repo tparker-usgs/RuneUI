@@ -3451,7 +3451,7 @@ function wrk_getHwPlatform($redis)
                     case "0":
 						// 0 = A or B
                         $arch = '08';
-						$redis->exits('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
 						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
