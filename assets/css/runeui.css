@@ -5,6 +5,9 @@ html {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%
 }
+
+body#section-index::-webkit-scrollbar { width: 0 !important }
+
 body {
     margin: 0
 }
