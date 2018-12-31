@@ -6,21 +6,27 @@
     <!-- PLAYBACK PANEL -->
     <div id="playback-ss" class="tab-pane active">
         <div class="container-fluid">
-            <div id="leftpanel-ss">
+            <div class="leftpanel-expandable-ss">
                 <div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            </div>
+            <div class="rightpanel-compactable-ss">
+                <div id="extrainfo-ss">
+                    <div id="playlist-position-ss"><span></span></div>
+                    <div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="leftpanel-ss">
                 <div class="col-sm-4 coverart-ss">
                     <img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
                     <div id="countdown-display-ss"><i class="fa fa-spinner fa-spin"></i></div>
                     <div id="total-ss"><i class="fa fa-spinner fa-spin"></i></div>
                 </div>
             </div>
-            <div id="rightpanel-ss">
-                <div id="extrainfo-ss">
-                    <div id="playlist-position-ss"><span></span></div>
-                    <div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                </div>
+            <div class="rightpanel-ss">
                 <div style="height: 100%">
                     <div class="col-sm-4 coverart">
                         <div id="artist-ss"><i>Artist:</i></div>

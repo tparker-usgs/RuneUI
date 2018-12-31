@@ -8117,15 +8117,26 @@ ul.parsley-error-list li {
 }
 
 /* Screensaver */
-#leftpanel-ss {
+.leftpanel-ss {
 	float: left;
 	width: 40%;
 	height: 100%;
 }
-#rightpanel-ss {
+.leftpanel-expandable-ss {
+	float: left;
+	width: 100%;
+	height: 100%;
+}
+.rightpanel-ss {
 	float: right;
 	width: 60%;
 	height: 100%;
+}
+.rightpanel-compactable-ss {
+	float: right;
+	width: 0%;
+	height: 100%;
+	display: none;
 }
 #currentartist-ss {
 	font-size: 30px;
@@ -8172,13 +8183,13 @@ div.coverart-ss {
 	float: left;
 	width: 50%;
 	line-height: 38px;
-	font-size: 38px;
+	font-size: 20px;
 	font-weight: bold;
 	text-align: center;
 }
 #total-ss {
 	line-height: 38px;
-	font-size: 28px;
+	font-size: 20px;
 	font-weight: bold;
 	text-align: center;
 }
@@ -8197,7 +8208,7 @@ div.coverart-ss {
 #playlist-position-ss {
 	padding-top: 30px;
 }
-#rightpanel-ss .coverart {
+.rightpanel-ss .coverart {
 	height: auto;
 	margin: 10px auto 11px;
 	width: 100%;
@@ -8236,4 +8247,20 @@ div.coverart-ss {
 #addinfo-text-ss {
 	font-size: 20px;
 	box-sizing: border-box;
+}
+
+@media (min-width: 700px) {
+	.leftpanel-expandable-ss {
+		width: 40%;
+	}
+	.rightpanel-compactable-ss {
+		width: 60%;
+		display: block;
+	}
+	#countdown-display-ss {
+		font-size: 38px;
+	}
+	#total-ss {
+		font-size: 28px;
+	}
 }
