@@ -3086,6 +3086,41 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// return 0;
 			// }
 			// unset($retval);
+			// validate the mount name
+			$mp['name'] = trim($mp['name']);
+			if ($mp['name'] != preg_replace('/[^A-Za-z0-9-._]/', '', $mp['name'])) {
+				// no spaces or special characters allowed in the mount name
+				$mp['error'] = '"'.$mp['name'].'" Invalid Mount Name - no spaces or special characters allowed';
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', $mp['error']);
+					sleep(3);
+				}
+				$redis->hMSet('mount_'.$id, $mp);
+				return 0;
+			}
+			// clean up the address and remotedir variables: make backslashes slashes and remove leading and trailing slashes
+			$mp['address'] = trim(str_replace(chr(92) , '/', $mp['address']));
+			while (substr($mp['address'], 0, 1) === '/') $mp['address'] = substr($mp['address'], 1);
+			while (substr($mp['address'], -1, 1) === '/') $mp['address'] = substr($mp['address'], 0, -1);
+			$mp['remotedir'] = trim(str_replace(chr(92), '/', $mp['remotedir']));
+			while (substr($mp['remotedir'], 0, 1) === '/') $mp['remotedir'] = substr($mp['remotedir'], 1);
+			while (substr($mp['remotedir'], -1, 1) === '/') $mp['remotedir'] = substr($mp['remotedir'], 0, -1);
+			if ($mp['address'] != preg_replace('/[^A-Za-z0-9-.]/', '', $mp['address'])) {
+				// spaces or special characters are not normally valid in an IP Address
+				$mp['error'] = '"'.$mp['address'].'" IP Address seems incorrect - contains space(s) or special character(s) - continuing';
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', $mp['error']);
+					sleep(3);
+				}
+			}
+			if ($mp['remotedir'] != preg_replace('/[^A-Za-z0-9-._]/', '', $mp['remotedir'])) {
+				// spaces or special characters are not normally valid as a remote directory name
+				$mp['error'] = '"'.$mp['remotedir'].'" Remote Directory seems incorrect - contains space(s) or special character(s) - continuing';
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', $mp['error']);
+					sleep(3);
+				}
+			}
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
             if ($mp['type'] === 'nfs') {
@@ -3126,13 +3161,14 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				$busy = 0;
 				unset($retval);
 				$retval = sysCmd($mountstr);
+				$mp['error'] = implode("\n", $retval);
 				foreach ($retval as $line) {
 					$busy += substr_count($line, 'resource busy');
 					$unresolved += substr_count($line, 'could not resolve address');
 					$noaddress += substr_count($line, 'Unable to find suitable address');
 				}
 			}
-            runelog('system response',var_dump($retval));
+			runelog('system response', var_dump($retval));
             if (empty($retval)) {
 				// mounted OK
 				$mp['error'] = '';
@@ -3146,7 +3182,6 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				}
                 return 1;
             } else {
-				$mp['error'] = implode("\n", $retval);
 				unset($retval);
 				$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
 				if ($retval[0]) {
@@ -3249,6 +3284,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							$busy = 0;
 							unset($retval);
 							$retval = sysCmd($mountstr);
+							$mp['error'] = implode("\n", $retval);
 							foreach ($retval as $line) {
 								$busy += substr_count($line, 'resource busy');
 							}
@@ -3267,7 +3303,6 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							}
 							return 1;
 						} else {
-							$mp['error'] = implode("\n", $retval);
 							unset($retval);
 							$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
 							if ($retval[0]) {
@@ -3451,7 +3486,7 @@ function wrk_getHwPlatform($redis)
                     case "0":
 						// 0 = A or B
                         $arch = '08';
-						$redis->exits('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
+						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
 						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
