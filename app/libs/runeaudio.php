@@ -3071,8 +3071,13 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
     switch ($action) {
         case 'mount':
             $mp = $redis->hGetAll('mount_'.$id);
+			if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
+				$type = 'cifs';
+			} else if ($mp['type'] === 'nfs') {
+				$type = 'nfs';
+			}
 			// check that it is not already mounted
-			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
+			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
 			if ($retval[0]) {
 				// already mounted, do nothing and return
 				return 1;
@@ -3129,7 +3134,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			}
             $mpdproc = getMpdDaemonDetalis();
             sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-            if ($mp['type'] === 'nfs') {
+            if ($type === 'nfs') {
                 // nfs mount
 				if (trim($mp['options']) == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
@@ -3140,7 +3145,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// $mountstr = "mount -t nfs -o soft,retry=0,actimeo=1,retrans=2,timeo=50,nofsc,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
                 // $mountstr = "mount -t nfs -o soft,retry=1,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
-            if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
+            if ($type === 'cifs') {
 				// smb/cifs mount
 				$auth = 'guest';
                 if (!empty($mp['username'])) {
@@ -3189,7 +3194,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 return 1;
             } else {
 				unset($retval);
-				$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
+				$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
 				if ($retval[0]) {
 					// mounted OK
 					$mp['error'] = '';
@@ -3310,7 +3315,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							return 1;
 						} else {
 							unset($retval);
-							$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
+							$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
 							if ($retval[0]) {
 								// mounted OK
 								$mp['error'] = '';
