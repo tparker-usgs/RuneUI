@@ -30,8 +30,8 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="nas-ip">IP address</label>
                 <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="text" id="nas-ip" name="mount[address]" value="<?=$this->mount['address']?>" data-trigger="change" autocomplete="off" placeholder="es: 192.168.1.250">
-                    <span class="help-block">Specify your NAS address. For fixed IP addresses enter the IP address (no spaces allowed).<br>
+                    <input class="form-control osk-trigger input-lg" type="text" id="nas-ip" name="mount[address]" value="<?=$this->mount['address']?>" data-trigger="change" autocomplete="off" placeholder="es: 192.168.1.250" required>
+                    <span class="help-block">Specify your NAS address. For fixed IP addresses enter the IP address (normally no spaces allowed).<br>
 					You can also specify <i>hostname</i>.local, this works well for many devices which do not have a fixed IP address. For example, another RuneAudio player with Samba enabled</span>
                 </div>
             </div>
@@ -39,7 +39,7 @@
                 <label class="col-sm-2 control-label" for="nas-dir">Remote directory</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="nas-dir" name="mount[remotedir]" value="<?=$this->mount['remotedir']?>" data-trigger="change" autocomplete="off" placeholder="es: Music/Classical">
-                    <span class="help-block">Specify the directory name on the NAS where to scan music files (case sensitive and no spaces allowed)</span>
+                    <span class="help-block">Specify the directory name on the NAS where to scan music files (case sensitive)</span>
                 </div>
             </div>
             <div id="mount-cifs" class="optional">
