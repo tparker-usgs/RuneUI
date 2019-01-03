@@ -3072,7 +3072,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
         case 'mount':
             $mp = $redis->hGetAll('mount_'.$id);
 			// check that it is not already mounted
-			$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
 			if ($retval[0]) {
 				// already mounted, do nothing and return
 				return 1;
@@ -3100,22 +3100,28 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			}
 			// clean up the address and remotedir variables: make backslashes slashes and remove leading and trailing slashes
 			$mp['address'] = trim(str_replace(chr(92) , '/', $mp['address']));
-			while (substr($mp['address'], 0, 1) === '/') $mp['address'] = substr($mp['address'], 1);
-			while (substr($mp['address'], -1, 1) === '/') $mp['address'] = substr($mp['address'], 0, -1);
+			$mp['address'] = trim($mp['address'], '/');
 			$mp['remotedir'] = trim(str_replace(chr(92), '/', $mp['remotedir']));
-			while (substr($mp['remotedir'], 0, 1) === '/') $mp['remotedir'] = substr($mp['remotedir'], 1);
-			while (substr($mp['remotedir'], -1, 1) === '/') $mp['remotedir'] = substr($mp['remotedir'], 0, -1);
+			$mp['remotedir'] = trim($mp['remotedir'], '/');
 			if ($mp['address'] != preg_replace('/[^A-Za-z0-9-.]/', '', $mp['address'])) {
 				// spaces or special characters are not normally valid in an IP Address
-				$mp['error'] = '"'.$mp['address'].'" IP Address seems incorrect - contains space(s) or special character(s) - continuing';
+				$mp['error'] = 'Warning "'.$mp['address'].'" IP Address seems incorrect - contains space(s) and/or special character(s) - continuing';
 				if (!$quiet) {
 					ui_notify($mp['type'].' mount', $mp['error']);
 					sleep(3);
 				}
 			}
-			if ($mp['remotedir'] != preg_replace('/[^A-Za-z0-9-._]/', '', $mp['remotedir'])) {
-				// spaces or special characters are not normally valid as a remote directory name
-				$mp['error'] = '"'.$mp['remotedir'].'" Remote Directory seems incorrect - contains space(s) or special character(s) - continuing';
+			if ($mp['remotedir'] != preg_replace('|[^A-Za-z0-9-._/ ]|', '', $mp['remotedir'])) {
+				// special characters are not normally valid as a remote directory name
+				$mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - contains special character(s) - continuing';
+				if (!$quiet) {
+					ui_notify($mp['type'].' mount', $mp['error']);
+					sleep(3);
+				}
+			}
+			if (strlen($mp['remotedir']) === 0) {
+				// normally valid as a remote directory name should be specified
+				$mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - empty - continuing';
 				if (!$quiet) {
 					ui_notify($mp['type'].' mount', $mp['error']);
 					sleep(3);
@@ -3183,7 +3189,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 return 1;
             } else {
 				unset($retval);
-				$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+				$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
 				if ($retval[0]) {
 					// mounted OK
 					$mp['error'] = '';
@@ -3304,7 +3310,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							return 1;
 						} else {
 							unset($retval);
-							$retval = sysCmd('cat /proc/mounts | grep -c //'.$mp['address'].'/'.$mp['remotedir']);
+							$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep -c "'.$mp['remotedir'].'"');
 							if ($retval[0]) {
 								// mounted OK
 								$mp['error'] = '';
