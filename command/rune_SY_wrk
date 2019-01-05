@@ -35,7 +35,7 @@
 // common include
 include('/srv/http/app/libs/runeaudio.php');
 $start = microtime(true);
-$savecpu_rp = 15;
+$savecpu_rp = 10;
 $savecpu_mnt = 1;
 $savecpu_smt = 2400;
 $savecpu_inc = 10;
@@ -1416,10 +1416,9 @@ while (1) {
 			sysCmdAsync('/var/www/command/mount_async.php');
 		}
 	}
-	// The following parts are a bit heavy on cpu time, run then only on every +/-15th cycle (= every +/-7 seconds)
-	// this will allow the normal queued actions to be more responsive, waiting only 0,5 seconds in sleep state
+	// Random play auto start and stop, run first after 10 cycles (+/-5 seconds), then only on every +/-20th cycle (= every +/-10 seconds)
 	if ($savecpu_rp-- === 0) {
-		$savecpu_rp = 10 + rand(0, 10);
+		$savecpu_rp = 15 + rand(0, 10);
 		// Detect deletion of playlist random file
 		// Stop / restart ashuffle if the file RandomPlayPlaylist.m3u has been deleted
 		// To-do: Better if the UI informs /db/index.php that it has deleted a file, then start the ashufflereset in /db/index.php

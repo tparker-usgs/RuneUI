@@ -113,11 +113,11 @@ if (isset($_POST)) {
     if (isset($_POST['features'])) {
         if ($_POST['features']['airplay']['enable'] == 1) {
             if ($redis->hGet('airplay','enable') !== $_POST['features']['airplay']['enable'] OR $redis->hGet('airplay','name') !== $_POST['features']['airplay']['name']) {
-                // create worker job (start shairport)
+                // create worker job (start shairport-sync)
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplay', 'action' => 'start', 'args' => $_POST['features']['airplay']['name']));
             }
         } else {
-            // create worker job (stop shairport)
+            // create worker job (stop shairport-sync)
             $redis->hGet('airplay','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplay', 'action' => 'stop', 'args' => $_POST['features']['airplay']['name']));
         }
         if ($_POST['features']['dlna']['enable'] == 1) {
