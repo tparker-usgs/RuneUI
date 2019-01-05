@@ -1375,6 +1375,18 @@ function getmac($nicname)
 function wrk_xorgconfig($redis, $action, $args)
 {
 	switch ($action) {
+		case 'start':
+			// no break
+		case 'stop':
+			// modify bootsplash on/off setting in /boot/config.txt
+			$file = '/boot/config.txt';
+			// replace the line with 'disable_splash='
+			$newArray = wrk_replaceTextLine($file, '', 'disable_splash=', 'disable_splash='.$args);
+			// Commit changes to /boot/config.txt
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
 		case 'zoomfactor':
 			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
 			$file = '/etc/X11/xinit/start_chromium.sh';
