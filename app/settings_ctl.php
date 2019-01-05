@@ -134,10 +134,10 @@ if (isset($_POST)) {
         } else {
             $redis->hGet('local_browser', 'enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'stop', 'args' => 0));
         }
-		if ($_POST['features']['local_browser']['zoomfactor'] != $redis->get('local_browser', 'zoomfactor')) {
+		if ($_POST['features']['local_browser']['zoomfactor'] != $redis->hGet('local_browser', 'zoomfactor')) {
 			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'zoomfactor', 'args' => $_POST['features']['local_browser']['zoomfactor']));
 		}
-		if ($_POST['features']['local_browser']['rotate'] != $redis->get('local_browser', 'rotate')) {
+		if ($_POST['features']['local_browser']['rotate'] != $redis->hGet('local_browser', 'rotate')) {
 			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'rotate', 'args' => $_POST['features']['local_browser']['rotate']));
 		}
         if ($_POST['features']['local_browser']['mouse_cursor'] == 1) {

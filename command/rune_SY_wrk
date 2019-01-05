@@ -1388,7 +1388,7 @@ while (1) {
         } // end foreach loop
     } // end if loop
     // mount all sources
-    if ((!$allmounted) && ($retriesmounting = 100)) {
+    if ((!$allmounted) && ($retriesmounting == 100)) {
         runelog('wrk_SY: try to mount all shares! - First time');
 		// first time, so call directly
 		// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
