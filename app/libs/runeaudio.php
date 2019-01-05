@@ -2464,10 +2464,10 @@ if ($action === 'reset') {
 			// for v0.20 and higher SoXr is reported in the --version list if it was included in the build
 			if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
 				// MPD version is higher than 0.20
-				$count = sysCmd("mpd --version | grep -c 'soxr'");
+				$count = sysCmd('mpd --version | grep -c "soxr"');
 			} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
 				// MPD version is higher than 0.19 but lower than 0.20
-				$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
+				$count = sysCmd('grep -c "soxr" /usr/bin/mpd');
 			} else {
 				// MPD version is lower than 0.19
 				$count[0] = 0;
@@ -3888,7 +3888,7 @@ function wrk_playerID($arch)
     }
     // And just in case a normal Pi Zero boots the first time without any network interface use the CPU serial number
     if (trim($playerid) === $arch) {
-        $retval = sysCmd("grep -Po '^Serial\s*:\s*\K[[:xdigit:]]{16}' /proc/cpuinfo");
+        $retval = sysCmd('grep -Po "^Serial\s*:\s*\K[[:xdigit:]]{16}" /proc/cpuinfo');
         $playerid = $arch.'CPU'.$retval[0];
 		unset($retval);
     }
