@@ -1375,6 +1375,18 @@ function getmac($nicname)
 function wrk_xorgconfig($redis, $action, $args)
 {
 	switch ($action) {
+		case 'start':
+			// no break
+		case 'stop':
+			// modify bootsplash on/off setting in /boot/config.txt
+			$file = '/boot/config.txt';
+			// replace the line with 'disable_splash='
+			$newArray = wrk_replaceTextLine($file, '', 'disable_splash=', 'disable_splash='.$args);
+			// Commit changes to /boot/config.txt
+			$fp = fopen($file, 'w');
+			$return = fwrite($fp, implode("", $newArray));
+			fclose($fp);
+			break;
 		case 'zoomfactor':
 			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
 			$file = '/etc/X11/xinit/start_chromium.sh';
@@ -2452,10 +2464,10 @@ if ($action === 'reset') {
 			// for v0.20 and higher SoXr is reported in the --version list if it was included in the build
 			if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
 				// MPD version is higher than 0.20
-				$count = sysCmd("mpd --version | grep -c 'soxr'");
+				$count = sysCmd('mpd --version | grep -c "soxr"');
 			} elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
 				// MPD version is higher than 0.19 but lower than 0.20
-				$count = sysCmd("grep -c 'soxr' /usr/bin/mpd");
+				$count = sysCmd('grep -c "soxr" /usr/bin/mpd');
 			} else {
 				// MPD version is lower than 0.19
 				$count[0] = 0;
@@ -3075,6 +3087,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				$type = 'cifs';
 			} else if ($mp['type'] === 'nfs') {
 				$type = 'nfs';
+				// some possible UI values are not valid for nfs, so empty them
+				$mp['username'] = '';
+				$mp['password'] = '';
 			}
 			// check that it is not already mounted
 			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
@@ -3876,7 +3891,7 @@ function wrk_playerID($arch)
     }
     // And just in case a normal Pi Zero boots the first time without any network interface use the CPU serial number
     if (trim($playerid) === $arch) {
-        $retval = sysCmd("grep -Po '^Serial\s*:\s*\K[[:xdigit:]]{16}' /proc/cpuinfo");
+        $retval = sysCmd('grep -Po "^Serial\s*:\s*\K[[:xdigit:]]{16}" /proc/cpuinfo');
         $playerid = $arch.'CPU'.$retval[0];
 		unset($retval);
     }
