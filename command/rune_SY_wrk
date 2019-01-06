@@ -496,6 +496,7 @@ while (1) {
 						// set bootsplash-disable OFF for the next reboot
 						$redis->hSet('local_browser', 'disable-splash', 0);
 						wrk_xorgconfig($redis, $job->action, 0);
+						sysCmd('systemctl enable bootsplash');
 						// start the local browser
 						sysCmd('systemctl start local-browser');
 					} else if ($job->action === 'stop') {
@@ -504,6 +505,7 @@ while (1) {
 						// set bootsplash-disable ON for the next reboot
 						$redis->hSet('local_browser', 'disable-splash', 1);
 						wrk_xorgconfig($redis, $job->action, 1);
+						sysCmd('systemctl disable bootsplash');
 						// stop the local browser
 						sysCmd('systemctl stop local-browser');
 					} else if ($job->action === 'zoomfactor') {
