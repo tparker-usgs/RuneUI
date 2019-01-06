@@ -3087,6 +3087,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				$type = 'cifs';
 			} else if ($mp['type'] === 'nfs') {
 				$type = 'nfs';
+				// some possible UI values are not valid for nfs, so empty them
+				$mp['username'] = '';
+				$mp['password'] = '';
 			}
 			// check that it is not already mounted
 			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
