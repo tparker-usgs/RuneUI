@@ -145,13 +145,13 @@ if (isset($_POST)) {
         } else {
             $redis->hGet('local_browser', 'mouse_cursor') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 0));
         }
+        if ($_POST['features']['localSStime'] != $redis->get('localSStime')) {
+            $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'localSStime', 'args' => $_POST['features']['localSStime']));
+        }
         if ($_POST['features']['pwd_protection'] == 1) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
         } else {
             $redis->get('pwd_protection') == 0 || $redis->set('pwd_protection', 0);
-        }
-        if (isset($_POST['features']['localSStime'])) {
-            $redis->set('localSStime', $_POST['features']['localSStime']);
         }
         if (isset($_POST['features']['remoteSStime'])) {
             $redis->set('remoteSStime', $_POST['features']['remoteSStime']);
