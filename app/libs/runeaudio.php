@@ -2791,6 +2791,7 @@ if ($action === 'reset') {
 				sleep(2);
 				// ashuffle gets started automatically
 				// restore the player status
+				sysCmd('mpc volume '.$redis->get('lastmpdvolume'));
 				wrk_mpdRestorePlayerStatus($redis);
                 // restart mpdscribble
                 if ($redis->hGet('lastfm', 'enable') === '1') {
@@ -2811,6 +2812,12 @@ if ($action === 'reset') {
             //$mpd = openMpdSocket('/run/mpd.sock', 0);
             //sendMpdCommand($mpd, 'kill');
             //closeMpdSocket($mpd);
+			$retval  = sysCmd('mpc volume');
+			$redis->set('lastmpdvolume', preg_replace('/[^0-9]/', '',$retval[0]));
+			unset($retval);
+			sysCmd('mpc stop');
+			sysCmd('mpc volume 100');
+			sysCmd('mpc volume');
 			sysCmd('mpd --kill');
             sleep(1);
             sysCmd('systemctl stop mpd ashuffle mpdscribble upmpdcli');

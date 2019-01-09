@@ -40,6 +40,7 @@ $savecpu_mnt = 1;
 $savecpu_smt = 2400;
 $savecpu_inc = 10;
 $savecpu_sps = 43200;
+$savecpu_avd = 86400;
 $allmounted = 0;
 $retriesmounting = 100;
 ini_set('display_errors', '1');
@@ -1631,6 +1632,15 @@ while (1) {
 			sysCmd('systemctl daemon-reload');
 			sysCmd('systemctl start shairport-sync');
 		}
+	}
+	// Restart avahi-daemon every 12 hours
+	// There is an unresolved problem with avahi which stops broadcasting the player name after a number of hours
+	// It will normally run correctly for at least 24 hours
+	// Restart every +/-86400 cycles (= every +/-12 hours)
+	if ($savecpu_avd-- === 0) {
+		$savecpu_avd = 86300 + rand(0, 200);
+		// restart avahi-daemon
+		sysCmd('systemctl restart avahi-daemon');
 	}
     // unload CPU: 0,5 second sleep
     usleep(500000);
