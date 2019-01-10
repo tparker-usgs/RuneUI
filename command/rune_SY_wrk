@@ -410,7 +410,7 @@ if ($playerid_db === '') {
 
 	// close startup Redis connection
 	$redis->close();
-	// reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice) and check the contents of redis
+	// reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
 	sysCmdAsync('/var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
 	runelog('--- NORMAL STARTUP');
 	// --- NORMAL STARTUP //
@@ -934,8 +934,8 @@ while (1) {
                     runelog('wrk_SY: ', $job->wrkcmd);
 					ui_notify("Install Rern's Addons", 'It takes some time .....');
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('systemctl stop addons');
-					sysCmd('systemctl disable addons');
+					sysCmd('systemctl stop addons cronie');
+					sysCmd('systemctl disable addons cronie');
 					sysCmd('rm -f /etc/systemd/system/addons.service');
 					sysCmd('rm -f /etc/sudoers.d/http');
 					sysCmd('rm -f /etc/sudoers.d/http-backup');
@@ -966,8 +966,8 @@ while (1) {
                     runelog('wrk_SY: ', $job->wrkcmd);
 					ui_notify("Remove Rern's Addons", 'It takes some time .....');
                     $redis->sAdd('w_lock', $jobID);
-					sysCmd('systemctl stop addons');
-					sysCmd('systemctl disable addons');
+					sysCmd('systemctl stop addons cronie');
+					sysCmd('systemctl disable addons cronie');
 					sysCmd('rm -f /etc/systemd/system/addons.service');
 					sysCmd('rm -f /etc/sudoers.d/http');
 					sysCmd('rm -f /etc/sudoers.d/http-backup');
