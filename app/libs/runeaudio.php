@@ -1945,6 +1945,9 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 }
             }
             if ($args->wireless === '1') {
+				if ($args->hidden === '1') {
+					$nic .= "Hidden=yes\n";
+				}
                 $nic .= "WPAConfigSection=(\n";
                 if ($args->newssid === "add") {
                     $nic .= "    'ssid=\"".$args->ssid."\"'\n";
