@@ -29,7 +29,7 @@ Previous changes for 0.1 to 0.4b are not included.
 •	Rern’s Addon 'RuneUI Fonts - Extended Characters' is pre-installed.
 •	The player name is included in the browser tab and can optionally be included in 'Menu' text. The control to switch ON/OFF is included in the /dev UI.
 •	Extend the Linux Partition is now an option in the /dev UI.
-•	All UI checked and updated. Extra notes added where required. Specifically, credits UI updated, /dev UI notes added for mediainfo, 384k kernel and smartmontools.
+•	All UI's checked and updated. Extra notes added where required. Specifically, credits UI updated, /dev UI notes added for mediainfo, 384k kernel and smartmontools.
 •	No sound/hissing problems with Allo Piano 2.1 with Kali Reclocker fixed (32 bit is now forced by default).
 •	Rern's Addons Menu can be installed and removed from the /dev UI.
 •	CIFS network mounts logic reworked.
