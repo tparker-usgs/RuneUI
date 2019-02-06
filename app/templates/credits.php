@@ -71,6 +71,8 @@
     <p><strong>FastClick</strong> by <a href="https://github.com/ftlabs" target="_blank" rel="nofollow">ftlabs</a><br><a href="http://ftlabs.github.io/fastclick/" target="_blank" rel="nofollow">http://ftlabs.github.io/fastclick</a></p>
     <p><strong>Font Awesome</strong> by <a href="https://twitter.com/davegandy" target="_blank" rel="nofollow">Dave Gandy</a><br><a href="http://fontawesome.io/" target="_blank" rel="nofollow">http://fontawesome.io</a></p>
     <p><strong>Lato-Fonts</strong> by <a href="http://alfabety.pl/" target="_blank" rel="nofollow">Lukasz Dziedzic</a><br><a href="http://www.latofonts.com/lato-free-fonts/" target="_blank" rel="nofollow">http://www.latofonts.com/lato-free-fonts</a></p>
+    <p><strong>last.fm artist information and albumart services</strong> by <a href="https://www.last.fm/" target="_blank" rel="nofollow">last.fm</a><br><a href="https://www.last.fm/" target="_blank" rel="nofollow">https://www.last.fm/</a></p>
+    <p><strong>makeitpersonal song lyrics service</strong> by <a href="https://github.com/febuiles" target="_blank" rel="nofollow">Federico Builes</a><br><a href="https://github.com/febuiles/makeitpersonal" target="_blank" rel="nofollow">https://github.com/febuiles/makeitpersonal</a> and <a href="https://makeitpersonal.co/" target="_blank" rel="nofollow">https://makeitpersonal.co/</a></p>
     <p><strong>NGiNX Push Stream Module</strong><br><a href="http://wiki.nginx.org/HttpPushStreamModule" target="_blank" rel="nofollow">http://wiki.nginx.org/HttpPushStreamModule</a></p>
     <p><strong>NGiNX</strong><br><a href="http://nginx.org/" target="_blank" rel="nofollow">http://nginx.org</a></p>
     <p><strong>PHP language v5.5</strong> by <a href="http://php.net/credits.php" target="_blank" rel="nofollow">PHP Team</a><br><a href="http://php.net/" target="_blank" rel="nofollow">http://php.net</a></p>
@@ -88,7 +90,7 @@
     <p><strong>jQuery Knob</strong> by <a href="http://anthonyterrien.com/" target="_blank" rel="nofollow">Anthony Terrien</a><br><a href="https://github.com/aterrien/jQuery-Knob" target="_blank" rel="nofollow">https://github.com/aterrien/jQuery-Knob</a></p>
     <p><strong>jQuery scrollTo</strong> by <a href="http://flesler.blogspot.com/" target="_blank" rel="nofollow">Ariel Flesler</a><br><a href="http://flesler.blogspot.it/2007/10/jqueryscrollto.html" target="_blank" rel="nofollow">http://flesler.blogspot.it/2007/10/jqueryscrollto.html</a></p>
     <p>Also thanks to B. Carlisle (<strong>MPD-class</strong> <a href="http://mpd.24oz.com/" target="_blank" rel="nofollow">http://mpd.24oz.com</a>) for code inspiration on some data-parsing functions.</p>
-	<p><i>Please contact us if you think we have forgotten someone</i></p>	
+	<p><i>Please contact us if you think we have forgotten someone</i></p>
     <h2>RuneOS credits</h2>
 	<p><i>In alphabetical order, credits for all versions included</i></p>
     <p>Alac by Timothy Gu<br><a href="https://github.com/TimothyGu" target="_blank" rel="nofollow">https://github.com/TimothyGu</a></p>

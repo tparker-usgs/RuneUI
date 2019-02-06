@@ -46,6 +46,9 @@ Previous changes for 0.1 to 0.4b are not included.
 •	Modified the I2S audio card selector in the Settings UI to remember the selected card type.
 •	Support for the Allo Piano 2.0 DAC included (requires 32 bit to forced by default). Added IQaudIO Pi-DAC PRO in the Settings UI I²S kernel modules selector
 •	Added workaround fixes for situations when shairport-sync and the RuneAudio player fail to broadcast their respective names on the network (using avahi). The problem tends to happen only after 24+ hours of usage, the reason is unknown.
+•	Lyrics now change when the song changes.
+•	Fixed UI Problems when the lyrics server is not available.
+•	Added an option for Hidden SSID for WiFi in the Network UI.
 
 Known problems:
 •	Spotify has stopped working (see forum for details).
@@ -54,6 +57,5 @@ Known problems:
 •	Dim the volume control in UI when in Airplay mode is not working. There are also other screen refresh issues.
 •	Using UPnP/DLNA when Global Random (ashuffle) is enabled will not work. This is documented in the UI.
 •	The library navigation based on Artist, Composer and Genre do not work correctly. This functionality is unchanged in 0.5b, the same problems also exist in 0.4b. It seems to occurs when the metadata album name differs from the directory name containing the song files from the album.
-•	Lyrics only changing when an artist changes, should also change when song changes.
 •	Special characters in the WiFi SysID will fail.
 •	Casting MP3 via UPnP/DLNA has sound quality problems, other file formats are OK. See here for the probable cause: http://www.runeaudio.com/forum/digital-output-and-input-for-runeaudio-t6592.html
