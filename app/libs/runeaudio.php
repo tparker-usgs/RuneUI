@@ -4650,3 +4650,32 @@ function osort(&$array, $key)
         return $a->$key > $b->$key ? 1 : -1;
     });	
 }
+
+// clean up strings for lyrics and artistinfo
+function lyricsStringClean($string, $type="")
+{
+	// replace all combinations of single or multiple tab, space, <cr> or <lf> with space
+	$string = preg_replace('/[\t\n\r\s]+/', ' ', $string);
+	// standard trim of whitespace
+	$string = trim($string);
+	// trim open or closed angle, square, round or squiggly brackets in first and last positions
+	$string = trim($string, '<[({})}>');
+	// truncate the string up to a open or closed angle, square, round or squiggly bracket
+	$string = explode('[', $string);
+	$string = explode('(', $string[0]);
+	$string = explode('{', $string[0]);
+	$string = explode('<', $string[0]);
+	$string = explode(')', $string[0]);
+	$string = explode('}', $string[0]);
+	$string = explode(')', $string[0]);
+	$string = explode('>', $string[0]);
+	// for artist truncate the string to the first semicolon, slash, comma
+	if ($type == 'artist') {
+		$string = explode(';', $string[0]);
+		$string = explode('/', $string[0]);
+		$string = explode(',', $string[0]);
+	}
+	// remove leading and trailing ASCII hex characters 0 to 2F and 3A to 40 and 5B to 60 and 7B to 7F
+	$string = trim($string[0], "\x0..\x2F\x3A..\x40\x5B..\x60\x7B..\x7F");
+	return $string;
+}
