@@ -44,6 +44,9 @@ redis-cli del addons
 redis-cli del addo
 #
 # remove user files and logs
+umount /srv/http/tmp
+umount //var/log/runeaudio
+umount /var/log
 rm -f /var/lib/mpd/mpd.db
 rm -f /var/lib/mpd/mpdstate
 rm -rf /var/log/*
