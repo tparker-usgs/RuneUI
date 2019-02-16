@@ -24,7 +24,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with RuneAudio; see the file COPYING.  If not, see
+ * along with RuneAudio; see the file COPYING. If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.txt>.
  *
  *  file: command/rune_SY_wrk
@@ -888,12 +888,14 @@ while (1) {
                 case 'pl_ashuffle':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					// Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
-					sysCmd('ln -sf '.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-					// set the indicator to say a playlist random file exists
-					$redis->set('last_pl_randomfile', 'exists');
 					// Stop ashuffle
 					sysCmd('systemctl stop ashuffle');
+					// delete the existing symbolic link if it exists
+					sysCmd('rm -f "'.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u"');
+					// Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
+					sysCmd('ln -sf "'.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u" "'.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u"');
+					// set the indicator to say a playlist random file exists
+					$redis->set('last_pl_randomfile', 'exists');
 					// Set global random ON
 					$redis->set('globalrandom', '1');
 					// ashuffle gets started automatically

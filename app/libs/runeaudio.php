@@ -3512,75 +3512,100 @@ function wrk_getHwPlatform($redis)
 				$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 				$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 				$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+				$redis->hSet('AccessPoint', 'enabled', 0);
             }
             else {
-                $model = trim(substr($revision, -2, 1));
+                $model = trim(substr($revision, -3, 2));
                 switch($model) {
-                    case "0":
-						// 0 = A or B
+                    case "00":
+						// 00 = PiA or PiB
                         $arch = '08';
 						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 0);
 						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->hSet('AccessPoint', 'enabled', 0);
                         break;
-                    case "1":
-						// 1 = B+, A+ or Compute module 1
+                    case "01":
+						// 01 = PiB+, PiA+ or PiCompute module 1
 						// no break;
-                    case "2":
-						// 2 = A+,
+                    case "02":
+						// 02 = PiA+,
 						// no break;
-                    case "3":
-						// 3 = B+,
+                    case "03":
+						// 03 = PiB+,
 						// no break;
-                    case "6":
-						// 6 = Compute Module
+                    case "04":
+						// 04 = Pi2B,
 						// no break;
-                    case "9":
-						// 9 = Zero,
+                    case "06":
+						// 06 = PiCompute Module
 						// no break;
-                    case "c":
-						// c = Zero W
+                    case "09":
+						// 09 = PiZero,
 						// no break;
-                    case "C":
-						// C = Zero W
+                    case "0a":
+						// 0a = PiCompute Module 3
 						// no break;
-                    case "4":
-						// 4 = B Pi2,
+                    case "0A":
+						// 0A = PiCompute Module 3
 						// no break;
-                    case "8":
-						// 8 = B Pi3,
-						// no break;
-                    case "a":
-						// a = Compute Module 3
-						// no break;
-                    case "A":
-						// A = Compute Module 3
-						// no break;
-                    case "d":
-						// d = B+ Pi3
-						// no break;
-                    case "D":
-						// D = B+ Pi3
+					case "10":
+						// 10 = PiCompute Module 3+
                         $arch = '08';
 						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
 						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
+						$redis->hSet('AccessPoint', 'enabled', 0);
                         break;
-                    case "5":
-						// 5 = Alpha,
+                    case "08":
+						// 08 = Pi3B,
+						// no break;
+                    case "0c":
+						// 0c = PiZero W
+						// no break;
+                    case "0C":
+						// 0C = PiZero W
+						// no break;
+                    case "0d":
+						// 0d = Pi3B+
+						// no break;
+                    case "0D":
+						// 0D = Pi3B+
+						// no break;
+                    case "0e":
+						// 0d = Pi3A+
+						// no break;
+                    case "0E":
+						// 0D = Pi3A+
+                        $arch = '08';
+						$redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
+						$redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
+						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
+						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
+						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
+						$redis->hSet('AccessPoint', 'enabled', 1);
+                        break;
+                    case "05":
+						// 05 = PiAlpha prototype,
                         // no break;
-                    case "7":
-						// 7 = unknown,
+                    case "07":
+						// 07 = unknown,
                         // no break;
-                    case "b":
-						// b = unknown,
+                    case "0b":
+						// 0b = unknown,
                         // no break;
-                    case "B":
-						// B = unknown,
+                    case "0B":
+						// 0B = unknown,
+                        // no break;
+                    case "0f":
+						// 0f = internal use only,
+                        // no break;
+                    case "0F":
+						// 0F = internal use only,
                         // no break;
                     default:
                         $arch = '--';
@@ -3589,6 +3614,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                 }
             }
@@ -4623,4 +4649,33 @@ function osort(&$array, $key)
     usort($array, function($a, $b) use ($key) {
         return $a->$key > $b->$key ? 1 : -1;
     });	
+}
+
+// clean up strings for lyrics and artistinfo
+function lyricsStringClean($string, $type="")
+{
+	// replace all combinations of single or multiple tab, space, <cr> or <lf> with space
+	$string = preg_replace('/[\t\n\r\s]+/', ' ', $string);
+	// standard trim of whitespace
+	$string = trim($string);
+	// trim open or closed angle, square, round or squiggly brackets in first and last positions
+	$string = trim($string, '<[({})}>');
+	// truncate the string up to a open or closed angle, square, round or squiggly bracket
+	$string = explode('[', $string);
+	$string = explode('(', $string[0]);
+	$string = explode('{', $string[0]);
+	$string = explode('<', $string[0]);
+	$string = explode(')', $string[0]);
+	$string = explode('}', $string[0]);
+	$string = explode(')', $string[0]);
+	$string = explode('>', $string[0]);
+	// for artist truncate the string to the first semicolon, slash, comma
+	if ($type == 'artist') {
+		$string = explode(';', $string[0]);
+		$string = explode('/', $string[0]);
+		$string = explode(',', $string[0]);
+	}
+	// remove leading and trailing ASCII hex characters 0 to 2F and 3A to 40 and 5B to 60 and 7B to 7F
+	$string = trim($string[0], "\x0..\x2F\x3A..\x40\x5B..\x60\x7B..\x7F");
+	return $string;
 }
