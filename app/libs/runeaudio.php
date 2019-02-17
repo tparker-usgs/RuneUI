@@ -3097,6 +3097,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// some possible UI values are not valid for nfs, so empty them
 				$mp['username'] = '';
 				$mp['password'] = '';
+				$mp['charset'] = '';
 			}
 			// check that it is not already mounted
 			$retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
@@ -3115,11 +3116,11 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			// unset($retval);
 			// validate the mount name
 			$mp['name'] = trim($mp['name']);
-			if ($mp['name'] != preg_replace('/[^A-Za-z0-9-._]/', '', $mp['name'])) {
-				// no spaces or special characters allowed in the mount name
-				$mp['error'] = '"'.$mp['name'].'" Invalid Mount Name - no spaces or special characters allowed';
+			if ($mp['name'] != preg_replace('/[^A-Za-z0-9-._ ]/', '', $mp['name'])) {
+				// no special characters allowed in the mount name
+				$mp['error'] = '"'.$mp['name'].'" Invalid Mount Name - no special characters allowed';
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', $mp['error']);
+					ui_notify($type.' mount', $mp['error']);
 					sleep(3);
 				}
 				$redis->hMSet('mount_'.$id, $mp);
@@ -3134,7 +3135,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// spaces or special characters are not normally valid in an IP Address
 				$mp['error'] = 'Warning "'.$mp['address'].'" IP Address seems incorrect - contains space(s) and/or special character(s) - continuing';
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', $mp['error']);
+					ui_notify($type.' mount', $mp['error']);
 					sleep(3);
 				}
 			}
@@ -3142,7 +3143,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// special characters are not normally valid as a remote directory name
 				$mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - contains special character(s) - continuing';
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', $mp['error']);
+					ui_notify($type.' mount', $mp['error']);
 					sleep(3);
 				}
 			}
@@ -3150,39 +3151,54 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// normally valid as a remote directory name should be specified
 				$mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - empty - continuing';
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', $mp['error']);
+					ui_notify($type.' mount', $mp['error']);
 					sleep(3);
 				}
 			}
-            $mpdproc = getMpdDaemonDetalis();
-            sysCmd("mkdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+			// strip special characters, spaces, tabs, etc. (hex 00 to 32 and 7F), from the options string
+			$mp['options'] = preg_replace("|[\\x00-\\x32\\x7F]|", "", $mp['options']);
+			// trim leasing and trailing whitespace from username and password
+			$mp['username'] = trim($mp['username']);
+			$mp['password'] = trim($mp['password']);
+			// strip non numeric characters from rsize and wsize
+			$mp['rsize'] = preg_replace('|[^0-9]|', '', $mp['rsize']);
+			$mp['wsize'] = preg_replace('|[^0-9]|', '', $mp['wsize']);
             if ($type === 'nfs') {
                 // nfs mount
-				if (trim($mp['options']) == '') {
+				if ($mp['options'] == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
-					$mp['options'] = 'ro,nocto,noexec';
+					$options2 = 'ro,nocto,noexec';
+				} else {
+					// mount options provided so use them
+					if (!$quiet) ui_notify($type.' mount', 'Attempting to use saved/predefined mount options');
+					$options2 = $mp['options'];
 				}
                 // janui nfs mount string modified, old invalid options removed, no longer use nfsvers='xx' - let it auto-negotiate
-				$mountstr = "mount -t nfs -o soft,retry=0,retrans=2,timeo=50,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
+				$mountstr = "mount -t nfs -o soft,retry=0,retrans=2,timeo=50,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$options2." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
 				// $mountstr = "mount -t nfs -o soft,retry=0,actimeo=1,retrans=2,timeo=50,nofsc,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
                 // $mountstr = "mount -t nfs -o soft,retry=1,noatime,rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",".$mp['options']." \"".$mp['address'].":/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
             if ($type === 'cifs') {
 				// smb/cifs mount
-				$auth = 'guest';
+				// get the MPD uid and gid
+				$mpdproc = getMpdDaemonDetalis();
                 if (!empty($mp['username'])) {
                     $auth = "username=".$mp['username'].",password=".$mp['password'];
+				} else {
+					$auth = 'guest';
                 }
-				if (trim($mp['options']) == '') {
+				if ($mp['options'] == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
 					$options2 = 'cache=none,noserverino,ro,sec=ntlmssp,noexec';
 				} else {
 					// mount options provided so use them
-					if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting previous mount options');
+					if (!$quiet) ui_notify($type.' mount', 'Attempting to use saved/predefined mount options');
 					$options2 = $mp['options'];
 				}
-				$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"/mnt/MPD/NAS/".$mp['name']."\"";
+				$mountstr = "mount -t cifs -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
 			}
+			// create the mount point
+            sysCmd("mkdir -p \"/mnt/MPD/NAS/".$mp['name']."\"");
             // debug
             runelog('mount string', $mountstr);
 			$count = 10;
@@ -3193,6 +3209,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				usleep(100000);
 				$busy = 0;
 				unset($retval);
+				// attempt to mount it
 				$retval = sysCmd($mountstr);
 				$mp['error'] = implode("\n", $retval);
 				foreach ($retval as $line) {
@@ -3207,10 +3224,11 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				$mp['error'] = '';
 				// only save mount options when mounted OK
 				$mp['options'] = $options2;
+				$mp['type'] = $type;
 				// save the mount information
 				$redis->hMSet('mount_'.$id, $mp);
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+					ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
 					sleep(3);
 				}
                 return 1;
@@ -3222,10 +3240,11 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 					$mp['error'] = '';
 					// only save mount options when mounted OK
 					$mp['options'] = $options2;
+					$mp['type'] = $type;
 					// save the mount information
 					$redis->hMSet('mount_'.$id, $mp);
 					if (!$quiet) {
-						ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+						ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
 						sleep(3);
 					}
 					return 1;
@@ -3236,51 +3255,50 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			unset($retval);
 			if ($unresolved OR $noaddress OR $quick) {
 				if (!$quiet) {
-					ui_notify($mp['type'].' mount', $mp['error']);
+					ui_notify($type.' mount', $mp['error']);
 					sleep(3);
-					ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+					ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
 					sleep(3);
 				}
 				if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
 				return 0;
 			}
-            if ($mp['type'] === 'cifs' OR $mp['type'] === 'osx') {
+            if ($type === 'cifs') {
 				for ($i = 1; $i <= 8; $i++) {
 					// try all valid cifs versions
 					// vers=1.0, vers=2.0, vers=2.1, vers=3.0, vers=3.02, vers=3.1.1
 					//
 					switch ($i) {
 						case 1:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting automatic negotiation');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting automatic negotiation');
 							$options1 = 'cache=none,noserverino,ro,noexec';
 							break;
 						case 2:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.1.1');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.1.1');
 							$options1 = 'cache=none,noserverino,ro,vers=3.1.1,noexec';
 							break;
 						case 3:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.02');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.02');
 							$options1 = 'cache=none,noserverino,ro,vers=3.02,noexec';
 							break;
 						case 4:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=3.0');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.0');
 							$options1 = 'cache=none,noserverino,ro,vers=3.0,noexec';
 							break;
 						case 5:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=2.1');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=2.1');
 							$options1 = 'cache=none,noserverino,ro,vers=2.1,noexec';
 							break;
 						case 6:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=2.0');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=2.0');
 							$options1 = 'cache=none,noserverino,ro,vers=2.0,noexec';
 							break;
 						case 7:
-					        if (!$quiet) ui_notify($mp['type'].' mount', 'Attempting vers=1.0');
+					        if (!$quiet) ui_notify($type.' mount', 'Attempting vers=1.0');
 							$options1 = 'cache=none,noserverino,ro,vers=1.0,noexec';
 							break;
 						default:
-							if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-							return 0;
+							$i = 10;
 							break;
 					}
 					for ($j = 1; $j <= 6; $j++) {
@@ -3307,7 +3325,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 								$j = 10;
 								break;
 						}
-						$mountstr = "mount -t cifs \"//".$mp['address']."/".$mp['remotedir']."\" -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"/mnt/MPD/NAS/".$mp['name']."\"";
+						$mountstr = "mount -t cifs -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
 						// debug
 						runelog('mount string', $mountstr);
 						$count = 10;
@@ -3316,6 +3334,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							usleep(100000);
 							$busy = 0;
 							unset($retval);
+							// attempt to mount it
 							$retval = sysCmd($mountstr);
 							$mp['error'] = implode("\n", $retval);
 							foreach ($retval as $line) {
@@ -3328,10 +3347,11 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							$mp['error'] = '';
 							// only save mount options when mounted OK
 							$mp['options'] = $options2;
+							$mp['type'] = $type;
 							// save the mount information
 							$redis->hMSet('mount_'.$id, $mp);
 							if (!$quiet) {
-								ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+								ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
 								sleep(3);
 							}
 							return 1;
@@ -3343,10 +3363,11 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 								$mp['error'] = '';
 								// only save mount options when mounted OK
 								$mp['options'] = $options2;
+								$mp['type'] = $type;
 								// save the mount information
 								$redis->hMSet('mount_'.$id, $mp);
 								if (!$quiet) {
-									ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
+									ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Mounted');
 									sleep(3);
 								}
 								return 1;
@@ -3361,9 +3382,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			// mount failed
             if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
 			if (!$quiet) {
-				ui_notify($mp['type'].' mount', $mp['error']);
+				ui_notify($type.' mount', $mp['error']);
 				sleep(3);
-				ui_notify($mp['type'].' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+				ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
 				sleep(3);
 			}
 			return 0;
@@ -4652,9 +4673,9 @@ function osort(&$array, $key)
 }
 
 // clean up strings for lyrics and artistinfo
-function lyricsStringClean($string, $type="")
+function lyricsStringClean($string, $type=null)
 {
-	// replace all combinations of single or multiple tab, space, <cr> or <lf> with space
+	// replace all combinations of single or multiple tab, space, <cr> or <lf> with a single space
 	$string = preg_replace('/[\t\n\r\s]+/', ' ', $string);
 	// standard trim of whitespace
 	$string = trim($string);
@@ -4669,7 +4690,7 @@ function lyricsStringClean($string, $type="")
 	$string = explode('}', $string[0]);
 	$string = explode(')', $string[0]);
 	$string = explode('>', $string[0]);
-	// for artist truncate the string to the first semicolon, slash, comma
+	// for artist truncate the string to the first semicolon, slash or comma
 	if ($type == 'artist') {
 		$string = explode(';', $string[0]);
 		$string = explode('/', $string[0]);
