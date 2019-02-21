@@ -91,7 +91,7 @@
                         <option value="secure" <?php if($this->conf['log_level'] == 'secure'): ?> selected <?php endif ?>>secure</option>    
                         <option value="verbose" <?php if($this->conf['log_level'] == 'verbose'): ?> selected <?php endif ?>>verbose</option>
                     </select>         
-                    <span class="help-block">This setting controls the type of information which is logged. Available setting arguments are "default", "secure" or "verbose".
+                    <span class="help-block">This setting controls the type of information which is logged. Available settings are "default", "secure" or "verbose".
 					The "verbose" setting is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
                 </div>
             </div>
