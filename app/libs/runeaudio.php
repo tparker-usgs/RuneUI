@@ -3155,8 +3155,13 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 					sleep(3);
 				}
 			}
-			// strip special characters, spaces, tabs, etc. (hex 00 to 32 and 7F), from the options string
-			$mp['options'] = preg_replace("|[\\x00-\\x32\\x7F]|", "", $mp['options']);
+			// strip special characters, spaces, tabs, etc. (hex 00 to 20 and 7F), from the options string
+			$mp['options'] = preg_replace("|[\\x00-\\x20\\x7F]|", "", $mp['options']);
+			// bug fix: remove the following lines in the next version
+			if (strpos(' '.$mp['options'], ',')) {
+				$mp['options'] = '';
+			}
+			// end bug fix
 			// trim leasing and trailing whitespace from username and password
 			$mp['username'] = trim($mp['username']);
 			$mp['password'] = trim($mp['password']);
@@ -3426,14 +3431,18 @@ function wrk_sourcecfg($redis, $action, $args=null)
         case 'edit':
             $mp = $redis->hGetAll('mount_'.$args->id);
             $args = (array) $args;
+			// check if the mount type has changed, saved options need to be cleared, assume that they won't be valid
+			if ($mp['type'] != $args['type']) {
+				$args['options'] = '';
+			}
             $redis->hMset('mount_'.$args['id'], $args);
             sysCmd('mpc stop');
             usleep(500000);
             sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
-                if ($mp['name'] != $args['name']) {
+			if ($mp['name'] != $args['name']) {
                 sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
                 sysCmd("mkdir \"/mnt/MPD/NAS/".$args['name']."\"");
-                }
+			}
             $return = wrk_sourcemount($redis, 'mount', $args['id']);
             runelog('wrk_sourcecfg(edit) exit status', $return);
             break;
