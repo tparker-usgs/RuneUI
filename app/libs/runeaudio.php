@@ -3158,7 +3158,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 			// strip special characters, spaces, tabs, etc. (hex 00 to 20 and 7F), from the options string
 			$mp['options'] = preg_replace("|[\\x00-\\x20\\x7F]|", "", $mp['options']);
 			// bug fix: remove the following lines in the next version
-			if (strpos(' '.$mp['options'], ',')) {
+			if (!strpos(' '.$mp['options'], ',')) {
 				$mp['options'] = '';
 			}
 			// end bug fix
