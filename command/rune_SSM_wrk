@@ -417,7 +417,7 @@ while (1) {
 						// artwork
 						// skip this section if cover art is not set, should never get here
 						if ($redis->hget('airplay', 'metadata_include_cover_art') == 'yes') {
-							// first detemine the image file type
+							// first determine the image file type
 							$tmp = ' '.substr($buf, 0, 32);
 							if (strpos($tmp, 'PNG') !== false) {
 								$imgtype = 'png';
