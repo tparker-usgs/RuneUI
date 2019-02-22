@@ -77,7 +77,7 @@ sysCmd('rm -f /etc/sudoers.d/http-backup');
 $redis->set('restoreact', 0);
 
 // determine the actual mpd player version
-$retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '");
+$retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4 -d' '");
 $mpdversion = trim($retval[0]);
 unset($retval);
 
