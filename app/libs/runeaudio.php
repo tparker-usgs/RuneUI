@@ -4094,8 +4094,8 @@ function wrk_restartSamba($redis)
     // restart Samba
 	// first stop Samba ?
 	runelog('Samba Stopping...', '');
-	sysCmd('systemctl stop smbd nmbd');
-	runelog('Samba Dev/Prod   :', $redis->get('dev'));
+	sysCmd('systemctl stop smbd smb nmbd nmb winbind');
+	runelog('Samba Dev Mode   :', $redis->get('dev'));
 	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
 	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
 	// clear the php cache
@@ -4132,10 +4132,11 @@ function wrk_restartSamba($redis)
 	if (($redis->get('dev')) OR ($redis->hGet('samba', 'enable'))) {
 		runelog('Samba Restarting...', '');
 		sysCmd('systemctl daemon-reload');
-		sysCmd('systemctl start nmbd');
-		sysCmd('systemctl start smbd');
+		sysCmd('systemctl start nmbd nmb smbd smb');
 		sysCmd('pgrep nmbd || systemctl reload-or-restart nmbd');
 		sysCmd('pgrep smbd || systemctl reload-or-restart smbd');
+		sysCmd('pgrep nmb || systemctl reload-or-restart nmb');
+		sysCmd('pgrep smb || systemctl reload-or-restart smb');
 	}
 }
 
