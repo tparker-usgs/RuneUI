@@ -4094,7 +4094,7 @@ function wrk_restartSamba($redis)
     // restart Samba
 	// first stop Samba ?
 	runelog('Samba Stopping...', '');
-	sysCmd('systemctl stop smbd smb nmbd nmb winbind');
+	sysCmd('systemctl stop smbd smb nmbd nmb');
 	runelog('Samba Dev Mode   :', $redis->get('dev'));
 	runelog('Samba Enable     :', $redis->hGet('samba', 'enable'));
 	runelog('Samba Read/Write :', $redis->hGet('samba', 'readwrite'));
