@@ -116,7 +116,7 @@
                     <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh.</span>
                 </div>
             </div>
-			<?php if(!$this->conf['mpdv21']): ?>
+			<?php if(!$this->mpdv21): ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 playback</label>
                 <div class="col-sm-10">
@@ -182,7 +182,7 @@
                     <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
                 </div>
             </div>
-			<?php if(!$this->conf['mpdv21']): ?>
+			<?php if(!$this->mpdv21): ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">Buffer before play</label>
                 <div class="col-sm-10">

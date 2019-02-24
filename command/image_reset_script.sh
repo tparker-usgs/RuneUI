@@ -22,12 +22,15 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd smbd udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd bootsplash cronie
+systemctl disable ashuffle mpd mpdscribble nmbd nmb smbd smb winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd bootsplash cronie
 systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
-systemctl stop ashuffle mpd spopd smbd nmbd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie
+systemctl stop ashuffle mpd spopd nmbd nmb smbd smb winbind shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie
 #
 # install raspi-rotate
 /var/www/command/raspi-rotate-install.sh
+#
+# install spotifyd
+/var/www/command/spotifyd-install.sh
 #
 # remove rerns addons menu (if installed)
 systemctl stop addons cronie
