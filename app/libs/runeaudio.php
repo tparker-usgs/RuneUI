@@ -3542,7 +3542,7 @@ function wrk_getHwPlatform($redis)
 				$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 				$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 				$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
-				$redis->hSet('AccessPoint', 'enabled', 0);
+				$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
             }
             else {
                 $model = trim(substr($revision, -3, 2));
@@ -3555,7 +3555,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
-						$redis->hSet('AccessPoint', 'enabled', 0);
+						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                     case "01":
 						// 01 = PiB+, PiA+ or PiCompute module 1
@@ -3589,7 +3589,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
-						$redis->hSet('AccessPoint', 'enabled', 0);
+						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                     case "08":
 						// 08 = Pi3B,
@@ -3617,7 +3617,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
-						$redis->hSet('AccessPoint', 'enabled', 1);
+						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
                         break;
                     case "05":
 						// 05 = PiAlpha prototype,
@@ -3644,7 +3644,7 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
-						$redis->hSet('AccessPoint', 'enabled', 0);
+						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                 }
             }
