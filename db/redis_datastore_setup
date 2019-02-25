@@ -113,7 +113,7 @@ function redisDatastore($redis,$action) {
 			$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
 			$redis->set('password', $hash);
 			// Access Point
-			$redis->hSet('AccessPoint', 'enabled', 1);
+			$redis->hDel('AccessPoint', 'enabled');
 			$redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
 			$redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
 			$redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
