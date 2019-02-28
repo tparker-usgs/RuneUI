@@ -2459,7 +2459,7 @@ if ($action === 'reset') {
             // default MPD config
 			sysCmd('/srv/http/db/redis_datastore_setup mpdreset');
 			unset($retval);
-			$retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4- -d' '");
+			$retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4 -d' '");
 			$redis->hSet('mpdconf', 'version', trim(reset($retval)));
 			unset($retval);
 			// if MPD has been built with SoXr support use it
