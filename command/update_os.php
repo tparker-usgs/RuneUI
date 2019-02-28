@@ -197,6 +197,10 @@ function updateOS($redis) {
 				sysCmd('cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service');
 				sysCmd('chown root.root /usr/lib/systemd/system/rune_SY_wrk.service');
 				sysCmd('chmod 644 /usr/lib/systemd/system/rune_SY_wrk.service');
+				// clear the refresh ao lock
+				$redis->set('lock_refresh_ao', 0);
+				// delete incorrect redis variable
+				$redis->del('globalrandom_lock');
 				// set the patch level
 				$redis->set('patchlevel', 10);
 			}
