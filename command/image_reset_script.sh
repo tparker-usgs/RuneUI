@@ -96,7 +96,7 @@ git config user.name "anybody"
 git stash
 git add .
 git stash
-git pull
+git pull --no-edit
 git stash
 cd /home
 #
