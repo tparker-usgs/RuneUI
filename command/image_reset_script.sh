@@ -90,11 +90,13 @@ redis-cli set hwplatformid ""
 # update local git
 rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
+git config --global core.editor "nano"
 git config user.email "any@body.com"
 git config user.name "anybody"
 git stash
 git add .
-git pull
+git stash
+git pull --no-edit
 git stash
 cd /home
 #
