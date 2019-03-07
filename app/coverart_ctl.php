@@ -74,7 +74,23 @@ if ($activePlayer === 'MPD') {
     $spop = openSpopSocket('localhost', 6602, 1);
 }
 
-if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD') {
+if ($activePlayer === 'MPD' && !is_null($status['radioname']) {
+	$cover_url = $redis->hGet('lyrics','arturl');
+	if (!empty($cover_url)) {
+		// debug
+		runelog("coverart match: lastfm radio coverURL=", $cover_url);
+		$lastfm_img = curlGet($cover_url, $proxy);
+		$lastfm_img_mime = $bufferinfo->buffer($lastfm_img);
+		if (!empty($lastfm_img)) {
+			header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+			header('Pragma: no-cache'); // HTTP 1.0.
+			header('Expires: 0'); // Proxies.
+			header('Content-Type: '.$lastfm_img_mime);
+			echo $lastfm_img;
+			$output = 1;
+		}
+	}
+} else if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD') {
     // extact song details
     if (isset($curTrack[0]['Title'])) {
         $status['currentartist'] = $curTrack[0]['Artist'];
@@ -155,10 +171,8 @@ if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $requ
             if (!empty($cover_url)) {
                 // debug
                 runelog("coverart match: lastfm (query 2) coverURL=", $cover_url);
-                if (!empty($cover_url)) {
-                    $lastfm_img = curlGet($cover_url, $proxy);
-                    $lastfm_img_mime = $bufferinfo->buffer($lastfm_img);
-                }
+				$lastfm_img = curlGet($cover_url, $proxy);
+				$lastfm_img_mime = $bufferinfo->buffer($lastfm_img);
             }
         }
         if (!empty($lastfm_img)) {

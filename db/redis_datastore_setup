@@ -210,6 +210,7 @@ function redisDatastore($redis,$action) {
 			$redis->hSet('lyrics', 'currentsong', '');
 			$redis->hSet('lyrics', 'currentalbum', '');
 			$redis->hSet('lyrics', 'art', '');
+			$redis->hSet('lyrics', 'arturl', '');
 			$redis->hSet('lyrics', 'audio', '');
 			$redis->hSet('lyrics', 'time', '');
 			$redis->hSet('lyrics', 'artist', '');
@@ -458,6 +459,7 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('lyrics', 'currentsong') || $redis->hSet('lyrics', 'currentsong', '');
 			$redis->hExists('lyrics', 'currentalbum') || $redis->hSet('lyrics', 'currentalbum', '');
 			$redis->hExists('lyrics', 'art') || $redis->hSet('lyrics', 'art', '');
+			$redis->hExists('lyrics', 'arturl') || $redis->hSet('lyrics', 'arturl', '');
 			$redis->hExists('lyrics', 'audio') || $redis->hSet('lyrics', 'audio', '');
 			$redis->hExists('lyrics', 'time') || $redis->hSet('lyrics', 'time', '');
 			$redis->hExists('lyrics', 'artist') || $redis->hSet('lyrics', 'artist', '');

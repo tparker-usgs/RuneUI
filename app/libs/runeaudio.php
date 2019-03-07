@@ -1394,7 +1394,6 @@ function wrk_xorgconfig($redis, $action, $args)
 			// modify bootsplash on/off setting in /boot/config.txt
 			$command = 'sed -i '."'".'s|.*disable_splash=.*|disable_splash=1|g'."'".' /boot/config.txt';
 			syscmd($command);
-			}
 			break;
 		case 'zoomfactor':
 			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
