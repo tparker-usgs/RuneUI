@@ -39,7 +39,7 @@ ob_implicit_flush(0);
 
 ob_clean();
 flush();
-			
+
 // --------------------- MPD ---------------------
 if ($activePlayer === 'MPD') {
     // output switch
@@ -74,13 +74,14 @@ if ($activePlayer === 'MPD') {
     $spop = openSpopSocket('localhost', 6602, 1);
 }
 
-if ($activePlayer === 'MPD' && !is_null($status['radioname'])) {
+if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio'))) {
 	$cover_url = $redis->hGet('lyrics','arturl');
-	$bufferinfo = new finfo(FILEINFO_MIME);
 	if (!empty($cover_url)) {
 		// debug
 		runelog("coverart match: lastfm radio coverURL=", $cover_url);
 		$lastfm_img = curlGet($cover_url, $proxy);
+		// $lastfm_img = file_get_contents($cover_url);
+		$bufferinfo = new finfo(FILEINFO_MIME);
 		$lastfm_img_mime = $bufferinfo->buffer($lastfm_img);
 		if (!empty($lastfm_img)) {
 			header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
