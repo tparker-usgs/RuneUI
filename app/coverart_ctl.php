@@ -74,7 +74,7 @@ if ($activePlayer === 'MPD') {
     $spop = openSpopSocket('localhost', 6602, 1);
 }
 
-if ($activePlayer === 'MPD' && !is_null($status['radioname']) {
+if ($activePlayer === 'MPD' && !is_null($status['radioname'])) {
 	$cover_url = $redis->hGet('lyrics','arturl');
 	if (!empty($cover_url)) {
 		// debug
@@ -90,7 +90,7 @@ if ($activePlayer === 'MPD' && !is_null($status['radioname']) {
 			$output = 1;
 		}
 	}
-} else if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD' && !$output) {
+} else if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD') {
     // extact song details
     if (isset($curTrack[0]['Title'])) {
         $status['currentartist'] = $curTrack[0]['Artist'];
@@ -195,7 +195,7 @@ if ($activePlayer === 'MPD' && !is_null($status['radioname']) {
         readfile($_SERVER['HOME'].'/assets/img/cover-default.png');
         $output = 1;
     }
-} else if ($activePlayer === 'Spotify' && !$output) {
+} else if ($activePlayer === 'Spotify') {
 	$count = 1;
 	do {
 		sendSpopCommand($spop, 'image');
@@ -217,7 +217,7 @@ if ($activePlayer === 'MPD' && !is_null($status['radioname']) {
 	header('Expires: 0'); // Proxies.
 	header('Content-Type: '.$spotify_cover_mime);
 	echo $spotify_cover;
-} else if ($activePlayer === 'Airplay' && !$output) {
+} else if ($activePlayer === 'Airplay') {
 	// clear the cache before testing for the existence of a file
 	clearstatcache();
 	// determine the file name and path
