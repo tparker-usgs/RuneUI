@@ -3551,6 +3551,8 @@ function wrk_getHwPlatform($redis)
 				$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 				$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 				$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+				$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
+				$redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
 				$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
             }
             else {
@@ -3564,6 +3566,8 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
+						$redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
 						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                     case "01":
@@ -3598,6 +3602,8 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
+						$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
+						$redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 1);
 						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                     case "08":
@@ -3626,6 +3632,8 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 1);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 1);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
+						$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
+						$redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 1);
 						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
                         break;
                     case "05":
@@ -3653,6 +3661,8 @@ function wrk_getHwPlatform($redis)
 						$redis->hExists('airplay', 'metadataonoff') || $redis->hSet('airplay', 'metadataonoff', 0);
 						$redis->hExists('airplay', 'artworkonoff') || $redis->hSet('airplay', 'artworkonoff', 0);
 						$redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
+						$redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
+						$redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
 						$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
                         break;
                 }
