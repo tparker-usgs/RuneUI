@@ -76,6 +76,7 @@ if ($activePlayer === 'MPD') {
 
 if ($activePlayer === 'MPD' && !is_null($status['radioname'])) {
 	$cover_url = $redis->hGet('lyrics','arturl');
+	$bufferinfo = new finfo(FILEINFO_MIME);
 	if (!empty($cover_url)) {
 		// debug
 		runelog("coverart match: lastfm radio coverURL=", $cover_url);

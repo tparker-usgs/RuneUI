@@ -42,9 +42,8 @@ fi
 set +e
 
 echo "Stop MPD and unmount shares..."
-systemctl stop ashuffle upmpdcli mpdscribble
-mpc stop
-mpd --kill
+systemctl stop ashuffle upmpdcli mpdscribble mpd
+systemctl stop ashuffle upmpdcli mpdscribble mpd
 systemctl stop nginx
 sleep 1
 systemctl stop local-browser
