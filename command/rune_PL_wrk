@@ -44,6 +44,9 @@ sysCmd('echo "--------------- start: rune_PL_wrk ---------------" > /var/log/run
 runelog('WORKER rune_PL_wrk START');
 // reset forceupdate state
 $forceupdate = 1;
+$spotify_connect_timeout_count = 0;
+$proxy = $redis->hGetall('proxy');
+$lastfm_apikey = $redis->get('lastfm_apikey');
 
 // --- WORKER MAIN LOOP --- //
 while (1) {
@@ -138,6 +141,16 @@ while (1) {
 				//    sysCmdAsync('ui_render_pl');
 				//    runelog('---------------- PLAYLIST RENDER ----------------');
 				//}
+				
+				// EXPERIMENTAL decode radio song name and artist
+				// curl -s -f --connect-timeout 5 -m 10 --retry 2 http://ws.audioscrobbler.com/2.0/?method=track.search&track=annie%20lennox%20why&api_key=ba8ad00468a50732a3860832eaed0882&format=json&limit=1
+				if (!is_nul($status['radioname']) && is_null($status['currentartist']) && !is_null($status['currentsong'])) {
+					$url = 'http://ws.audioscrobbler.com/2.0/?method=track.search&track='.$status['currentsong'].'&api_key='.$lastfm_apikey.'&format=json&limit=1';
+					$retval = json_decode(curlGet($url, $proxy), true);
+					$status['currentsong'] = $retval['results']['trackmatches']['track'][0]['name'];
+					$status['currentartist'] = $retval['results']['trackmatches']['track'][0]['artist'];
+				}
+				unset($retval);
 				
 				// store information for lyrics and info
 				$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
