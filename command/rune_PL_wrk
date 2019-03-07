@@ -234,11 +234,13 @@ while (1) {
 				$forceupdate = 0;
 				runelog('---------------------------- FORCE UPDATE Airplay ----------------------------------');
 				sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+				$redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-default.png');
 //				$status = array();
 				if (!empty($redis->get('lastmpdvolume'))) {
 					$status['volume'] = $redis->get('lastmpdvolume');
 				}
 				$status['audio'] = "44100:16:2";
+				$redis->hSet('lyrics', 'audio', $status['audio']);
 				$status['audio_sample_rate'] = "44.1";
 				$status['audio_sample_depth'] = "16";
 				$status['bitrate'] = "1411";
@@ -250,11 +252,15 @@ while (1) {
 				$status['playlistlength'] = "";
 				$status['state'] = "play";
 				$status['time'] = "0";
+				$redis->hSet('lyrics', 'time', $status['time']);
 				$status['elapsed'] = "0";
 				$status['song_percent'] = "100";
 				$status['currentartist'] = "Airplay";
 				$status['currentalbum'] = "-----";
 				$status['currentsong'] = "-----";
+				$redis->hSet('lyrics', 'artist', $status['currentartist']);
+				$redis->hSet('lyrics', 'album', $status['currentalbum']);
+				$redis->hSet('lyrics', 'song', $status['currentsong']);
 				$status['actPlayer'] = "Airplay";
 				$status['radioname'] = null;
 				$status['OK'] = null;
