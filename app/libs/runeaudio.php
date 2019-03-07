@@ -1376,16 +1376,25 @@ function wrk_xorgconfig($redis, $action, $args)
 {
 	switch ($action) {
 		case 'start':
-			// no break
-		case 'stop':
+			// spash on
+			// modify the console tty in /boot/cmdline.txt (normal console=tty1, with boot splash console=tty3)
+			// otherwise the console messages interfere with the splash image presentation
+			$command = 'sed -i '."'".'s|console=tty1|console=tty3|g'."'".' /boot/cmdline.txt';
+			syscmd($command);
 			// modify bootsplash on/off setting in /boot/config.txt
-			$file = '/boot/config.txt';
-			// replace the line with 'disable_splash='
-			$newArray = wrk_replaceTextLine($file, '', 'disable_splash=', 'disable_splash='.$args);
-			// Commit changes to /boot/config.txt
-			$fp = fopen($file, 'w');
-			$return = fwrite($fp, implode("", $newArray));
-			fclose($fp);
+			$command = 'sed -i '."'".'s|.*disable_splash=.*|disable_splash=0|g'."'".' /boot/config.txt';
+			syscmd($command);
+			break;
+		case 'stop':
+			// spash off
+			// modify the console tty in /boot/cmdline.txt (normal console=tty1, with boot splash console=tty3)
+			// otherwise the console messages interfere with the splash image presentation
+			$command = 'sed -i '."'".'s|console=tty3|console=tty1|g'."'".' /boot/cmdline.txt';
+			syscmd($command);
+			// modify bootsplash on/off setting in /boot/config.txt
+			$command = 'sed -i '."'".'s|.*disable_splash=.*|disable_splash=1|g'."'".' /boot/config.txt';
+			syscmd($command);
+			}
 			break;
 		case 'zoomfactor':
 			// modify the zoom factor in /etc/X11/xinit/start_chromium.sh
