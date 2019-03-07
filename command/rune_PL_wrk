@@ -145,6 +145,8 @@ while (1) {
 				// EXPERIMENTAL decode radio song name and artist
 				// curl -s -f --connect-timeout 5 -m 10 --retry 2 http://ws.audioscrobbler.com/2.0/?method=track.search&track=annie%20lennox%20why&api_key=ba8ad00468a50732a3860832eaed0882&format=json&limit=1
 				if (!is_null($status['radioname'])) {
+					$redis->hSet('lyrics','art', 'assets/img/cover-radio.jpg');
+					$redis->hSet('lyrics','arturl', $_SERVER['HOME'].'assets/img/cover-radio.jpg');
 					$status['currentalbum'] = $status['radioname'];
 					if (!is_null($status['currentsong']) && is_null($status['currentartist'])) {
 						$url = 'http://ws.audioscrobbler.com/2.0/?method=track.search&track='.$status['currentsong'].'&api_key='.$lastfm_apikey.'&format=json&limit=1';
@@ -152,21 +154,29 @@ while (1) {
 						if ($retval['results']['trackmatches']['track'][0]['name'] != '') {
 							$status['currentsong'] = $retval['results']['trackmatches']['track'][0]['name'];
 							$status['currentartist'] = $retval['results']['trackmatches']['track'][0]['artist'];
-							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][2][#text]);
-						} else {
-							$redis->hSet('lyrics','arturl', '');
+							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][2]['#text']);
+							$redis->hSet('lyrics','art', '');
 						}
-					} else {
+						unset($retval);
+					}
+					if (is_null($status['currentartist'])) {
 						$status['currentartist'] = 'Streaming';
+					}
+					if (is_null($status['currentsong'])) {
 						$status['currentsong'] = 'Radio';
 					}
 				}
-				unset($retval);
-				
+
 				// store information for lyrics and info
-				$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
-				$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
-				$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
+				if ( $status['currentartist'] == 'Streaming' && $status['currentsong'] == 'Radio' ) {
+					$redis->hSet('lyrics', 'currentartist', '');
+					$redis->hSet('lyrics', 'currentsong', '');
+					$redis->hSet('lyrics', 'currentalbum', '');
+				} else {
+					$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
+					$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
+					$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
+				}
 
 				if ($status['changed'] === 'mixer') {
 					//$redis->set('current_volume', $status['volume']);
