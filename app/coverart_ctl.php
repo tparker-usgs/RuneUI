@@ -74,7 +74,7 @@ if ($activePlayer === 'MPD') {
     $spop = openSpopSocket('localhost', 6602, 1);
 }
 
-if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio'))) {
+if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
 	$cover_url = $redis->hGet('lyrics','arturl');
 	if (!empty($cover_url)) {
 		// debug
