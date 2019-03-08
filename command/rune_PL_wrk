@@ -144,6 +144,7 @@ while (1) {
 				
 				// EXPERIMENTAL decode radio song name and artist
 				// curl -s -f --connect-timeout 5 -m 10 --retry 2 http://ws.audioscrobbler.com/2.0/?method=track.search&track=annie%20lennox%20why&api_key=ba8ad00468a50732a3860832eaed0882&format=json&limit=1
+				runelog('rune_PL_wrk: radioname = ', $status['radioname']);
 				if (!is_null($status['radioname'])) {
 					$redis->hSet('lyrics', 'radio', 1);
 					$redis->hSet('lyrics', 'art', 'assets/img/cover-radio.jpg');
@@ -156,11 +157,20 @@ while (1) {
 							$status['currentsong'] = $retval['results']['trackmatches']['track'][0]['name'];
 							$status['currentartist'] = $retval['results']['trackmatches']['track'][0]['artist'];
 						}
-						if ($retval['results']['trackmatches']['track'][0]['image'][3]['#text'] != '') {
-							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][3]['#text']);
+						if ($retval['results']['trackmatches']['track'][0]['image'][2]['#text'] != '') {
+							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][2]['#text']);
 							$redis->hSet('lyrics','art', '');
 						}
 						unset($retval);
+						if (!is_null($status['currentsong']) && !is_null($status['currentartist'])) {
+							$url = 'http://ws.audioscrobbler.com/2.0/?method=track.getinfo&track='.$status['currentsong'].'&artist='.$status['currentartist'].'&api_key='.$lastfm_apikey.'&format=json';
+							$retval = json_decode(curlGet($url, $proxy), true);
+							if ($retval['track']['album']['image'][2]['#text'] != '') {
+								$redis->hSet('lyrics','arturl', $retval['track']['album']['image'][2]['#text']);
+								$redis->hSet('lyrics','art', '');
+							}
+							unset($retval);
+						}
 					}
 					if (is_null($status['currentartist'])) {
 						$status['currentartist'] = 'Streaming';
@@ -168,6 +178,10 @@ while (1) {
 					if (is_null($status['currentsong'])) {
 						$status['currentsong'] = 'Radio';
 					}
+				} else {
+					$redis->hSet('lyrics', 'radio', 0);
+					$redis->hSet('lyrics', 'art', '');
+					$redis->hSet('lyrics', 'arturl', '');
 				}
 
 				// store information for lyrics and info
