@@ -730,7 +730,7 @@ class globalRandom extends Thread
 
     public function run()
     {
-        $mpd = openMpdSocket('/run/mpd.sock', 0);
+        $mpd = openMpdSocket('/run/mpd/socket', 0);
             // if ($this->status['consume'] == 0 OR $this->status['random'] == 0) {
             if ($this->status['random'] == 0) {
                 // sendMpdCommand($mpd,'consume 1');
@@ -2321,7 +2321,7 @@ function wrk_i2smodule($redis, $args)
         fclose($fp);
     } else {
         if (wrk_mpdPlaybackStatus($redis) === 'playing') {
-            $mpd = openMpdSocket('/run/mpd.sock', 0);
+            $mpd = openMpdSocket('/run/mpd/socket', 0);
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
         }
@@ -2563,7 +2563,7 @@ if ($action === 'reset') {
                     continue;
                 }
                 if ($param === 'bind_to_address') {
-                    $output .= "bind_to_address \"/run/mpd.sock\"\n";
+                    $output .= "bind_to_address \"/run/mpd/socket\"\n";
                 }
                 if ($param === 'ffmpeg') {
                     // --- decoder plugin ---
@@ -2803,7 +2803,7 @@ if ($action === 'reset') {
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
-            //$mpd = openMpdSocket('/run/mpd.sock', 0);
+            //$mpd = openMpdSocket('/run/mpd/socket', 0);
             //sendMpdCommand($mpd, 'kill');
             //closeMpdSocket($mpd);
 			$retval  = sysCmd('mpc volume');
@@ -3768,7 +3768,7 @@ runelog('activePlayer = ', $activePlayer);
     if ($stoppedPlayer !== '') {
         if ($stoppedPlayer === 'MPD') {
             // connect to MPD daemon
-            $sock = openMpdSocket('/run/mpd.sock', 0);
+            $sock = openMpdSocket('/run/mpd/socket', 0);
             $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             if ($status['state'] === 'pause') {
@@ -3808,7 +3808,7 @@ function wrk_startAirplay($redis)
 			// record  the mpd status
 			wrk_mpdPlaybackStatus($redis);
             // connect to MPD daemon
-            $sock = openMpdSocket('/run/mpd.sock', 0);
+            $sock = openMpdSocket('/run/mpd/socket', 0);
             $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             // to get MPD out of its idle-loop we discribe to a channel
@@ -3854,7 +3854,7 @@ function wrk_stopAirplay($redis)
             // we previously stopped playback of one player to use the Airport Stream
             if ($stoppedPlayer === 'MPD') {
                 // connect to MPD daemon
-                $sock = openMpdSocket('/run/mpd.sock', 0);
+                $sock = openMpdSocket('/run/mpd/socket', 0);
                 $status = _parseStatusResponse($redis, MpdStatus($sock));
                 runelog('MPD status', $status);
                 if ($status['state'] === 'pause') {

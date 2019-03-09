@@ -77,7 +77,7 @@ sysCmd('udevil clean');
 // connect to MPD daemon
 // check if usb autorebuild is set
 if ($redis->get('usb_db_autorebuild')) {
-    //$mpd = openMpdSocket('/run/mpd.sock');
+    //$mpd = openMpdSocket('/run/mpd/socket');
 	// next two lines should eventually be removed, at the moment mpd seems to have problems when requested to do an update too quickly
 	sysCmd('sync ; mpc status');
 	sleep(5);

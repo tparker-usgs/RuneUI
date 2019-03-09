@@ -53,7 +53,7 @@ while (1) {
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
-        $socket = openMpdSocket('/run/mpd.sock', 0);
+        $socket = openMpdSocket('/run/mpd/socket', 0);
 		if (!$socket) {
 			$redis->close();
 			sleep(5);

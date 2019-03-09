@@ -43,7 +43,7 @@ $redis = new Redis();
 $redis->connect('/run/redis.sock');
 $activePlayer = $redis->get('activePlayer');
 if ($activePlayer === 'MPD') {
-    $socket = openMpdSocket('/run/mpd.sock', 0);
+    $socket = openMpdSocket('/run/mpd/socket', 0);
 } elseif ($activePlayer === 'Spotify') {
     $socket = openSpopSocket('localhost', 6602, 1);
 } else {
