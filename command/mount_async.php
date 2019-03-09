@@ -38,7 +38,7 @@ define('APP', '/srv/http/app/');
 include('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // reset logfile
 sysCmd('echo "--------------- start: mount_async.php ---------------" > /var/log/runeaudio/mount_async.log');

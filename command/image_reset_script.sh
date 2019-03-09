@@ -145,7 +145,9 @@ cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffl
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
 cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
+cp /var/www/app/config/defaults/mpd.service /usr/lib/systemd/system/mpd.service
 cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
+cp /var/www/app/config/defaults/redis.socket /usr/lib/systemd/system/redis.socket
 cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
 cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
 cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service

@@ -1,7 +1,7 @@
 <?php
 $redis = new Redis();
 //$redis->connect('127.0.0.1');
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 $option = array('cost' => 12);
 $hash = password_hash('rune', PASSWORD_BCRYPT, $option);

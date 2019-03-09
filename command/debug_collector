@@ -39,7 +39,7 @@ ini_set('error_log', '/var/log/runeaudio/debug_collector.log');
 include('/var/www/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 function debug_data($redis)
 {
 	$acards = sysCmd("cat /proc/asound/cards | grep : | cut -d ' ' -f 2");

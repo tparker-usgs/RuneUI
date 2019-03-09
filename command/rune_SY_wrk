@@ -52,7 +52,7 @@ sysCmd('chmod 777 /run');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // if os updates are needed
 if (file_exists('/srv/http/command/update_os.php')) {
@@ -422,7 +422,7 @@ runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
 while (1) {
 	// Connect to Redis backend
-	$redis->pconnect('/run/redis.sock');
+	$redis->pconnect('/run/redis/socket');
 	// runelog('[wrk] loop marker ',microtime(true));
     // monitor loop
     if (!empty($redis->hGetAll('w_queue'))) {

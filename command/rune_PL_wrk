@@ -49,7 +49,7 @@ $forceupdate = 1;
 while (1) {
     // Connect to Redis backend
     $redis = new Redis();
-    $redis->pconnect('/run/redis.sock');
+    $redis->pconnect('/run/redis/socket');
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
