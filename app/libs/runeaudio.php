@@ -3890,7 +3890,7 @@ function wrk_stopAirplay($redis)
             $redis->set('activePlayer', $stoppedPlayer);
 
             //delete all files in shairport folder except "now_playing"
-            $dir = '/var/run/shairport/';
+            $dir = '/run/shairport/';
             $leave_files = array('now_playing');
             foreach( glob("$dir/*") as $file ) {
             if( !in_array(basename($file), $leave_files) )

@@ -49,7 +49,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'user', 'mpd');
             $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
             $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hSet('mpdconf', 'pid_file', '/run/mpd/pid');
             $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
@@ -79,7 +79,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'user') || $redis->hSet('mpdconf', 'user', 'mpd');
             $redis->hExists('mpdconf', 'db_file') || $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
             $redis->hExists('mpdconf', 'sticker_file') || $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hExists('mpdconf', 'pid_file') || $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hExists('mpdconf', 'pid_file') || $redis->hSet('mpdconf', 'pid_file', '/run/mpd/pid');
             $redis->hExists('mpdconf', 'music_directory') || $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hExists('mpdconf', 'playlist_directory') || $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hExists('mpdconf', 'state_file') || $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
