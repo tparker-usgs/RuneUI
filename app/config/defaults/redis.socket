@@ -1,9 +1,0 @@
-[Socket]
-ListenStream=/run/redis/socket
-ListenStream=6379
-Backlog=5
-KeepAlive=true
-PassCredentials=true
-
-[Install]
-WantedBy=sockets.target
