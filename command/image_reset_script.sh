@@ -140,7 +140,8 @@ cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supp
 cp /var/www/app/config/defaults/fstab /etc/fstab
 cp /var/www/app/config/defaults/hosts /etc/hosts
 cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
-cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
+cp /var/www/app/config/defaults/start_midori.sh /etc/X11/xinit/start_midori.sh
+cp /var/www/app/config/defaults/Xwrapper.config /etc/X11/Xwrapper.config
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
 cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
