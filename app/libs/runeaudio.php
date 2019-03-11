@@ -2722,6 +2722,7 @@ if ($action === 'reset') {
 			}
 			// write the changes to the Airplay (shairport-sync) configuration file
             wrk_shairport($redis, $ao);
+            wrk_spotifyd($redis, $ao);
             break;
         case 'update':
             foreach ($args as $param => $value) {
@@ -2907,6 +2908,103 @@ function wrk_mpdRestorePlayerStatus($redis)
 	$redis->set('ashuffle_wait_for_play', '0');
 }
 
+function wrk_spotifyd($redis, $ao, $name = null)
+{
+    if (!isset($name)) {
+        $name = $redis->hGet('spotifyconnect', 'device_name');
+	}
+	$redis->hSet('spotifyconnect', 'ao', $ao);
+	$acard = $redis->hGet('acards', $ao);
+    $acard = json_decode($acard);
+    runelog('wrk_spotifyd acard details      : ', $acard);
+    runelog('wrk_spotifyd acard name         : ', $acard->name);
+	runelog('wrk_spotifyd acard type         : ', $acard->type);
+	runelog('wrk_spotifyd acard device       : ', $acard->device);
+	//
+	$redis->hSet('spotifyconnect', 'device', preg_split('/[\s,]+/', $acard->device)[0]);
+	//
+	if (!empty($acard->mixer_control)) {
+		$mixer_control = trim($acard->mixer_control);
+	} else {
+		$mixer_control = 'PCM';
+	}
+	if ($mixer_control === '') {
+		$mixer_control = 'PCM';
+	}
+	if ($redis->hGet('mpdconf', 'mixer_type') != 'hardware') {
+		$mixer_control = 'PCM';
+	}
+    runelog('wrk_spotifyd mixer: ', $mixer_control);
+	$redis->hSet('spotifyconnect', 'mixer', $mixer_control);
+	//
+	$spotifyd_conf  = "############################################################\n";
+	$spotifyd_conf .= "# Auto generated spotifyd.conf file\n";
+	$spotifyd_conf .= "# Configuration File for Spotifyd\n";
+	$spotifyd_conf .= "# A spotify playing daemon - Spotify Connect Receiver\n";
+	$spotifyd_conf .= '# See: https://github.com/Spotifyd/spotifyd#configuration'."\n";
+	$spotifyd_conf .= "############################################################\n";
+    $spotifyd_conf .= "#\n";
+	$spotifyd_conf .= "[global]\n";
+    $spotifyd_conf .= "#\n";
+	$mpdcfg = $redis->hGetAll('mpdconf');
+	foreach ($mpdcfg as $param => $value) {
+		switch ($param) {
+		case "username":
+			// no break;
+		case "password":
+			// no break;
+		case "backend":
+			// no break;
+		case "device":
+			// no break;
+		case "mixer":
+			// no break;
+		case "volume-control":
+			// no break;
+		case "onevent":
+			// no break;
+		case "device_name":
+			// no break;
+		case "bitrate":
+			// no break;
+		case "cache_path":
+			// no break;
+		case "volume-normalisation":
+			// no break;
+		case "normalisation-pregain":
+			$spotifyd_conf .= $param." = ".$value."\n";
+			break;
+		default:
+			break;
+		}
+	}
+	// write spotifyd.conf file to /tmp location
+	$fh = fopen('/tmp/spotifyd.conf', 'w');
+	fwrite($fh, $spotifyd_conf);
+	fclose($fh);
+	// check whether the spotifyd.conf file has changed
+	if (md5_file('/etc/spotifyd.conf') == md5_file('/tmp/spotifyd.conf')) {
+		// nothing has changed
+		syscmd('rm -f /tmp/spotifyd.conf');
+	} else {
+		// spotifyd configuration has changed
+		if ($redis->get('activePlayer') === 'SpotifyConnect') {
+			runelog('Stop SpotifyConnect player');
+			wrk_stopPlayer($redis, 'SpotifyConnect');
+		}
+		syscmd('cp /tmp/spotifyd.conf /etc/spotifyd.conf');
+		syscmd('rm -f /tmp/spotifyd.conf');
+		// stop spotifyd
+		sysCmd('systemctl stop spotifyd');
+		// update systemd
+		sysCmd('systemctl daemon-reload');
+		if ($redis->hGet('spotifyconnect', 'enable')) {
+			runelog('restart spotifyd');
+			sysCmd('systemctl reload-or-restart spotifyd || systemctl start spotifyd');
+		}
+	}
+}
+
 function wrk_shairport($redis, $ao, $name = null)
 {
     if (!isset($name)) {
@@ -3077,14 +3175,14 @@ function wrk_shairport($redis, $ao, $name = null)
 	// restart only if the conf files have changed
 	if (($redis->get('sssconfchange')) OR ($redis->get('libaoconfchange'))) {
 		// stop rune_SSM_wrk
-		sysCmd('systemctl stop rune_SSM_wrk');
+		if ($redis->get('activePlayer') === 'Airplay') {
+			runelog('Stop Airplay player');
+			wrk_stopPlayer($redis, 'Airplay');
+		}
+		sysCmd('systemctl stop rune_SSM_wrk shairport-sync');
 		// update systemd
 		sysCmd('systemctl daemon-reload');
-		if ($redis->get('activePlayer') === 'Spotify') {
-			runelog('restart spopd');
-			sysCmd('systemctl reload-or-restart spopd || systemctl start spopd');
-		}
-		if ($redis->hGet('airplay','enable')) {
+		if ($redis->hGet('airplay', 'enable')) {
 			runelog('restart shairport-sync');
 			sysCmd('systemctl reload-or-restart shairport-sync || systemctl start shairport-sync');
 		}
@@ -3776,7 +3874,7 @@ function wrk_setHwPlatform($redis)
     }
 }
 
-// this can be removed in next version, because it's replaced by wrk_startAirplay($redis) and wrk_stopAirplay($redis)
+// this can be removed in next version, because it's replaced by wrk_startPlayback($redis, $newplayer) and wrk_stopPlayback($redis, $oldplayer)
 function wrk_togglePlayback($redis, $activePlayer)
 {
 $stoppedPlayer = $redis->get('stoppedPlayer');
@@ -3817,12 +3915,12 @@ runelog('activePlayer = ', $activePlayer);
 runelog('endFunction!!!', $stoppedPlayer);
 }
 
-function wrk_startAirplay($redis)
+function wrk_startPlayer($redis, $newplayer)
 {
     $activePlayer = $redis->get('activePlayer');
-    if ($activePlayer != 'Airplay') {
-        $redis->set('stoppedPlayer', $activePlayer);
+    if ($activePlayer != $newplayer) {
         if ($activePlayer === 'MPD') {
+			$redis->set('stoppedPlayer', $activePlayer);
 			// record  the mpd status
 			wrk_mpdPlaybackStatus($redis);
             // connect to MPD daemon
@@ -3830,8 +3928,8 @@ function wrk_startAirplay($redis)
             $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             // to get MPD out of its idle-loop we discribe to a channel
-            sendMpdCommand($sock, 'subscribe Airplay');
-            sendMpdCommand($sock, 'unsubscribe Airplay');
+            sendMpdCommand($sock, 'subscribe '.$newplayer);
+            sendMpdCommand($sock, 'unsubscribe '.$newplayer);
             if ($status['state'] === 'play') {
                 // pause playback
                 sendMpdCommand($sock, 'pause');
@@ -3840,6 +3938,7 @@ function wrk_startAirplay($redis)
             }
             closeMpdSocket($sock);
         } elseif ($activePlayer === 'Spotify') {
+			$redis->set('stoppedPlayer', $activePlayer);
             // connect to SPOPD daemon
             $sock = openSpopSocket('localhost', 6602, 1);
             // to get SPOP out of its idle-loop
@@ -3853,23 +3952,28 @@ function wrk_startAirplay($redis)
                 runelog('sendSpopCommand', 'toggle');
             }
             closeSpopSocket($sock);
+        } elseif ($activePlayer === 'Airplay') {
+			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaymetadata', 'action' => 'stop'));
+			waitSyWrk($redis, $jobID);
+			sysCmd('systemctl restart shairport-sync');
+        } elseif ($activePlayer === 'SpotifyConnect') {
+			sysCmd('systemctl restart spotifyd');
         }
-        $redis->set('activePlayer', 'Airplay');
+        $redis->set('activePlayer', $newplayer);
         //ui_render('playback', "{\"currentartist\":\"<unknown>\",\"currentsong\":\"Airplay\",\"currentalbum\":\"<unknown>\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
         //sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
     }
 }
 
-function wrk_stopAirplay($redis)
+function wrk_stopPlayer($redis, $oldplayer=null)
 {
     $activePlayer = $redis->get('activePlayer');
-    if ($activePlayer == 'Airplay') {
-
+    if ($activePlayer === 'Airplay' || $activePlayer === 'SpotifyConnect') {
         $stoppedPlayer = $redis->get('stoppedPlayer');
         runelog('stoppedPlayer = ', $stoppedPlayer);
 
         if ($stoppedPlayer !== '') {
-            // we previously stopped playback of one player to use the Airport Stream
+            // we previously stopped playback of one player to use the Stream
             if ($stoppedPlayer === 'MPD') {
                 // connect to MPD daemon
                 $sock = openMpdSocket('/run/mpd.sock', 0);
@@ -3881,10 +3985,10 @@ function wrk_stopAirplay($redis)
                 }
                 //sendMpdCommand($sock, 'pause');
                 // to get MPD out of its idle-loop we discribe to a channel
-                sendMpdCommand($sock, 'subscribe Airplay');
-                sendMpdCommand($sock, 'unsubscribe Airplay');
+                sendMpdCommand($sock, 'subscribe '.$activePlayer);
+                sendMpdCommand($sock, 'unsubscribe '.$activePlayer);
                 closeMpdSocket($sock);
-				// continue playing mpd where it stopped when airplay started
+				// continue playing mpd where it stopped when the stream started
 				wrk_mpdRestorePlayerStatus($redis);
                 // debug
                 //runelog('sendMpdCommand', 'pause');
@@ -3904,6 +4008,11 @@ function wrk_stopAirplay($redis)
                 // debug
                 //runelog('sendSpopCommand', 'toggle');
             }
+			if ($activePlayer == 'Airplay') {
+				sysCmd('systemctl restart shairport-sync');
+			} elseif ($activePlayer == 'SpotifyConnect') {
+				sysCmd('systemctl restart spotifyd');
+			}
             // set the active player back to the one we stopped
             $redis->set('activePlayer', $stoppedPlayer);
 
@@ -3918,6 +4027,25 @@ function wrk_stopAirplay($redis)
         runelog('endFunction!!!', $stoppedPlayer);
         sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
     }
+}
+
+function wrk_SpotifyConnectMetadata($redis, $status, $track_id)
+{
+	runelog('wrk_SpotifyConnectMetadata status  :', $status);
+	runelog('wrk_SpotifyConnectMetadata track ID:', $track_id);
+	$redis->hSet('spotifyconnect', 'status', $status)
+	switch($status) {
+		case 'start':
+			// no break;
+        case 'change':
+			// run asynchronous metadata script
+			sysCmdAsync('nice --adjustment=2 /var/www/command/spotify_connect_metadata_async.php '.$track_id);
+            break;
+        case 'stopped':
+            break;
+		default:
+            runelog('wrk_SpotifyConnectMetadata error:', 'Unknown status');
+            break;
 }
 
 function wrk_startUpmpdcli($redis)
@@ -4174,7 +4302,7 @@ function wrk_changeHostname($redis, $newhostname)
     runelog('current system hostname:', $shn);
 	runelog('current redis hostname :', $rhn);
 	runelog('new hostname           :', $newhostname);
-    // update airplayname
+    // update airplay name
     if ((trim($redis->hGet('airplay', 'name')) === $rhn) && ($newhostname != $rhn)) {
         $redis->hSet('airplay', 'name', $newhostname);
 		wrk_shairport($redis, $redis->get('ao'), $newhostname);
@@ -4183,7 +4311,16 @@ function wrk_changeHostname($redis, $newhostname)
 			sysCmd('systemctl reload-or-restart shairport-sync || systemctl start shairport-sync');
 		}
     }
-    // update dlnaname
+    // update spotifyconnect name
+    if ((trim($redis->hGet('spotifyconnect', 'device_name')) === $rhn) && ($newhostname != $rhn)) {
+        $redis->hSet('spotifyconnect', 'device_name', $newhostname);
+		wrk_spotifyd($redis, $redis->get('ao'), $newhostname);
+        if ($redis->hGet('spotifyconnect','enable') === '1') {
+			runelog("service: spotifyconnect restart",'');
+			sysCmd('systemctl reload-or-restart spotifyd || systemctl start spotifyd');
+		}
+    }
+    // update dlna name
     if ((trim($redis->hGet('dlna', 'name')) === $rhn) && ($newhostname != $rhn)) {
         $redis->hSet('dlna','name', $newhostname);
 		wrk_upmpdcli($redis, $newhostname);

@@ -13,12 +13,14 @@ if [ $? -eq 0 ]; then
 	chown http.http /srv/http/command/artist_info.sh
 	chmod 755 /srv/http/command/lyric.sh
 	chmod 755 /srv/http/command/artist_info.sh
+	redis-cli set internetAvailable 1
 else
 #	internet connection not available, so make the artist info & lyric files non-executable
 	chown root.root /srv/http/command/lyric.sh
 	chown root.root /srv/http/command/artist_info.sh
 	chmod 600 /srv/http/command/lyric.sh
 	chmod 600 /srv/http/command/artist_info.sh
+	redis-cli set internetAvailable 0
 fi
 #---
 #End script

@@ -107,6 +107,7 @@ function redisDatastore($redis,$action) {
 			$redis->set('audio_on_off', '1');
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
+            $redis->set('internetAvailable', 0);
 			// UI login password 
 			$redis->set('pwd_protection', 0);
 			$option = array('cost' => 12);
@@ -387,6 +388,7 @@ function redisDatastore($redis,$action) {
 				$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
 				$redis->set('password', $hash);
 			}
+            $redis->exists('internetAvailable') || $redis->set('internetAvailable', 0);
 			// Access Point
 			$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
 			$redis->hExists('AccessPoint', 'ip-address') || $redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
