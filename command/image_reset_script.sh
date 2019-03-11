@@ -88,6 +88,7 @@ redis-cli del mpdconf
 redis-cli del nics
 redis-cli del samba
 redis-cli del spotify
+redis-cli del spotifyconnect
 redis-cli del usbmounts
 redis-cli del debugdata
 redis-cli del local_browser

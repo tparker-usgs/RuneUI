@@ -351,7 +351,7 @@ if ($playerid_db === '') {
 	}
 	// start shairport-sync
 	if ($redis->hGet('airplay', 'enable')) {
-		runelog("service: SHAIRPORT-SYNC start",'');
+		runelog('service: SHAIRPORT-SYNC start','');
 		// create a directory to use for airplay metadata artwork
 		// the location /srv/http/tmp is a tmpfs, see /etc/fstab
 		sysCmd('mkdir -p /srv/http/tmp/airplay');
@@ -363,7 +363,7 @@ if ($playerid_db === '') {
 	}
 	// start spotifyd
 	if ($redis->hGet('spotifyconnect', 'enable')) {
-		runelog("service: SPOTIFYD start",'');
+		runelog('service: SPOTIFYD start','');
 		// create a directory to use for spotifyd artwork
 		// the location /srv/http/tmp is a tmpfs, see /etc/fstab
 		sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
@@ -372,11 +372,11 @@ if ($playerid_db === '') {
 		sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect');
 		// create a directory to use for spotifyd cache
 		// the location /tmp is a tmpfs, see /etc/fstab
-		// default location is '/tmp/spotify-connect-cache'
-		$spotify-connect-cache = $redis->hGet('spotifyconnect', 'cache_path');
-		sysCmd('mkdir -p '.$spotify-connect-cache);
-		sysCmd('chown -R spotifyd.spotifyd '.$spotify-connect-cache);
-		sysCmd('chmod -R 644 '.$spotify-connect-cache);
+		// default location is '/tmp/spotifyConnectCache'
+		$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
+		sysCmd('mkdir -p '.$spotifyConnectCache);
+		sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+		sysCmd('chmod -R 644 '.$spotifyConnectCache);
 		// start spotifyd if it is not already started
 		sysCmd('pgrep -x spotifyd || systemctl start spotifyd');
 	}
@@ -574,9 +574,9 @@ while (1) {
 					}
 					// process metadata if enabled
 					if ($redis->hGet('spotifyconnect', 'metadata_enabled') == 'yes') {
-						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args)
+						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args);
 					}
-					$redis->hSet('spotifyconnect', 'status', $job->action)
+					$redis->hSet('spotifyconnect', 'status', $job->action);
                     $redis->sAdd('w_lock', $jobID);
                     $redis->sRem('w_lock', $jobID);
 					break;

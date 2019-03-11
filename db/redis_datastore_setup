@@ -144,7 +144,7 @@ function redisDatastore($redis,$action) {
 			$redis->hSet('spotifyconnect', 'onevent', '/srv/http/command/spotify_connect_command.php');
 			$redis->hSet('spotifyconnect', 'device_name', 'RuneAudio');
 			$redis->hSet('spotifyconnect', 'bitrate', 320);
-			$redis->hSet('spotifyconnect', 'cache_path', '/tmp/spotify-connect-cache');
+			$redis->hSet('spotifyconnect', 'cache_path', '/tmp/spotifyConnectCache');
 			$redis->hSet('spotifyconnect', 'volume-normalisation', 'true');
 			$redis->hSet('spotifyconnect', 'normalisation-pregain', -10);
             $redis->hDel('airplay', 'enable');

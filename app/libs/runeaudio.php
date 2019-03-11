@@ -4033,7 +4033,7 @@ function wrk_SpotifyConnectMetadata($redis, $status, $track_id)
 {
 	runelog('wrk_SpotifyConnectMetadata status  :', $status);
 	runelog('wrk_SpotifyConnectMetadata track ID:', $track_id);
-	$redis->hSet('spotifyconnect', 'status', $status)
+	$redis->hSet('spotifyconnect', 'status', $status);
 	switch($status) {
 		case 'start':
 			// no break;
@@ -4046,6 +4046,7 @@ function wrk_SpotifyConnectMetadata($redis, $status, $track_id)
 		default:
             runelog('wrk_SpotifyConnectMetadata error:', 'Unknown status');
             break;
+	}
 }
 
 function wrk_startUpmpdcli($redis)
