@@ -2921,21 +2921,29 @@ function wrk_spotifyd($redis, $ao, $name = null)
 	runelog('wrk_spotifyd acard type         : ', $acard->type);
 	runelog('wrk_spotifyd acard device       : ', $acard->device);
 	//
-	$redis->hSet('spotifyconnect', 'device', preg_split('/[\s,]+/', $acard->device)[0]);
+	// $redis->hSet('spotifyconnect', 'device', preg_split('/[\s,]+/', $acard->device)[0]);
+	// $redis->hSet('spotifyconnect', 'device', 'plug'.preg_split('/[\s,]+/', $acard->device)[0]);
+	$redis->hSet('spotifyconnect', 'device', 'plug'.$acard->device);
 	//
 	if (!empty($acard->mixer_control)) {
-		$mixer_control = trim($acard->mixer_control);
+		$mixer = trim($acard->mixer_control);
+		$volume_control = 'alsa';
 	} else {
-		$mixer_control = 'PCM';
+		$mixer = 'PCM';
+		$volume_control = 'softvol';
 	}
-	if ($mixer_control === '') {
-		$mixer_control = 'PCM';
+	if ($mixer === '') {
+		$mixer = 'PCM';
+		$volume_control = 'softvol';
 	}
 	if ($redis->hGet('mpdconf', 'mixer_type') != 'hardware') {
-		$mixer_control = 'PCM';
+		$mixer = 'PCM';
+		$volume_control = 'softvol';
 	}
     runelog('wrk_spotifyd mixer: ', $mixer_control);
-	$redis->hSet('spotifyconnect', 'mixer', $mixer_control);
+	$redis->hSet('spotifyconnect', 'mixer', $mixer);
+    runelog('wrk_spotifyd volume control: ', $volume_control);
+	$redis->hSet('spotifyconnect', 'mixer', $volume_control);
 	//
 	$spotifyd_conf  = "############################################################\n";
 	$spotifyd_conf .= "# Auto generated spotifyd.conf file\n";
