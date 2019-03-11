@@ -2946,7 +2946,7 @@ function wrk_spotifyd($redis, $ao, $name = null)
     $spotifyd_conf .= "#\n";
 	$spotifyd_conf .= "[global]\n";
     $spotifyd_conf .= "#\n";
-	$mpdcfg = $redis->hGetAll('mpdconf');
+	$mpdcfg = $redis->hGetAll('spotifyconnect');
 	foreach ($mpdcfg as $param => $value) {
 		switch ($param) {
 		case "username":

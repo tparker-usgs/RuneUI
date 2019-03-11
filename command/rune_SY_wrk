@@ -374,9 +374,11 @@ if ($playerid_db === '') {
 		// the location /tmp is a tmpfs, see /etc/fstab
 		// default location is '/tmp/spotifyConnectCache'
 		$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
-		sysCmd('mkdir -p '.$spotifyConnectCache);
-		sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
-		sysCmd('chmod -R 644 '.$spotifyConnectCache);
+		if (!empty($spotifyConnectCache)) {
+			sysCmd('mkdir -p '.$spotifyConnectCache);
+			sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+			sysCmd('chmod -R 644 '.$spotifyConnectCache);
+		}
 		// start spotifyd if it is not already started
 		sysCmd('pgrep -x spotifyd || systemctl start spotifyd');
 	}
@@ -540,12 +542,21 @@ while (1) {
                     // start spotify connect
                     if ($job->action === 'start') {
                         runelog('service: SPORIFY CONNECT start');
-						// create a directory to use for spotify connect metadata artwork
+						// create a directory to use for spotifyd artwork
 						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
 						sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
 						sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
 						sysCmd('chown -R http.http /srv/http/tmp');
-						sysCmd('chmod 644 /srv/http/tmp/spotify-connect/spotify-connect-default.png');
+						sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect');
+						// create a directory to use for spotifyd cache
+						// the location /tmp is a tmpfs, see /etc/fstab
+						// default location is '/tmp/spotifyConnectCache'
+						$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
+						if (!empty($spotifyConnectCache)) {
+							sysCmd('mkdir -p '.$spotifyConnectCache);
+							sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+							sysCmd('chmod -R 644 '.$spotifyConnectCache);
+						}
                         // start or re-start shairport-sync service
                         if (isset($restart)) {
                             sysCmd('systemctl reload-or-restart spotifyd');
@@ -556,7 +567,7 @@ while (1) {
                         // send notfy to UI
                         ui_notify('Spotify Connect', 'Spotify Connect feature enabled');
                     }
-                    // stop shairport
+                    // stop spotify connect
                     if ($job->action === 'stop') {
                         runelog('service: SPOTIFY CONNECT stop');
                         sysCmd('systemctl stop spotifyd');
