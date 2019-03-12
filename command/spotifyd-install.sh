@@ -18,6 +18,9 @@ else
 	exit 0
 fi
 #
+# make sure that the spotifyd redis varaiables are initialised
+/srv/http/db/redis_datastore_setup check
+#
 # create a user for starting spotifyd as a systemd service
 userdel spotifyd
 groupdel spotifyd
@@ -36,9 +39,6 @@ chmod 644 /usr/lib/systemd/system/spotifyd.service
 # initiate systemd
 systemctl daemon-reload
 systemctl disable spotifyd
-#
-# make sure that the spotifyd redis varaiables are initialised
-/srv/http/db/redis_datastore_setup check
 #
 # end
 exit 1

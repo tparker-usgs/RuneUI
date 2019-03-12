@@ -3178,6 +3178,17 @@ if ($('#section-index').length) {
                 }
             });
             
+            // show/hide Spotify Connect auth form
+            $('#spotifyconnect').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#spotifyconnectAuth').removeClass('hide');
+                    $('#spotifyconnectBox').addClass('boxed-group');
+                } else {
+                    $('#spotifyconnectAuth').addClass('hide');
+                    $('#spotifyconnectBox').removeClass('boxed-group');
+                }
+            });
+            
             // show/hide Samba on/off form
             $('#samba').change(function(){
                 if ($(this).prop('checked')) {

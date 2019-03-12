@@ -2908,12 +2908,16 @@ function wrk_mpdRestorePlayerStatus($redis)
 	$redis->set('ashuffle_wait_for_play', '0');
 }
 
-function wrk_spotifyd($redis, $ao, $name = null)
+function wrk_spotifyd($redis, $ao = null, $name = null)
 {
     if (!isset($name)) {
         $name = $redis->hGet('spotifyconnect', 'device_name');
 	}
-	$redis->hSet('spotifyconnect', 'ao', $ao);
+    if (!isset($ao)) {
+        $name = $redis->hGet('ao', 'device_name');
+	} else {
+		$redis->hSet('spotifyconnect', 'ao', $ao);
+	}
 	$acard = $redis->hGet('acards', $ao);
     $acard = json_decode($acard);
     runelog('wrk_spotifyd acard details      : ', $acard);

@@ -355,6 +355,64 @@
                     </div>
                 </div>
             </div>
+            <div <?php if($this->spotifyconnect['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="spotifyconnectBox">
+                <div class="form-group">
+                    <label for="spotifyconnect" class="control-label col-sm-2">Spotify Connect</label>
+                    <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="spotifyconnect" name="features[spotifyconnect][enable]" type="checkbox" value="1"<?php if($this->spotifyconnect['enable'] === '1'): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled readonly<?php endif; ?>>
+                            <?php if($this->activePlayer === 'SpotifyConnect'): ?><input id="spotifyconnect" name="features[spotifyconnect][enable]" type="hidden" value="1"><?php endif; ?>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled<?php endif; ?>"></a>
+                        </label>
+                        <span class="help-block">Enable Spotify Connect steaming client. You must have a <strong><a href="https://www.spotifyconnect.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account</span>
+                    </div>
+                </div>
+                <div class="<?php if($this->spotifyconnect['enable'] != 1): ?>hide<?php endif ?>" id="spotifyconnectAuth">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_username">Username</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_username" name="features[spotifyconnect][username]" value="<?php echo $this->spotifyconnect['username']; ?>" data-trigger="change" placeholder="username" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>username</i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_passwoord" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" placeholder="password" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_bitrate">Bitrate</label>
+						<div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][bitrate]" data-style="btn-default btn-lg">
+								<option value="320" <?php if($this->spotifyconnect['bitrate'] === '320'): ?> selected <?php endif ?>> 320 (high quality)</option>
+								<option value="160" <?php if($this->spotifyconnect['bitrate'] === '160'): ?> selected <?php endif ?>> 160 (medium quality)</option>
+								<option value="96"  <?php if($this->spotifyconnect['bitrate'] === '96'): ?>  selected <?php endif ?>> 96  (low quality)</option>
+							</select>
+                            <span class="help-block">Choose the bitrate <strong>320</strong> (high quality), <strong>160</strong> (medium quality) or <strong>96</strong> (low quality)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_volume-normalisation">Volume Normalisation</label>
+                        <div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume-normalisation]" data-style="btn-default btn-lg">
+								<option value="true"  <?php if($this->spotifyconnect['volume-normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
+								<option value="false" <?php if($this->spotifyconnect['volume-normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
+							</select>
+                            <span class="help-block">Switch Volume Normalisation per track <strong>ON</strong> or <strong>OFF</strong></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_normalisation-pregain">Normalisation Pregain</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_normalisation-pregain" name="features[spotifyconnect][normalisation-pregain]" value="<?php echo $this->spotifyconnect['normalisation-pregain']; ?>" min="-20" max="0" placeholder="-10" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>0</strong> (zero) and <strong>-20</strong>. This value is active only when <i>Volume Normalisation</i> is <strong>ON</strong>.<br>
+							When <i>Volume Normalisation</i> is selected the output volume will need to be reduced to prevent clipping. A value of -10dB is advised as a starting point. When modifying, change it in small steps (and turn your amplifier down!)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div <?php if($this->local_browser['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="local_browserBox">
 				<?php if($this->local_browseronoff): ?>
 				<div class="form-group">

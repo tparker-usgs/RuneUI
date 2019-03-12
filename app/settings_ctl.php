@@ -187,13 +187,27 @@ if (isset($_POST)) {
             $redis->hGet('samba','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaonoff', 'action' => $_POST['features']['samba']['enable'], 'args' => $_POST['features']['samba']['readwrite']));
         }
 		if ($_POST['features']['spotify']['enable'] == 1) {
-            // create worker job (start spotify)
+            // create worker job (start Spotify)
             if (($_POST['features']['spotify']['user'] != $redis->hGet('spotify', 'user') OR $_POST['features']['spotify']['pass'] != $redis->hGet('spotify', 'pass')) OR $redis->hGet('spotify', 'enable') != $_POST['features']['spotify']['enable']) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotify', 'action' => 'start', 'args' => $_POST['features']['spotify']));
             }
         } else {
-            // create worker job (stop spotify)
+            // create worker job (stop Spotify)
             $redis->hGet('spotify','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotify', 'action' => 'stop'));
+        }
+		if ($_POST['features']['spotifyconnect']['enable'] == 1) {
+            // create worker job (start Spotify Connect)
+            if (($_POST['features']['spotifyconnect']['username'] != $redis->hGet('spotifyconnect', 'username')
+					OR $_POST['features']['spotifyconnect']['password'] != $redis->hGet('spotifyconnect', 'password')) 
+					OR $_POST['features']['spotifyconnect']['bitrate'] != $redis->hGet('spotifyconnect', 'bitrate')) 
+					OR $_POST['features']['spotifyconnect']['volume-normalisation'] != $redis->hGet('spotifyconnect', 'volume-normalisation')) 
+					OR $_POST['features']['spotifyconnect']['normalisation-pregain'] != $redis->hGet('spotifyconnect', 'normalisation-pregain')) 
+					OR $redis->hGet('spotifyconnect', 'enable') != $_POST['features']['spotifyconnect']['enable']) {
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnect', 'action' => 'start', 'args' => $_POST['features']['spotifyconnect']));
+            }
+        } else {
+            // create worker job (stop Spotify Connect)
+            $redis->hGet('spotifyconnect','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnect', 'action' => 'stop'));
         }
     }
     // ----- SYSTEM COMMANDS -----
@@ -235,6 +249,7 @@ $template->coverart = $redis->get('coverart');
 $template->lastfm = $redis->hGetAll('lastfm');
 $template->proxy = $redis->hGetAll('proxy');
 $template->spotify = $redis->hGetAll('spotify');
+$template->spotifyconnect = $redis->hGetAll('spotifyconnect');
 $template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
