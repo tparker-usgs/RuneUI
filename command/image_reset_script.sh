@@ -19,9 +19,43 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
+<<<<<<< Updated upstream
 systemctl disable ashuffle mpd mpdscribble nmbd nmb smbd smb winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd bootsplash cronie
 systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
 systemctl stop ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil
+=======
+# for a distribution image disable systemd audit to reduce log files. Switch it on for a development image
+if [ "$1" == "full" ];
+then
+	systemctl mask systemd-journald-audit.socket
+else
+	systemctl unmask systemd-journald-audit.socket
+fi
+# systemctl stops after an eronious entry, use an array to run through all entries
+declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start)
+declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd bootsplash dbus)
+declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil)
+#
+for i in "${disable_arr[@]}"
+do
+   systemctl disable "$i"
+done
+#
+for i in "${enable_arr[@]}"
+do
+   systemctl enable "$i"
+done
+#
+for i in "${stop_arr[@]}"
+do
+   systemctl stop "$i"
+done
+# stop twice, some services try to restart themselves (e.g. ashuffle)
+for i in "${stop_arr[@]}"
+do
+   systemctl stop "$i"
+done
+>>>>>>> Stashed changes
 #
 # run poweroff script (and remove network mounts)
 /var/www/command/rune_shutdown poweroff
