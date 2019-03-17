@@ -198,11 +198,11 @@ if (isset($_POST)) {
 		if ($_POST['features']['spotifyconnect']['enable'] == 1) {
             // create worker job (start Spotify Connect)
             if (($_POST['features']['spotifyconnect']['username'] != $redis->hGet('spotifyconnect', 'username')
-					OR $_POST['features']['spotifyconnect']['password'] != $redis->hGet('spotifyconnect', 'password')) 
-					OR $_POST['features']['spotifyconnect']['bitrate'] != $redis->hGet('spotifyconnect', 'bitrate')) 
-					OR $_POST['features']['spotifyconnect']['volume-normalisation'] != $redis->hGet('spotifyconnect', 'volume-normalisation')) 
-					OR $_POST['features']['spotifyconnect']['normalisation-pregain'] != $redis->hGet('spotifyconnect', 'normalisation-pregain')) 
-					OR $redis->hGet('spotifyconnect', 'enable') != $_POST['features']['spotifyconnect']['enable']) {
+					OR $_POST['features']['spotifyconnect']['password'] != $redis->hGet('spotifyconnect', 'password') 
+					OR $_POST['features']['spotifyconnect']['bitrate'] != $redis->hGet('spotifyconnect', 'bitrate')
+					OR $_POST['features']['spotifyconnect']['volume-normalisation'] != $redis->hGet('spotifyconnect', 'volume-normalisation')
+					OR $_POST['features']['spotifyconnect']['normalisation-pregain'] != $redis->hGet('spotifyconnect', 'normalisation-pregain')
+					OR $redis->hGet('spotifyconnect', 'enable') != $_POST['features']['spotifyconnect']['enable'])) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnect', 'action' => 'start', 'args' => $_POST['features']['spotifyconnect']));
             }
         } else {

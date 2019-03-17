@@ -2914,10 +2914,10 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
         $name = $redis->hGet('spotifyconnect', 'device_name');
 	}
     if (!isset($ao)) {
-        $name = $redis->hGet('ao', 'device_name');
-	} else {
-		$redis->hSet('spotifyconnect', 'ao', $ao);
+        $oa = $redis->get('ao');
 	}
+	$redis->hSet('spotifyconnect', 'ao', $ao);
+	//
 	$acard = $redis->hGet('acards', $ao);
     $acard = json_decode($acard);
     runelog('wrk_spotifyd acard details      : ', $acard);

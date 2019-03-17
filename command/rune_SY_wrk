@@ -535,13 +535,13 @@ while (1) {
                     $redis->sAdd('w_lock', $jobID);
                     if ($job->args !== $redis->hGet('spotifyconnect', 'device_name')) {
                         $redis->hSet('spotifyconnect', 'device_name', $job->args);
-                        // update shairport startup config
+                        // update Spotify Connect startup config
                         wrk_spotifyd($redis, $redis->get('ao'), $redis->hGet('spotifyconnect', 'device_name'));
                         $restart = 1;
                     }
                     // start spotify connect
                     if ($job->action === 'start') {
-                        runelog('service: SPORIFY CONNECT start');
+                        runelog('service: SPOTIFY CONNECT start');
 						// create a directory to use for spotifyd artwork
 						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
 						sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
