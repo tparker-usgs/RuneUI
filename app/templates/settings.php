@@ -386,7 +386,7 @@
                         <label class="control-label col-sm-2" for="spotifyconnect_device_name">Spotify Connect name</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_device_name" name="features[spotifyconnect][device_name]" value="<?php echo $this->spotifyconnect['device_name']; ?>" data-trigger="change" placeholder="RuneAudio">
-                            <span class="help-block">Spotify Connect broadcast name</span>
+                            <span class="help-block">Spotify Connect broadcast/connection name</span>
                         </div>
                     </div>
                     <div class="form-group">
