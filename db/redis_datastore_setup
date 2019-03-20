@@ -43,7 +43,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
             $redis->hSet('mpdconf', 'log_level', 'default');
-            $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hSet('mpdconf', 'bind_to_address', 'localhost');
             $redis->hSet('mpdconf', 'port', '6600');
             $redis->hSet('mpdconf', 'max_connections', '20');
             $redis->hSet('mpdconf', 'user', 'mpd');
@@ -73,7 +73,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'zeroconf_enabled') || $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hExists('mpdconf', 'zeroconf_name') || $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
             $redis->hExists('mpdconf', 'log_level') || $redis->hSet('mpdconf', 'log_level', 'default');
-            $redis->hExists('mpdconf', 'bind_to_address') || $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hExists('mpdconf', 'bind_to_address') || $redis->hSet('mpdconf', 'bind_to_address', 'localhost');
             $redis->hExists('mpdconf', 'port') || $redis->hSet('mpdconf', 'port', '6600');
             $redis->hExists('mpdconf', 'max_connections') || $redis->hSet('mpdconf', 'max_connections', '20');
             $redis->hExists('mpdconf', 'user') || $redis->hSet('mpdconf', 'user', 'mpd');
