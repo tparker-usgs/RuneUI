@@ -378,7 +378,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
                         <div class="col-sm-10">
-                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_passwoord" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" placeholder="password" autocomplete="off">
+                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" placeholder="password" autocomplete="off">
                             <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
                         </div>
                     </div>

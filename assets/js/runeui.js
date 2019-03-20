@@ -480,7 +480,7 @@ function setPlaybackSource() {
     var source = activePlayer.toLowerCase();
     $('#playsource-' + source).removeClass('inactive');
     // update volume knob and control buttons
-    if (activePlayer === 'Spotify' || activePlayer === 'Airplay') {
+    if (activePlayer === 'Spotify' || activePlayer === 'Airplay' || activePlayer === 'SpotifyConnect') {
         $('#volume').trigger('configure', {'readOnly': true, 'fgColor': '#1A242F'}).css({'color': '#1A242F'});
         $('#volume-knob').addClass('nomixer');
         $('#volume-knob button').prop('disabled', true);
@@ -519,7 +519,7 @@ function renderLibraryHome() {
         divClose = '</div>',
         toggleMPD = '',
         toggleSpotify = '',
-        notMPD = (obj.ActivePlayer === 'Spotify' || obj.ActivePlayer === 'Airplay');
+        notMPD = (obj.ActivePlayer === 'Spotify' || obj.ActivePlayer === 'Airplay' || obj.ActivePlayer === 'SpotifyConnect');
     if(isLocalHost) {
         content = '';
     } else {

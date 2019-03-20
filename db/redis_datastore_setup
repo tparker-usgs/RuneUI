@@ -422,7 +422,7 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('spotifyconnect', 'cache_path') || $redis->hSet('spotifyconnect', 'cache_path', '/tmp/spotifyConnectCache');
 			$redis->hExists('spotifyconnect', 'volume_normalisation') || $redis->hSet('spotifyconnect', 'volume_normalisation', 'true');
 			$redis->hExists('spotifyconnect', 'normalisation_pregain') || $redis->hSet('spotifyconnect', 'normalisation_pregain', -10);
-			$redis->hExists('spotifyconnect', 'track_id') || redis->hSet('spotifyconnect', 'track_id', '');
+			$redis->hExists('spotifyconnect', 'track_id') || $redis->hSet('spotifyconnect', 'track_id', '');
 			$redis->hExists('airplay', 'name') || $redis->hSet('airplay', 'name', 'RuneAudio');
 			$redis->hExists('airplay', 'interpolation') || $redis->hSet('airplay', 'interpolation', 'soxr');
 			$redis->hExists('airplay', 'output_backend') || $redis->hSet('airplay', 'output_backend', 'alsa');

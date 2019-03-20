@@ -2961,7 +2961,7 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
 	$spotifyd_conf .= "[global]\n";
     $spotifyd_conf .= "#\n";
 	$sccfg = $redis->hGetAll('spotifyconnect');
-	foreach (sccfg as $param => $value) {
+	foreach ($sccfg as $param => $value) {
 		switch ($param) {
 		case "username":
 			// no break;
@@ -3980,13 +3980,24 @@ function wrk_startPlayer($redis, $newplayer)
         } elseif ($activePlayer === 'Airplay') {
 			$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaymetadata', 'action' => 'stop'));
 			waitSyWrk($redis, $jobID);
-			sysCmd('systemctl restart shairport-sync');
+			if ($newplayer === 'SpotifyConnect') {
+				sysCmd('systemctl restart shairport-sync');
+			}
         } elseif ($activePlayer === 'SpotifyConnect') {
-			sysCmd('systemctl restart spotifyd');
+			if ($newplayer === 'Airplay') {
+				sysCmd('systemctl restart spotifyd');
+			}
         }
+		if ($newplayer === 'SpotifyConnect') {
+			ui_render('playback', "{\"currentartist\":\"Spotify Connect\",\"currentsong\":\"-----\",\"currentalbum\":\"-----\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
+			sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+		}
+		if ($activePlayer === 'SpotifyConnect') {
+			sysCmd('rm /srv/http/tmp/spotifyd/spotify-connect-cover.*');
+			ui_render('playback', "{\"currentartist\":\"Spotify Connect\",\"currentsong\":\"Switching\",\"currentalbum\":\"-----\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
+			sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+		}
         $redis->set('activePlayer', $newplayer);
-        //ui_render('playback', "{\"currentartist\":\"<unknown>\",\"currentsong\":\"Airplay\",\"currentalbum\":\"<unknown>\",\"artwork\":\"\",\"genre\":\"\",\"comment\":\"\"}");
-        //sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
     }
 }
 
@@ -3996,11 +4007,11 @@ function wrk_stopPlayer($redis, $oldplayer=null)
     if ($activePlayer === 'Airplay' || $activePlayer === 'SpotifyConnect') {
         $stoppedPlayer = $redis->get('stoppedPlayer');
         runelog('stoppedPlayer = ', $stoppedPlayer);
-		if ($activePlayer == 'Airplay') {
-			sysCmd('systemctl restart shairport-sync');
-		} elseif ($activePlayer == 'SpotifyConnect') {
-			sysCmd('systemctl restart spotifyd');
-		}
+		// if ($activePlayer == 'Airplay') {
+			// sysCmd('systemctl restart shairport-sync');
+		// } elseif ($activePlayer == 'SpotifyConnect') {
+			// sysCmd('systemctl restart spotifyd');
+		// }
 		if ($stoppedPlayer === '') {
 			// if no stopped player is specified use MPD as default
 			$stoppedPlayer = 'MPD';
@@ -4019,6 +4030,8 @@ function wrk_stopPlayer($redis, $oldplayer=null)
 			sendMpdCommand($sock, 'subscribe '.$activePlayer);
 			sendMpdCommand($sock, 'unsubscribe '.$activePlayer);
 			closeMpdSocket($sock);
+            // set the active player back to the one we stopped
+            $redis->set('activePlayer', $stoppedPlayer);
 			// continue playing mpd where it stopped when the stream started
 			wrk_mpdRestorePlayerStatus($redis);
 		} elseif ($stoppedPlayer === 'Spotify') {
@@ -4036,7 +4049,6 @@ function wrk_stopPlayer($redis, $oldplayer=null)
 			closeSpopSocket($sock);
             // set the active player back to the one we stopped
             $redis->set('activePlayer', $stoppedPlayer);
-
             //delete all files in shairport folder except "now_playing"
             $dir = '/var/run/shairport/';
             $leave_files = array('now_playing');

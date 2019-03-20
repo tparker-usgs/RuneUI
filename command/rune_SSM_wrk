@@ -348,7 +348,7 @@ while (1) {
 						$status['song_percent'] = "100";
 						$status['currentartist'] = "Airplay";
 						$status['currentalbum'] = "-----";
-						$status['currentsong'] = "-----";
+						$status['currentsong'] = " ----- ";
 						$status['actPlayer'] = "Airplay";
 						$status['radioname'] = null;
 						$status['OK'] = null;
@@ -410,6 +410,7 @@ while (1) {
 						runelog('rune_SSM_wrk: Percent : ', $status['song_percent']);
 						// save and post the playback data to the UI
 						// push the info to the UI if cover art is not set
+						$status['currentsong'] = ' '.$status['currentsong'].' ';
 						ui_render('playback', json_encode($status));
 						$redis->set('act_player_info', json_encode($status));
 						if ($redis->hget('airplay', 'metadata_include_cover_art') != 'yes') {
@@ -465,6 +466,7 @@ while (1) {
 								$status['elapsed'] = "0";
 								$status['song_percent'] = "100";
 							}
+							$status['currentsong'] = trim($status['currentsong']);
 							ui_render('playback', json_encode($status));
 							$redis->set('act_player_info', json_encode($status));
 							//sleep(1);
