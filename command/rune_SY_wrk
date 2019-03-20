@@ -1334,8 +1334,8 @@ while (1) {
 					isset($job->args->password) && $redis->hSet('spotifyconnect', 'password', $job->args->password);
 					isset($job->args->device_name) && $redis->hSet('spotifyconnect', 'password', $job->args->device_name);
 					isset($job->args->bitrate) && $redis->hSet('spotifyconnect', 'bitrate', $job->args->bitrate);
-					isset($job->args->volume-normalisation) && $redis->hSet('spotifyconnect', 'volume-normalisation', $job->args->volume-normalisation); 
-					isset($job->args->normalisation-pregain) && $redis->hSet('spotifyconnect', 'normalisation-pregain', $job->args->normalisation-pregain);
+					isset($job->args->volume_normalisation) && $redis->hSet('spotifyconnect', 'volume_normalisation', $job->args->volume_normalisation); 
+					isset($job->args->normalisation_pregain) && $redis->hSet('spotifyconnect', 'normalisation_pregain', $job->args->normalisation_pregain);
 					isset($job->args->timeout) && $redis->hSet('spotifyconnect', 'timeout', $job->args->timeout);
 					isset($job->args->enable) && $redis->hSet('spotifyconnect', 'enable', $job->args->enable);
 					// isset($job->args->status) && $redis->hSet('spotifyconnect', 'status', $job->args->status);
@@ -1344,7 +1344,7 @@ while (1) {
 					// isset($job->args->backend) && $redis->hSet('spotifyconnect', 'backend', $job->args->backend);
 					// isset($job->args->device) && $redis->hSet('spotifyconnect', 'device', $job->args->device);
 					// isset($job->args->mixer) && $redis->hSet('spotifyconnect', 'mixer', $job->args->mixer);
-					// isset($job->args->volume-control) && $redis->hSet('spotifyconnect', 'volume-control', $job->args->volume-control);
+					// isset($job->args->volume_control) && $redis->hSet('spotifyconnect', 'volume_control', $job->args->volume_control);
 					// isset($job->args->onevent) && $redis->hSet('spotifyconnect', 'onevent', $job->args->onevent);
 					// isset($job->args->cache_path) && $redis->hSet('spotifyconnect', 'cache_path', $job->args->cache_path);
 					// isset($job->args->track_id) && $redis->hSet('spotifyconnect', 'track_id', track_id);

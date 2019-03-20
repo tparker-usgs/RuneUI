@@ -2960,8 +2960,8 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
     $spotifyd_conf .= "#\n";
 	$spotifyd_conf .= "[global]\n";
     $spotifyd_conf .= "#\n";
-	$mpdcfg = $redis->hGetAll('spotifyconnect');
-	foreach ($mpdcfg as $param => $value) {
+	$sccfg = $redis->hGetAll('spotifyconnect');
+	foreach (sccfg as $param => $value) {
 		switch ($param) {
 		case "username":
 			// no break;
@@ -2973,8 +2973,6 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
 			// no break;
 		case "mixer":
 			// no break;
-		case "volume-control":
-			// no break;
 		case "onevent":
 			// no break;
 		case "device_name":
@@ -2982,11 +2980,20 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
 		case "bitrate":
 			// no break;
 		case "cache_path":
-			// no break;
-		case "volume-normalisation":
-			// no break;
-		case "normalisation-pregain":
 			$spotifyd_conf .= $param." = ".$value."\n";
+			break;
+		case "volume_control":
+			$spotifyd_conf .= "volume-control = ".$value."\n";
+			break;
+		case "volume_normalisation":
+			if ($value == 'true') {
+				$spotifyd_conf .= "volume-normalisation = ".$value."\n";
+			}
+			break;
+		case "normalisation_pregain":
+			if ($sccfg['volume_normalisation'] == 'true') {
+				$spotifyd_conf .= "normalisation-pregain = ".$value."\n";
+			}
 			break;
 		default:
 			break;

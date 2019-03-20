@@ -401,19 +401,19 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="spotifyconnect_volume-normalisation">Volume Normalisation</label>
+                        <label class="control-label col-sm-2" for="spotifyconnect_volume_normalisation">Volume Normalisation</label>
                         <div class="col-sm-10">
-							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume-normalisation]" data-style="btn-default btn-lg">
-								<option value="true"  <?php if($this->spotifyconnect['volume-normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
-								<option value="false" <?php if($this->spotifyconnect['volume-normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume_normalisation]" data-style="btn-default btn-lg">
+								<option value="true"  <?php if($this->spotifyconnect['volume_normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
+								<option value="false" <?php if($this->spotifyconnect['volume_normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
 							</select>
                             <span class="help-block">Switch Volume Normalisation per track <strong>ON</strong> or <strong>OFF</strong></span>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-sm-2" for="spotifyconnect_normalisation-pregain">Normalisation Pregain</label>
+                        <label class="control-label col-sm-2" for="spotifyconnect_normalisation_pregain">Normalisation Pregain</label>
                         <div class="col-sm-10">
-                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_normalisation-pregain" name="features[spotifyconnect][normalisation-pregain]" value="<?php echo $this->spotifyconnect['normalisation-pregain']; ?>" min="-20" max="0" placeholder="-10" autocomplete="off">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_normalisation_pregain" name="features[spotifyconnect][normalisation_pregain]" value="<?php echo $this->spotifyconnect['normalisation_pregain']; ?>" min="-20" max="0" placeholder="-10" autocomplete="off">
                             <span class="help-block">Enter a value between <strong>0</strong> (zero) and <strong>-20</strong>. This value is active only when <i>Volume Normalisation</i> is <strong>ON</strong>.<br>
 							When <i>Volume Normalisation</i> is selected the output volume will need to be reduced to prevent clipping. A value of -10dB is advised as a starting point. When modifying, change it in small steps (and turn your amplifier down!)</span>
                         </div>
