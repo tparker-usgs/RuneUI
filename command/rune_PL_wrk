@@ -157,16 +157,16 @@ while (1) {
 							$status['currentsong'] = $retval['results']['trackmatches']['track'][0]['name'];
 							$status['currentartist'] = $retval['results']['trackmatches']['track'][0]['artist'];
 						}
-						if ($retval['results']['trackmatches']['track'][0]['image'][2]['#text'] != '') {
-							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][2]['#text']);
+						if ($retval['results']['trackmatches']['track'][0]['image'][3]['#text'] != '') {
+							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][3]['#text']);
 							$redis->hSet('lyrics','art', '');
 						}
 						unset($retval);
 						if (!is_null($status['currentsong']) && !is_null($status['currentartist'])) {
 							$url = 'http://ws.audioscrobbler.com/2.0/?method=track.getinfo&track='.$status['currentsong'].'&artist='.$status['currentartist'].'&api_key='.$lastfm_apikey.'&format=json';
 							$retval = json_decode(curlGet($url, $proxy), true);
-							if ($retval['track']['album']['image'][2]['#text'] != '') {
-								$redis->hSet('lyrics','arturl', $retval['track']['album']['image'][2]['#text']);
+							if ($retval['track']['album']['image'][3]['#text'] != '') {
+								$redis->hSet('lyrics','arturl', $retval['track']['album']['image'][3]['#text']);
 								$redis->hSet('lyrics','art', '');
 							}
 							unset($retval);

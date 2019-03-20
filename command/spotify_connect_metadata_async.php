@@ -53,7 +53,7 @@ if ($track_id == '') {
 	runelog('spotify_connect_metadata_async TRACK_ID:', 'Empty - Terminating');
 	return 0;
 }
-if ($track_id != $redis->hSet('lyrics', 'track_id')) {
+if ($track_id != $redis->hSet('spotifyconnect', 'track_id')) {
 	// delete any existing cover art
 	sysCmd('rm -f /srv/http/tmp/spotifyd/spotify-connect-cover.*');
 	// initialise the status array
@@ -203,9 +203,11 @@ if ($track_id != $redis->hSet('lyrics', 'track_id')) {
 	$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
 	$redis->hSet('lyrics', 'song', $status['currentsong']);
 	$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
-	$redis->hSet('lyrics', 'track_id', $track_id);
+	$redis->hSet('spotifyconnect', 'track_id', $track_id);
 	$redis->set('act_player_info', json_encode($status));
 } else {
+	// same song as last time so use the last saved information
+	$status = array();
 	$status = json_decode($redis->get('act_player_info'));
 // save JSON response for extensions
 ui_render('playback', json_encode($status));

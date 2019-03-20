@@ -203,6 +203,7 @@ if (isset($_POST)) {
 					OR $_POST['features']['spotifyconnect']['bitrate'] != $redis->hGet('spotifyconnect', 'bitrate')
 					OR $_POST['features']['spotifyconnect']['volume-normalisation'] != $redis->hGet('spotifyconnect', 'volume-normalisation')
 					OR $_POST['features']['spotifyconnect']['normalisation-pregain'] != $redis->hGet('spotifyconnect', 'normalisation-pregain')
+					OR $_POST['features']['spotifyconnect']['timeout'] != $redis->hGet('spotifyconnect', 'timeout')
 					OR $redis->hGet('spotifyconnect', 'enable') != $_POST['features']['spotifyconnect']['enable'])) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnect', 'action' => 'start', 'args' => $_POST['features']['spotifyconnect']));
             }

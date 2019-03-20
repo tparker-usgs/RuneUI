@@ -11,9 +11,9 @@ else
 fi
 #---
 #Before running the script...
-#Connect via Wired ethernet, remove all WiFi profiles.
-#Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources.
-#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
+#Connect via Wired ethernet, remove all WiFi profiles
+#Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources
+#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
 #
 # clean up any no longer valid mounts
 udevil clean
@@ -27,7 +27,7 @@ then
 else
 	systemctl unmask systemd-journald-audit.socket
 fi
-# systemctl stops after an eronious entry, use an array to run through all entries
+# systemctl stops after an erroneous entry, use an array to run through all entries
 declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start)
 declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd bootsplash dbus)
 declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil)
@@ -52,7 +52,7 @@ do
    systemctl stop "$i"
 done
 #
-# run poweroff script (and remove network mounts)
+# run the shutdown poweroff script (this will also remove network mounts)
 /var/www/command/rune_shutdown poweroff
 #
 # unmount USB drives and delete the mount points
@@ -193,13 +193,13 @@ cp /var/www/app/config/defaults/test /etc/netctl/test
 # copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
 #
-# modify standard .service files
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/smb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
+# modify all standard .service files which specify the wrong PIDFile location
+sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.service
+# sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
+# sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
 sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
 #
-# some fixes for the ply-image - currently required for 0.5b
+# some fixes for the ply-image binary location - currently required for 0.5b
 if [ -e /usr/bin/ply-image ];
 then
     rm /usr/local/bin/ply-image
