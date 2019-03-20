@@ -7,7 +7,7 @@ After=mpd.service
 [Service]
 ExecStartPre=/bin/rm -f /var/log/runeaudio/upmpdcli.log
 ExecStartPre=/bin/mkdir -p /tmp/upmpdcli
-ExecStart=/usr/bin/upmpdcli -c /etc/upmpdcli.conf -q 1 -d /var/log/runeaudio/upmpdcli.log -l 2 -f "RuneAudio"
+ExecStart=/usr/bin/upmpdcli -c /etc/upmpdcli.conf
 Restart=always
 
 [Install]
