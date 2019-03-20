@@ -381,6 +381,7 @@ if ($playerid_db === '') {
 		}
 		// start spotifyd if it is not already started
 		sysCmd('pgrep -x spotifyd || systemctl start spotifyd');
+		$redis->hSet('spotifyconnect', 'track_id', '');
 	}
 	// start udevil
 	if ($redis->get('udevil') === '1') {
@@ -527,67 +528,6 @@ while (1) {
 						// stop rune_SSM_wrk
 						sysCmd('systemctl stop rune_SSM_wrk');
 					}
-                    $redis->sAdd('w_lock', $jobID);
-                    $redis->sRem('w_lock', $jobID);
-					break;
-                case 'spotifyconnect':
-					runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-                    if ($job->args !== $redis->hGet('spotifyconnect', 'device_name')) {
-                        $redis->hSet('spotifyconnect', 'device_name', $job->args);
-                        // update Spotify Connect startup config
-                        wrk_spotifyd($redis, $redis->get('ao'), $redis->hGet('spotifyconnect', 'device_name'));
-                        $restart = 1;
-                    }
-                    // start spotify connect
-                    if ($job->action === 'start') {
-                        runelog('service: SPOTIFY CONNECT start');
-						// create a directory to use for spotifyd artwork
-						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
-						sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
-						sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
-						sysCmd('chown -R http.http /srv/http/tmp');
-						sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect');
-						// create a directory to use for spotifyd cache
-						// the location /tmp is a tmpfs, see /etc/fstab
-						// default location is '/tmp/spotifyConnectCache'
-						$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
-						if (!empty($spotifyConnectCache)) {
-							sysCmd('mkdir -p '.$spotifyConnectCache);
-							sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
-							sysCmd('chmod -R 644 '.$spotifyConnectCache);
-						}
-                        // start or re-start shairport-sync service
-                        if (isset($restart)) {
-                            sysCmd('systemctl reload-or-restart spotifyd');
-                        } else {
-                            sysCmd('systemctl start spotifyd');
-                        }
-                        $redis->hSet('spotifyconnect', 'enable', 1);
-                        // send notfy to UI
-                        ui_notify('Spotify Connect', 'Spotify Connect feature enabled');
-                    }
-                    // stop spotify connect
-                    if ($job->action === 'stop') {
-                        runelog('service: SPOTIFY CONNECT stop');
-                        sysCmd('systemctl stop spotifyd');
-                        $redis->hSet('spotifyconnect', 'enable', 0);
-                        // send notfy to UI
-                        ui_notify('Spotify Connect', 'Spotify Connect feature disabled');
-                    }
-                    $redis->sRem('w_lock', $jobID);
-                    break;
-				case 'spotifyconnectmsg':
-					runelog('wrk_SY: ', $job->wrkcmd);
-					if ($job->action === 'start') {
-						// switch the player to spotify connect
-						wrk_startPlayer($redis, 'SpotifyConnect');
-					}
-					// process metadata if enabled
-					if ($redis->hGet('spotifyconnect', 'metadata_enabled') == 'yes') {
-						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args);
-					}
-					$redis->hSet('spotifyconnect', 'status', $job->action);
                     $redis->sAdd('w_lock', $jobID);
                     $redis->sRem('w_lock', $jobID);
 					break;
@@ -1371,32 +1311,79 @@ while (1) {
                 case 'spotifyconnect':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
+                    if ($job->action === 'start') {
+						// create a directory to use for spotifyd artwork
+						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+						sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
+						sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
+						sysCmd('chown -R http.http /srv/http/tmp');
+						sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect');
+						// create a directory to use for spotifyd cache
+						// the location /tmp is a tmpfs, see /etc/fstab
+						// default location is '/tmp/spotifyConnectCache'
+						$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
+						if (!empty($spotifyConnectCache)) {
+							sysCmd('mkdir -p '.$spotifyConnectCache);
+							sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+							sysCmd('chmod -R 644 '.$spotifyConnectCache);
+						}
+						$redis->hSet('spotifyconnect', 'track_id', '');
+					}
 					// write Spotify Connect data to Redis datastore
-					$redis->hSet('spotifyconnect', 'username', $job->args->username);
-					$redis->hSet('spotifyconnect', 'password', $job->args->password); 
-					$redis->hSet('spotifyconnect', 'bitrate', $job->args->bitrate);
-					$redis->hSet('spotifyconnect', 'volume-normalisation', $job->args->volume-normalisation); 
-					$redis->hSet('spotifyconnect', 'normalisation-pregain', $job->args->normalisation-pregain);
-					$redis->hSet('spotifyconnect', 'enable', $job->args->enable);
+					isset($job->args->username) && $redis->hSet('spotifyconnect', 'username', $job->args->username);
+					isset($job->args->password) && $redis->hSet('spotifyconnect', 'password', $job->args->password);
+					isset($job->args->device_name) && $redis->hSet('spotifyconnect', 'password', $job->args->device_name);
+					isset($job->args->bitrate) && $redis->hSet('spotifyconnect', 'bitrate', $job->args->bitrate);
+					isset($job->args->volume-normalisation) && $redis->hSet('spotifyconnect', 'volume-normalisation', $job->args->volume-normalisation); 
+					isset($job->args->normalisation-pregain) && $redis->hSet('spotifyconnect', 'normalisation-pregain', $job->args->normalisation-pregain);
+					isset($job->args->timeout) && $redis->hSet('spotifyconnect', 'timeout', $job->args->timeout);
+					isset($job->args->enable) && $redis->hSet('spotifyconnect', 'enable', $job->args->enable);
+					// isset($job->args->status) && $redis->hSet('spotifyconnect', 'status', $job->args->status);
+					// isset($job->args->ao) && $redis->hSet('spotifyconnect', 'ao', $job->args->ao);
+					isset($job->args->metadata_enabled) && $redis->hSel('spotifyconnect', 'metadata_enabled', $job->args->metadata_enabled);
+					// isset($job->args->backend) && $redis->hSet('spotifyconnect', 'backend', $job->args->backend);
+					// isset($job->args->device) && $redis->hSet('spotifyconnect', 'device', $job->args->device);
+					// isset($job->args->mixer) && $redis->hSet('spotifyconnect', 'mixer', $job->args->mixer);
+					// isset($job->args->volume-control) && $redis->hSet('spotifyconnect', 'volume-control', $job->args->volume-control);
+					// isset($job->args->onevent) && $redis->hSet('spotifyconnect', 'onevent', $job->args->onevent);
+					// isset($job->args->cache_path) && $redis->hSet('spotifyconnect', 'cache_path', $job->args->cache_path);
+					// isset($job->args->track_id) && $redis->hSet('spotifyconnect', 'track_id', track_id);
 					// create a new spotifyd config file
 					wrk_spotifyd($redis);
 					// stop and/or start spotifyd
                     if ($job->action === 'start') {
-						sysCmd('systemctl stop spotifyd');
                         runelog('service: SPOTIFYD start');
-                        sysCmd('systemctl start spotifyd');
+                        // start or re-start spotifyd service
+                        $redis->hSet('spotifyconnect', 'enable', 1);
+                        // send notfy to UI
+                        ui_notify('Spotify Connect', 'Spotify Connect feature enabled');
+                        sysCmd('pgrep spotifyd || systemctl start spotifyd');
                         // send notfy to UI
                         ui_notify_async('Spotify Connect', 'Spotify Connect client configured', $jobID);
                         $redis->hSet('spotifyconnect', 'enable',  1);
                     } else if ($job->action === 'stop') {
                         runelog('service: SPOTIFYD stop');
-                        sysCmd('systemctl stop spotifyd');
+                        sysCmd('pgrep spotifyd && systemctl stop spotifyd');
                         // send notfy to UI
                         ui_notify_async('Spotify Connect', 'Spotify Connect client stopped', $jobID);
                         $redis->hSet('spotifyconnect', 'enable',  0);
                     }
                     $redis->sRem('w_lock', $jobID);
                     break;
+				case 'spotifyconnectmsg':
+					runelog('wrk_SY: ', $job->wrkcmd);
+					if ($job->action === 'start') {
+						// switch the player to spotify connect
+						wrk_startPlayer($redis, 'SpotifyConnect');
+					}
+					// process metadata if enabled
+					if ($redis->hGet('spotifyconnect', 'metadata_enabled') == 'yes') {
+						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args);
+					}
+					$redis->hSet('spotifyconnect', 'status', $job->action);
+                    $redis->sAdd('w_lock', $jobID);
+                    $redis->sRem('w_lock', $jobID);
+					break;
                 case 'sourcecfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);

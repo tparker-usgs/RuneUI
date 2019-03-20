@@ -418,6 +418,13 @@
 							When <i>Volume Normalisation</i> is selected the output volume will need to be reduced to prevent clipping. A value of -10dB is advised as a starting point. When modifying, change it in small steps (and turn your amplifier down!)</span>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_timeout">Stream Time-out</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_timeout" name="features[spotifyconnect][timeout]" value="<?php echo $this->spotifyconnect['timeout']; ?>" min="15" max="120" placeholder="20" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>15</strong> and <strong>120</strong>. Tis is the number of seconds of stopped or paused play after which Spotify Connect will assume that the play stream has finished. After the time-out the stream will be terminated</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div <?php if($this->local_browser['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="local_browserBox">

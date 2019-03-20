@@ -2913,6 +2913,7 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
     if (!isset($name)) {
         $name = $redis->hGet('spotifyconnect', 'device_name');
 	}
+	$redis->hSet('spotifyconnect', 'device_name', $name);
     if (!isset($ao)) {
         $oa = $redis->get('ao');
 	}
@@ -2927,6 +2928,7 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
 	//
 	// $redis->hSet('spotifyconnect', 'device', preg_split('/[\s,]+/', $acard->device)[0]);
 	// $redis->hSet('spotifyconnect', 'device', 'plug'.preg_split('/[\s,]+/', $acard->device)[0]);
+	// $redis->hSet('spotifyconnect', 'device', $acard->device);
 	$redis->hSet('spotifyconnect', 'device', 'plug'.$acard->device);
 	//
 	if (!empty($acard->mixer_control)) {
@@ -3007,7 +3009,7 @@ function wrk_spotifyd($redis, $ao = null, $name = null)
 		syscmd('cp /tmp/spotifyd.conf /etc/spotifyd.conf');
 		syscmd('rm -f /tmp/spotifyd.conf');
 		// stop spotifyd
-		sysCmd('systemctl stop spotifyd');
+		sysCmd('pgrep spotifyd && systemctl stop spotifyd');
 		// update systemd
 		sysCmd('systemctl daemon-reload');
 		if ($redis->hGet('spotifyconnect', 'enable')) {
@@ -3930,6 +3932,10 @@ runelog('endFunction!!!', $stoppedPlayer);
 function wrk_startPlayer($redis, $newplayer)
 {
     $activePlayer = $redis->get('activePlayer');
+	if ($activePlayer === '') {
+		// it should always be set, but default to MPD when nothing specified
+		$activePlayer = 'MPD';
+	}
     if ($activePlayer != $newplayer) {
         if ($activePlayer === 'MPD') {
 			$redis->set('stoppedPlayer', $activePlayer);
@@ -3983,43 +3989,39 @@ function wrk_stopPlayer($redis, $oldplayer=null)
     if ($activePlayer === 'Airplay' || $activePlayer === 'SpotifyConnect') {
         $stoppedPlayer = $redis->get('stoppedPlayer');
         runelog('stoppedPlayer = ', $stoppedPlayer);
-
-        if ($stoppedPlayer !== '') {
-            // we previously stopped playback of one player to use the Stream
-            if ($stoppedPlayer === 'MPD') {
-                // connect to MPD daemon
-                $sock = openMpdSocket('/run/mpd.sock', 0);
-                $status = _parseStatusResponse($redis, MpdStatus($sock));
-                runelog('MPD status', $status);
-                if ($status['state'] === 'pause') {
-                    // clear the stopped player if we left MPD paused
-                    $redis->set('stoppedPlayer', '');
-                }
-                //sendMpdCommand($sock, 'pause');
-                // to get MPD out of its idle-loop we discribe to a channel
-                sendMpdCommand($sock, 'subscribe '.$activePlayer);
-                sendMpdCommand($sock, 'unsubscribe '.$activePlayer);
-                closeMpdSocket($sock);
-				// continue playing mpd where it stopped when the stream started
-				wrk_mpdRestorePlayerStatus($redis);
-                // debug
-                //runelog('sendMpdCommand', 'pause');
-            } elseif ($stoppedPlayer === 'Spotify') {
-                // connect to SPOPD daemon
-                $sock = openSpopSocket('localhost', 6602, 1);
-                $status = _parseSpopStatusResponse(SpopStatus($sock));
-                runelog('SPOP status', $status);
-                if ($status['state'] === 'pause') {
-                    // clear the stopped player if we left SPOP paused
-                    $redis->set('stoppedPlayer', '');
-                }
-                // to get SPOP out of its idle-loop
-                sendSpopCommand($sock, 'notify');
-                //sendSpopCommand($sock, 'toggle');
-                closeSpopSocket($sock);
-                // debug
-                //runelog('sendSpopCommand', 'toggle');
-            }
+		// we previously stopped playback of one player to use the Stream
+		if ($stoppedPlayer === '') {
+			// if no stopped player is specified use MPD as default
+			$stoppedPlayer = 'MPD';
+		}
+		if ($stoppedPlayer === 'MPD') {
+			// connect to MPD daemon
+			$sock = openMpdSocket('/run/mpd.sock', 0);
+			$status = _parseStatusResponse($redis, MpdStatus($sock));
+			runelog('MPD status', $status);
+			if ($status['state'] === 'pause') {
+				// clear the stopped player if we left MPD paused
+				$redis->set('stoppedPlayer', '');
+			}
+			// to get MPD out of its idle-loop we discribe to a channel
+			sendMpdCommand($sock, 'subscribe '.$activePlayer);
+			sendMpdCommand($sock, 'unsubscribe '.$activePlayer);
+			closeMpdSocket($sock);
+			// continue playing mpd where it stopped when the stream started
+			wrk_mpdRestorePlayerStatus($redis);
+		} elseif ($stoppedPlayer === 'Spotify') {
+			// connect to SPOPD daemon
+			$sock = openSpopSocket('localhost', 6602, 1);
+			$status = _parseSpopStatusResponse(SpopStatus($sock));
+			runelog('SPOP status', $status);
+			if ($status['state'] === 'pause') {
+				// clear the stopped player if we left SPOP paused
+				$redis->set('stoppedPlayer', '');
+			}
+			// to get SPOP out of its idle-loop
+			sendSpopCommand($sock, 'notify');
+			//sendSpopCommand($sock, 'toggle');
+			closeSpopSocket($sock);
 			if ($activePlayer == 'Airplay') {
 				sysCmd('systemctl restart shairport-sync');
 			} elseif ($activePlayer == 'SpotifyConnect') {
