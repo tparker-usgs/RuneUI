@@ -101,7 +101,7 @@ function redisDatastore($redis,$action) {
 			break;
         case 'reset':
             // kernel
-            $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
+            $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
             $redis->set('i2smodule', 'none');
             $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
 			$redis->set('audio_on_off', '1');
@@ -228,9 +228,9 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'janui-20180903');
+            $redis->set('buildversion', 'gearhead-20190322');
 			$redis->set('patchlevel', 0);
-            $redis->set('release', '0.5');
+            $redis->set('release', '0.6');
             // HW platform data
             // $redis->set('playerid', '');
             // $redis->set('hwplatform', '');
@@ -347,30 +347,30 @@ function redisDatastore($redis,$action) {
             break;
         case 'check':
             // kernel
-            $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
+            $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
             $redis->exists('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->exists('activePlayer') || $redis->set('activePlayer', 'MPD');
-			// UI login password
-			if ((!empty(trim($redis->get('pwd_protection')))) && (!empty(trim($redis->get('password'))))){
-				// do nothing
-			} else {
-				$redis->set('pwd_protection', 0);
-				$option = array('cost' => 12);
-				$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
-				$redis->set('password', $hash);
-			}
-			// Access Point
-			$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
-			$redis->hExists('AccessPoint', 'ip-address') || $redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
-			$redis->hExists('AccessPoint', 'broadcast') || $redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
-			$redis->hExists('AccessPoint', 'ssid') || $redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
-			$redis->hExists('AccessPoint', 'passphrase') || $redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
-			$redis->hExists('AccessPoint', 'dhcp-range') || $redis->hSet('AccessPoint', 'dhcp-range', '192.168.5.2,192.168.5.254,24h');
-			$redis->hExists('AccessPoint', 'dhcp-option-dns') || $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
-			$redis->hExists('AccessPoint', 'dhcp-option-router') || $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
-			$redis->hExists('AccessPoint', 'enable-NAT') || $redis->hSet('AccessPoint', 'enable-NAT', 1);
+		// UI login password
+		if ((!empty(trim($redis->get('pwd_protection')))) && (!empty(trim($redis->get('password'))))){
+			// do nothing
+		} else {
+			$redis->set('pwd_protection', 0);
+			$option = array('cost' => 12);
+			$hash = password_hash('rune', PASSWORD_BCRYPT, $option);
+			$redis->set('password', $hash);
+		}
+		// Access Point
+		$redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
+		$redis->hExists('AccessPoint', 'ip-address') || $redis->hSet('AccessPoint', 'ip-address', '192.168.5.1');
+		$redis->hExists('AccessPoint', 'broadcast') || $redis->hSet('AccessPoint', 'broadcast', '192.168.5.255');
+		$redis->hExists('AccessPoint', 'ssid') || $redis->hSet('AccessPoint', 'ssid', 'RuneAudioAP');
+		$redis->hExists('AccessPoint', 'passphrase') || $redis->hSet('AccessPoint', 'passphrase', 'RuneAudio');
+		$redis->hExists('AccessPoint', 'dhcp-range') || $redis->hSet('AccessPoint', 'dhcp-range', '192.168.5.2,192.168.5.254,24h');
+		$redis->hExists('AccessPoint', 'dhcp-option-dns') || $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
+		$redis->hExists('AccessPoint', 'dhcp-option-router') || $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
+		$redis->hExists('AccessPoint', 'enable-NAT') || $redis->hSet('AccessPoint', 'enable-NAT', 1);
             // player features
             $redis->exists('hostname') || $redis->set('hostname', 'RuneAudio');
             $redis->exists('ntpserver') || $redis->set('ntpserver', 'pool.ntp.org');
@@ -470,7 +470,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('debug') || $redis->set('debug', 0);
             $redis->exists('debugdata') || $redis->set('debugdata', '');
             $redis->exists('opcache') || $redis->set('opcache', 1);
-            $redis->exists('buildversion') || $redis->set('buildversion', 'janui-20180903');
+            $redis->exists('buildversion') || $redis->set('buildversion', 'gearhead-20190322');
             $redis->exists('patchlevel') || $redis->set('patchlevel', 0);
             // HW platform data
             $redis->exists('playerid') || $redis->set('playerid', '');
