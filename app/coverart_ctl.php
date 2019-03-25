@@ -239,6 +239,26 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
 	header('Content-Length: '.filesize($imgfilename));
 	readfile($imgfilename);
 	$output = 1;
+} else if ($activePlayer === 'SpotifyConnect') {
+	// clear the cache before testing for the existence of a file
+	clearstatcache();
+	// determine the file name and path
+	if (file_exists($_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.jpg')) {
+		$imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.jpg';
+	} else if (file_exists($_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.png')) {
+		$imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.png';
+	} else {
+		$imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-default.png';
+	}
+	// debug
+	runelog('SpotifyConnect coverart match: ', $imgfilename);
+	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, no-transform'); // HTTP 1.1.
+	header('Pragma: no-cache'); // HTTP 1.0.
+	header('Expires: 0'); // Proxies, pre-expired content
+	header('Content-Type: '.mime_content_type($imgfilename));
+	header('Content-Length: '.filesize($imgfilename));
+	readfile($imgfilename);
+	$output = 1;
 } else {
 	// redirect to /covers NGiNX location
 	$local_cover_url =  'http://'.$_SERVER["SERVER_ADDR"].'/covers/'.$request_folder.'/'.$request_coverfile;

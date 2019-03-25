@@ -317,8 +317,8 @@ while (1) {
 				$forceupdate = 0;
 				runelog('---------------------------- FORCE UPDATE SpotifyConnect ----------------------------------');
 				// delete any existing cover art
-				sysCmd('rm -f /srv/http/tmp/spotifyd/spotify-connect-cover.*');
-				$redis->hSet('lyrics', 'art', '/srv/http/tmp/spotifyd/spotify-connect-default.png');
+				sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
+				$redis->hSet('lyrics', 'art', '/srv/http/tmp/spotify-connect/spotify-connect-default.png');
 //				$status = array();
 				if (!empty($redis->get('lastmpdvolume'))) {
 					$status['volume'] = $redis->get('lastmpdvolume');
@@ -334,14 +334,14 @@ while (1) {
 				$status['consume'] = "0";
 				$status['playlist'] = "";
 				$status['playlistlength'] = "";
-				$status['state'] = "play";
+				$status['state'] = "stop";
 				$status['time'] = "0";
 				$redis->hSet('lyrics', 'time', $status['time']);
 				$status['elapsed'] = "0";
 				$status['song_percent'] = "100";
 				$status['currentartist'] = "SpotifyConnect";
 				$status['currentalbum'] = "-----";
-				$status['currentsong'] = "-----";
+				$status['currentsong'] = "Switching";
 				$redis->hSet('lyrics', 'artist', $status['currentartist']);
 				$redis->hSet('lyrics', 'album', $status['currentalbum']);
 				$redis->hSet('lyrics', 'song', $status['currentsong']);
@@ -355,7 +355,7 @@ while (1) {
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
 			do {
-				if ($redis->hGet('spotifyconnect', 'status') === 'stopped') {
+				if ($redis->hGet('spotifyconnect', 'status') === 'stop') {
 					$spotify_connect_timeout_count += 2;
 				} else {
 					$spotify_connect_timeout_count = 0;

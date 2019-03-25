@@ -378,14 +378,14 @@
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
                         <div class="col-sm-10">
-                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" placeholder="password" autocomplete="off">
+                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" data-trigger="change" placeholder="password" autocomplete="off">
                             <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="spotifyconnect_device_name">Spotify Connect name</label>
                         <div class="col-sm-10">
-                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_device_name" name="features[spotifyconnect][device_name]" value="<?php echo $this->spotifyconnect['device_name']; ?>" data-trigger="change" placeholder="RuneAudio">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_device_name" name="features[spotifyconnect][device_name]" value="<?php echo $this->spotifyconnect['device_name']; ?>" data-trigger="change" placeholder="RuneAudio" autocomplete="off">
                             <span class="help-block">Spotify Connect broadcast/connection name</span>
                         </div>
                     </div>
