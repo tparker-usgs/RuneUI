@@ -49,9 +49,13 @@ $redis = new Redis();
 $redis->connect('/run/redis.sock');
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
-$event = trim($argv[1]); // PLAYER_EVENT
+// $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
+// don't use the parameters, there may have been more events since this job was initiated
+// use the latest information, later jobs will run but have nothing to do
+$event = $redis->hGet('spotifyconnect', 'event');
 runelog('spotify_connect_metadata_async PLAYER_EVENT:', $event);
-$track_id = trim($argv[2]); // TRACK_ID
+// $track_id = trim($argv[2]); // TRACK_ID
+$track_id = $redis->hGet('spotifyconnect', 'track_id');
 runelog('spotify_connect_metadata_async TRACK_ID    :', $track_id);
 if ($event == '') {
 	runelog('spotify_connect_metadata_async PLAYER_EVENT:', 'Empty - Terminating');
@@ -61,9 +65,18 @@ if ($track_id == '') {
 	runelog('spotify_connect_metadata_async TRACK_ID:', 'Empty - Terminating');
 	return 0;
 }
+$active_player = $redis->get('activePlayer');
+if ($active_player != 'SpotifyConnect') {
+	runelog('spotify_connect_metadata_async active player changed:', $active_player);
+	return 0;
+}
 
-// get the metadata
-$last_track_id = $redis->hGet('spotifyconnect', 'track_id');
+$last_track_id = $redis->hGet('spotifyconnect', 'last_track_id');
+if ($event!= 'stop') {
+	$redis->hSet('spotifyconnect', 'last_track_id', $track_id);
+}
+
+// sort out the metadata
 $status = array();
 if ($last_track_id == '') {
 	// initialise the status array
@@ -83,14 +96,16 @@ if ($last_track_id == '') {
 	$status['song_percent'] = "100";
 	$status['currentartist'] = "SpotifyConnect";
 	$status['currentalbum'] = "-----";
-	$status['currentsong'] = "-----";
+	$status['currentsong'] = "Switching";
 	$status['actPlayer'] = "SpotifyConnect";
 	$status['radioname'] = null;
 	$status['OK'] = null;
-	// save JSON response for extensions
-	ui_render('playback', json_encode($status));
-	sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
-	sysCmdAsync('/var/www/command/ui_update_async');
+	if ($event == 'stop') {
+		// save JSON response for extensions
+		ui_render('playback', json_encode($status));
+		sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+		sysCmdAsync('/var/www/command/ui_update_async');
+	}
 } else {
 	// get the last stored status
 	$status = json_decode($redis->get('act_player_info'));
@@ -98,11 +113,13 @@ if ($last_track_id == '') {
 if ($track_id == $last_track_id) {
 	// same song as last time
 	if ($event == 'stop') {
+		// assume pause, timeout counter starts when stop is set, actual stop after timeout
 		$status['state'] = "pause";
-	} else if ($event == 'start') {
+	} else {
+		// restarting a paused track
 		$status['state'] = "play";
 	}
-} else {
+} else if ($event != 'stop') {
 	// new song, started from the beginning of the track or change track
 	$status['state'] = "play";
 	$status['time'] = "0";
@@ -233,13 +250,17 @@ if ($track_id == $last_track_id) {
 		}
 		unset($retval);
 	}
-	$status['time'] = $duration_in_sec;
+	$status['time'] = abs(round(floatval($duration_in_sec)));
 	$status['currentartist'] = $artist;
 	$status['currentalbum'] = $album;
 	$status['currentsong'] = $title;
 	// calculate elapsed time and song percentage
-	$status['elapsed'] = time() - $metadataTimestamp + 1;
-	$status['song_percent'] = $status['elapsed'] / $status['time'] * 100;
+	$status['elapsed'] = int(time() - $metadataTimestamp + 1);
+	if ($status['time'] != 0) {
+		$status['song_percent'] = $status['elapsed'] / $status['time'] * 100;
+	} else {
+		$status['song_percent'] = 0;
+	}
 }
 $redis->hSet('lyrics', 'time', $status['time']);
 $redis->hSet('lyrics', 'artist', $status['currentartist']);
@@ -248,7 +269,6 @@ $redis->hSet('lyrics', 'album', $status['currentalbum']);
 $redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
 $redis->hSet('lyrics', 'song', $status['currentsong']);
 $redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
-$redis->hSet('spotifyconnect', 'track_id', $track_id);
 $redis->set('act_player_info', json_encode($status));
 // save JSON response for extensions
 ui_render('playback', json_encode($status));

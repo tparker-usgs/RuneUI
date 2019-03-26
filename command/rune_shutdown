@@ -42,7 +42,7 @@ fi
 set +e
 
 echo "Stop MPD, services and unmount shares..."
-mpc pause
+mpc stop
 sleep 1
 systemctl stop ashuffle upmpdcli mpdscribble mpd
 systemctl stop ashuffle upmpdcli mpdscribble mpd

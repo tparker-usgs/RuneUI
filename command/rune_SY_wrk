@@ -1343,7 +1343,7 @@ while (1) {
 					isset($job->args->normalisation_pregain) && $redis->hSet('spotifyconnect', 'normalisation_pregain', $job->args->normalisation_pregain);
 					isset($job->args->timeout) && $redis->hSet('spotifyconnect', 'timeout', $job->args->timeout);
 					isset($job->args->enable) && $redis->hSet('spotifyconnect', 'enable', $job->args->enable);
-					// isset($job->args->status) && $redis->hSet('spotifyconnect', 'status', $job->args->status);
+					// isset($job->args->status) && $redis->hSet('spotifyconnect', 'event', $job->args->status);
 					// isset($job->args->ao) && $redis->hSet('spotifyconnect', 'ao', $job->args->ao);
 					isset($job->args->metadata_enabled) && $redis->hSet('spotifyconnect', 'metadata_enabled', $job->args->metadata_enabled);
 					// isset($job->args->backend) && $redis->hSet('spotifyconnect', 'backend', $job->args->backend);
@@ -1384,7 +1384,6 @@ while (1) {
 					if ($redis->hGet('spotifyconnect', 'metadata_enabled')) {
 						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args);
 					}
-					$redis->hSet('spotifyconnect', 'status', $job->action);
                     $redis->sRem('w_lock', $jobID);
 					break;
                 case 'sourcecfg':

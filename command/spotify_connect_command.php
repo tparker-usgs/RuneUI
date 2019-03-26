@@ -62,6 +62,10 @@ if (($track_id == '') || ($player_event == '')) {
 	return 0;
 }
 
+// set the event and track in redis variables
+$redis->hSet('spotifyconnect', 'event', $player_event);
+$redis->hSet('spotifyconnect', 'track_id', $track_id);
+
 // pass the command to the back-end to process the information, it needs to run as root to start and stop systemd services
 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnectmsg', 'action' => $player_event, 'args' => $track_id));
 waitSyWrk($redis, $jobID);

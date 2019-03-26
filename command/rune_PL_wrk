@@ -44,7 +44,6 @@ sysCmd('echo "--------------- start: rune_PL_wrk ---------------" > /var/log/run
 runelog('WORKER rune_PL_wrk START');
 // reset forceupdate state
 $forceupdate = 1;
-$spotify_connect_timeout_count = 0;
 
 // --- WORKER MAIN LOOP --- //
 while (1) {
@@ -354,14 +353,18 @@ while (1) {
 				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 				sysCmdAsync('/var/www/command/ui_update_async');
 			}
+			$spotify_connect_timeout = $redis->hGet('spotifyconnect', 'timeout');
+			$spotify_connect_timeout_count = $spotify_connect_timeout;
 			do {
-				if ($redis->hGet('spotifyconnect', 'status') === 'stop') {
-					$spotify_connect_timeout_count += 2;
+				if ($redis->hGet('spotifyconnect', 'event') === 'stop') {
+					$spotify_connect_timeout_count -= 2;
 				} else {
-					$spotify_connect_timeout_count = 0;
+					$spotify_connect_timeout_count = $spotify_connect_timeout;
 				}
-				if ($redis->hGet('spotifyconnect', 'timeout') < $spotify_connect_timeout_count) {
+				if ($spotify_connect_timeout_count <= 0) {
 					wrk_stopPlayer($redis, 'SpotifyConnect');
+					$spotify_connect_timeout_count = $spotify_connect_timeout;
+					break;
 				}
 				sleep(2);
 			} while ($redis->get('activePlayer') === 'SpotifyConnect');

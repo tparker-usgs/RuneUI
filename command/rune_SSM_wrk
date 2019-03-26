@@ -82,7 +82,7 @@ $status['single'] = "0";
 $status['consume'] = "0";
 $status['playlist'] = "1";
 $status['playlistlength'] = "1";
-$status['state'] = "stop";
+$status['state'] = "play";
 $status['time'] = "0";
 $status['elapsed'] = "0";
 $status['song_percent'] = "100";
@@ -315,12 +315,6 @@ while (1) {
 					case 'ssnc flsr':
 						// flush request > pause
 						runelog('rune_SSM_wrk: Flush request: ', $buf);
-						$status['state'] = "pause";
-						// save JSON response for extensions
-						ui_render('playback', json_encode($status));
-						$redis->set('act_player_info', json_encode($status));
-						//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
-						sysCmdAsync('/var/www/command/ui_update_async');
 						break;
 					case 'ssnc pfls':
 						// play stream flush, no arguments

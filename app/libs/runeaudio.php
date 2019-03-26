@@ -4014,9 +4014,11 @@ function wrk_startPlayer($redis, $newplayer)
     }
 }
 
-function wrk_stopPlayer($redis, $oldplayer=null)
+function wrk_stopPlayer($redis, $activePlayer=null)
 {
-    $activePlayer = $redis->get('activePlayer');
+    if (is_nul($activePlayer)) {
+		$activePlayer = $redis->get('activePlayer');
+	}
     if (($activePlayer === 'Airplay') || ($activePlayer === 'SpotifyConnect')) {
 		// we previously stopped playback of one player to use the Stream
         $stoppedPlayer = $redis->get('stoppedPlayer');
@@ -4077,22 +4079,21 @@ function wrk_stopPlayer($redis, $oldplayer=null)
     }
 }
 
-function wrk_SpotifyConnectMetadata($redis, $status, $track_id)
+function wrk_SpotifyConnectMetadata($redis, $event, $track_id)
 {
-	runelog('wrk_SpotifyConnectMetadata status  :', $status);
+	runelog('wrk_SpotifyConnectMetadata event   :', $event);
 	runelog('wrk_SpotifyConnectMetadata track ID:', $track_id);
-	$redis->hSet('spotifyconnect', 'status', $status);
-	switch($status) {
+	switch($event) {
 		case 'start':
 			// no break;
         case 'change':
 			// no break;
         case 'stop':
 			// run asynchronous metadata script
-			sysCmdAsync('nice --adjustment=2 /var/www/command/spotify_connect_metadata_async.php '.$status.' '.$track_id);
+			sysCmdAsync('nice --adjustment=2 /var/www/command/spotify_connect_metadata_async.php '.$event.' '.$track_id);
             break;
 		default:
-            runelog('wrk_SpotifyConnectMetadata error:', 'Unknown status');
+            runelog('wrk_SpotifyConnectMetadata error:', 'Unknown event');
             break;
 	}
 }
