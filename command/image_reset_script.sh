@@ -120,7 +120,7 @@ rm -f /etc/samba/*.conf
 rm -f /etc/netctl/*
 # copy default settings and services
 cp -Rv /srv/http/app/config/defaults/etc/* /etc
-cp -R /srv/http/app/config/defaults/usr/* /usr
+cp -Rv /srv/http/app/config/defaults/usr/* /usr
 # make appropriate links
 ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
