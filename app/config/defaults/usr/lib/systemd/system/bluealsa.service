@@ -8,7 +8,7 @@ Type=simple
 #User=bluealsa
 Group=audio
 #ExecStart=/usr/bin/bluealsa --profile=a2dp-sink --device=hci1
-ExecStart=/usr/bin/bluealsa --profile=a2dp-sink
+ExecStart=/usr/bin/bluealsa --profile=a2dp-sink 00:00:00:00:00:00
 
 [Install]
 WantedBy=multi-user.target
