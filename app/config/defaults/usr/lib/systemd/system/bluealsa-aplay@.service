@@ -6,6 +6,6 @@ Type=simple
 #User=http
 Group=audio
 #ExecStart=/usr/bin/bluealsa-aplay %I -dhw:0,0 --hci=hci1
-ExecStart=/usr/bin/bluealsa-aplay %I -dhw:0,0
+ExecStart=/usr/bin/bluealsa-aplay %I -dhw:0,0 00:00:00:00:00:00
 [Install]
 WantedBy=multi-user.target
