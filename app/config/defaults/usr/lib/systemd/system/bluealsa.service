@@ -7,6 +7,7 @@ After=bluetooth.service
 Type=simple
 #User=bluealsa
 Group=audio
+#ExecStart=/usr/bin/bluealsa --profile=a2dp-sink --device=hci1
 ExecStart=/usr/bin/bluealsa --profile=a2dp-sink
 
 [Install]

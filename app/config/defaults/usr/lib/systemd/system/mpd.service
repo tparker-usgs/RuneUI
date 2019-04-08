@@ -28,10 +28,6 @@ ProtectKernelModules=yes
 # AF_NETLINK is required by libsmbclient, or it will exit() .. *sigh*
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
 RestrictNamespaces=yes
-ReadWriteDirectories=-/var/log/runeaudio
-
-RuntimeDirectory=mpd
-RuntimeDirectoryMode=755
 
 [Install]
 WantedBy=default.target

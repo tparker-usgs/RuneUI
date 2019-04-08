@@ -19,9 +19,9 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmbd nmb smbd smb winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd bootsplash cronie
+systemctl disable ashuffle mpd mpdscribble nmb smb winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth bootsplash cronie
 systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
-systemctl stop ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil
+systemctl stop ashuffle mpd nmb smb winbind shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth systemd-timesyncd cronie udevil spotifyd
 #
 # run poweroff script (and remove network mounts)
 /var/www/command/rune_shutdown poweroff
@@ -68,6 +68,7 @@ rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 rm -rf /home/*
+rm -rf /var/lib/bluetooth/*
 #
 # redis reset
 redis-cli del AccessPoint
@@ -114,61 +115,25 @@ echo -e "rune\nrune" | passwd root
 #
 # reset the service and configuration files to the distribution standard
 # the following commands should also be run after a system update or any package updates
-cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
-cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
-cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
-cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
-cp /var/www/app/config/defaults/lircd.conf /etc/conf.d/lircd.conf
-cp /var/www/app/config/defaults/lirc_options.conf /etc/lirc/lirc_options.conf
-cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 rm -f /etc/nginx/nginx.conf
-cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
-ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
-cp /var/www/app/config/defaults/50x.html /etc/nginx/html/50x.html
-cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
-cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
-cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
-cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 rm -f /etc/samba/*.conf
-cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
-cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
-ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
-cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
-cp /var/www/app/config/defaults/timesyncd.conf /etc/systemd/timesyncd.conf
-cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
-cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-cp /var/www/app/config/defaults/fstab /etc/fstab
-cp /var/www/app/config/defaults/hosts /etc/hosts
-cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
-cp /var/www/app/config/defaults/start_midori.sh /etc/X11/xinit/start_midori.sh
-cp /var/www/app/config/defaults/Xwrapper.config /etc/X11/Xwrapper.config
-cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
-cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
-cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
-cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
-cp /var/www/app/config/defaults/mpd.service /usr/lib/systemd/system/mpd.service
-cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
-cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
-cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
-cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
-cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
-cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
-cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
-cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
-#
-# network
 rm -f /etc/netctl/*
-cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0
-cp /var/www/app/config/defaults/test /etc/netctl/test
+# copy default settings and services
+cp -Rv /srv/http/app/config/defaults/etc/* /etc
+cp -R /srv/http/app/config/defaults/usr/* /usr
+# make appropriate links
+ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
+ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 #
 # copy a standard config.txt
-cp /var/www/app/config/defaults/config.txt /boot/config.txt
+#cp /var/www/app/config/defaults/config.txt /boot/config.txt
 #
 # modify standard .service files
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/smb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
-sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
+# not needed any more kg
+#sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/smb.service
+#sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
+#sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
+#sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
 #
 # make sure that all files are unix format and have the correct ownerships and protections
 # the 'final' option also removes the dos2unix package
