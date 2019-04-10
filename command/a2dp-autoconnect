@@ -10,12 +10,12 @@ then
        if [ $ACTION = "remove" ]
        then
              log "Stop Played Connection " $BTMAC
-             ifconfig wlan0 up
+             #ifconfig wlan0 up
              systemctl stop bluealsa-aplay@$BTMAC
        elif [ $ACTION = "add" ]
        then
              log "Start Played Connection " $BTMAC
-             ifconfig wlan0 down
+             #ifconfig wlan0 down
              systemctl start bluealsa-aplay@$BTMAC
        else
              log "Other action " $ACTION
