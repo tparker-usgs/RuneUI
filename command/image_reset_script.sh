@@ -19,9 +19,11 @@ udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-systemctl disable ashuffle mpd mpdscribble nmb smb winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth bootsplash cronie
+systemctl disable ashuffle mpd mpdscribble nmb smb winbind udevil upmpdcli hostapd shairport-sync local-browser 
+systemctl disable rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth bootsplash cronie brcm34348
 systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
-systemctl stop ashuffle mpd nmb smb winbind shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth systemd-timesyncd cronie udevil spotifyd
+systemctl stop ashuffle mpd nmb smb winbind shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli 
+systemctl stop bluetooth systemd-timesyncd cronie udevil spotifyd brcm34348
 #
 # run poweroff script (and remove network mounts)
 /var/www/command/rune_shutdown poweroff
@@ -126,7 +128,9 @@ ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 #
 # copy a standard config.txt
-#cp /var/www/app/config/defaults/config.txt /boot/config.txt
+cp /var/www/app/config/defaults/config.txt /boot/config.txt
+cp /var/www/app/config/defaults/cmdline.txt /boot/cmdline.txt
+
 #
 # modify standard .service files
 # not needed any more kg
