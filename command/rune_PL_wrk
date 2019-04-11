@@ -71,9 +71,10 @@ while (1) {
 		}
     }
 
-    if (!$socket && $activePlayer !== "Airplay") {
+    if (!$socket && ($activePlayer !== "Airplay") && ($activePlayer !== "SpotifyConnect")) {
         // exit script
         // die();
+		runelog('rune_PL_wrk: no valid socket or streamer');
         $forceupdate = 1;
         sleep(3);
     } else {
@@ -340,7 +341,7 @@ while (1) {
 				$status['song_percent'] = "100";
 				$status['currentartist'] = "SpotifyConnect";
 				$status['currentalbum'] = "-----";
-				$status['currentsong'] = "Switching";
+				$status['currentsong'] = "-----";
 				$redis->hSet('lyrics', 'artist', $status['currentartist']);
 				$redis->hSet('lyrics', 'album', $status['currentalbum']);
 				$redis->hSet('lyrics', 'song', $status['currentsong']);
@@ -356,12 +357,17 @@ while (1) {
 			$spotify_connect_timeout = $redis->hGet('spotifyconnect', 'timeout');
 			$spotify_connect_timeout_count = $spotify_connect_timeout;
 			do {
-				if ($redis->hGet('spotifyconnect', 'event') === 'stop') {
+				runelog('rune_PL_wrk: Spotify Connect idle loop');
+				if ($redis->hGet('spotifyconnect', 'event') == 'stop') {
+					runelog('rune_PL_wrk: Spotify Connect event is stop');
 					$spotify_connect_timeout_count -= 2;
 				} else {
+					runelog('rune_PL_wrk: Spotify Connect event is not stop');
 					$spotify_connect_timeout_count = $spotify_connect_timeout;
 				}
+				runelog('rune_PL_wrk: Spotify Connect timeout count', $spotify_connect_timeout_count);
 				if ($spotify_connect_timeout_count <= 0) {
+					runelog('rune_PL_wrk: Spotify Connect timeout initiated');
 					wrk_stopPlayer($redis, 'SpotifyConnect');
 					$spotify_connect_timeout_count = $spotify_connect_timeout;
 					break;

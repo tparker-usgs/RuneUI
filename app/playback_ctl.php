@@ -39,9 +39,11 @@ if ($redis->get('coverart') == 1) {
     $template->coverart = 0;
     $template->colspan = 6;
 }
-if ($redis->get('volume') == 1 && $template->activePlayer !== 'Spotify') {
+if ($redis->get('volume') == 1 && $template->activePlayer == 'MPD') {
     $template->volume['color'] = '#0095D8';
     $template->volume['readonly'] = 'false';
+    $template->volume['disabled'] = 0;
+    $template->volume['divclass'] = '';
 } else {
     //$_volumeColor = '#002c40';
     $template->volume['color'] = '#1A242F';

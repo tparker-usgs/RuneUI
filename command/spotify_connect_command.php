@@ -54,17 +54,23 @@ $old_track_id = trim(getenv('OLD_TRACK_ID', true));
 // track id's are unique Spotify ID's
 $player_event = trim(getenv('PLAYER_EVENT', true));
 // player event is 'start', 'change', 'stop'
-runelog('spotify_connect_command OLD_TRACK_ID:'.$old_track_id);
-runelog('spotify_connect_command OLD_TRACK_ID:'.$old_track_id);
-runelog('spotify_connect_command PLAYER_EVENT:'.$player_event);
+// at connect time a stop is issued, the other events work as you would expect
+$event_time_stamp = time();
+runelog('spotify_connect_command TRACK_ID        :'.$track_id);
+runelog('spotify_connect_command OLD_TRACK_ID    :'.$old_track_id);
+runelog('spotify_connect_command PLAYER_EVENT    :'.$player_event);
+runelog('spotify_connect_command EVENT_TIME_STAMP:'.$event_time_stamp);
 if (($track_id == '') || ($player_event == '')) {
+	// a track ID and an event are essential
 	runelog('spotify_connect_command - ERROR - no parameters');
+	// return false
 	return 0;
 }
 
-// set the event and track in redis variables
+// set the event, track and time stamp in redis variables
 $redis->hSet('spotifyconnect', 'event', $player_event);
 $redis->hSet('spotifyconnect', 'track_id', $track_id);
+$redis->hSet('spotifyconnect', 'event_time_stamp', $event_time_stamp);
 
 // pass the command to the back-end to process the information, it needs to run as root to start and stop systemd services
 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnectmsg', 'action' => $player_event, 'args' => $track_id));

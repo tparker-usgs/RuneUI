@@ -50,13 +50,15 @@ $redis->connect('/run/redis.sock');
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
 // $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
-// don't use the parameters, there may have been more events since this job was initiated
-// use the latest information, later jobs will run but have nothing to do
-$event = $redis->hGet('spotifyconnect', 'event');
-runelog('spotify_connect_metadata_async PLAYER_EVENT:', $event);
 // $track_id = trim($argv[2]); // TRACK_ID
+// don't use the parameters, this job runs with a delay, there may have been more events since this job was initiated
+// use the latest information from redis, later jobs could run but may have nothing to do
+$event = $redis->hGet('spotifyconnect', 'event');
 $track_id = $redis->hGet('spotifyconnect', 'track_id');
-runelog('spotify_connect_metadata_async TRACK_ID    :', $track_id);
+$event_time_stamp = $redis->hGet('spotifyconnect', 'event_time_stamp');
+runelog('spotify_connect_metadata_async PLAYER_EVENT    :', $event);
+runelog('spotify_connect_metadata_async TRACK_ID        :', $track_id);
+runelog('spotify_connect_metadata_async EVENT TIME STAMP:', $event_time_stamp);
 if ($event == '') {
 	runelog('spotify_connect_metadata_async PLAYER_EVENT:', 'Empty - Terminating');
 	return 0;
@@ -73,12 +75,16 @@ if ($active_player != 'SpotifyConnect') {
 
 $last_track_id = $redis->hGet('spotifyconnect', 'last_track_id');
 if ($event!= 'stop') {
+	// set this early so that any later jobs will do nothing when events are skipped
 	$redis->hSet('spotifyconnect', 'last_track_id', $track_id);
 }
 
 // sort out the metadata
 $status = array();
 if ($last_track_id == '') {
+	// first time start
+	// remove any cover art
+	sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
 	// initialise the status array
 	$status['audio'] = "44100:16:2";
 	$status['audio_sample_rate'] = "44.1";
@@ -102,30 +108,45 @@ if ($last_track_id == '') {
 	$status['OK'] = null;
 	if ($event == 'stop') {
 		// save JSON response for extensions
+		$redis->set('act_player_info', json_encode($status));
 		ui_render('playback', json_encode($status));
 		sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 		sysCmdAsync('/var/www/command/ui_update_async');
 	}
 } else {
+	// not the frst time, we have already processed some data 
 	// get the last stored status
-	$status = json_decode($redis->get('act_player_info'));
+	$status = json_decode($redis->get('act_player_info'), true);
 }
 if ($track_id == $last_track_id) {
 	// same song as last time
+	// stop > start, start > stop or change > stop
 	if ($event == 'stop') {
-		// assume pause, timeout counter starts when stop is set, actual stop after timeout
+		// start > stop or change > stop
+		// assume pause, timeout counter starts when stop is set, actual stop occurs after timeout
 		$status['state'] = "pause";
+		// calculate elapsed time and song percentage at stop time, it will be used on a restart
+		// compensate because this routine runs async and is therefore late, event_time_stamp contains the real stop event time
+		$last_time_stamp = $redis->hGet('spotifyconnect', 'last_time_stamp');
+		$status['elapsed'] += intval($event_time_stamp - $last_time_stamp);
+		$redis->hSet('spotifyconnect', 'last_time_stamp', $event_time_stamp);
+		if ($status['time'] != 0) {
+			$status['song_percent'] = $status['elapsed'] / $status['time'] * 100;
+		} else {
+			$status['song_percent'] = 0;
+		}
 	} else {
+		// stop > start
 		// restarting a paused track
 		$status['state'] = "play";
 	}
 } else if ($event != 'stop') {
-	// new song, started from the beginning of the track or change track
+	// null > start, stop > change or start > change
+	// new song, assume started from the beginning of the track
 	$status['state'] = "play";
 	$status['time'] = "0";
 	$status['elapsed'] = "0";
 	$status['song_percent'] = "0";
-	$metadataTimestamp = time();
 	// delete any existing cover art
 	sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
 	// curl -s https://open.spotify.com/track/<TRACK_ID> | sed 's/<meta/\n<meta/g' | grep -i -E 'og:title|og:image|music:duration|music:album|music:musician'
@@ -161,7 +182,7 @@ if ($track_id == $last_track_id) {
 		}
 		unset($lineparts);
 	}
-	unset($retval);
+	unset($retval, $line);
 	// get the album name
 	runelog('spotify_connect_metadata_async ALBUM_URL:', $album_url);
 	if ($album_url == '') {
@@ -188,7 +209,7 @@ if ($track_id == $last_track_id) {
 			}
 			unset($lineparts);
 		}
-		unset($retval);
+		unset($retval, $line);
 	}
 	// get the artist name
 	runelog('spotify_connect_metadata_async ARTIST_URL:', $artist_url);
@@ -216,7 +237,7 @@ if ($track_id == $last_track_id) {
 			}
 			unset($lineparts);
 		}
-		unset($retval);
+		unset($retval, $line);
 	}
 	// get the album art file
 	runelog('spotify_connect_metadata_async ALBUMART_URL:', $albumart_url);
@@ -255,7 +276,10 @@ if ($track_id == $last_track_id) {
 	$status['currentalbum'] = $album;
 	$status['currentsong'] = $title;
 	// calculate elapsed time and song percentage
-	$status['elapsed'] = int(time() - $metadataTimestamp + 1);
+	// compensate because this routine runs async and is therefore late, event_time_stamp contains the real start time
+	$time_stamp = time();
+	$redis->hSet('spotifyconnect', 'last_time_stamp', $time_stamp);
+	$status['elapsed'] = intval($time_stamp - $event_time_stamp);
 	if ($status['time'] != 0) {
 		$status['song_percent'] = $status['elapsed'] / $status['time'] * 100;
 	} else {
@@ -269,8 +293,8 @@ $redis->hSet('lyrics', 'album', $status['currentalbum']);
 $redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
 $redis->hSet('lyrics', 'song', $status['currentsong']);
 $redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
-$redis->set('act_player_info', json_encode($status));
 // save JSON response for extensions
+$redis->set('act_player_info', json_encode($status));
 ui_render('playback', json_encode($status));
 sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 sysCmdAsync('/var/www/command/ui_update_async');
