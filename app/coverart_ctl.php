@@ -92,7 +92,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
 			$output = 1;
 		}
 	}
-} else if ((substr($request_coverfile, 0, 2) === '?v' OR $current_mpd_folder ===  $request_folder) && $activePlayer === 'MPD') {
+} else if (((substr($request_coverfile, 0, 2) === '?v') || ($current_mpd_folder ===  $request_folder)) && ($activePlayer === 'MPD')) {
     // extact song details
     if (isset($curTrack[0]['Title'])) {
         $status['currentartist'] = $curTrack[0]['Artist'];
@@ -129,7 +129,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Content-Type: ' .$auinfo['comments']['picture'][0]['image_mime']);
             echo $auinfo['comments']['picture'][0]['data'];
             $output = 1;
-        } 
+        }
     }
     // 2. try to find local coverart
     if ($output === 0) {

@@ -4,7 +4,7 @@
 </script>
 <div class="screen-saver-content" style="display:none;">
     <!-- PLAYBACK PANEL -->
-    <div id="playback-ss" class="tab-pane active">
+    <div id="playback-ss" class="tab-pane active disable-scrollbar-1 disable-scrollbar-2">
         <div class="container-fluid">
             <div class="leftpanel-expandable-ss">
                 <div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
@@ -46,7 +46,7 @@
 </div>
 <div class="tab-content">
     <!-- PLAYBACK PANEL -->
-    <div id="playback" class="tab-pane active">
+    <div id="playback" class="tab-pane active disable-scrollbar-1 disable-scrollbar-2">
         <div class="container-fluid">
 			<span id="currentartist"><i class="fa fa-spinner fa-spin"></i></span>
             <span id="currentsong"><i class="fa fa-spinner fa-spin"></i></span>
@@ -61,9 +61,9 @@
                     <span id="countdown-display"><i class="fa fa-spinner fa-spin"></i></span>
                     <span id="total"><i class="fa fa-spinner fa-spin"></i></span>
                     <div class="btn-group">
-                        <button id="repeat" class="btn btn-default btn-lg btn-cmd btn-toggle" type="button" title="Repeat" data-cmd="repeat"><i class="fa fa-repeat"></i></button>
-                        <button id="random" class="btn btn-default btn-lg btn-cmd btn-toggle" type="button" title="Random" data-cmd="random"><i class="fa fa-random"></i></button>
-                        <button id="single" class="btn btn-default btn-lg btn-cmd btn-toggle <?php if ($this->activePlayer === 'Spotify'): ?>disabled<?php endif; ?>" type="button" title="Single" data-cmd="single"><i class="fa fa-refresh"></i></button>
+                        <button id="repeat" class="btn btn-default btn-lg btn-cmd btn-toggle <?php if (($this->activePlayer != 'MPD') && ($this->activePlayer != 'Spotify')): ?>disabled<?php endif; ?>" type="button" title="Repeat" data-cmd="repeat"><i class="fa fa-repeat"></i></button>
+                        <button id="random" class="btn btn-default btn-lg btn-cmd btn-toggle <?php if (($this->activePlayer != 'MPD') && ($this->activePlayer != 'Spotify')): ?>disabled<?php endif; ?>" type="button" title="Random" data-cmd="random"><i class="fa fa-random"></i></button>
+                        <button id="single" class="btn btn-default btn-lg btn-cmd btn-toggle <?php if ($this->activePlayer != 'MPD'): ?>disabled<?php endif; ?>" type="button" title="Single" data-cmd="single"><i class="fa fa-refresh"></i></button>
                         <!--<button type="button" id="consume" class="btn btn-default btn-lg btn-cmd btn-toggle" title="Consume Mode" data-cmd="consume"><i class="fa fa-compress"></i></button>-->
                     </div>
                 </div>
@@ -435,10 +435,18 @@
         <ul>
             <li><span>Playback source</span></li>
 			<li><a href="javascript:;" id="playsource-mpd" class="btn btn-default btn-lg btn-block" title="Switch to MPD"><i class="fa fa-linux sx"></i> MPD</a></li>
+			<?php if ($this->spotify): ?>hidden
 			<li><a href="javascript:;" id="playsource-spotify" class="btn btn-default btn-lg btn-block inactive" title="Switch to Spotify"><i class="fa fa-spotify sx"></i> <span>spop</span> Spotify</a></li>
-			<li><a href="javascript:;" id="playsource-spotify-connect" class="btn btn-default btn-lg btn-block inactive"><i class="fa fa-spotify sx"></i> <span>spotyfyd</span> Spotify Connect</a></li>
-			<li><a href="javascript:;" id="playsource-airplay" class="btn btn-default btn-lg btn-block inactive"><i class="fa fa-apple sx"></i> <span>shairport-sync</span> Airplay</a></li>
-			<li><a href="javascript:;" id="playsource-dlna" class="btn btn-default btn-lg btn-block inactive"><i class="fa fa-puzzle-piece sx"></i> <span>upmpdcli</span> DLNA</a></li>
+			<?php endif; ?>
+			<?php if ($this->spotifyconnect): ?>
+			<li><a href="javascript:;" id="playsource-spotify-connect" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-spotify sx"></i> <span>spotyfyd</span> Spotify Connect</a></li>
+			<?php endif; ?>
+			<?php if ($this->airplay): ?>
+			<li><a href="javascript:;" id="playsource-airplay" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-apple sx"></i> <span>shairport-sync</span> Airplay</a></li>
+			<?php endif; ?>
+			<?php if ($this->dlna): ?>
+			<li><a href="javascript:;" id="playsource-dlna" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-puzzle-piece sx"></i> <span>upmpdcli</span> DLNA</a></li>
+			<?php endif; ?>
             <li><button id="overlay-playsource-close" class="btn btn-link" type="button"><i class="fa fa-times"></i> close this layer</button></li>
         </ul>
     </nav>

@@ -166,19 +166,32 @@ $(document).ready(function () {
 });
 
 function timerIncrement() {
-    if ($('#section-index').length && GUI.state === 'play') {
-        // only when in playback section
+    if ($('#section-index').length && GUI.state === 'play' && !$('#panel-sx').hasClass('active') && !$('#panel-dx').hasClass('active')) {
+        // only when in playback section and when playing
         idleTime = idleTime + 1;
     } else {
         idleTime = 0;
     }
     if (idleTime > SStime) {
+		$('#section-index').addClass('disable-scrollbar-1');
+		$('#section-index').addClass('disable-scrollbar-2');
         $('.tab-content').hide("slow");
         $('.screen-saver-content').show("slow");
         $('#menu-bottom').hide("slow");
         $('#menu-top').hide("slow");
         viewScreenSaver = 1;
     }
+}
+
+// remove/add scrollbars depending on playback state
+function checkPlayerState() {
+	if ($('#playback').hasClass('active')) {
+		$('#section-index').addClass('disable-scrollbar-1');
+		$('#section-index').addClass('disable-scrollbar-2');
+	} else {
+		$('#section-index').removeClass('disable-scrollbar-1');
+		$('#section-index').removeClass('disable-scrollbar-2');
+	}
 }
 
 // update countdown
@@ -1075,6 +1088,7 @@ function renderUI(text){
             // console.log('playlist = ', GUI.playlist);
         }
     }
+	checkPlayerState()
 }
 
 // render saved playlists
@@ -2231,6 +2245,22 @@ if ($('#section-index').length) {
                 $('#random').removeClass('btn-primary');
             }
         });
+
+        $('#panel-sx').click(function(){
+			$('#section-index').removeClass('disable-scrollbar-1');
+			$('#section-index').removeClass('disable-scrollbar-2');
+        });
+		
+        $('#panel-dx').click(function(){
+			$('#section-index').removeClass('disable-scrollbar-1');
+			$('#section-index').removeClass('disable-scrollbar-2');
+        });
+		
+        $('#playback').click(function(){
+			$('#section-index').addClass('disable-scrollbar-1');
+			$('#section-index').addClass('disable-scrollbar-2');
+        });
+
 
         // KNOBS
         // ----------------------------------------------------------------------------------------------------

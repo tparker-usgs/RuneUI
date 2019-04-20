@@ -462,6 +462,16 @@ html, body {
     outline: none;
 }
 
+.disable-scrollbar-1 {
+    scrollbar-width: none; /*For Firefox*/
+	overflow: -moz-scrollbars-none; /*For Firefox*/
+    -ms-overflow-style: none; /*For IE and Edge*/
+}
+
+.disable-scrollbar-2::-webkit-scrollbar {
+		width: 0 !important; /*For Chrome, Safari and Opera*/
+		display: none;
+}
 
 
 // Screensaver display and panels panels
@@ -506,7 +516,7 @@ html, body {
 	text-align: center;
 	font-weight: bold;
 	color: rgb(0, 149, 216);
-	line-height: 34px;
+	line-height: 40px;
 }
 #currentalbum-ss {
 	font-size: 30px;
@@ -611,7 +621,7 @@ div.coverart-ss {
 		font-size: 38px;
 	}
 	#total-ss {
-		font-size: 28px;
+		font-size: 38px;
 	}
 }
 

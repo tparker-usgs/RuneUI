@@ -262,7 +262,7 @@ if ($playerid_db === '') {
 			// do nothing
 		} else {
 			// Start and refresh MPD (audio hardware status - soundcards and MPD config)
-			wrk_mpdconf($redis,'refresh');
+			wrk_mpdconf($redis, 'refresh');
 		}
 		unset($retval);
 		// ashuffle gets started automatically
@@ -1411,7 +1411,7 @@ while (1) {
                 case 'switchplayer':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    if (wrk_switchplayer($redis, $job->args)) {
+                    if (wrk_startPlayer($redis, $job->args)) {
                         ui_notify_async('Switch Player Engine', 'Current active player engine: '.$job->args, $jobID);
                     }
                     $redis->sRem('w_lock', $jobID);
@@ -1630,21 +1630,27 @@ while (1) {
 			if ($retval[0] == 'active') {
 				// ashuffle already started
 				unset($retval);
-				if (($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) {
-					// nothing to play so stop ashuffle
+				if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD')) {
+					// nothing to play or active player is not MPD, so stop ashuffle
 					sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
 				}
 			} else {
 				// ashuffle not started
-				if (($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) {
-					// nothing to play, do nothing
+				if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD'))  {
+					// nothing to play, MPD not active, do nothing
 				} else {
 					// seems to be a bug somewhere in MPD
 					// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
 					// wait until mpd has been running for a while before starting ashuffle
 					$retval = sysCmd('ps -C mpd -o etimes=');
-					$mpd_uptime = trim($retval[0]);
-					if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
+					if (isset($retval[0])) {
+						// a value has been returned
+						$mpd_uptime = intval(trim($retval[0]));
+					} else {
+						// no value, MPD is probably not running
+						$mpd_uptime = 0;
+					}
+					if ($mpd_uptime > intval($redis->get('ashuffle_start_delay'))) {
 						sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 						sysCmdAsync('/srv/http/command/rune_prio nice');
 					}
