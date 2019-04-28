@@ -473,10 +473,20 @@
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
 						<div class="col-sm-10">
-							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[local_browser][localSStime]" value="<?php echo $this->local_browser['localSStime'] ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
 							<span class="help-block">Sets the activation time for the local browser screensaver (0-100 seconds, -1 disables the feature)</span>
 						</div>
 					</div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="smallScreenSaver">Small ScreenSaver</label>
+                        <div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="smallScreenSaver" name="features[local_browser][smallScreenSaver]" type="checkbox" value="1"<?php if($this->local_browser['smallScreenSaver'] === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">Optionally switch this ON if you use a very small local browser screen with the screensaver</span>
+                        </div>
+                    </div>
 				</div>
 				<?php else: ?>
 				<div class="form-group">

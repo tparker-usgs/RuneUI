@@ -142,8 +142,13 @@ if (isset($_POST)) {
 			} else {
 				$redis->hGet('local_browser', 'mouse_cursor') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 0));
 			}
-			if ($_POST['features']['localSStime'] != $redis->get('localSStime')) {
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'localSStime', 'args' => $_POST['features']['localSStime']));
+			if ($_POST['features']['local_browser']['localSStime'] != $redis->hGet('local_browser', 'localSStime')) {
+				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'localSStime', 'args' => $_POST['features']['local_browser']['localSStime']));
+			}
+			if ($_POST['features']['local_browser']['smallScreenSaver'] == 1) {
+				$redis->hGet('local_browser', 'smallScreenSaver') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'smallScreenSaver', 'args' => 1));
+			} else {
+				$redis->hGet('local_browser', 'smallScreenSaver') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'smallScreenSaver', 'args' => 0));
 			}
         } else {
             $redis->hGet('local_browser', 'enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'stop', 'args' => 0));
@@ -244,7 +249,6 @@ $template->orionprofile = $redis->get('orionprofile');
 $template->airplay = $redis->hGetAll('airplay');
 $template->dlna = $redis->hGetAll('dlna');
 $template->local_browser = $redis->hGetAll('local_browser');
-$template->localSStime = $redis->get('localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
 $template->udevil = $redis->get('udevil');
 $template->coverart = $redis->get('coverart');

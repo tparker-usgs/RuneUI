@@ -226,12 +226,14 @@ while (1) {
 				$redis->set('act_player_info', json_encode($status));
 				$errorcode = socket_last_error($socket);
 				runelog('MPD last socket error = ', $errorcode);
-				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-				$lastmpdvolume = preg_replace('/[^0-9]/', '', $retval[0]);
-				if (!empty($lastmpdvolume)) {
-					$redis->set('lastmpdvolume', $lastmpdvolume);
+				if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
+					$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+					$lastmpdvolume = preg_replace('/[^0-9]/', '', $retval[0]);
+					if (!empty($lastmpdvolume)) {
+						$redis->set('lastmpdvolume', $lastmpdvolume);
+					}
+					unset($retval);
 				}
-				unset($retval);
 			} while (($errorcode === 0) && ($redis->get('activePlayer') === 'MPD'));
 
 			// close Redis connection

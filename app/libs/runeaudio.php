@@ -2815,9 +2815,14 @@ if ($action === 'reset') {
             //$mpd = openMpdSocket('/run/mpd.sock', 0);
             //sendMpdCommand($mpd, 'kill');
             //closeMpdSocket($mpd);
-			$retval  = sysCmd('mpc volume');
-			$redis->set('lastmpdvolume', preg_replace('/[^0-9]/', '',$retval[0]));
-			unset($retval);
+			if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
+				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+				$lastmpdvolume = preg_replace('/[^0-9]/', '', $retval[0]);
+				if (!empty($lastmpdvolume)) {
+					$redis->set('lastmpdvolume', $lastmpdvolume);
+				}
+				unset($retval);
+			}
 			sysCmd('mpc stop');
 			sysCmd('mpc volume 100');
 			sysCmd('mpc volume');

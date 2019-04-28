@@ -1,48 +1,74 @@
 <script>
     var localSStime = parseInt("<?php echo $this->localSStime; ?>");
     var remoteSStime = parseInt("<?php echo $this->remoteSStime; ?>");
+    var smallScreenSaver = parseInt("<?php echo $this->smallScreenSaver; ?>");
 </script>
 <div class="screen-saver-content" style="display:none;">
-    <!-- PLAYBACK PANEL -->
-    <div id="playback-ss" class="tab-pane active disable-scrollbar-1 disable-scrollbar-2">
-        <div class="container-fluid">
-            <div class="leftpanel-expandable-ss">
-                <div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                <div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                <div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
-            </div>
-            <div class="rightpanel-compactable-ss">
-                <div id="extrainfo-ss">
-                    <div id="playlist-position-ss"><span></span></div>
-                    <div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="container-fluid">
-            <div class="leftpanel-ss">
-                <div class="col-sm-4 coverart-ss">
-                    <img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
-                    <div id="countdown-display-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                    <div id="total-ss"><i class="fa fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-            <div class="rightpanel-ss">
-                <div style="height: 100%">
-                    <div class="col-sm-4 coverart">
-                        <div id="artist-ss"><i>Artist:</i></div>
-                        <img id="artist-image-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
-                        <div id="artist-bio-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
-                    </div>
-                </div>
-                <div style="height: auto">
-                    <div class="col-sm-4 coverart">
-                        <div id="addinfo-ss"><i>Additional Info:</i></div>
-                        <div id="addinfo-text-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- NORMAL SCREEN SAVER PANEL -->
+	<div class="container-fluid">
+		<div class="leftpanel-expandable-ss">
+			<div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
+			<div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
+			<div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
+		</div>
+		<div class="rightpanel-compactable-ss">
+			<div id="extrainfo-ss">
+				<div id="playlist-position-ss"><span></span></div>
+				<div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid">
+		<div class="leftpanel-ss">
+			<div class="col-sm-4 coverart-ss">
+				<img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+			</div>
+			<div id="countdown-display-ss"><i class="fa fa-spinner fa-spin"></i></div>
+			<div id="total-ss"><i class="fa fa-spinner fa-spin"></i></div>
+		</div>
+		<div class="rightpanel-ss">
+			<div style="height: 100%">
+				<div class="col-sm-4 coverart">
+					<div id="artist-ss"><i>Artist:</i></div>
+					<img id="artist-image-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
+					<div id="artist-bio-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+				</div>
+			</div>
+			<div style="height: auto">
+				<div class="col-sm-4 coverart">
+					<div id="addinfo-ss"><i>Additional Info:</i></div>
+					<div id="addinfo-text-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="small-screen-saver-content" style="display:none;">
+	<!-- SMALL SCREEN SCREEN SAVER PANEL -->
+	<div class="container-fluid">
+		<div class="leftpanel-sss">
+			<div class="col-sm-4 coverart-sss">
+				<img id="cover-art-sss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+			</div>
+		</div>
+		<div class="rightpanel-sss">
+			<div style="height: auto">
+				<div class="col-sm-4 coverart">
+					<div class="top-sss">
+						<div id="currentartist-sss"><i class="fa fa-spinner fa-spin"></i></div>
+						<div id="currentsong-sss"><i class="fa fa-spinner fa-spin"></i></div>
+						<div id="currentalbum-sss"><i class="fa fa-spinner fa-spin"></i></div>
+					</div>
+					<div class="bottom-sss">
+						<div id="playlist-position-sss"><span></span></div>
+						<div id="format-bitrate-sss"><i class="fa fa-spinner fa-spin"></i></div>
+						<div id="countdown-display-sss"><i class="fa fa-spinner fa-spin"></i></div>
+						<div id="total-sss"><i class="fa fa-spinner fa-spin"></i></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 <div class="tab-content">
     <!-- PLAYBACK PANEL -->

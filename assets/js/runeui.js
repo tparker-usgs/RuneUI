@@ -156,7 +156,11 @@ $(document).ready(function () {
             idleTime = 0;
             if (viewScreenSaver) {
                 $('.tab-content').show("slow");
-                $('.screen-saver-content').hide("slow");
+				if ((smallScreenSaver) && (isLocalHost)) {
+					$('.small-screen-saver-content').hide("slow");
+				} else {
+					$('.screen-saver-content').hide("slow");
+				}
                 $('#menu-bottom').show("slow");
                 $('#menu-top').show("slow");
                 viewScreenSaver = 0;
@@ -176,7 +180,11 @@ function timerIncrement() {
 		$('#section-index').addClass('disable-scrollbar-1');
 		$('#section-index').addClass('disable-scrollbar-2');
         $('.tab-content').hide("slow");
-        $('.screen-saver-content').show("slow");
+		if ((smallScreenSaver) && (isLocalHost)) {
+			$('.small-screen-saver-content').show("slow");
+		} else {
+			$('.screen-saver-content').show("slow");
+		}
         $('#menu-bottom').hide("slow");
         $('#menu-top').hide("slow");
         viewScreenSaver = 1;
@@ -211,6 +219,13 @@ function refreshTimer(startFrom, stopTo, state) {
     if (state !== 'play'){
         // console.log('startFrom = ', startFrom);
         displayss.countdown('pause');
+    }
+    var displaysss = $('#countdown-display-sss');
+    displaysss.countdown('destroy');
+    displaysss.countdown({ since: ((state !== 'stop' || state !== undefined)? -(startFrom) : 0), compact: true, format: 'MS' });
+    if (state !== 'play'){
+        // console.log('startFrom = ', startFrom);
+        displaysss.countdown('pause');
     }
 }
 
@@ -280,6 +295,8 @@ function countdownRestart(startFrom) {
     display.countdown({since: -(startFrom), compact: true, format: 'MS'});
     var displayss = $('#countdown-display-ss').countdown('destroy');
     displayss.countdown({since: -(startFrom), compact: true, format: 'MS'});
+    var displaysss = $('#countdown-display-sss').countdown('destroy');
+    displaysss.countdown({since: -(startFrom), compact: true, format: 'MS'});
 }
 
 function reset_vol_changed_local() {
@@ -718,6 +735,7 @@ function refreshState() {
     } else if (state === 'pause') {
         $('#playlist-position span').html('Not playing');
         $('#playlist-position-ss span').html('Not playing');
+        $('#playlist-position-sss span').html('Not playing');
         $('#play').addClass('btn-primary');
         $('i', '#play').removeClass('fa fa-play').addClass('fa fa-pause');
         $('#stop').removeClass('btn-primary');
@@ -728,6 +746,7 @@ function refreshState() {
         if ($('#section-index').length) {
             $('#countdown-display').countdown('destroy');
             $('#countdown-display-ss').countdown('destroy');
+            $('#countdown-display-sss').countdown('destroy');
         }
         // if (GUI.stream === 'radio') {
             // $('#elapsed').html('&infin;');
@@ -737,13 +756,16 @@ function refreshState() {
         if (GUI.stream === 'radio') {
             $('#total').html('<span>&infin;</span>');
             $('#total-ss').html('<span>&infin;</span>');
+            $('#total-sss').html('<span>&infin;</span>');
         } else {
             $('#total').html('00:00');
             $('#total-ss').html('00:00');
+            $('#total-sss').html('00:00');
         }
         $('#time').val(0, false).trigger('update');
         $('#format-bitrate').html('&nbsp;');
         $('#format-bitrate-ss').html('&nbsp;');
+        $('#format-bitrate-sss').html('&nbsp;');
         $('li', '#playlist-entries').removeClass('active');
     }
     if (state !== 'stop') {
@@ -752,13 +774,16 @@ function refreshState() {
         if (GUI.stream === 'radio') {
             $('#total').html('<span>&infin;</span>');
             $('#total-ss').html('<span>&infin;</span>');
+            $('#total-sss').html('<span>&infin;</span>');
         } else {
             $('#total').html((GUI.json.time !== undefined)? timeConvert(GUI.json.time) : '00:00');
             $('#total-ss').html((GUI.json.time !== undefined)? timeConvert(GUI.json.time) : '00:00');
+            $('#total-sss').html((GUI.json.time !== undefined)? timeConvert(GUI.json.time) : '00:00');
         }
         var fileinfo = (GUI.json.audio_channels && GUI.json.audio_sample_depth && GUI.json.audio_sample_rate) ? (GUI.json.audio_channels + ', ' + GUI.json.audio_sample_depth + ' bit, ' + GUI.json.audio_sample_rate +' kHz, '+GUI.json.bitrate+' kbps') : '&nbsp;';
         $('#format-bitrate').html(fileinfo);
         $('#format-bitrate-ss').html(fileinfo);
+        $('#format-bitrate-sss').html(fileinfo);
         $('li', '#playlist-entries').removeClass('active');
         var current = parseInt(GUI.json.song);
         $('#playlist-entries').find('li').eq(current).addClass('active');
@@ -767,13 +792,16 @@ function refreshState() {
         if (GUI.json.song) {
             $('#playlist-position span').html('Playlist position ' + (parseInt(GUI.json.song) + 1) + '/' + GUI.json.playlistlength);
             $('#playlist-position-ss span').html('Playlist position ' + (parseInt(GUI.json.song) + 1) + '/' + GUI.json.playlistlength);
+            $('#playlist-position-sss span').html('Playlist position ' + (parseInt(GUI.json.song) + 1) + '/' + GUI.json.playlistlength);
         } else {
             $('#playlist-position span').html('Playlist position 1/' + GUI.json.playlistlength);
             $('#playlist-position-ss span').html('Playlist position 1/' + GUI.json.playlistlength);
+            $('#playlist-position-sss span').html('Playlist position 1/' + GUI.json.playlistlength);
         }
     } else {
         $('#playlist-position span').html('Empty queue, add some music!');
         $('#playlist-position-ss span').html('Empty queue, add some music!');
+        $('#playlist-position-sss span').html('Empty queue, add some music!');
     }
     // show UpdateDB icon
     // console.log('dbupdate = ', GUI.json.updating_db);
@@ -812,35 +840,67 @@ function updateGUI() {
         }
         // console.log('currentartist = ', GUI.json.currentartist);
         // if (GUI.stream !== 'radio') {
+            if (currentartist === null || currentartist.length > 55) {
+                $('#currentartist-ss')[0].style.fontSize = "20px";
+                $('#currentartist-sss')[0].style.fontSize = "32px";
+            } else if (currentartist.length > 45) {
+                $('#currentartist-ss')[0].style.fontSize = "22px";
+                $('#currentartist-sss')[0].style.fontSize = "34px";
+            } else if (currentartist.length > 30) {
+                $('#currentartist-ss')[0].style.fontSize = "26px";
+                $('#currentartist-sss')[0].style.fontSize = "36px";
+            } else {
+                $('#currentartist-ss')[0].style.fontSize = "30px";
+                $('#currentartist-sss')[0].style.fontSize = "38px";
+            }
             $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
             $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
-            if (currentsong === null || currentsong.length > 35) {
-                $('#currentsong-ss')[0].style.fontSize = "26px";
+            $('#currentartist-sss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+            if (currentsong === null || currentsong.length > 45) {
+                $('#currentsong-ss')[0].style.fontSize = "25px";
+                $('#currentsong-sss')[0].style.fontSize = "34px";
+            } else if (currentsong.length > 35) {
+                $('#currentsong-ss')[0].style.fontSize = "30px";
+                $('#currentsong-sss')[0].style.fontSize = "36px";
             } else if (currentsong.length > 25) {
-                $('#currentsong-ss')[0].style.fontSize = "33px";
+                $('#currentsong-ss')[0].style.fontSize = "35px";
+                $('#currentsong-sss')[0].style.fontSize = "38px";
             } else {
                 $('#currentsong-ss')[0].style.fontSize = "40px";
+                $('#currentsong-sss')[0].style.fontSize = "40px";
             }
             $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
             $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
-            if (currentalbum === null || currentalbum.length > 45) {
+            $('#currentsong-sss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+            if (currentalbum === null || currentalbum.length > 55) {
                 $('#currentalbum-ss')[0].style.fontSize = "20px";
+                $('#currentalbum-sss')[0].style.fontSize = "32px";
+            } else if (currentalbum.length > 45) {
+                $('#currentalbum-ss')[0].style.fontSize = "22px";
+                $('#currentalbum-sss')[0].style.fontSize = "34px";
             } else if (currentalbum.length > 30) {
-                $('#currentalbum-ss')[0].style.fontSize = "24px";
+                $('#currentalbum-ss')[0].style.fontSize = "26px";
+                $('#currentalbum-sss')[0].style.fontSize = "36px";
             } else {
                 $('#currentalbum-ss')[0].style.fontSize = "30px";
+                $('#currentalbum-sss')[0].style.fontSize = "38px";
             }
             $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
             $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
+            $('#currentalbum-sss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
         // } else {
             // $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
             // $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
+            // $('#currentartist-sss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
             // $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
             // $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
+            // $('#currentsong-sss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
             // $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
             // $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
+            // $('#currentalbum-sss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
             // // $('#currentalbum').html('<span class="notag">streaming</span>');
             // // $('#currentalbum-ss').html('<span class="notag">streaming</span>');
+            // // $('#currentalbum-sss').html('<span class="notag">streaming</span>');
         // }
         if (GUI.json.repeat === '1') {
             $('#repeat').addClass('btn-primary');
@@ -888,6 +948,7 @@ function updateGUI() {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
                 $('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
+                $('#cover-art-sss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
                 $.ajax({
                     url: '/artist_info/',
                     success: function(data){
@@ -1732,8 +1793,10 @@ function onreleaseKnob(value) {
             $('#time').val(value);
             $('#countdown-display').countdown('destroy');
             $('#countdown-display-ss').countdown('destroy');
+            $('#countdown-display-sss').countdown('destroy');
             $('#countdown-display').countdown({since: -seekto, compact: true, format: 'MS'});
             $('#countdown-display-ss').countdown({since: -seekto, compact: true, format: 'MS'});
+            $('#countdown-display-sss').countdown({since: -seekto, compact: true, format: 'MS'});
         } else {
             $('#time').val(0).trigger('change');
         }
@@ -1754,6 +1817,7 @@ function commandButton(el) {
             $('.playlist').find('li').removeClass('active');
             $('#total').html('00:00');
             $('#total-ss').html('00:00');
+            $('#total-sss').html('00:00');
         }
     }
     // play/pause
@@ -1765,18 +1829,21 @@ function commandButton(el) {
             if ($('#section-index').length) {
                 $('#countdown-display').countdown('pause');
                 $('#countdown-display-ss').countdown('pause');
+                $('#countdown-display-sss').countdown('pause');
             }
         } else if (state === 'pause') {
             cmd = 'play';
             if ($('#section-index').length) {
                 $('#countdown-display').countdown('resume');
                 $('#countdown-display-ss').countdown('resume');
+                $('#countdown-display-sss').countdown('resume');
             }
         } else if (state === 'stop') {
             cmd = 'play';
             if ($('#section-index').length) {
                 $('#countdown-display').countdown({since: 0, compact: true, format: 'MS'});
                 $('#countdown-display-ss').countdown({since: 0, compact: true, format: 'MS'});
+                $('#countdown-display-sss').countdown({since: 0, compact: true, format: 'MS'});
             }
         }
         //$(this).find('i').toggleClass('fa fa-play').toggleClass('fa fa-pause');
@@ -1796,6 +1863,7 @@ function commandButton(el) {
         if ($('#section-index').length) {
             $('#countdown-display').countdown('pause');
             $('#countdown-display-ss').countdown('pause');
+            $('#countdown-display-sss').countdown('pause');
             window.clearInterval(GUI.currentKnob);
         }
     }

@@ -222,7 +222,6 @@ function redisDatastore($redis,$action) {
 			$redis->hSet('lyrics', 'album', '');
 			$redis->hSet('lyrics', 'song', '');
 			$redis->del('soxrmpdonoff');
-			$redis->set('localSStime', -1);
 			$redis->set('remoteSStime', -1);
             $redis->set('ashuffle_start_delay', '5');
 			$redis->set('ashuffle_wait_for_play', '0');
@@ -234,6 +233,8 @@ function redisDatastore($redis,$action) {
 			$redis->hSet('local_browser', 'rotate', 'NORMAL');
 			$redis->hSet('local_browser', 'mouse_cursor', 0);
 			$redis->hSet('local_browser', 'disable-splash', 1);
+			$redis->hSet('local_browser', 'smallScreenSaver', 0);
+			$redis->hSet('local_browser', 'localSStime', -1);
 			$redis->set('restoreact', 0);
 			$redis->set('restoreact', 0);
 			$redis->set('playernamemenu', 0);
@@ -485,7 +486,6 @@ function redisDatastore($redis,$action) {
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
             $redis->exists('globalrandom') || $redis->set('globalrandom', 0);
             $redis->exists('stoppedPlayer') || $redis->set('stoppedPlayer', '');
-			$redis->exists('localSStime') || $redis->set('localSStime', -1);
 			$redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
             $redis->exists('audio_on_off') || $redis->set('audio_on_off', '1');
 			$redis->exists('ashuffle_start_delay') || $redis->set('ashuffle_start_delay', '5');
@@ -499,6 +499,8 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('local_browser', 'rotate') || $redis->hSet('local_browser', 'rotate', 'NORMAL');
 			$redis->hExists('local_browser', 'mouse_cursor') || $redis->hSet('local_browser', 'mouse_cursor', 0);
 			$redis->hExists('local_browser', 'disable-splash') || $redis->hSet('local_browser', 'disable-splash', 1);
+			$redis->hExists('local_browser', 'smallScreenSaver') || $redis->hSet('local_browser', 'smallScreenSaver', 0);
+			$redis->hExists('local_browser', 'localSStime') || $redis->hSet('local_browser', 'localSStime', -1);
 			$redis->exists('restoreact') || $redis->set('restoreact', 0);
 			$redis->exists('playernamemenu') || $redis->set('playernamemenu', 0);
 			$redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', 0);
