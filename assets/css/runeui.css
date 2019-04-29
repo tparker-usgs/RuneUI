@@ -3,18 +3,21 @@
 html {
     font-family: sans-serif;
     -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%
+    -webkit-text-size-adjust: 100%;
+}
+
+.disable-scrollbar-0 {
+    scrollbar-width: none; /*For Firefox*/
+	overflow: hidden scroll; /*For Firefox*/
 }
 
 .disable-scrollbar-1 {
-    scrollbar-width: none; /*For Firefox*/
-	overflow: -moz-scrollbars-none; /*For Firefox*/
     -ms-overflow-style: none; /*For IE and Edge*/
 }
 
 .disable-scrollbar-2::-webkit-scrollbar {
 		width: 0 !important; /*For Chrome, Safari and Opera*/
-		display: none;
+		display: none; /*For Chrome, Safari and Opera*/
 }
 
 body {

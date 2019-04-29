@@ -462,15 +462,18 @@ html, body {
     outline: none;
 }
 
-.disable-scrollbar-1 {
+.disable-scrollbar-0 {
     scrollbar-width: none; /*For Firefox*/
-	overflow: -moz-scrollbars-none; /*For Firefox*/
+	overflow: hidden scroll; /*For Firefox*/
+}
+
+.disable-scrollbar-1 {
     -ms-overflow-style: none; /*For IE and Edge*/
 }
 
 .disable-scrollbar-2::-webkit-scrollbar {
 		width: 0 !important; /*For Chrome, Safari and Opera*/
-		display: none;
+		display: none; /*For Chrome, Safari and Opera*/
 }
 
 

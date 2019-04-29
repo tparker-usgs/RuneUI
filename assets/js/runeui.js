@@ -177,8 +177,7 @@ function timerIncrement() {
         idleTime = 0;
     }
     if (idleTime > SStime) {
-		$('#section-index').addClass('disable-scrollbar-1');
-		$('#section-index').addClass('disable-scrollbar-2');
+		removePlayerScrollbars();
         $('.tab-content').hide("slow");
 		if ((smallScreenSaver) && (isLocalHost)) {
 			$('.small-screen-saver-content').show("slow");
@@ -194,12 +193,24 @@ function timerIncrement() {
 // remove/add scrollbars depending on playback state
 function checkPlayerState() {
 	if ($('#playback').hasClass('active')) {
-		$('#section-index').addClass('disable-scrollbar-1');
-		$('#section-index').addClass('disable-scrollbar-2');
+		removePlayerScrollbars();
 	} else {
-		$('#section-index').removeClass('disable-scrollbar-1');
-		$('#section-index').removeClass('disable-scrollbar-2');
+		addPlayerScrollbars();
 	}
+}
+
+// remove scrollbars form player window
+function removePlayerScrollbars() {
+	$('html').addClass('disable-scrollbar-0');
+	$('#section-index').addClass('disable-scrollbar-1');
+	$('#section-index').addClass('disable-scrollbar-2');
+}
+
+// add scrollbars form player window
+function addPlayerScrollbars() {
+	$('html').removeClass('disable-scrollbar-0');
+	$('#section-index').removeClass('disable-scrollbar-1');
+	$('#section-index').removeClass('disable-scrollbar-2');
 }
 
 // update countdown
@@ -2314,19 +2325,29 @@ if ($('#section-index').length) {
             }
         });
 
+		// switch between scrollable an non-scrollable features of the playback screen
         $('#panel-sx').click(function(){
-			$('#section-index').removeClass('disable-scrollbar-1');
-			$('#section-index').removeClass('disable-scrollbar-2');
+			addPlayerScrollbars();
         });
 		
         $('#panel-dx').click(function(){
-			$('#section-index').removeClass('disable-scrollbar-1');
-			$('#section-index').removeClass('disable-scrollbar-2');
+			addPlayerScrollbars();
+        });
+		
+        $('button#songinfo-open').click(function(){
+			addPlayerScrollbars();
         });
 		
         $('#playback').click(function(){
-			$('#section-index').addClass('disable-scrollbar-1');
-			$('#section-index').addClass('disable-scrollbar-2');
+			removePlayerScrollbars();
+        });
+
+        $('button#songinfo-close-x').click(function(){
+			removePlayerScrollbars();
+        });
+
+        $('button#songinfo-close-cancel').click(function(){
+			removePlayerScrollbars();
         });
 
 

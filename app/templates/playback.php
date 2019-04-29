@@ -420,7 +420,7 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button id="songinfo-close-x" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <!-- <h4 class="modal-title" id="songinfo-modal-label" >Song info</h4> -->
             </div>
             <div class="modal-body txtmid">
@@ -439,7 +439,7 @@
                 </div>
 			</div>
 			<div class="modal-footer">
-                <button class="btn btn-default btn-lg" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button id="songinfo-close-cancel" class="btn btn-default btn-lg" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
     </div>

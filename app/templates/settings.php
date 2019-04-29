@@ -67,7 +67,8 @@
                         <label class="control-label col-sm-2" for="proxy-pass">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="proxy_pass" name="features[proxy][pass]" value="<?php echo $this->proxy['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)</span>
+                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -319,7 +320,8 @@
                         <label class="control-label col-sm-2" for="spotify-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="spotify_pass" name="features[spotify][pass]" value="<?php echo $this->spotify['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -379,7 +381,8 @@
                         <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" data-trigger="change" placeholder="password" autocomplete="off">
-                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -557,7 +560,8 @@
                         <label class="control-label col-sm-2" for="lastfm-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="lastfm_pass" name="features[lastfm][pass]" value="<?php echo $this->lastfm['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
