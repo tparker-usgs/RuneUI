@@ -360,16 +360,17 @@ while (1) {
 			$spotify_connect_timeout_count = $spotify_connect_timeout;
 			do {
 				runelog('rune_PL_wrk: Spotify Connect idle loop');
-				// sometimes spotifyd gets its stop/start switch mixed up (returning start when stopped) so also test for nothing playing
-				$playing = sysCmd('cat /proc/asound/card*/pcm*p/sub*/hw_params | grep -c -i -v closed');
-				// $playing contains 0 when nothing is playing, otherwise a positive number like 7
+				// sometimes spotifyd gets its stop/start switch mixed up (returning start when stopped) so test for something playing instead of the event 'stop' value
+				$playing = reset(sysCmd('cat /proc/asound/card*/pcm*p/sub*/hw_params | grep -c -i -v closed'));
+				// $playing contains 0 or false when nothing is playing, otherwise a positive number like 7 (=true)
 				runelog('rune_PL_wrk: $playing:', $playing);
-				if (($redis->hGet('spotifyconnect', 'event') == 'stop') || !$playing) {
-					runelog('rune_PL_wrk: Spotify Connect event is stop');
-					$spotify_connect_timeout_count -= 2;
-				} else {
-					runelog('rune_PL_wrk: Spotify Connect event is not stop');
+				// if (($redis->hGet('spotifyconnect', 'event') != 'stop') || $playing) {
+				if ($playing) {
+					runelog('rune_PL_wrk: Spotify Connect is playing');
 					$spotify_connect_timeout_count = $spotify_connect_timeout;
+				} else {
+					runelog('rune_PL_wrk: Spotify Connect is not playing');
+					$spotify_connect_timeout_count -= 2;
 				}
 				runelog('rune_PL_wrk: Spotify Connect timeout count', $spotify_connect_timeout_count);
 				if ($spotify_connect_timeout_count <= 0) {
