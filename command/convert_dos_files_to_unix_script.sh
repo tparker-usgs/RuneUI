@@ -36,27 +36,6 @@ chown -R http.http /srv/http/
 find /srv/http/ -type f -exec chmod 644 {} \;
 find /srv/http/ -type d -exec chmod 755 {} \;
 find /etc -name *.conf -exec chmod 644 {} \;
-unset array_suid_files
-unset array_sticky_files
-array_suid_files=( $(find /usr -perm /4000) )
-array_sticky_files=( $(find /usr -perm /1000) )
-chmod 755 /usr
-chmod -R 755 /usr/share
-chown -R root.root /usr
-for i in "${array_suid_files[@]}"
-do
-	chmod +s "$i"
-#	echo "chmod +s $i"
-done
-for i in "${array_sticky_files[@]}"
-do
-	chmod +t "$i"
-#	echo "chmod +t $i"
-done
-unset array_suid_files
-unset array_sticky_files
-chmod +s /usr/bin/udevil
-chmod +s /usr/bin/passwd
 find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;
 chmod 644 /etc/nginx/html/50x.html
 chmod 777 /run
