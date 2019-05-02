@@ -3259,14 +3259,6 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				return 1;
 			}
 			unset($retval);
-			// check that the mount server is on-line
-			// $retval = sysCmd('avahi-browse -atrlkp | grep -Ei "smb|cifs|nfs" | grep -i -c "'.$mp['address'].'"');
-			// if ($retval[0] == 0) {
-				// // the mount server is not visible, so don't even try to mount it
-				// $mp['error'] = 'Network Mount off-line';
-				// return 0;
-			// }
-			// unset($retval);
 			// validate the mount name
 			$mp['name'] = trim($mp['name']);
 			if ($mp['name'] != preg_replace('/[^A-Za-z0-9-._ ]/', '', $mp['name'])) {
@@ -3341,9 +3333,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 				// get the MPD uid and gid
 				$mpdproc = getMpdDaemonDetalis();
                 if (!empty($mp['username'])) {
-                    $auth = "username=".$mp['username'].",password=".$mp['password'];
+                    $auth = 'username='.$mp['username'].',password='.$mp['password'].',';
 				} else {
-					$auth = 'guest';
+					$auth = 'guest,';
                 }
 				if ($mp['options'] == '') {
 					// no mount options set by the user or from previous auto mount, so set it to a value
@@ -3353,7 +3345,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 					if (!$quiet) ui_notify($type.' mount', 'Attempting to use saved/predefined mount options');
 					$options2 = $mp['options'];
 				}
-				$mountstr = "mount -t cifs -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
+				$mountstr = "mount -t cifs -o ".$auth."soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
 			}
 			// create the mount point
             sysCmd("mkdir -p \"/mnt/MPD/NAS/".$mp['name']."\"");
@@ -3459,9 +3451,12 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 							$i = 10;
 							break;
 					}
-					for ($j = 1; $j <= 6; $j++) {
+					for ($j = 1; $j <= 7; $j++) {
 						switch ($j) {
 							case 1:
+								if ($auth == '') {
+									$auth = 'guest,';
+								}
 								$options2 = $options1.',sec=ntlm';
 								break;
 							case 2:
@@ -3478,6 +3473,12 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
 								break;
 							case 6:
 								$options2 = $options1.',nounix';
+								break;
+							case 7:
+								if ($auth == 'guest,') {
+									$auth = '';
+								}
+								$options2 = $options1.',sec=none';
 								break;
 							default:
 								$j = 10;
