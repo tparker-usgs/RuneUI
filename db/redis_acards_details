@@ -48,7 +48,8 @@ $redis->hSet('acards_details', 'Devialet USB Audio 2.0', '{"sysname":"Devialet U
 $redis->hSet('acards_details', 'DigiHug USB Audio', '{"sysname":"DigiHug USB Audio","extlabel":"DigiHug USB DAC","mixer_numid":"1","mixer_control":"PCM","hwplatformid":"08","type":"usb"}');
 $redis->hSet('acards_details', 'Geek Out HD Audio 1V0', '{"sysname":"Geek Out HD Audio 1V0","extlabel":"LH Labs Geek Out 720","mixer_numid":"3","mixer_control":"LH Labs Clock Selector","type":"usb"}');
 $redis->hSet('acards_details', 'Hugo', '{"sysname":"Hugo","extlabel":"Chord Hugo","mixer_numid":"4","mixer_control":"Hugo","type":"usb"}');
-$redis->hSet('acards_details', 'I-Sabre Q2M DAC', '{"sysname":"I-Sabre Q2M DAC","extlabel":"I-Sabre Q2M DAC (I&#178;S)","hwplatformid":"01","type":"i2s"}');
+$redis->hSet('acards_details', 'I-Sabre K2M DAC', '{"sysname":"I-Sabre K2M DAC","extlabel":"I-Sabre K2M DAC (I&#178;S)","hwplatformid":"08","type":"i2s"}');
+$redis->hSet('acards_details', 'I-Sabre Q2M DAC', '{"sysname":"I-Sabre Q2M DAC","extlabel":"I-Sabre Q2M DAC (I&#178;S)","hwplatformid":"08","type":"i2s"}');
 $redis->hSet('acards_details', 'IQaudIODAC', '{"sysname":"snd_rpi_iqaudio_dac","extlabel":"IQaudIO Pi-DAC+ (I&#178;S)","mixer_numid":"1","mixer_control":"Digital","hwplatformid":"02","type":"i2s"}');
 $redis->hSet('acards_details', 'NuForce USB Audio', '{"sysname":"NuForce USB Audio","extlabel":"NuForce DDA-100","mixer_numid":"4","mixer_control":"PCM","type":"usb"}');
 $redis->hSet('acards_details', 'ODROID-DAC', '{"sysname":"ODROID-DAC","extlabel":"ODROID HifiShield (I&#178;S)","mixer_numid":"1","hwplatformid":"10","type":"i2s"}');

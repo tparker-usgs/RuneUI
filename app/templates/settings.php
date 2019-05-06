@@ -67,7 +67,8 @@
                         <label class="control-label col-sm-2" for="proxy-pass">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="proxy_pass" name="features[proxy][pass]" value="<?php echo $this->proxy['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)</span>
+                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -319,7 +320,8 @@
                         <label class="control-label col-sm-2" for="spotify-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="spotify_pass" name="features[spotify][pass]" value="<?php echo $this->spotify['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -351,6 +353,79 @@
 							</label>
                             <span class="help-block">When ON: a UPnP / DLNA broadcast will clear the MPD queue and then add and play the song, clearing the queue with each successive song<br>
 							When OFF: UPnP / DLNA will add songs of the MPD queue (before the current play position) but MPD will continue to play the current song</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div <?php if($this->spotifyconnect['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="spotifyconnectBox">
+                <div class="form-group">
+                    <label for="spotifyconnect" class="control-label col-sm-2">Spotify Connect</label>
+                    <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="spotifyconnect" name="features[spotifyconnect][enable]" type="checkbox" value="1"<?php if($this->spotifyconnect['enable'] === '1'): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled readonly<?php endif; ?>>
+                            <?php if($this->activePlayer === 'SpotifyConnect'): ?><input id="spotifyconnect" name="features[spotifyconnect][enable]" type="hidden" value="1"><?php endif; ?>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled<?php endif; ?>"></a>
+                        </label>
+                        <span class="help-block">Enable Spotify Connect steaming client. You must have a <strong><a href="https://www.spotifyconnect.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account</span>
+                    </div>
+                </div>
+                <div class="<?php if($this->spotifyconnect['enable'] != 1): ?>hide<?php endif ?>" id="spotifyconnectAuth">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_username">Username</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_username" name="features[spotifyconnect][username]" value="<?php echo $this->spotifyconnect['username']; ?>" data-trigger="change" placeholder="username" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>username</i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" data-trigger="change" placeholder="password" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_device_name">Spotify Connect name</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_device_name" name="features[spotifyconnect][device_name]" value="<?php echo $this->spotifyconnect['device_name']; ?>" data-trigger="change" placeholder="RuneAudio" autocomplete="off">
+                            <span class="help-block">Spotify Connect broadcast/connection name</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_bitrate">Bitrate</label>
+						<div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][bitrate]" data-style="btn-default btn-lg">
+								<option value="320" <?php if($this->spotifyconnect['bitrate'] === '320'): ?> selected <?php endif ?>> 320 (high quality)</option>
+								<option value="160" <?php if($this->spotifyconnect['bitrate'] === '160'): ?> selected <?php endif ?>> 160 (medium quality)</option>
+								<option value="96"  <?php if($this->spotifyconnect['bitrate'] === '96'): ?>  selected <?php endif ?>> 96  (low quality)</option>
+							</select>
+                            <span class="help-block">Choose the bitrate <strong>320</strong> (high quality), <strong>160</strong> (medium quality) or <strong>96</strong> (low quality)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_volume_normalisation">Volume Normalisation</label>
+                        <div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume_normalisation]" data-style="btn-default btn-lg">
+								<option value="true"  <?php if($this->spotifyconnect['volume_normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
+								<option value="false" <?php if($this->spotifyconnect['volume_normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
+							</select>
+                            <span class="help-block">Switch Volume Normalisation per track <strong>ON</strong> or <strong>OFF</strong></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_normalisation_pregain">Normalisation Pregain</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_normalisation_pregain" name="features[spotifyconnect][normalisation_pregain]" value="<?php echo $this->spotifyconnect['normalisation_pregain']; ?>" min="-20" max="0" placeholder="-10" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>0</strong> (zero) and <strong>-20</strong>. This value is active only when <i>Volume Normalisation</i> is <strong>ON</strong>.<br>
+							When <i>Volume Normalisation</i> is selected the output volume will need to be reduced to prevent clipping. A value of -10dB is advised as a starting point. When modifying, change it in small steps (and turn your amplifier down!)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_timeout">Stream Time-out</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_timeout" name="features[spotifyconnect][timeout]" value="<?php echo $this->spotifyconnect['timeout']; ?>" min="15" max="120" placeholder="20" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>15</strong> and <strong>120</strong>. This is the number of seconds of stopped or paused play after which Spotify Connect will assume that the play stream has finished. After the time-out the stream will be terminated</span>
                         </div>
                     </div>
                 </div>
@@ -401,10 +476,20 @@
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
 						<div class="col-sm-10">
-							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[local_browser][localSStime]" value="<?php echo $this->local_browser['localSStime'] ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
 							<span class="help-block">Sets the activation time for the local browser screensaver (0-100 seconds, -1 disables the feature)</span>
 						</div>
 					</div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="smallScreenSaver">Small ScreenSaver</label>
+                        <div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="smallScreenSaver" name="features[local_browser][smallScreenSaver]" type="checkbox" value="1"<?php if($this->local_browser['smallScreenSaver'] === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">Optionally switch this ON if you use a very small local browser screen with the screensaver</span>
+                        </div>
+                    </div>
 				</div>
 				<?php else: ?>
 				<div class="form-group">
@@ -475,7 +560,8 @@
                         <label class="control-label col-sm-2" for="lastfm-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="lastfm_pass" name="features[lastfm][pass]" value="<?php echo $this->lastfm['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>

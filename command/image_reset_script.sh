@@ -3,27 +3,23 @@ set -x # echo all commands to cli
 set +e # continue on errors
 #
 # Image reset script
-if [ "$1" == "full" ]; then
+if [ "$1" == "full" ];
+then
 	echo "Running full cleanup and image initialisation for a distribution image"
 else
 	echo "Running quick image initialisation"
 fi
 #---
 #Before running the script...
-#Connect via Wired ethernet, remove all WiFi profiles.
-#Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources.
-#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem.
+#Connect via Wired ethernet, remove all WiFi profiles
+#Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources
+#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
 #
 # clean up any no longer valid mounts
 udevil clean
 #
 # set up services and stop them
 systemctl unmask systemd-journald
-<<<<<<< Updated upstream
-systemctl disable ashuffle mpd mpdscribble nmbd nmb smbd smb winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd systemd-timesyncd php-fpm ntpd bluetooth chronyd bootsplash cronie
-systemctl enable avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd
-systemctl stop ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil
-=======
 # for a distribution image disable systemd audit to reduce log files. Switch it on for a development image
 if [ "$1" == "full" ];
 then
@@ -31,7 +27,7 @@ then
 else
 	systemctl unmask systemd-journald-audit.socket
 fi
-# systemctl stops after an eronious entry, use an array to run through all entries
+# systemctl stops after an erroneous entry, use an array to run through all entries
 declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start)
 declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd bootsplash dbus)
 declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil)
@@ -55,9 +51,8 @@ for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"
 done
->>>>>>> Stashed changes
 #
-# run poweroff script (and remove network mounts)
+# run the shutdown poweroff script (this will also remove network mounts)
 /var/www/command/rune_shutdown poweroff
 #
 # unmount USB drives and delete the mount points
@@ -114,6 +109,7 @@ redis-cli del mpdconf
 redis-cli del nics
 redis-cli del samba
 redis-cli del spotify
+redis-cli del spotifyconnect
 redis-cli del usbmounts
 redis-cli del debugdata
 redis-cli del local_browser
@@ -173,10 +169,10 @@ cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
 cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
 cp /var/www/app/config/defaults/fstab /etc/fstab
 cp /var/www/app/config/defaults/hosts /etc/hosts
-cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
-cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
 cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
 cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
+cp /var/www/app/config/defaults/bootsplash.service /usr/lib/systemd/system/bootsplash.service
+cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
 cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
 cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
 cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
@@ -185,6 +181,7 @@ cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/run
 cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
 cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
 cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
+cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
 cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
 cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 #
@@ -196,11 +193,21 @@ cp /var/www/app/config/defaults/test /etc/netctl/test
 # copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
 #
-# modify standard .service files
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/smb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
-sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
+# modify all standard .service files which specify the wrong PIDFile location
+sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.service
+# sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
+# sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
 sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
+#
+# some fixes for the ply-image binary location - currently required for 0.5b
+if [ -e /usr/bin/ply-image ];
+then
+    rm /usr/local/bin/ply-image
+else
+    cp /usr/local/bin/ply-image /usr/bin/ply-image
+	rm /usr/local/bin/ply-image
+	chmod 755 /usr/bin/ply-image
+fi
 #
 # make sure that all files are unix format and have the correct ownerships and protections
 # the 'final' option also removes the dos2unix package
@@ -217,16 +224,31 @@ chmod 600 /srv/http/command/lyric.sh
 chmod 600 /srv/http/command/artist_info.sh
 #
 #for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
-if [ "$1" == "full" ]; then
+if [ "$1" == "full" ];
+then
 	pacman -Sc --noconfirm
 fi
 #
 # reset systemd services so that any cached files are replaced by the latest ones
 systemctl daemon-reload
 #
+# reset host information (icon-name, chassis and hostname)
+hostnamectl --static --transient --pretty set-icon-name multimedia-player
+hostnamectl --static --transient --pretty set-chassis embedded
+hostnamectl --static --transient --pretty set-hostname runeaudio
+#
+# set timezone to -11 hours before GMT - any user adjustment will always go forward
+timedatectl set-timezone Pacific/Pago_Pago
+redis-cli set timezone "Pacific/Pago_Pago"
+#
+# shutdown redis and force a write all in-memory keys to disk (purges any cached values)
+redis-cli save
+redis-cli shutdown save
+#
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
-if [ "$1" == "full" ]; then
+if [ "$1" == "full" ];
+then
 	redis-cli save
 	echo "Zero filling the file system"
 	# zero fill the file system
@@ -243,19 +265,6 @@ if [ "$1" == "full" ]; then
 	sync
 	cd /home
 fi
-#
-# reset host information (icon-name, chassis and hostname)
-hostnamectl --static --transient --pretty set-icon-name multimedia-player
-hostnamectl --static --transient --pretty set-chassis embedded
-hostnamectl --static --transient --pretty set-hostname runeaudio
-#
-# set timezone to -11 hours of GMT - any user adjustment will always go forward
-timedatectl set-timezone Pacific/Pago_Pago
-redis-cli set timezone "Pacific/Pago_Pago"
-#
-# shutdown redis and force a write all in-memory keys to disk (purges any cached values)
-redis-cli save
-redis-cli shutdown save
 #
 # shutdown & poweroff
 shutdown -P now

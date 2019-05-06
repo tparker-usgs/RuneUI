@@ -462,6 +462,19 @@ html, body {
     outline: none;
 }
 
+.disable-scrollbar-0 {
+    scrollbar-width: none; /*For Firefox*/
+	overflow: hidden scroll; /*For Firefox*/
+}
+
+.disable-scrollbar-1 {
+    -ms-overflow-style: none; /*For IE and Edge*/
+}
+
+.disable-scrollbar-2::-webkit-scrollbar {
+		width: 0 !important; /*For Chrome, Safari and Opera*/
+		display: none; /*For Chrome, Safari and Opera*/
+}
 
 
 // Screensaver display and panels panels
@@ -474,6 +487,8 @@ html, body {
 }
 .leftpanel-expandable-ss {
 	float: left;
+	padding: 20px 0px 0px 0px;
+	position: relative;
 	width: 100%;
 	height: 100%;
 }
@@ -493,27 +508,25 @@ html, body {
 	display: block;
 	box-sizing: border-box;
 	text-align: center;
-	line-height: 1.42857;
+	line-height: 115%;
 	color: rgb(224, 231, 238);
 }
 #currentsong-ss {
-	white-space: nowrap;
 	overflow: hidden;
-	height: 40px;
 	font-size: 40px;
 	display: block;
 	box-sizing: border-box;
 	text-align: center;
 	font-weight: bold;
 	color: rgb(0, 149, 216);
-	line-height: 34px;
+	line-height: 115%;
 }
 #currentalbum-ss {
 	font-size: 30px;
 	display: block;
 	box-sizing: border-box;
 	text-align: center;
-	line-height: 1.42857;
+	line-height: 115%;
 	color: rgb(224, 231, 238);
 }
 div.coverart-ss {
@@ -525,20 +538,19 @@ div.coverart-ss {
 	width: 100%;
 	height: auto;
 	border: 2px solid rgb(52, 73, 94);
-	margin-bottom: 20px;
 	border-radius: 6px;
 	background-size: 100% 100%;
 }
 #countdown-display-ss {
 	float: left;
 	width: 50%;
-	line-height: 38px;
+	height: auto;
 	font-size: 20px;
 	font-weight: bold;
 	text-align: center;
 }
 #total-ss {
-	line-height: 38px;
+	height: auto;
 	font-size: 20px;
 	font-weight: bold;
 	text-align: center;
@@ -598,7 +610,6 @@ div.coverart-ss {
 	font-size: 20px;
 	box-sizing: border-box;
 }
-
 @media (min-width: 700px) {
 	.leftpanel-expandable-ss {
 		width: 40%;
@@ -608,13 +619,125 @@ div.coverart-ss {
 		display: block;
 	}
 	#countdown-display-ss {
-		font-size: 38px;
+		font-size: 30px;
 	}
 	#total-ss {
-		font-size: 28px;
+		font-size: 30px;
 	}
 }
 
+
+// Small Screensaver display and panels panels
+// --------------------------------------------------------------
+
+.leftpanel-sss {
+	float: left;
+	width: 45%;
+	height: 100%;
+}
+.rightpanel-sss {
+	float: right;
+	width: 55%;
+	height: 100%;
+	display: block;
+}
+#currentartist-sss {
+	font-size: 38px;
+	line-height: 115%;
+	height: auto;
+	margin-bottom: 10px;
+	display: block;
+	box-sizing: border-box;
+	text-align: center;
+	color: rgb(224, 231, 238);
+}
+#currentsong-sss {
+	font-size: 40px;
+	line-height: 115%;
+	height: auto;
+	margin-bottom: 10px;
+	display: block;
+	box-sizing: border-box;
+	text-align: center;
+	font-weight: bold;
+	color: rgb(0, 149, 216);
+}
+#currentalbum-sss {
+	font-size: 38px;
+	line-height: 115%;
+	height: auto;
+	margin-bottom: 10px;
+	display: block;
+	box-sizing: border-box;
+	text-align: center;
+	color: rgb(224, 231, 238);
+}
+div.coverart-sss {
+	height: auto;
+	margin: 10px auto 11px;
+	width: 100%;
+}
+#cover-art-sss {
+	width: 100%;
+	height: auto;
+	border: 2px solid rgb(52, 73, 94);
+	border-radius: 6px;
+	background-size: 100% 100%;
+}
+#countdown-display-sss {
+	float: left;
+	width: 50%;
+	height: auto;
+	font-size: 38px;
+	font-weight: bold;
+	text-align: center;
+}
+#total-sss {
+	height: auto;
+	font-size: 38px;
+	font-weight: bold;
+	text-align: center;
+}
+#format-bitrate-sss {
+	height: auto;
+	font-size: 30px;
+	text-align: center;
+	color: rgb(0, 149, 216);
+}
+#playlist-position-sss {
+	height: auto;
+	font-size: 30px;
+	text-align: center;
+	color: rgb(0, 149, 216);
+}
+.rightpanel-sss .coverart {
+	height: auto;
+	margin: 10px auto 11px;
+	width: 100%;
+}
+.top-sss {
+	position: relative;
+	text-align: center;
+	top: 10px;
+	height: 58%;
+	width: auto;
+}
+.bottom-sss {
+	position: fixed;
+	text-align: center;
+	bottom: 0;
+	height: 42%;
+	width: 50%;
+}
+@media (min-width: 700px) {
+	.leftpanel-expandable-sss {
+		width: 45%;
+	}
+	.rightpanel-compactable-sss {
+		width: 55%;
+		display: block;
+	}
+}
 
 
 // Playlist and Database panels

@@ -50,7 +50,8 @@
                             <input id="nas-guest" name="nas-guest" type="checkbox" <?php if(empty($this->mount['username'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
-                        <span class="help-block">Log with guest account (no user/password required) for CIFS mounts (not used for NFS)</span>
+                        <span class="help-block">Log in with guest account (no user/password required) for CIFS mounts (not used for NFS)<br>
+						<i>Note: The use of Guest access for mounting Windows shares is not supported by the latest versions of Windows, you must use a valid username and password</i></span>
                     </div>
                 </div>
                 <div id="mount-auth" class="optional disabled">

@@ -88,7 +88,7 @@ $status['elapsed'] = "0";
 $status['song_percent'] = "100";
 $status['currentartist'] = "Airplay";
 $status['currentalbum'] = "-----";
-$status['currentsong'] = "-----";
+$status['currentsong'] = "Switching";
 $status['actPlayer'] = "Airplay";
 $status['radioname'] = null;
 $status['OK'] = null;
@@ -209,6 +209,7 @@ while (1) {
 						$status['currentartist'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentartist: ', $status['currentartist']);
 						// store information for lyrics and info
+						$redis->hSet('lyrics', 'artist', $status['currentartist']);
 						$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
 						break;
 					case 'core astm':
@@ -220,6 +221,7 @@ while (1) {
 						$status['currentalbum'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentalbum: ', $status['currentalbum']);
 						// store information for lyrics and info
+						$redis->hSet('lyrics', 'album', $status['currentalbum']);
 						$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
 						break;
 					case 'core minm':
@@ -227,6 +229,7 @@ while (1) {
 						$status['currentsong'] = empty($buf) ? 'Unknown' : trim($buf);
 						runelog('rune_SSM_wrk: Currentsong: ', $status['currentsong']);
 						// store information for lyrics and info
+						$redis->hSet('lyrics', 'song', $status['currentsong']);
 						$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
 						break;
 					case 'core asgn':
@@ -310,7 +313,7 @@ while (1) {
 						$redis->set('act_player_info', json_encode($status));
 						break;
 					case 'ssnc flsr':
-						// flush request
+						// flush request > pause
 						runelog('rune_SSM_wrk: Flush request: ', $buf);
 						break;
 					case 'ssnc pfls':
@@ -329,6 +332,7 @@ while (1) {
 							$status['volume'] = $redis->get('lastmpdvolume');
 						}
 						$status['audio'] = "44100:16:2";
+						$redis->hSet('lyrics', 'audio', $status['audio']);
 						$status['audio_sample_rate'] = "44.1";
 						$status['audio_sample_depth'] = "16";
 						$status['bitrate'] = "1411";
@@ -344,7 +348,7 @@ while (1) {
 						$status['song_percent'] = "100";
 						$status['currentartist'] = "Airplay";
 						$status['currentalbum'] = "-----";
-						$status['currentsong'] = "-----";
+						$status['currentsong'] = " ----- ";
 						$status['actPlayer'] = "Airplay";
 						$status['radioname'] = null;
 						$status['OK'] = null;
@@ -406,12 +410,14 @@ while (1) {
 						runelog('rune_SSM_wrk: Percent : ', $status['song_percent']);
 						// save and post the playback data to the UI
 						// push the info to the UI if cover art is not set
+						$status['currentsong'] = ' '.$status['currentsong'].' ';
 						ui_render('playback', json_encode($status));
 						$redis->set('act_player_info', json_encode($status));
 						if ($redis->hget('airplay', 'metadata_include_cover_art') != 'yes') {
 							//sysCmdAsync('/var/www/command/ui_update_async');
 							//sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 						}
+						$redis->hSet('lyrics', 'time', $status['time']);
 						break;
 					case 'ssnc PICT':
 						// artwork
@@ -433,6 +439,7 @@ while (1) {
 								if (file_put_contents('/srv/http/tmp/airplay/airplay-cover.'.$imgtype, $buf) === false) {
 									runelog('rune_SSM_wrk: Image file create failed, name: ', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
 									runelog('rune_SSM_wrk: Image file create failed, buffer length: ', strlen($buf));
+									$redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-default.png');
 									break;
 								}
 								else {
@@ -441,6 +448,7 @@ while (1) {
 									// make sure the impage file is readable for the UI (runs as user http)
 									sysCmd('chown -f http.http /srv/http/tmp/airplay/airplay-cover.*');
 									sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-cover.*');
+									$redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
 								}
 							} else {
 								// no image file
@@ -458,6 +466,7 @@ while (1) {
 								$status['elapsed'] = "0";
 								$status['song_percent'] = "100";
 							}
+							$status['currentsong'] = trim($status['currentsong']);
 							ui_render('playback', json_encode($status));
 							$redis->set('act_player_info', json_encode($status));
 							//sleep(1);
