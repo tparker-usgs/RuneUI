@@ -52,7 +52,7 @@ sysCmd('chmod 777 /run');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // if os updates are needed
 if (file_exists('/srv/http/command/update_os.php')) {
@@ -152,7 +152,7 @@ if ($playerid_db === '') {
 	// ashuffle gets started automatically
     // reconnect to new instance of MPD
     // clear MPD database
-    //$mpd = openMpdSocket('/run/mpd.sock', 0);
+    //$mpd = openMpdSocket('/run/mpd/socket', 0);
     //sendMpdCommand($mpd, 'update');
 	sysCmd('mpc update');
     // system ENV files check and replace
@@ -200,7 +200,7 @@ if ($playerid_db === '') {
 	unset($retval);
 	// ashuffle gets started automatically
     // clear MPD database
-    //$mpd = openMpdSocket('/run/mpd.sock', 0);
+    //$mpd = openMpdSocket('/run/mpd/socket', 0);
     //sendMpdCommand($mpd,'update');
 	sysCmd('mpc update');
     sleep(1);
@@ -449,7 +449,7 @@ runelog('WORKER MAIN LOOP ---');
 // WORKER MAIN LOOP --- //
 while (1) {
 	// Connect to Redis backend
-	$redis->pconnect('/run/redis.sock');
+	$redis->pconnect('/run/redis/socket');
 	// runelog('[wrk] loop marker ',microtime(true));
     // monitor loop
     if (!empty($redis->hGetAll('w_queue'))) {
@@ -1439,7 +1439,7 @@ while (1) {
                 case 'webradio':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    $mpd = openMpdSocket('/run/mpd.sock');
+                    $mpd = openMpdSocket('/run/mpd/socket');
                     if ($job->action === 'add') {
                         runelog('service: WEBRADIO add', $job->args);
                         if (addRadio($mpd, $redis, $job->args)) {

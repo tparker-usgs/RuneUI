@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 redis-cli shutdown save
 systemctl stop mpd redis rune_PL_wrk rune_SSM_wrk ashuffle spopd shairport-sync upmpdcli mpdscribble local-browser udevil

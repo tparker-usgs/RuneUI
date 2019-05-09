@@ -83,7 +83,7 @@ redis-cli del addo
 # remove user files and logs
 rm -rf /var/log/runeaudio/*
 umount /srv/http/tmp
-umount //var/log/runeaudio
+umount /var/log/runeaudio
 umount /var/log
 rm -f /var/lib/mpd/mpd.db
 rm -f /var/lib/mpd/mpdstate
@@ -97,6 +97,7 @@ rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 rm -rf /home/*
+rm -rf /var/lib/bluetooth/*
 #
 # redis reset
 redis-cli del AccessPoint
@@ -144,24 +145,14 @@ echo -e "rune\nrune" | passwd root
 #
 # reset the service and configuration files to the distribution standard
 # the following commands should also be run after a system update or any package updates
-cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
-cp /var/www/app/config/defaults/chrony.conf /etc/chrony.conf
-cp /var/www/app/config/defaults/hostapd.conf /etc/hostapd/hostapd.conf
-cp /var/www/app/config/defaults/journald.conf /etc/systemd/journald.conf
-cp /var/www/app/config/defaults/lircd.conf /etc/conf.d/lircd.conf
-cp /var/www/app/config/defaults/lirc_options.conf /etc/lirc/lirc_options.conf
-cp /var/www/app/config/defaults/mpdscribble.conf /etc/mpdscribble.conf
 rm -f /etc/nginx/nginx.conf
-cp /var/www/app/config/defaults/nginx-prod.conf /etc/nginx/nginx-prod.conf
-ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
-cp /var/www/app/config/defaults/50x.html /etc/nginx/html/50x.html
-cp /var/www/app/config/defaults/nsswitch.conf /etc/nsswitch.conf
-cp /var/www/app/config/defaults/php-fpm.conf /etc/php/php-fpm.conf
-cp /var/www/app/config/defaults/redis.conf /etc/redis.conf
-cp /var/www/app/config/defaults/shairport-sync.conf /etc/shairport-sync.conf
 rm -f /etc/samba/*.conf
-cp /var/www/app/config/defaults/smb-dev.conf /etc/samba/smb-dev.conf
-cp /var/www/app/config/defaults/smb-prod.conf /etc/samba/smb-prod.conf
+rm -f /etc/netctl/*
+# copy default settings and services
+cp -Rv /srv/http/app/config/defaults/etc/* /etc
+cp -Rv /srv/http/app/config/defaults/usr/* /usr
+# make appropriate links
+ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
 cp /var/www/app/config/defaults/timesyncd.conf /etc/systemd/timesyncd.conf
@@ -185,13 +176,10 @@ cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.
 cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
 cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 #
-# network
-rm -f /etc/netctl/*
-cp /var/www/app/config/defaults/eth0 /etc/netctl/eth0
-cp /var/www/app/config/defaults/test /etc/netctl/test
-#
 # copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
+cp /var/www/app/config/defaults/cmdline.txt /boot/cmdline.txt
+
 #
 # modify all standard .service files which specify the wrong PIDFile location
 sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.service

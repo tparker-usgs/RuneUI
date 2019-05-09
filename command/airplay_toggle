@@ -41,7 +41,7 @@ include('/srv/http/app/libs/runeaudio.php');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // read status from /usr/lib/systemd/system/shairport.service
 $status = $argv[1]; // "on" or "off"

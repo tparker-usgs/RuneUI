@@ -41,7 +41,7 @@ include('/srv/http/app/libs/runeaudio.php');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // clear the log file
 sysCmd('echo "--------------- start: airplay_toggle ---------------" > /var/log/runeaudio/upmpdcli_toggle.log');

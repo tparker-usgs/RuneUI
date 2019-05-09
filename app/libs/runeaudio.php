@@ -730,7 +730,7 @@ class globalRandom extends Thread
 
     public function run()
     {
-        $mpd = openMpdSocket('/run/mpd.sock', 0);
+        $mpd = openMpdSocket('/run/mpd/socket', 0);
             // if ($this->status['consume'] == 0 OR $this->status['random'] == 0) {
             if ($this->status['random'] == 0) {
                 // sendMpdCommand($mpd,'consume 1');
@@ -2329,7 +2329,7 @@ function wrk_i2smodule($redis, $args)
         fclose($fp);
     } else {
         if (wrk_mpdPlaybackStatus($redis) === 'playing') {
-            $mpd = openMpdSocket('/run/mpd.sock', 0);
+            $mpd = openMpdSocket('/run/mpd/socket', 0);
             sendMpdCommand($mpd, 'kill');
             closeMpdSocket($mpd);
         }
@@ -2571,7 +2571,7 @@ if ($action === 'reset') {
                     continue;
                 }
                 if ($param === 'bind_to_address') {
-                    $output .= "bind_to_address \"/run/mpd.sock\"\n";
+                    $output .= "bind_to_address \"/run/mpd/socket\"\n";
                 }
                 if ($param === 'ffmpeg') {
                     // --- decoder plugin ---
@@ -2812,7 +2812,7 @@ if ($action === 'reset') {
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
-            //$mpd = openMpdSocket('/run/mpd.sock', 0);
+            //$mpd = openMpdSocket('/run/mpd/socket', 0);
             //sendMpdCommand($mpd, 'kill');
             //closeMpdSocket($mpd);
 			if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
@@ -3945,6 +3945,7 @@ function wrk_setHwPlatform($redis)
         // } elseif ($stoppedPlayer === 'Spotify') {
             // // connect to SPOPD daemon
             // $sock = openSpopSocket('localhost', 6602, 1);
+            // runelog('sendSpopCommand', 'toggle');
             // $status = _parseSpopStatusResponse(SpopStatus($sock));
             // runelog('SPOP status', $status);
             // if ($status['state'] === 'pause') {
@@ -3953,7 +3954,6 @@ function wrk_setHwPlatform($redis)
             // sendSpopCommand($sock, 'toggle');
             // closeSpopSocket($sock);
             // // debug
-            // runelog('sendSpopCommand', 'toggle');
         // }
         // $redis->set('activePlayer', $stoppedPlayer);        
     // } else {
@@ -3976,7 +3976,7 @@ function wrk_startPlayer($redis, $newplayer)
 			// record  the mpd status
 			wrk_mpdPlaybackStatus($redis);
             // connect to MPD daemon
-            $sock = openMpdSocket('/run/mpd.sock', 0);
+            $sock = openMpdSocket('/run/mpd/socket', 0);
             $status = _parseStatusResponse($redis, MpdStatus($sock));
             runelog('MPD status', $status);
             if ($status['state'] === 'play') {

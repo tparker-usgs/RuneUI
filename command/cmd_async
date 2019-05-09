@@ -38,7 +38,7 @@ ini_set('display_errors', '1');
 ini_set('error_log', '/var/log/runeaudio/cmd_async.log');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 include('/var/www/app/libs/runeaudio.php');
 
 if (isset($argv[1])) {

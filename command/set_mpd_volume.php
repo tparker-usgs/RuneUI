@@ -39,7 +39,7 @@ define('APP', '/srv/http/app/');
 include('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // reset logfile
 sysCmd('echo "--------------- start: set_mpd_volume.php ---------------" > /var/log/runeaudio/set_mpd_volume.log');

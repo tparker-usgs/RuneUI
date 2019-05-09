@@ -100,7 +100,7 @@ sysCmdAsync('/var/www/command/ui_update_async');
 while (1) {
     // Connect to Redis backend
     $redis = new Redis();
-    $redis->pconnect('/run/redis.sock');
+    $redis->pconnect('/run/redis/socket');
 	sleep(3);
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer !== "Airplay") {

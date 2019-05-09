@@ -43,13 +43,13 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
             $redis->hSet('mpdconf', 'log_level', 'default');
-            $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hSet('mpdconf', 'bind_to_address', 'localhost');
             $redis->hSet('mpdconf', 'port', '6600');
             $redis->hSet('mpdconf', 'max_connections', '20');
             $redis->hSet('mpdconf', 'user', 'mpd');
             $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
             $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hSet('mpdconf', 'pid_file', '/run/mpd/pid');
             $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
@@ -73,13 +73,13 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'zeroconf_enabled') || $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
             $redis->hExists('mpdconf', 'zeroconf_name') || $redis->hSet('mpdconf', 'zeroconf_name', 'RuneAudio');
             $redis->hExists('mpdconf', 'log_level') || $redis->hSet('mpdconf', 'log_level', 'default');
-            $redis->hExists('mpdconf', 'bind_to_address') || $redis->hSet('mpdconf', 'bind_to_address', 'any');
+            $redis->hExists('mpdconf', 'bind_to_address') || $redis->hSet('mpdconf', 'bind_to_address', 'localhost');
             $redis->hExists('mpdconf', 'port') || $redis->hSet('mpdconf', 'port', '6600');
             $redis->hExists('mpdconf', 'max_connections') || $redis->hSet('mpdconf', 'max_connections', '20');
             $redis->hExists('mpdconf', 'user') || $redis->hSet('mpdconf', 'user', 'mpd');
             $redis->hExists('mpdconf', 'db_file') || $redis->hSet('mpdconf', 'db_file', '/var/lib/mpd/mpd.db');
             $redis->hExists('mpdconf', 'sticker_file') || $redis->hSet('mpdconf', 'sticker_file', '/var/lib/mpd/sticker.sql');
-            $redis->hExists('mpdconf', 'pid_file') || $redis->hSet('mpdconf', 'pid_file', '/var/run/mpd/pid');
+            $redis->hExists('mpdconf', 'pid_file') || $redis->hSet('mpdconf', 'pid_file', '/run/mpd/pid');
             $redis->hExists('mpdconf', 'music_directory') || $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hExists('mpdconf', 'playlist_directory') || $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hExists('mpdconf', 'state_file') || $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
@@ -101,7 +101,7 @@ function redisDatastore($redis,$action) {
 			break;
         case 'reset':
             // kernel
-            $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
+            $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
             $redis->set('i2smodule', 'none');
             $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
 			$redis->set('audio_on_off', '1');
@@ -260,9 +260,9 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'janui-20180903');
+            $redis->set('buildversion', 'gearhead-20190322');
 			$redis->set('patchlevel', 0);
-            $redis->set('release', '0.5');
+            $redis->set('release', '0.6');
             // HW platform data
             // $redis->set('playerid', '');
             // $redis->set('hwplatform', '');
@@ -379,7 +379,7 @@ function redisDatastore($redis,$action) {
             break;
         case 'check':
             // kernel
-            $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.14.34-1-ARCH');
+            $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
             $redis->exists('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
@@ -532,7 +532,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('debug') || $redis->set('debug', 0);
             $redis->exists('debugdata') || $redis->set('debugdata', '');
             $redis->exists('opcache') || $redis->set('opcache', 1);
-            $redis->exists('buildversion') || $redis->set('buildversion', 'janui-20180903');
+            $redis->exists('buildversion') || $redis->set('buildversion', 'gearhead-20190322');
             $redis->exists('patchlevel') || $redis->set('patchlevel', 0);
             // HW platform data
             $redis->exists('playerid') || $redis->set('playerid', '');

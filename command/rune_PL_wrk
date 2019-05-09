@@ -49,13 +49,13 @@ $forceupdate = 1;
 while (1) {
     // Connect to Redis backend
     $redis = new Redis();
-    $redis->pconnect('/run/redis.sock');
+    $redis->pconnect('/run/redis/socket');
     $activePlayer = $redis->get('activePlayer');
 	$proxy = $redis->hGetall('proxy');
 	$lastfm_apikey = $redis->get('lastfm_apikey');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
-        $socket = openMpdSocket('/run/mpd.sock', 0);
+        $socket = openMpdSocket('/run/mpd/socket', 0);
 		if (!$socket) {
 			$redis->close();
 			sleep(5);
