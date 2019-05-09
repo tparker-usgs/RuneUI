@@ -116,6 +116,7 @@
 						<option value="allo-digione|Allo DigiOne" <?php if($this->i2smodule_select === 'allo-digione|Allo DigiOne'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-digione|Allo DigiOne Signature" <?php if($this->i2smodule_select === 'allo-digione|Allo DigiOne Signature'): ?> selected <?php endif ?>>Allo DigiOne Signature</option>
 						<option value="allo-katana-dac-audio|Allo Katana DAC" <?php if($this->i2smodule_select === 'allo-katana-dac-audio|Allo Katana DAC'): ?> selected <?php endif ?>>Allo Katana DAC</option>
+						<option value="allo-boss-dac-pcm512x-audio|Allo MiniBoss for RPI Zero" <?php if($this->i2smodule_select === 'allo-boss-dac-pcm512x-audio|Allo MiniBoss for RPI Zero'): ?> selected <?php endif ?>>Allo MiniBoss for RPI Zero</option>
 						<option value="allo-boss-dac-pcm512x-audio|Allo Piano 2.0" <?php if($this->i2smodule_select === 'allo-boss-dac-pcm512x-audio|Allo Piano 2.0'): ?> selected <?php endif ?>>Allo Piano 2.0</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio|Allo Piano 2.1 DAC Plus" <?php if($this->i2smodule_select === 'allo-piano-dac-plus-pcm512x-audio|Allo Piano 2.1 DAC Plus'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk|Allo Piano 2.1 DAC Plus with Kali Reclocker" <?php if($this->i2smodule_select === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk|Allo Piano 2.1 DAC Plus with Kali Reclocker'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
@@ -141,26 +142,8 @@
 						<option value="dionaudio-loco|Dionaudio Loco DAC-AMP" <?php if($this->i2smodule_select === 'dionaudio-loco|Dionaudio Loco DAC-AMP'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP" <?php if($this->i2smodule_select === 'dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio|Fe-Pi Audio Sound Card" <?php if($this->i2smodule_select === 'fe-pi-audio|Fe-Pi Audio Sound Card'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
-						<option value="rpi-dac|Generic AK4399 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4399 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
-						<option value="hifiberry-dac,384k|Generic AK4399 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4399 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
-						<option value="rpi-dac|Generic AK4452 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4452 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 1)</option>
-						<option value="hifiberry-dac,384k|Generic AK4452 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4452 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 2)</option>
-						<option value="rpi-dac|Generic AK449x (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK449x (Alternative 1)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
-						<option value="hifiberry-dac,384k|Generic AK449x (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK449x (Alternative 2)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
-						<option value="i-sabre-k2m|Generic ES9018K2M" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES9018K2M'): ?> selected <?php endif ?>>Generic ES9018K2M</option>
-						<option value="rpi-dac|Generic ES9023" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES9023'): ?> selected <?php endif ?>>Generic ES9023</option>
-						<option value="i-sabre-q2m|Generic ES9028Q2M" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9028Q2M'): ?> selected <?php endif ?>>Generic ES9028Q2M</option>
-						<option value="i-sabre-q2m|Generic ES9038QTM" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9038QTM'): ?> selected <?php endif ?>>Generic ES9038QTM</option>
-						<option value="i-sabre-k2m|Generic ES90x8  (Alternative 1)" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES90x8  (Alternative 1)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 1)</option>
-						<option value="i-sabre-q2m|Generic ES90x8  (Alternative 2)" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES90x8  (Alternative 2)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 2)</option>
-						<option value="rpi-dac|Generic ES90x8  (Alternative 3)" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES90x8  (Alternative 3)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 3)</option>
-						<option value="rpi-dac|Generic PCM1794" <?php if($this->i2smodule_select === 'rpi-dac|Generic PCM1794'): ?> selected <?php endif ?>>Generic PCM1794</option>
-						<option value="hifiberry-dac,384k|Generic PCM510x" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic PCM510x'): ?> selected <?php endif ?>>Generic PCM510x</option>
-						<option value="hifiberry-dacplus|Generic PCM512x" <?php if($this->i2smodule_select === 'hifiberry-dacplus|Generic PCM512x'): ?> selected <?php endif ?>>Generic PCM512x</option>
-						<option value="hifiberry-dac|Generic TDA1387" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1387'): ?> selected <?php endif ?>>Generic TDA1387</option>
-						<option value="hifiberry-dac|Generic TDA1541" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1541'): ?> selected <?php endif ?>>Generic TDA1541</option>
-						<option value="hifiberry-dac|Generic TDA1543" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1543'): ?> selected <?php endif ?>>Generic TDA1543</option>
 						<option value="hifiberry-amp|HiFiBerry Amp" <?php if($this->i2smodule_select === 'hifiberry-amp|HiFiBerry Amp'): ?> selected <?php endif ?>>HiFiBerry Amp</option>
+						<option value="hifiberry-amp|HiFiBerry Amp2" <?php if($this->i2smodule_select === 'hifiberry-amp|HiFiBerry Amp2'): ?> selected <?php endif ?>>HiFiBerry Amp2</option>
 						<option value="hifiberry-dac,384k|HiFiBerry DAC" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|HiFiBerry DAC'): ?> selected <?php endif ?>>HiFiBerry DAC</option>
 						<option value="hifiberry-dacplus|HiFiBerry DAC Plus" <?php if($this->i2smodule_select === 'hifiberry-dacplus|HiFiBerry DAC Plus'): ?> selected <?php endif ?>>HiFiBerry DAC Plus</option>
 						<option value="rpi-dac|HiFiBerry DAC Plus Lite" <?php if($this->i2smodule_select === 'rpi-dac|HiFiBerry DAC Plus Lite'): ?> selected <?php endif ?>>HiFiBerry DAC Plus Lite</option>
@@ -211,6 +194,25 @@
 						<option value="superaudioboard|SuperAudioBoard sound card" <?php if($this->i2smodule_select === 'superaudioboard|SuperAudioBoard sound card'): ?> selected <?php endif ?>>SuperAudioBoard sound card</option>
 						<option value="rpi-dac|X10-DAC BOARD" <?php if($this->i2smodule_select === 'rpi-dac|X10-DAC BOARD'): ?> selected <?php endif ?>>X10-DAC BOARD</option>
 						<option value="hifiberry-dacplus|X400 V3.0 DAC+AMP Expansion Board" <?php if($this->i2smodule_select === 'hifiberry-dacplus|X400 V3.0 DAC+AMP Expansion Board'): ?> selected <?php endif ?>>X400 V3.0 DAC+AMP Expansion Board</option>
+						<option value="rpi-dac|Generic AK4399 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4399 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK4399 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4399 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
+						<option value="rpi-dac|Generic AK4452 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4452 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK4452 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4452 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 2)</option>
+						<option value="rpi-dac|Generic AK449x (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK449x (Alternative 1)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK449x (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK449x (Alternative 2)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
+						<option value="i-sabre-k2m|Generic ES9018" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES9018'): ?> selected <?php endif ?>>Generic ES9018</option>
+						<option value="rpi-dac|Generic ES9023" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES9023'): ?> selected <?php endif ?>>Generic ES9023</option>
+						<option value="i-sabre-q2m|Generic ES9028" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9028'): ?> selected <?php endif ?>>Generic ES9028</option>
+						<option value="i-sabre-q2m|Generic ES9038" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9038'): ?> selected <?php endif ?>>Generic ES9038</option>
+						<option value="i-sabre-k2m|Generic ES90x8  (Alternative 1)" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES90x8  (Alternative 1)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 1)</option>
+						<option value="i-sabre-q2m|Generic ES90x8  (Alternative 2)" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES90x8  (Alternative 2)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 2)</option>
+						<option value="rpi-dac|Generic ES90x8  (Alternative 3)" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES90x8  (Alternative 3)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 3)</option>
+						<option value="rpi-dac|Generic PCM1794" <?php if($this->i2smodule_select === 'rpi-dac|Generic PCM1794'): ?> selected <?php endif ?>>Generic PCM1794</option>
+						<option value="hifiberry-dac,384k|Generic PCM510x" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic PCM510x'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dacplus|Generic PCM512x" <?php if($this->i2smodule_select === 'hifiberry-dacplus|Generic PCM512x'): ?> selected <?php endif ?>>Generic PCM512x</option>
+						<option value="hifiberry-dac|Generic TDA1387" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1387'): ?> selected <?php endif ?>>Generic TDA1387</option>
+						<option value="hifiberry-dac|Generic TDA1541" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1541'): ?> selected <?php endif ?>>Generic TDA1541</option>
+						<option value="hifiberry-dac|Generic TDA1543" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1543'): ?> selected <?php endif ?>>Generic TDA1543</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware.<br>
