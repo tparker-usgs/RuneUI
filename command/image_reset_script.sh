@@ -154,27 +154,27 @@ cp -Rv /srv/http/app/config/defaults/usr/* /usr
 # make appropriate links
 ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
-cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
-cp /var/www/app/config/defaults/timesyncd.conf /etc/systemd/timesyncd.conf
-cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
-cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
-cp /var/www/app/config/defaults/fstab /etc/fstab
-cp /var/www/app/config/defaults/hosts /etc/hosts
-cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
-cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
-cp /var/www/app/config/defaults/bootsplash.service /usr/lib/systemd/system/bootsplash.service
-cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
-cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
-cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
-cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
-cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
-cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
-cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
-cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
-cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
-cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
-cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
-cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
+# cp /var/www/app/config/defaults/spopd.conf /etc/spop/spopd.conf
+# cp /var/www/app/config/defaults/timesyncd.conf /etc/systemd/timesyncd.conf
+# cp /var/www/app/config/defaults/upmpdcli.conf /etc/upmpdcli.conf
+# cp /var/www/app/config/defaults/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+# cp /var/www/app/config/defaults/fstab /etc/fstab
+# cp /var/www/app/config/defaults/hosts /etc/hosts
+# cp /var/www/app/config/defaults/ashuffle.service /usr/lib/systemd/system/ashuffle.service
+# cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service
+# cp /var/www/app/config/defaults/bootsplash.service /usr/lib/systemd/system/bootsplash.service
+# cp /var/www/app/config/defaults/irexec.service /usr/lib/systemd/system/irexec.service
+# cp /var/www/app/config/defaults/local-browser.service /usr/lib/systemd/system/local-browser.service
+# cp /var/www/app/config/defaults/php-fpm.service /usr/lib/systemd/system/php-fpm.service
+# cp /var/www/app/config/defaults/redis.service /usr/lib/systemd/system/redis.service
+# cp /var/www/app/config/defaults/rune_PL_wrk.service /usr/lib/systemd/system/rune_PL_wrk.service
+# cp /var/www/app/config/defaults/rune_SSM_wrk.service /usr/lib/systemd/system/rune_SSM_wrk.service
+# cp /var/www/app/config/defaults/rune_SY_wrk.service /usr/lib/systemd/system/rune_SY_wrk.service
+# cp /var/www/app/config/defaults/shairport-sync.service /usr/lib/systemd/system/shairport-sync.service
+# cp /var/www/app/config/defaults/spopd.service /usr/lib/systemd/system/spopd.service
+# cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
+# cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
+# cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
 #
 # copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
