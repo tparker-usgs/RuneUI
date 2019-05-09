@@ -4,6 +4,7 @@ allo-boss-dac-pcm512x-audio,slave|Allo Boss DAC in slave mode
 allo-digione|Allo DigiOne
 allo-digione|Allo DigiOne Signature
 allo-katana-dac-audio|Allo Katana DAC
+allo-boss-dac-pcm512x-audio|Allo MiniBoss for RPI Zero
 allo-boss-dac-pcm512x-audio|Allo Piano 2.0
 allo-piano-dac-plus-pcm512x-audio|Allo Piano 2.1 DAC Plus
 allo-piano-dac-plus-pcm512x-audio,glb_mclk|Allo Piano 2.1 DAC Plus with Kali Reclocker
@@ -29,26 +30,8 @@ akkordion-iqdacplus|Digital Dreamtime Akkordion
 dionaudio-loco|Dionaudio Loco DAC-AMP
 dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP
 fe-pi-audio|Fe-Pi Audio Sound Card
-rpi-dac|Generic AK4399 (Alternative 1)
-hifiberry-dac,384k|Generic AK4399 (Alternative 2)
-rpi-dac|Generic AK4452 (Alternative 1)
-hifiberry-dac,384k|Generic AK4452 (Alternative 2)
-rpi-dac|Generic AK449x (Alternative 1)
-hifiberry-dac,384k|Generic AK449x (Alternative 2)
-i-sabre-k2m|Generic ES9018K2M
-rpi-dac|Generic ES9023
-i-sabre-q2m|Generic ES9028Q2M
-i-sabre-q2m|Generic ES9038QTM
-i-sabre-k2m|Generic ES90x8  (Alternative 1)
-i-sabre-q2m|Generic ES90x8  (Alternative 2)
-rpi-dac|Generic ES90x8  (Alternative 3)
-rpi-dac|Generic PCM1794
-hifiberry-dac,384k|Generic PCM510x
-hifiberry-dacplus|Generic PCM512x
-hifiberry-dac|Generic TDA1387
-hifiberry-dac|Generic TDA1541
-hifiberry-dac|Generic TDA1543
 hifiberry-amp|HiFiBerry Amp
+hifiberry-amp|HiFiBerry Amp2
 hifiberry-dac,384k|HiFiBerry DAC
 hifiberry-dacplus|HiFiBerry DAC Plus
 rpi-dac|HiFiBerry DAC Plus Lite
@@ -99,3 +82,22 @@ rpi-dac|Sabre DAC  (Alternative 3)
 superaudioboard|SuperAudioBoard sound card
 rpi-dac|X10-DAC BOARD
 hifiberry-dacplus|X400 V3.0 DAC+AMP Expansion Board
+rpi-dac|Generic AK4399 (Alternative 1)
+hifiberry-dac,384k|Generic AK4399 (Alternative 2)
+rpi-dac|Generic AK4452 (Alternative 1)
+hifiberry-dac,384k|Generic AK4452 (Alternative 2)
+rpi-dac|Generic AK449x (Alternative 1)
+hifiberry-dac,384k|Generic AK449x (Alternative 2)
+i-sabre-k2m|Generic ES9018
+rpi-dac|Generic ES9023
+i-sabre-q2m|Generic ES9028
+i-sabre-q2m|Generic ES9038
+i-sabre-k2m|Generic ES90x8  (Alternative 1)
+i-sabre-q2m|Generic ES90x8  (Alternative 2)
+rpi-dac|Generic ES90x8  (Alternative 3)
+rpi-dac|Generic PCM1794
+hifiberry-dac,384k|Generic PCM510x
+hifiberry-dacplus|Generic PCM512x
+hifiberry-dac|Generic TDA1387
+hifiberry-dac|Generic TDA1541
+hifiberry-dac|Generic TDA1543
