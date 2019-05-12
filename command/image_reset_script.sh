@@ -175,10 +175,16 @@ ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 # cp /var/www/app/config/defaults/start_chromium.sh /etc/X11/xinit/start_chromium.sh
 # cp /var/www/app/config/defaults/udevil.service /usr/lib/systemd/system/udevil.service
 # cp /var/www/app/config/defaults/upmpdcli.service /usr/lib/systemd/system/upmpdcli.service
+
 #
 # copy a standard config.txt
 cp /var/www/app/config/defaults/config.txt /boot/config.txt
 cp /var/www/app/config/defaults/cmdline.txt /boot/cmdline.txt
+
+#
+# copy a logo for display in BubbleUpnp via upmpdcli
+cp /srv/http/assets/img/favicon-64x64.png /usr/share/upmpdcli/runeaudio.png
+chgmod 644 /usr/share/upmpdcli/runeaudio.png
 
 #
 # modify all standard .service files which specify the wrong PIDFile location
