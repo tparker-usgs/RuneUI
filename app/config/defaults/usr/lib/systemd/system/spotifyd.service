@@ -1,16 +1,16 @@
 [Unit]
-Description=A spotify playing daemon
+Description=Spotifyd - A spotify playing daemon - Spotify Connect Receiver
 Documentation=https://github.com/Spotifyd/spotifyd
-Wants=sound.target
-After=sound.target
-Wants=network-online.target
-After=network-online.target
+Wants=sound.target network-online.target
+After=sound.target network.target network-online.target avahi-daemon.service
+Requires=avahi-daemon.service
 
 [Service]
-ExecStart=/usr/bin/spotifyd --no-daemon
+ExecStart=/usr/bin/spotifyd --no-daemon -c /etc/spotifyd.conf
+User=spotifyd
+Group=spotifyd
 Restart=always
-RestartSec=12
+RestartSec=5
 
 [Install]
-WantedBy=default.target#
-
+WantedBy=multi-user.target
