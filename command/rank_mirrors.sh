@@ -4,6 +4,7 @@
 
 (( $# == 0 )) && sec=3 || sec=$1
 
+<<<<<<< HEAD
 # rank_mirrors.sh
 # Adapted form Rern's rankmirrors, see: https://github.com/rern/RuneAudio/tree/master/rankmirrors
 # mitigate download errors by enable(uncomment) and 
@@ -11,6 +12,16 @@
 
 
 # timestart 
+=======
+# rankmirrors.sh
+# mitigate download errors by enable(uncomment) and 
+# rank servers in /etc/pacman.d/mirrorlist by download speed
+
+# [[ ! -e /srv/http/addonstitle.sh ]] && wget -q https://github.com/rern/RuneAudio_Addons/raw/master/srv/http/addonstitle.sh -P /srv/http
+# . /srv/http/addonstitle.sh
+
+# timestart
+>>>>>>> 0.5b
 
 (( $# > 0 )) && title -l = $bar Rank Mirror Package Servers ...
 
