@@ -10,7 +10,7 @@
 # rank servers in /etc/pacman.d/mirrorlist by download speed
 
 
-# timestart
+# timestart 
 
 (( $# > 0 )) && title -l = $bar Rank Mirror Package Servers ...
 
