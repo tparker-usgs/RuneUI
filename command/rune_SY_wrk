@@ -228,9 +228,9 @@ if ($playerid_db === '') {
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
 
-	// refresh nics, check redis datastore status - run this while waiting for chrony (see below)
+	// refresh nics, check redis datastore status, check if an active internet connection is available - run this while waiting for chrony (see below)
 	// mostly these commands should do nothing or very little, they are also not essential for the startup sequence
-	sysCmdAsync('/var/www/command/refresh_nics ; /srv/http/db/redis_datastore_setup check');
+	sysCmdAsync('nice --adjustment=1 /var/www/command/refresh_nics ; /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh');
 
 	// if chrony is active call chronyc and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
 	// normally by this point time has been set, if not there is probably no internet connection
@@ -262,7 +262,7 @@ if ($playerid_db === '') {
 			// do nothing
 		} else {
 			// Start and refresh MPD (audio hardware status - soundcards and MPD config)
-			wrk_mpdconf($redis,'refresh');
+			wrk_mpdconf($redis, 'refresh');
 		}
 		unset($retval);
 		// ashuffle gets started automatically
@@ -351,16 +351,43 @@ if ($playerid_db === '') {
 	}
 	// start shairport-sync
 	if ($redis->hGet('airplay', 'enable')) {
-		runelog("service: SHAIRPORT start",'');
+		runelog('service: SHAIRPORT-SYNC start','');
 		// create a directory to use for airplay metadata artwork
 		// the location /srv/http/tmp is a tmpfs, see /etc/fstab
-		// TO-DO: use the airplay redis variables to determine the metadata artwork directory
 		sysCmd('mkdir -p /srv/http/tmp/airplay');
 		sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
 		sysCmd('chown -R http.http /srv/http/tmp');
-		sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-default.png');
+		sysCmd('chmod 755 /srv/http/tmp/airplay');
+		sysCmd('chmod -R 644 /srv/http/tmp/airplay/*');
 		// start shairport-sync if it is not already started
 		sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
+	}
+	// start spotifyd
+	if ($redis->hGet('spotifyconnect', 'enable')) {
+		runelog('service: SPOTIFYD start','');
+		// create a directory to use for spotifyd artwork
+		// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+		sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
+		sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
+		sysCmd('chown -R http.http /srv/http/tmp');
+		sysCmd('chmod 755 /srv/http/tmp/spotify-connect');
+		sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect/*');
+		// create a directory to use for spotifyd cache
+		// the location /tmp is a tmpfs, see /etc/fstab
+		// default location is '/tmp/spotifyConnectCache'
+		$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
+		if (!empty($spotifyConnectCache)) {
+			sysCmd('mkdir -p '.$spotifyConnectCache);
+			sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+			sysCmd('chmod 755 '.$spotifyConnectCache);
+			sysCmd('chmod -R 644 '.$spotifyConnectCache.'/*');
+		}
+		// start spotifyd if it is not already started
+		sysCmd('pgrep -x spotifyd || systemctl start spotifyd');
+		$redis->hSet('spotifyconnect', 'track_id', '');
+		$redis->hSet('spotifyconnect', 'last_track_id', '');
+		$redis->hSet('spotifyconnect', 'event_time_stamp', 0);
+		$redis->hSet('spotifyconnect', 'last_time_stamp', 0);
 	}
 	// start udevil
 	if ($redis->get('udevil') === '1') {
@@ -414,7 +441,7 @@ if ($playerid_db === '') {
 	// close startup Redis connection
 	$redis->close();
 	// reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
-	sysCmdAsync('/var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+	sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
 	runelog('--- NORMAL STARTUP');
 	// --- NORMAL STARTUP //
 }
@@ -461,8 +488,8 @@ while (1) {
                         wrk_shairport($redis, $redis->get('ao'), $redis->hGet('airplay', 'name'));
                         $restart = 1;
                     }
-                    // start shairport
                     if ($job->action === 'start') {
+						// start shairport-sync
                         runelog('service: SHAIRPORT start');
 						// create a directory to use for airplay metadata artwork
 						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
@@ -479,18 +506,37 @@ while (1) {
                         }
                         $redis->hSet('airplay', 'enable', 1);
                         // send notfy to UI
-                        ui_notify_async('AirPlay', 'AirPlay feature enabled', $jobID);
-                    }
-                    // stop shairport
-                    if ($job->action === 'stop') {
+                        ui_notify('AirPlay', 'AirPlay feature enabled', $jobID);
+                    } elseif ($job->action === 'stop') {
+						// stop shairport-sync
                         runelog('service: SHAIRPORT stop');
                         sysCmd('systemctl stop shairport-sync');
                         $redis->hSet('airplay', 'enable', 0);
                         // send notfy to UI
-                        ui_notify_async('AirPlay', 'AirPlay feature disabled', $jobID);
+                        ui_notify('AirPlay', 'AirPlay feature disabled', $jobID);
                     }
                     $redis->sRem('w_lock', $jobID);
                     break;
+				case 'airplaytoggle':
+					runelog('wrk_SY: ', $job->wrkcmd);
+					if ($job->action === 'start') {
+						// switch the player to airplay
+						wrk_startPlayer($redis, 'Airplay');
+						// start rune_SSM_wrk if metadata is enabled
+						if ($redis->hGet('airplay', 'metadata_enabled') == 'yes') {
+							sysCmd('systemctl start rune_SSM_wrk');
+							sleep(2);
+							sysCmd('renice 3 $(pgrep -w rune_SSM_wrk) || renice 3 $(pgrep -w rune_SSM_wrk)');
+						}
+					} elseif ($job->action === 'stop') {
+						// switch the player from airplay
+						wrk_stopPlayer($redis, 'Airplay');
+						// stop rune_SSM_wrk
+						sysCmd('systemctl stop rune_SSM_wrk');
+					}
+                    $redis->sAdd('w_lock', $jobID);
+                    $redis->sRem('w_lock', $jobID);
+					break;
                 case 'xorgserver':
 					runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -536,19 +582,8 @@ while (1) {
 							ui_notify('Local browser', 'Display zoom factor invalid: '.$job->args.' Enter a value between 0.1 and 10');
 							sleep(3);
 						}
-					} else if ($job->action === 'localSStime') {
-						// localSStime
-						// save localSStime
-						$redis->set('localSStime', $job->args);
-						// retart local browser if enabled
-						if ($redis->hGet('local_browser', 'enable')) {
-							sysCmd('systemctl stop local-browser');
-							sysCmd('systemctl daemon-reload');
-							sysCmd('systemctl start local-browser');
-							sysCmd('/srv/http/command/rune_prio nice');
-						}
 					} else {
-						// rotate or mouse_cursor
+						// localSStime, rotate, mouse_cursor or smallScreenSaver
 						// save the local browser rotate or mouse_cursor values
 						$redis->hSet('local_browser', $job->action, $job->args);
 						// set the parameter file
@@ -914,14 +949,6 @@ while (1) {
                 case 'airplaymetadata':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-					// start or stop rune_SSM_wrk
-					if ($job->action == 'start') {
-						sysCmd('systemctl start rune_SSM_wrk');
-						sleep(2);
-						sysCmd('renice 3 $(pgrep -w rune_SSM_wrk) || renice 3 $(pgrep -w rune_SSM_wrk)');
-					} else if ($job->action == 'stop') {
-						sysCmd('systemctl stop rune_SSM_wrk');
-					}
                     $redis->sRem('w_lock', $jobID);
                     break;
 				case 'sambaonoff':
@@ -1276,6 +1303,94 @@ while (1) {
                     }
                     $redis->sRem('w_lock', $jobID);
                     break;
+                case 'spotifyconnect':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    if ($job->action === 'start') {
+						// create a directory to use for spotifyd artwork
+						// the location /srv/http/tmp is a tmpfs, see /etc/fstab
+						sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
+						sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
+						sysCmd('chown -R http.http /srv/http/tmp');
+						sysCmd('chmod 755 /srv/http/tmp/spotify-connect');
+						sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect/*');
+						// create a directory to use for spotifyd cache
+						// the location /tmp is a tmpfs, see /etc/fstab
+						// default location is '/tmp/spotifyConnectCache'
+						$spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
+						if (!empty($spotifyConnectCache)) {
+							sysCmd('mkdir -p '.$spotifyConnectCache);
+							sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
+							sysCmd('chmod 755 '.$spotifyConnectCache);
+							sysCmd('chmod -R 644 '.$spotifyConnectCache.'/*');
+						}
+						$redis->hSet('spotifyconnect', 'track_id', '');
+						$redis->hSet('spotifyconnect', 'last_track_id', '');
+						$redis->hSet('spotifyconnect', 'event_time_stamp', 0);
+						$redis->hSet('spotifyconnect', 'last_time_stamp', 0);
+					}
+					// write Spotify Connect data to Redis datastore
+					isset($job->args->username) && $redis->hSet('spotifyconnect', 'username', $job->args->username);
+					isset($job->args->password) && $redis->hSet('spotifyconnect', 'password', $job->args->password);
+					isset($job->args->device_name) && $redis->hSet('spotifyconnect', 'device_name', $job->args->device_name);
+					isset($job->args->bitrate) && $redis->hSet('spotifyconnect', 'bitrate', $job->args->bitrate);
+					isset($job->args->volume_normalisation) && $redis->hSet('spotifyconnect', 'volume_normalisation', $job->args->volume_normalisation); 
+					isset($job->args->normalisation_pregain) && $redis->hSet('spotifyconnect', 'normalisation_pregain', $job->args->normalisation_pregain);
+					isset($job->args->timeout) && $redis->hSet('spotifyconnect', 'timeout', $job->args->timeout);
+					isset($job->args->enable) && $redis->hSet('spotifyconnect', 'enable', $job->args->enable);
+					// isset($job->args->status) && $redis->hSet('spotifyconnect', 'event', $job->args->status);
+					// isset($job->args->ao) && $redis->hSet('spotifyconnect', 'ao', $job->args->ao);
+					isset($job->args->metadata_enabled) && $redis->hSet('spotifyconnect', 'metadata_enabled', $job->args->metadata_enabled);
+					// isset($job->args->backend) && $redis->hSet('spotifyconnect', 'backend', $job->args->backend);
+					// isset($job->args->device) && $redis->hSet('spotifyconnect', 'device', $job->args->device);
+					// isset($job->args->mixer) && $redis->hSet('spotifyconnect', 'mixer', $job->args->mixer);
+					// isset($job->args->volume_control) && $redis->hSet('spotifyconnect', 'volume_control', $job->args->volume_control);
+					// isset($job->args->onevent) && $redis->hSet('spotifyconnect', 'onevent', $job->args->onevent);
+					// isset($job->args->cache_path) && $redis->hSet('spotifyconnect', 'cache_path', $job->args->cache_path);
+					// isset($job->args->track_id) && $redis->hSet('spotifyconnect', 'track_id', $job->args->track_id);
+					// isset($job->args->last_track_id) && $redis->hSet('spotifyconnect', 'last_track_id', $job->args->last_track_id);
+					// isset($job->args->event_time_stamp) && $redis->hSet('spotifyconnect', 'event_time_stamp', $job->args->event_time_stamp);
+					// isset($job->args->last_time_stamp) && $redis->hSet('spotifyconnect', 'last_time_stamp', $job->args->last_time_stamp);
+					// create a new spotifyd config file
+					wrk_spotifyd($redis);
+					// stop and/or start spotifyd
+                    if ($job->action === 'start') {
+                        runelog('service: SPOTIFYD start');
+                        // start or re-start spotifyd service
+                        // send notfy to UI
+                        ui_notify('Spotify Connect', 'Spotify Connect client configured', $jobID);
+                        sysCmd('pgrep spotifyd || systemctl start spotifyd');
+                        $redis->hSet('spotifyconnect', 'track_id', '');
+						$redis->hSet('spotifyconnect', 'last_track_id', '');
+						$redis->hSet('spotifyconnect', 'event_time_stamp', 0);
+						$redis->hSet('spotifyconnect', 'last_time_stamp', 0);
+                        $redis->hSet('spotifyconnect', 'enable',  1);
+                    } elseif ($job->action === 'stop') {
+                        runelog('service: SPOTIFYD stop');
+                        // send notfy to UI
+                        ui_notify('Spotify Connect', 'Spotify Connect client stopped', $jobID);
+                        sysCmd('pgrep spotifyd && systemctl stop spotifyd');
+						$redis->hSet('spotifyconnect', 'track_id', '');
+						$redis->hSet('spotifyconnect', 'last_track_id', '');
+						$redis->hSet('spotifyconnect', 'event_time_stamp', 0);
+						$redis->hSet('spotifyconnect', 'last_time_stamp', 0);
+                        $redis->hSet('spotifyconnect', 'enable',  0);
+                    }
+					wrk_stopPlayer($redis, 'SpotifyConnect');
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+				case 'spotifyconnectmsg':
+					runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+					// switch the player to spotify connect
+					// connect signals: stop, play: start, next track: change, stop: stop
+					wrk_startPlayer($redis, 'SpotifyConnect');
+					// process metadata if enabled
+					if ($redis->hGet('spotifyconnect', 'metadata_enabled')) {
+						wrk_SpotifyConnectMetadata($redis, $job->action, $job->args);
+					}
+                    $redis->sRem('w_lock', $jobID);
+					break;
                 case 'sourcecfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -1285,7 +1400,7 @@ while (1) {
                 case 'switchplayer':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    if (wrk_switchplayer($redis, $job->args)) {
+                    if (wrk_startPlayer($redis, $job->args)) {
                         ui_notify_async('Switch Player Engine', 'Current active player engine: '.$job->args, $jobID);
                     }
                     $redis->sRem('w_lock', $jobID);
@@ -1504,21 +1619,27 @@ while (1) {
 			if ($retval[0] == 'active') {
 				// ashuffle already started
 				unset($retval);
-				if (($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) {
-					// nothing to play so stop ashuffle
+				if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD')) {
+					// nothing to play or active player is not MPD, so stop ashuffle
 					sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
 				}
 			} else {
 				// ashuffle not started
-				if (($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) {
-					// nothing to play, do nothing
+				if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD'))  {
+					// nothing to play, MPD not active, do nothing
 				} else {
 					// seems to be a bug somewhere in MPD
 					// if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
 					// wait until mpd has been running for a while before starting ashuffle
 					$retval = sysCmd('ps -C mpd -o etimes=');
-					$mpd_uptime = trim($retval[0]);
-					if (intval($mpd_uptime) > intval($redis->get('ashuffle_start_delay'))) {
+					if (isset($retval[0])) {
+						// a value has been returned
+						$mpd_uptime = intval(trim($retval[0]));
+					} else {
+						// no value, MPD is probably not running
+						$mpd_uptime = 0;
+					}
+					if ($mpd_uptime > intval($redis->get('ashuffle_start_delay'))) {
 						sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
 						sysCmdAsync('/srv/http/command/rune_prio nice');
 					}

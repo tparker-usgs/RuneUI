@@ -67,7 +67,8 @@
                         <label class="control-label col-sm-2" for="proxy-pass">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="proxy_pass" name="features[proxy][pass]" value="<?php echo $this->proxy['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)</span>
+                            <span class="help-block">Insert your HTTP Proxy <i>password</i> (case sensitive) (leave blank for anonymous authentication)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -114,35 +115,35 @@
 						<option value="allo-boss-dac-pcm512x-audio,slave|Allo Boss DAC in slave mode" <?php if($this->i2smodule_select === 'allo-boss-dac-pcm512x-audio,slave|Allo Boss DAC in slave mode'): ?> selected <?php endif ?>>Allo Boss DAC in slave mode</option>
 						<option value="allo-digione|Allo DigiOne" <?php if($this->i2smodule_select === 'allo-digione|Allo DigiOne'): ?> selected <?php endif ?>>Allo DigiOne</option>
 						<option value="allo-digione|Allo DigiOne Signature" <?php if($this->i2smodule_select === 'allo-digione|Allo DigiOne Signature'): ?> selected <?php endif ?>>Allo DigiOne Signature</option>
+						<option value="allo-katana-dac-audio|Allo Katana DAC" <?php if($this->i2smodule_select === 'allo-katana-dac-audio|Allo Katana DAC'): ?> selected <?php endif ?>>Allo Katana DAC</option>
+						<option value="allo-boss-dac-pcm512x-audio|Allo MiniBoss for RPI Zero" <?php if($this->i2smodule_select === 'allo-boss-dac-pcm512x-audio|Allo MiniBoss for RPI Zero'): ?> selected <?php endif ?>>Allo MiniBoss for RPI Zero</option>
 						<option value="allo-boss-dac-pcm512x-audio|Allo Piano 2.0" <?php if($this->i2smodule_select === 'allo-boss-dac-pcm512x-audio|Allo Piano 2.0'): ?> selected <?php endif ?>>Allo Piano 2.0</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio|Allo Piano 2.1 DAC Plus" <?php if($this->i2smodule_select === 'allo-piano-dac-plus-pcm512x-audio|Allo Piano 2.1 DAC Plus'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus</option>
 						<option value="allo-piano-dac-plus-pcm512x-audio,glb_mclk|Allo Piano 2.1 DAC Plus with Kali Reclocker" <?php if($this->i2smodule_select === 'allo-piano-dac-plus-pcm512x-audio,glb_mclk|Allo Piano 2.1 DAC Plus with Kali Reclocker'): ?> selected <?php endif ?>>Allo Piano 2.1 DAC Plus with Kali Reclocker</option>
 						<option value="allo-piano-dac-pcm512x-audio|Allo Piano DAC" <?php if($this->i2smodule_select === 'allo-piano-dac-pcm512x-audio|Allo Piano DAC'): ?> selected <?php endif ?>>Allo Piano DAC</option>
-						<option value="rpi-dac|AOIDE DAC II ESS ES9018K2M I2S DAC" <?php if($this->i2smodule_select === 'rpi-dac|AOIDE DAC II ESS ES9018K2M I2S DAC'): ?> selected <?php endif ?>>AOIDE DAC II ESS ES9018K2M I2S DAC</option>
+						<option value="i-sabre-k2m|AOIDE DAC II ESS ES9018K2M I2S DAC" <?php if($this->i2smodule_select === 'i-sabre-k2m|AOIDE DAC II ESS ES9018K2M I2S DAC'): ?> selected <?php endif ?>>AOIDE DAC II ESS ES9018K2M I2S DAC</option>
+						<option value="applepi-dac|Apple PecanPi DAC" <?php if($this->i2smodule_select === 'applepi-dac|Apple PecanPi DAC'): ?> selected <?php endif ?>>Apple PecanPi DAC</option>
 						<option value="applepi-dac|Apple Pi DAC" <?php if($this->i2smodule_select === 'applepi-dac|Apple Pi DAC'): ?> selected <?php endif ?>>Apple Pi DAC</option>
+						<option value="audioinjector-ultra|Audio Injector Ultra 2 sound card" <?php if($this->i2smodule_select === 'audioinjector-ultra|Audio Injector Ultra 2 sound card'): ?> selected <?php endif ?>>Audio Injector Ultra 2 sound card</option>
 						<option value="audioinjector-addons|Audioinjector Addons" <?php if($this->i2smodule_select === 'audioinjector-addons|Audioinjector Addons'): ?> selected <?php endif ?>>Audioinjector Addons</option>
 						<option value="audioinjector-addons|Audioinjector Octo soundcard" <?php if($this->i2smodule_select === 'audioinjector-addons|Audioinjector Octo soundcard'): ?> selected <?php endif ?>>Audioinjector Octo soundcard</option>
 						<option value="audioinjector-wm8731-audio|Audioinjector Stereo soundcard" <?php if($this->i2smodule_select === 'audioinjector-wm8731-audio|Audioinjector Stereo soundcard'): ?> selected <?php endif ?>>Audioinjector Stereo soundcard</option>
 						<option value="audioinjector-wm8731-audio|Audioinjector WM8731 Audio" <?php if($this->i2smodule_select === 'audioinjector-wm8731-audio|Audioinjector WM8731 Audio'): ?> selected <?php endif ?>>Audioinjector WM8731 Audio</option>
 						<option value="audioinjector-wm8731-audio|Audioinjector Zero soundcard" <?php if($this->i2smodule_select === 'audioinjector-wm8731-audio|Audioinjector Zero soundcard'): ?> selected <?php endif ?>>Audioinjector Zero soundcard</option>
+						<option value="i-sabre-k2m|AUDIOPHONICS I-Sabre DAC ES9018K2M" <?php if($this->i2smodule_select === 'i-sabre-k2m|AUDIOPHONICS I-Sabre DAC ES9018K2M'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9018K2M</option>
 						<option value="rpi-dac|AUDIOPHONICS I-Sabre DAC ES9023" <?php if($this->i2smodule_select === 'rpi-dac|AUDIOPHONICS I-Sabre DAC ES9023'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023</option>
 						<option value="rpi-dac|AUDIOPHONICS I-Sabre DAC ES9023 / AMP" <?php if($this->i2smodule_select === 'rpi-dac|AUDIOPHONICS I-Sabre DAC ES9023 / AMP'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9023 / AMP</option>
-						<option value="rpi-dac|AUDIOPHONICS I-Sabre DAC ES9028Q2M" <?php if($this->i2smodule_select === 'rpi-dac|AUDIOPHONICS I-Sabre DAC ES9028Q2M'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
-						<option value="rpi-dac|AUDIOPHONICS I-Sabre DAC ES9038Q2M" <?php if($this->i2smodule_select === 'rpi-dac|AUDIOPHONICS I-Sabre DAC ES9038Q2M'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
+						<option value="i-sabre-q2m|AUDIOPHONICS I-Sabre DAC ES9028Q2M" <?php if($this->i2smodule_select === 'i-sabre-q2m|AUDIOPHONICS I-Sabre DAC ES9028Q2M'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9028Q2M</option>
+						<option value="i-sabre-q2m|AUDIOPHONICS I-Sabre DAC ES9038Q2M" <?php if($this->i2smodule_select === 'i-sabre-q2m|AUDIOPHONICS I-Sabre DAC ES9038Q2M'): ?> selected <?php endif ?>>AUDIOPHONICS I-Sabre DAC ES9038Q2M</option>
+						<option value="hifiberry-dac|AUDIOPHONICS I-TDA1387 TCXO DAC" <?php if($this->i2smodule_select === 'hifiberry-dac|AUDIOPHONICS I-TDA1387 TCXO DAC'): ?> selected <?php endif ?>>AUDIOPHONICS I-TDA1387 TCXO DAC</option>
+						<option value="audiosense-pi|AudioSense-Pi add-on soundcard" <?php if($this->i2smodule_select === 'audiosense-pi|AudioSense-Pi add-on soundcard'): ?> selected <?php endif ?>>AudioSense-Pi add-on soundcard</option>
+						<option value="pisound|Blokas Labs pisound card" <?php if($this->i2smodule_select === 'pisound|Blokas Labs pisound card'): ?> selected <?php endif ?>>Blokas Labs pisound card</option>
 						<option value="akkordion-iqdacplus|Digital Dreamtime Akkordion" <?php if($this->i2smodule_select === 'akkordion-iqdacplus|Digital Dreamtime Akkordion'): ?> selected <?php endif ?>>Digital Dreamtime Akkordion</option>
 						<option value="dionaudio-loco|Dionaudio Loco DAC-AMP" <?php if($this->i2smodule_select === 'dionaudio-loco|Dionaudio Loco DAC-AMP'): ?> selected <?php endif ?>>Dionaudio Loco DAC-AMP</option>
 						<option value="dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP" <?php if($this->i2smodule_select === 'dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP'): ?> selected <?php endif ?>>Dionaudio Loco V2 DAC-AMP</option>
 						<option value="fe-pi-audio|Fe-Pi Audio Sound Card" <?php if($this->i2smodule_select === 'fe-pi-audio|Fe-Pi Audio Sound Card'): ?> selected <?php endif ?>>Fe-Pi Audio Sound Card</option>
-						<option value="rpi-dac|Generic AK4399 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4399 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
-						<option value="hifiberry-dac,384k|Generic AK4399 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4399 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
-						<option value="rpi-dac|Generic AK449x (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK449x (Alternative 1)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
-						<option value="hifiberry-dac,384k|Generic AK449x (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK449x (Alternative 2)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
-						<option value="rpi-dac|Generic ES9023" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES9023'): ?> selected <?php endif ?>>Generic ES9023</option>
-						<option value="rpi-dac|Generic ES90x8" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES90x8'): ?> selected <?php endif ?>>Generic ES90x8</option>
-						<option value="rpi-dac|Generic PCM1794" <?php if($this->i2smodule_select === 'rpi-dac|Generic PCM1794'): ?> selected <?php endif ?>>Generic PCM1794</option>
-						<option value="hifiberry-dac,384k|Generic PCM510x" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic PCM510x'): ?> selected <?php endif ?>>Generic PCM510x</option>
-						<option value="hifiberry-dacplus|Generic PCM512x" <?php if($this->i2smodule_select === 'hifiberry-dacplus|Generic PCM512x'): ?> selected <?php endif ?>>Generic PCM512x</option>
 						<option value="hifiberry-amp|HiFiBerry Amp" <?php if($this->i2smodule_select === 'hifiberry-amp|HiFiBerry Amp'): ?> selected <?php endif ?>>HiFiBerry Amp</option>
+						<option value="hifiberry-amp|HiFiBerry Amp2" <?php if($this->i2smodule_select === 'hifiberry-amp|HiFiBerry Amp2'): ?> selected <?php endif ?>>HiFiBerry Amp2</option>
 						<option value="hifiberry-dac,384k|HiFiBerry DAC" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|HiFiBerry DAC'): ?> selected <?php endif ?>>HiFiBerry DAC</option>
 						<option value="hifiberry-dacplus|HiFiBerry DAC Plus" <?php if($this->i2smodule_select === 'hifiberry-dacplus|HiFiBerry DAC Plus'): ?> selected <?php endif ?>>HiFiBerry DAC Plus</option>
 						<option value="rpi-dac|HiFiBerry DAC Plus Lite" <?php if($this->i2smodule_select === 'rpi-dac|HiFiBerry DAC Plus Lite'): ?> selected <?php endif ?>>HiFiBerry DAC Plus Lite</option>
@@ -151,10 +152,12 @@
 						<option value="hifiberry-dacplus|HiFiBerry DAC Plus RTC" <?php if($this->i2smodule_select === 'hifiberry-dacplus|HiFiBerry DAC Plus RTC'): ?> selected <?php endif ?>>HiFiBerry DAC Plus RTC</option>
 						<option value="hifiberry-dacplus|HiFiBerry DAC Plus Standard" <?php if($this->i2smodule_select === 'hifiberry-dacplus|HiFiBerry DAC Plus Standard'): ?> selected <?php endif ?>>HiFiBerry DAC Plus Standard</option>
 						<option value="hifiberry-dac,384k|HiFiBerry DAC Plus Zero" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|HiFiBerry DAC Plus Zero'): ?> selected <?php endif ?>>HiFiBerry DAC Plus Zero</option>
+						<option value="hifiberry-dacplusadc|HiFiBerry DAC Plus ADC" <?php if($this->i2smodule_select === 'hifiberry-dacplusadc|HiFiBerry DAC Plus ADC'): ?> selected <?php endif ?>>HiFiBerry DAC Plus ADC</option>
 						<option value="hifiberry-digi|HiFiBerry Digi" <?php if($this->i2smodule_select === 'hifiberry-digi|HiFiBerry Digi'): ?> selected <?php endif ?>>HiFiBerry Digi</option>
 						<option value="hifiberry-digi|HiFiBerry Digi Plus" <?php if($this->i2smodule_select === 'hifiberry-digi|HiFiBerry Digi Plus'): ?> selected <?php endif ?>>HiFiBerry Digi Plus</option>
 						<option value="hifiberry-digi-pro|HiFiBerry Digi Plus Pro" <?php if($this->i2smodule_select === 'hifiberry-digi-pro|HiFiBerry Digi Plus Pro'): ?> selected <?php endif ?>>HiFiBerry Digi Plus Pro</option>
 						<option value="hifiberry-digi-pro|HiFiBerry Digi Pro" <?php if($this->i2smodule_select === 'hifiberry-digi-pro|HiFiBerry Digi Pro'): ?> selected <?php endif ?>>HiFiBerry Digi Pro</option>
+						<option value="hifiberry-dacplus|Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122" <?php if($this->i2smodule_select === 'hifiberry-dacplus|Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122'): ?> selected <?php endif ?>>Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122</option>
 						<option value="iqaudio-dacplus|IQaudIO Amp" <?php if($this->i2smodule_select === 'iqaudio-dacplus|IQaudIO Amp'): ?> selected <?php endif ?>>IQaudIO Amp</option>
 						<option value="iqaudio-dacplus,auto_mute_amp|IQaudIO Amp - with auto mute" <?php if($this->i2smodule_select === 'iqaudio-dacplus,auto_mute_amp|IQaudIO Amp - with auto mute'): ?> selected <?php endif ?>>IQaudIO Amp - with auto mute</option>
 						<option value="iqaudio-dacplus,unmute_amp|IQaudIO Amp - with unmute" <?php if($this->i2smodule_select === 'iqaudio-dacplus,unmute_amp|IQaudIO Amp - with unmute'): ?> selected <?php endif ?>>IQaudIO Amp - with unmute</option>
@@ -179,14 +182,37 @@
 						<option value="hifiberry-dacplus|NanoSound – HiFi DAC Pro" <?php if($this->i2smodule_select === 'hifiberry-dacplus|NanoSound – HiFi DAC Pro'): ?> selected <?php endif ?>>NanoSound – HiFi DAC Pro</option>
 						<option value="hifiberry-dac,384k|pHAT DAC for Raspberry Pi Zero" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|pHAT DAC for Raspberry Pi Zero'): ?> selected <?php endif ?>>pHAT DAC for Raspberry Pi Zero</option>
 						<option value="hifiberry-dacplus|PiFi DAC Plus" <?php if($this->i2smodule_select === 'hifiberry-dacplus|PiFi DAC Plus'): ?> selected <?php endif ?>>PiFi DAC Plus</option>
-						<option value="raspidac3|RaspiDAC3" <?php if($this->i2smodule_select === 'raspidac3|RaspiDAC3'): ?> selected <?php endif ?>>RaspiDAC3</option>
+						<option value="hifiberry-dacplus|RaspiDAC3" <?php if($this->i2smodule_select === 'hifiberry-dacplus|RaspiDAC3'): ?> selected <?php endif ?>>RaspiDAC3</option>
 						<option value="hifiberry-dacplus|RaspyPlay4" <?php if($this->i2smodule_select === 'hifiberry-dacplus|RaspyPlay4'): ?> selected <?php endif ?>>RaspyPlay4</option>
 						<option value="rra-digidac1-wm8741-audio|Red Rocks Audio DigiDAC1 soundcard" <?php if($this->i2smodule_select === 'rra-digidac1-wm8741-audio|Red Rocks Audio DigiDAC1 soundcard'): ?> selected <?php endif ?>>Red Rocks Audio DigiDAC1 soundcard</option>
 						<option value="rpi-cirrus-wm5102|RPi Cirrus WM5102" <?php if($this->i2smodule_select === 'rpi-cirrus-wm5102|RPi Cirrus WM5102'): ?> selected <?php endif ?>>RPi Cirrus WM5102</option>
 						<option value="rpi-dac|RPi DAC" <?php if($this->i2smodule_select === 'rpi-dac|RPi DAC'): ?> selected <?php endif ?>>RPi DAC</option>
-						<option value="rpi-dac|Sabre DAC (all models)" <?php if($this->i2smodule_select === 'rpi-dac|Sabre DAC (all models)'): ?> selected <?php endif ?>>Sabre DAC (all models)</option>
+						<option value="rpi-proto|RPi Proto audio card" <?php if($this->i2smodule_select === 'rpi-proto|RPi Proto audio card'): ?> selected <?php endif ?>>RPi Proto audio card</option>
+						<option value="i-sabre-k2m|Sabre DAC  (Alternative 1)" <?php if($this->i2smodule_select === 'i-sabre-k2m|Sabre DAC  (Alternative 1)'): ?> selected <?php endif ?>>Sabre DAC  (Alternative 1)</option>
+						<option value="i-sabre-q2m|Sabre DAC  (Alternative 2)" <?php if($this->i2smodule_select === 'i-sabre-q2m|Sabre DAC  (Alternative 2)'): ?> selected <?php endif ?>>Sabre DAC  (Alternative 2)</option>
+						<option value="rpi-dac|Sabre DAC  (Alternative 3)" <?php if($this->i2smodule_select === 'rpi-dac|Sabre DAC  (Alternative 3)'): ?> selected <?php endif ?>>Sabre DAC  (Alternative 3)</option>
+						<option value="superaudioboard|SuperAudioBoard sound card" <?php if($this->i2smodule_select === 'superaudioboard|SuperAudioBoard sound card'): ?> selected <?php endif ?>>SuperAudioBoard sound card</option>
 						<option value="rpi-dac|X10-DAC BOARD" <?php if($this->i2smodule_select === 'rpi-dac|X10-DAC BOARD'): ?> selected <?php endif ?>>X10-DAC BOARD</option>
 						<option value="hifiberry-dacplus|X400 V3.0 DAC+AMP Expansion Board" <?php if($this->i2smodule_select === 'hifiberry-dacplus|X400 V3.0 DAC+AMP Expansion Board'): ?> selected <?php endif ?>>X400 V3.0 DAC+AMP Expansion Board</option>
+						<option value="rpi-dac|Generic AK4399 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4399 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK4399 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4399 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4399 (Alternative 2)</option>
+						<option value="rpi-dac|Generic AK4452 (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK4452 (Alternative 1)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK4452 (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK4452 (Alternative 2)'): ?> selected <?php endif ?>>Generic AK4452 (Alternative 2)</option>
+						<option value="rpi-dac|Generic AK449x (Alternative 1)" <?php if($this->i2smodule_select === 'rpi-dac|Generic AK449x (Alternative 1)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 1)</option>
+						<option value="hifiberry-dac,384k|Generic AK449x (Alternative 2)" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic AK449x (Alternative 2)'): ?> selected <?php endif ?>>Generic AK449x (Alternative 2)</option>
+						<option value="i-sabre-k2m|Generic ES9018" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES9018'): ?> selected <?php endif ?>>Generic ES9018</option>
+						<option value="rpi-dac|Generic ES9023" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES9023'): ?> selected <?php endif ?>>Generic ES9023</option>
+						<option value="i-sabre-q2m|Generic ES9028" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9028'): ?> selected <?php endif ?>>Generic ES9028</option>
+						<option value="i-sabre-q2m|Generic ES9038" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES9038'): ?> selected <?php endif ?>>Generic ES9038</option>
+						<option value="i-sabre-k2m|Generic ES90x8  (Alternative 1)" <?php if($this->i2smodule_select === 'i-sabre-k2m|Generic ES90x8  (Alternative 1)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 1)</option>
+						<option value="i-sabre-q2m|Generic ES90x8  (Alternative 2)" <?php if($this->i2smodule_select === 'i-sabre-q2m|Generic ES90x8  (Alternative 2)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 2)</option>
+						<option value="rpi-dac|Generic ES90x8  (Alternative 3)" <?php if($this->i2smodule_select === 'rpi-dac|Generic ES90x8  (Alternative 3)'): ?> selected <?php endif ?>>Generic ES90x8  (Alternative 3)</option>
+						<option value="rpi-dac|Generic PCM1794" <?php if($this->i2smodule_select === 'rpi-dac|Generic PCM1794'): ?> selected <?php endif ?>>Generic PCM1794</option>
+						<option value="hifiberry-dac,384k|Generic PCM510x" <?php if($this->i2smodule_select === 'hifiberry-dac,384k|Generic PCM510x'): ?> selected <?php endif ?>>Generic PCM510x</option>
+						<option value="hifiberry-dacplus|Generic PCM512x" <?php if($this->i2smodule_select === 'hifiberry-dacplus|Generic PCM512x'): ?> selected <?php endif ?>>Generic PCM512x</option>
+						<option value="hifiberry-dac|Generic TDA1387" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1387'): ?> selected <?php endif ?>>Generic TDA1387</option>
+						<option value="hifiberry-dac|Generic TDA1541" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1541'): ?> selected <?php endif ?>>Generic TDA1541</option>
+						<option value="hifiberry-dac|Generic TDA1543" <?php if($this->i2smodule_select === 'hifiberry-dac|Generic TDA1543'): ?> selected <?php endif ?>>Generic TDA1543</option>
                     </select>
 					<input class="form-control input-lg" type="text" id="overlay" name="overlay" value="<?php echo $this->i2smodule; ?>" disabled autocomplete="off">
                     <span class="help-block">Enable I&#178;S output selecting one of the available drivers, specific for each hardware.<br>
@@ -319,7 +345,8 @@
                         <label class="control-label col-sm-2" for="spotify-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="spotify_pass" name="features[spotify][pass]" value="<?php echo $this->spotify['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>
@@ -351,6 +378,79 @@
 							</label>
                             <span class="help-block">When ON: a UPnP / DLNA broadcast will clear the MPD queue and then add and play the song, clearing the queue with each successive song<br>
 							When OFF: UPnP / DLNA will add songs of the MPD queue (before the current play position) but MPD will continue to play the current song</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div <?php if($this->spotifyconnect['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="spotifyconnectBox">
+                <div class="form-group">
+                    <label for="spotifyconnect" class="control-label col-sm-2">Spotify Connect</label>
+                    <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input id="spotifyconnect" name="features[spotifyconnect][enable]" type="checkbox" value="1"<?php if($this->spotifyconnect['enable'] === '1'): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled readonly<?php endif; ?>>
+                            <?php if($this->activePlayer === 'SpotifyConnect'): ?><input id="spotifyconnect" name="features[spotifyconnect][enable]" type="hidden" value="1"><?php endif; ?>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled<?php endif; ?>"></a>
+                        </label>
+                        <span class="help-block">Enable Spotify Connect steaming client. You must have a <strong><a href="https://www.spotifyconnect.com/premium/" target="_blank">Spotify PREMIUM</a></strong> account</span>
+                    </div>
+                </div>
+                <div class="<?php if($this->spotifyconnect['enable'] != 1): ?>hide<?php endif ?>" id="spotifyconnectAuth">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_username">Username</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_username" name="features[spotifyconnect][username]" value="<?php echo $this->spotifyconnect['username']; ?>" data-trigger="change" placeholder="username" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>username</i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_password">Password</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="password" id="spotifyconnect_password" name="features[spotifyconnect][password]" value="<?php echo $this->spotifyconnect['password']; ?>" data-trigger="change" placeholder="password" autocomplete="off">
+                            <span class="help-block">Insert your Spotify <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_device_name">Spotify Connect name</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="text" id="spotifyconnect_device_name" name="features[spotifyconnect][device_name]" value="<?php echo $this->spotifyconnect['device_name']; ?>" data-trigger="change" placeholder="RuneAudio" autocomplete="off">
+                            <span class="help-block">Spotify Connect broadcast/connection name</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_bitrate">Bitrate</label>
+						<div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][bitrate]" data-style="btn-default btn-lg">
+								<option value="320" <?php if($this->spotifyconnect['bitrate'] === '320'): ?> selected <?php endif ?>> 320 (high quality)</option>
+								<option value="160" <?php if($this->spotifyconnect['bitrate'] === '160'): ?> selected <?php endif ?>> 160 (medium quality)</option>
+								<option value="96"  <?php if($this->spotifyconnect['bitrate'] === '96'): ?>  selected <?php endif ?>> 96  (low quality)</option>
+							</select>
+                            <span class="help-block">Choose the bitrate <strong>320</strong> (high quality), <strong>160</strong> (medium quality) or <strong>96</strong> (low quality)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_volume_normalisation">Volume Normalisation</label>
+                        <div class="col-sm-10">
+							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume_normalisation]" data-style="btn-default btn-lg">
+								<option value="true"  <?php if($this->spotifyconnect['volume_normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
+								<option value="false" <?php if($this->spotifyconnect['volume_normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
+							</select>
+                            <span class="help-block">Switch Volume Normalisation per track <strong>ON</strong> or <strong>OFF</strong></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_normalisation_pregain">Normalisation Pregain</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_normalisation_pregain" name="features[spotifyconnect][normalisation_pregain]" value="<?php echo $this->spotifyconnect['normalisation_pregain']; ?>" min="-20" max="0" placeholder="-10" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>0</strong> (zero) and <strong>-20</strong>. This value is active only when <i>Volume Normalisation</i> is <strong>ON</strong>.<br>
+							When <i>Volume Normalisation</i> is selected the output volume will need to be reduced to prevent clipping. A value of -10dB is advised as a starting point. When modifying, change it in small steps (and turn your amplifier down!)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="spotifyconnect_timeout">Stream Time-out</label>
+                        <div class="col-sm-10">
+                            <input class="form-control osk-trigger input-lg" type="number" id="spotifyconnect_timeout" name="features[spotifyconnect][timeout]" value="<?php echo $this->spotifyconnect['timeout']; ?>" min="15" max="120" placeholder="20" autocomplete="off">
+                            <span class="help-block">Enter a value between <strong>15</strong> and <strong>120</strong>. This is the number of seconds of stopped or paused play after which Spotify Connect will assume that the play stream has finished. After the time-out the stream will be terminated</span>
                         </div>
                     </div>
                 </div>
@@ -401,10 +501,20 @@
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="localSStime">Local ScreenSaver time</label>
 						<div class="col-sm-10">
-							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[localSStime]" value="<?=$this->localSStime ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
+							<input class="form-control osk-trigger input-lg" type="number" id="localSStime" name="features[local_browser][localSStime]" value="<?php echo $this->local_browser['localSStime'] ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
 							<span class="help-block">Sets the activation time for the local browser screensaver (0-100 seconds, -1 disables the feature)</span>
 						</div>
 					</div>
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="smallScreenSaver">Small ScreenSaver</label>
+                        <div class="col-sm-10">
+							<label class="switch-light well" onclick="">
+								<input id="smallScreenSaver" name="features[local_browser][smallScreenSaver]" type="checkbox" value="1"<?php if($this->local_browser['smallScreenSaver'] === '1'): ?> checked="checked" <?php endif ?>>
+								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+							</label>
+                            <span class="help-block">Optionally switch this ON if you use a very small local browser screen with the screensaver</span>
+                        </div>
+                    </div>
 				</div>
 				<?php else: ?>
 				<div class="form-group">
@@ -475,7 +585,8 @@
                         <label class="control-label col-sm-2" for="lastfm-pasw">Password</label>
                         <div class="col-sm-10">
                             <input class="form-control osk-trigger input-lg" type="password" id="lastfm_pass" name="features[lastfm][pass]" value="<?php echo $this->lastfm['pass']; ?>" placeholder="pass" autocomplete="off">
-                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)</span>
+                            <span class="help-block">Insert your Last.fm <i>password</i> (case sensitive)<br>
+							<i>Note: Your password is stored as plain text, RuneAudio should only be used in your private network!</i></span>
                         </div>
                     </div>
                 </div>

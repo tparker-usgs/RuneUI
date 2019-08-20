@@ -39,9 +39,11 @@ if ($redis->get('coverart') == 1) {
     $template->coverart = 0;
     $template->colspan = 6;
 }
-if ($redis->get('volume') == 1 && $template->activePlayer !== 'Spotify') {
+if ($redis->get('volume') == 1 && $template->activePlayer == 'MPD') {
     $template->volume['color'] = '#0095D8';
     $template->volume['readonly'] = 'false';
+    $template->volume['disabled'] = 0;
+    $template->volume['divclass'] = '';
 } else {
     //$_volumeColor = '#002c40';
     $template->volume['color'] = '#1A242F';
@@ -52,7 +54,11 @@ if ($redis->get('volume') == 1 && $template->activePlayer !== 'Spotify') {
 $template->volume['dynamic'] = $redis->get('dynVolumeKnob');
 $template->dev = $redis->get('dev');
 $template->spotify = $redis->hGet('spotify', 'enable');
-$template->localSStime = $redis->get('localSStime');
+$template->spotifyconnect = $redis->hGet('spotifyconnect', 'enable');
+$template->airplay = $redis->hGet('airplay', 'enable');
+$template->dlna = $redis->hGet('dlna', 'enable');
+$template->localSStime = $redis->hGet('local_browser', 'localSStime');
 $template->remoteSStime = $redis->get('remoteSStime');
 $template->hostname = $redis->get('hostname');
 $template->pwd_protection = $redis->get('pwd_protection');
+$template->smallScreenSaver = $redis->hGet('local_browser', 'smallScreenSaver');

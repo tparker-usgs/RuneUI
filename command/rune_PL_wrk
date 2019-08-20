@@ -51,6 +51,8 @@ while (1) {
     $redis = new Redis();
     $redis->pconnect('/run/redis/socket');
     $activePlayer = $redis->get('activePlayer');
+	$proxy = $redis->hGetall('proxy');
+	$lastfm_apikey = $redis->get('lastfm_apikey');
     if ($activePlayer === 'MPD') {
         runelog('rune_PL_wrk: open MPD local UNIX socket');
         $socket = openMpdSocket('/run/mpd/socket', 0);
@@ -69,9 +71,10 @@ while (1) {
 		}
     }
 
-    if (!$socket && $activePlayer !== "Airplay") {
+    if (!$socket && ($activePlayer !== "Airplay") && ($activePlayer !== "SpotifyConnect")) {
         // exit script
         // die();
+		runelog('rune_PL_wrk: no valid socket or streamer');
         $forceupdate = 1;
         sleep(3);
     } else {
@@ -139,10 +142,58 @@ while (1) {
 				//    runelog('---------------- PLAYLIST RENDER ----------------');
 				//}
 				
+				// EXPERIMENTAL decode radio song name and artist
+				// curl -s -f --connect-timeout 5 -m 10 --retry 2 http://ws.audioscrobbler.com/2.0/?method=track.search&track=annie%20lennox%20why&api_key=ba8ad00468a50732a3860832eaed0882&format=json&limit=1
+				runelog('rune_PL_wrk: radioname = ', $status['radioname']);
+				if (!is_null($status['radioname'])) {
+					$redis->hSet('lyrics', 'radio', 1);
+					$redis->hSet('lyrics', 'art', 'assets/img/cover-radio.jpg');
+					$redis->hSet('lyrics', 'arturl', '127.0.0.1/assets/img/cover-radio.jpg');
+					$status['currentalbum'] = $status['radioname'];
+					if (!is_null($status['currentsong']) && is_null($status['currentartist']) && $redis->get(internetAvailable)) {
+						$url = 'http://ws.audioscrobbler.com/2.0/?method=track.search&track='.$status['currentsong'].'&api_key='.$lastfm_apikey.'&format=json&limit=1';
+						$retval = json_decode(curlGet($url, $proxy), true);
+						if ($retval['results']['trackmatches']['track'][0]['name'] != '') {
+							$status['currentsong'] = $retval['results']['trackmatches']['track'][0]['name'];
+							$status['currentartist'] = $retval['results']['trackmatches']['track'][0]['artist'];
+						}
+						if ($retval['results']['trackmatches']['track'][0]['image'][3]['#text'] != '') {
+							$redis->hSet('lyrics','arturl', $retval['results']['trackmatches']['track'][0]['image'][3]['#text']);
+							$redis->hSet('lyrics','art', '');
+						}
+						unset($retval);
+						if (!is_null($status['currentsong']) && !is_null($status['currentartist'])) {
+							$url = 'http://ws.audioscrobbler.com/2.0/?method=track.getinfo&track='.$status['currentsong'].'&artist='.$status['currentartist'].'&api_key='.$lastfm_apikey.'&format=json';
+							$retval = json_decode(curlGet($url, $proxy), true);
+							if ($retval['track']['album']['image'][3]['#text'] != '') {
+								$redis->hSet('lyrics','arturl', $retval['track']['album']['image'][3]['#text']);
+								$redis->hSet('lyrics','art', '');
+							}
+							unset($retval);
+						}
+					}
+					if (is_null($status['currentartist'])) {
+						$status['currentartist'] = 'Streaming';
+					}
+					if (is_null($status['currentsong'])) {
+						$status['currentsong'] = 'Radio';
+					}
+				} else {
+					$redis->hSet('lyrics', 'radio', 0);
+					$redis->hSet('lyrics', 'art', '');
+					$redis->hSet('lyrics', 'arturl', '');
+				}
+
 				// store information for lyrics and info
-				$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
-				$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
-				$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
+				if ( $status['currentartist'] == 'Streaming' && $status['currentsong'] == 'Radio' ) {
+					$redis->hSet('lyrics', 'currentartist', '');
+					$redis->hSet('lyrics', 'currentsong', '');
+					$redis->hSet('lyrics', 'currentalbum', '');
+				} else {
+					$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
+					$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
+					$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
+				}
 
 				if ($status['changed'] === 'mixer') {
 					//$redis->set('current_volume', $status['volume']);
@@ -175,12 +226,14 @@ while (1) {
 				$redis->set('act_player_info', json_encode($status));
 				$errorcode = socket_last_error($socket);
 				runelog('MPD last socket error = ', $errorcode);
-				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-				$lastmpdvolume = preg_replace('/[^0-9]/', '', $retval[0]);
-				if (!empty($lastmpdvolume)) {
-					$redis->set('lastmpdvolume', $lastmpdvolume);
+				if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
+					$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+					$lastmpdvolume = preg_replace('/[^0-9]/', '', $retval[0]);
+					if (!empty($lastmpdvolume)) {
+						$redis->set('lastmpdvolume', $lastmpdvolume);
+					}
+					unset($retval);
 				}
-				unset($retval);
 			} while (($errorcode === 0) && ($redis->get('activePlayer') === 'MPD'));
 
 			// close Redis connection
@@ -221,11 +274,13 @@ while (1) {
 				$forceupdate = 0;
 				runelog('---------------------------- FORCE UPDATE Airplay ----------------------------------');
 				sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+				$redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-default.png');
 //				$status = array();
 				if (!empty($redis->get('lastmpdvolume'))) {
 					$status['volume'] = $redis->get('lastmpdvolume');
 				}
 				$status['audio'] = "44100:16:2";
+				$redis->hSet('lyrics', 'audio', $status['audio']);
 				$status['audio_sample_rate'] = "44.1";
 				$status['audio_sample_depth'] = "16";
 				$status['bitrate'] = "1411";
@@ -237,11 +292,15 @@ while (1) {
 				$status['playlistlength'] = "";
 				$status['state'] = "play";
 				$status['time'] = "0";
+				$redis->hSet('lyrics', 'time', $status['time']);
 				$status['elapsed'] = "0";
 				$status['song_percent'] = "100";
 				$status['currentartist'] = "Airplay";
 				$status['currentalbum'] = "-----";
 				$status['currentsong'] = "-----";
+				$redis->hSet('lyrics', 'artist', $status['currentartist']);
+				$redis->hSet('lyrics', 'album', $status['currentalbum']);
+				$redis->hSet('lyrics', 'song', $status['currentsong']);
 				$status['actPlayer'] = "Airplay";
 				$status['radioname'] = null;
 				$status['OK'] = null;
@@ -254,6 +313,74 @@ while (1) {
 			do {
 				sleep(2);
 			} while ($redis->get('activePlayer') === 'Airplay');
+			sleep(1);
+		} else if ($activePlayer === 'SpotifyConnect') {
+			if ($forceupdate !== 0) {
+				$forceupdate = 0;
+				runelog('---------------------------- FORCE UPDATE SpotifyConnect ----------------------------------');
+				// delete any existing cover art
+				sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
+				$redis->hSet('lyrics', 'art', '/srv/http/tmp/spotify-connect/spotify-connect-default.png');
+//				$status = array();
+				if (!empty($redis->get('lastmpdvolume'))) {
+					$status['volume'] = $redis->get('lastmpdvolume');
+				}
+				$status['audio'] = "44100:16:2";
+				$redis->hSet('lyrics', 'audio', $status['audio']);
+				$status['audio_sample_rate'] = "44.1";
+				$status['audio_sample_depth'] = "16";
+				$status['bitrate'] = "1411";
+				$status['audio_channels'] = "Stereo";
+				$status['random'] = "0";
+				$status['single'] = "0";
+				$status['consume'] = "0";
+				$status['playlist'] = "";
+				$status['playlistlength'] = "";
+				$status['state'] = "stop";
+				$status['time'] = "0";
+				$redis->hSet('lyrics', 'time', $status['time']);
+				$status['elapsed'] = "0";
+				$status['song_percent'] = "100";
+				$status['currentartist'] = "SpotifyConnect";
+				$status['currentalbum'] = "-----";
+				$status['currentsong'] = "-----";
+				$redis->hSet('lyrics', 'artist', $status['currentartist']);
+				$redis->hSet('lyrics', 'album', $status['currentalbum']);
+				$redis->hSet('lyrics', 'song', $status['currentsong']);
+				$status['actPlayer'] = "SpotifyConnect";
+				$status['radioname'] = null;
+				$status['OK'] = null;
+				// save JSON response for extensions
+				$redis->set('act_player_info', json_encode($status));
+				ui_render('playback', json_encode($status));
+				sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+				sysCmdAsync('/var/www/command/ui_update_async');
+			}
+			$spotify_connect_timeout = $redis->hGet('spotifyconnect', 'timeout');
+			$spotify_connect_timeout_count = $spotify_connect_timeout;
+			do {
+				runelog('rune_PL_wrk: Spotify Connect idle loop');
+				// sometimes spotifyd gets its stop/start switch mixed up (returning start when stopped) so test for something playing instead of the event 'stop' value
+				$playing = reset(sysCmd('cat /proc/asound/card*/pcm*p/sub*/hw_params | grep -c -i -v closed'));
+				// $playing contains 0 or false when nothing is playing, otherwise a positive number like 7 (=true)
+				runelog('rune_PL_wrk: $playing:', $playing);
+				// if (($redis->hGet('spotifyconnect', 'event') != 'stop') || $playing) {
+				if ($playing) {
+					runelog('rune_PL_wrk: Spotify Connect is playing');
+					$spotify_connect_timeout_count = $spotify_connect_timeout;
+				} else {
+					runelog('rune_PL_wrk: Spotify Connect is not playing');
+					$spotify_connect_timeout_count -= 2;
+				}
+				runelog('rune_PL_wrk: Spotify Connect timeout count', $spotify_connect_timeout_count);
+				if ($spotify_connect_timeout_count <= 0) {
+					runelog('rune_PL_wrk: Spotify Connect timeout initiated');
+					wrk_stopPlayer($redis, 'SpotifyConnect');
+					$spotify_connect_timeout_count = $spotify_connect_timeout;
+					break;
+				}
+				sleep(2);
+			} while ($redis->get('activePlayer') === 'SpotifyConnect');
 			sleep(1);
 		} else {
 			$forceupdate = 1;

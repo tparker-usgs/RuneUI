@@ -47,8 +47,7 @@ runelog('WORKER set_mpd_volume.php STARTING...');
 
 // what we are trying to do is set the mpd volume to preset start volume
 // and store a value of the last known mpd volume to be used when switching players
-$activePlayer = $redis->get('activePlayer');
-if ($activePlayer === 'MPD') {
+if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
 	// Start MPD (if  not started) in order to set the startup volume (if needed and if set) then kill MPD (if required)
 	$retval = sysCmd('systemctl is-active mpd');
 	if ($retval[0] === 'active') {
@@ -105,25 +104,28 @@ if ($activePlayer === 'MPD') {
 		$mpdvolume = 100;
 	}
 	// Save the last known MPD volume
-	if ($retries_volume > 0) {
-		// correctly set or disabled
-		$redis->set('lastmpdvolume', $mpdvolume);
-		sysCmd('mpc volume '.$mpdvolume);
-	} else if ($mpdstartvolume != -1) {
-		// failed to set it, but start volume has a value
-		$redis->set('lastmpdvolume', $mpdstartvolume);
-		sysCmd('mpc volume '.$mpdstartvolume);
-	} else {
-		// set it to 100% when we don't have a value
-		$redis->set('lastmpdvolume', 100);
-		sysCmd('mpc volume 100');
+	if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
+		// save the values only when the active plater is MPD
+		if ($retries_volume > 0) {
+			// correctly set or disabled
+			$redis->set('lastmpdvolume', $mpdvolume);
+			sysCmd('mpc volume '.$mpdvolume);
+		} else if ($mpdstartvolume != -1) {
+			// failed to set it, but start volume has a value
+			$redis->set('lastmpdvolume', $mpdstartvolume);
+			sysCmd('mpc volume '.$mpdstartvolume);
+		} else {
+			// set it to 100% when we don't have a value
+			$redis->set('lastmpdvolume', 100);
+			sysCmd('mpc volume 100');
+		}
+		// start mpd if required
+		$retval = sysCmd('systemctl is-active mpd');
+		if ($retval[0] === 'active') {
+			// do nothing
+		} else {
+			sysCmd('systemctl start mpd');
+		}
+		unset($retval);
 	}
-	// start mpd if required
-	$retval = sysCmd('systemctl is-active mpd');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start mpd');
-	}
-	unset($retval);
 }

@@ -59,7 +59,7 @@
             $redis->get('mpd_start_volume') == $_POST['mpdvol']['start_volume'] || $redis->set('mpd_start_volume', $_POST['mpdvol']['start_volume']);
         }
 	}
-	if (isset($_POST['mpd'])) {	
+	if (isset($_POST['mpd'])) {
         if (isset($_POST['mpd']['crossfade'])) {
             sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
         }

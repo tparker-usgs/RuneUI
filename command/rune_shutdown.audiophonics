@@ -50,25 +50,30 @@ fi
 
 set +e
 
-echo "Stop MPD and unmount shares..."
-systemctl stop ashuffle upmpdcli mpdscribble
+echo "Stop MPD, services and unmount shares..."
 mpc stop
-mpd --kill
-systemctl stop nginx
 sleep 1
+systemctl stop ashuffle upmpdcli mpdscribble mpd
+systemctl stop ashuffle upmpdcli mpdscribble mpd
+systemctl stop nginx
 systemctl stop local-browser
 disablesplash=$( redis-cli hget local_browser disable-splash )
 if [[ $disablesplash == 0 ]] ; then
 	ply-image "$splash"
 fi
 sleep 1
+redis-cli set lock_globalrandom 0
+redis-cli set lock_refresh_ao 0
+redis-cli set lock_wifiscan 0
 redis-cli save
-systemctl stop shairport-sync mpd spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
+systemctl stop spotifyd shairport-sync spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
+redis-cli shutdown save
 sleep 1
 export DISPLAY=:0
 xset dpms force off
 sleep 1
 umount -aft nfs
 umount -aft cifs
+rm -R /mnt/MPD/NAS/*
 rmdir /mnt/MPD/NAS/*
 return 0
