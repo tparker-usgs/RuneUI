@@ -6,13 +6,13 @@
             <div class="boxed-group">
 				<p>Just some handy "tools" for PHP backend management.</p>
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Clear PHP 5 OPcache</label>
+					<label class="col-sm-2 control-label">Clear PHP OPcache</label>
 					<div class="col-sm-10">
 						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if($this->opcache === '0'): ?> disabled <?php endif ?>>clear OPcache</a>
 					</div>
 				</div>            
 				<div class="form-group">
-					<label class="col-sm-2 control-label">View PHP 5 OPcache status</label>
+					<label class="col-sm-2 control-label">View PHP OPcache status</label>
 					<div class="col-sm-10">
 						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/command/opcache.php" name="syscmd" id="syscmd-viewphpcache" target="_blank">php cache status</a>
 					</div>
@@ -24,13 +24,13 @@
 					</div>
 				</div> 
 			<div class="form-group">
-					<label class="col-sm-2 control-label">PHP 5 OPcache (persistent cache)</label>
+					<label class="col-sm-2 control-label">PHP OPcache (persistent cache)</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
 								<input id="opcache" name="opcache[enable]" type="checkbox" value="1"<?php if($this->opcache === '1'): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
-						<span class="help-block">Enable PHP 5 OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
+						<span class="help-block">Enable PHP OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
 					</div>
 				</div>
 			</div>
