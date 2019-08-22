@@ -186,7 +186,7 @@
 					<label class="col-sm-2 control-label" for="airplayor">Airplay output rate</label>
 					<div class="col-sm-10">
 						<select id="airplayor" class="selectpicker" name="mode[airplayor]" data-style="btn-default btn-lg">
-							<option value="44100" <?php if($this->airplayor === '44100'): ?> selected <?php endif ?>> 41.1kHz</option>
+							<option value="44100" <?php if($this->airplayor === '44100'): ?> selected <?php endif ?>> 44.1kHz</option>
 							<option value="88200" <?php if($this->airplayor === '88200'): ?> selected <?php endif ?>> 88.2kHz</option>
 							<option value="176400" <?php if($this->airplayor === '176400'): ?> selected <?php endif ?>> 176.4kHz</option>
 							<option value="352800" <?php if($this->airplayor === '352800'): ?> selected <?php endif ?>> 352.8kHz</option>
