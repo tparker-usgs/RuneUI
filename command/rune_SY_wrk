@@ -411,6 +411,8 @@ if ($playerid_db === '') {
 		// do nothing
 	} else {
 		sysCmd('systemctl start php-fpm');
+		// workaround for nginx needing restart with php7.x
+		sysCmd('systemctl restart nginx');
 	}
 	unset($retval);
 
