@@ -56,8 +56,8 @@ done
 /var/www/command/rune_shutdown poweroff
 #
 # unmount USB drives and delete the mount points
-umount -f -R /mnt/MPD/USB/*
-umount -f -R /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/USB/*
+umount -Rf /mnt/MPD/NAS/*
 rmdir /mnt/MPD/USB/*
 rmdir /mnt/MPD/NAS/*
 #rm -fr /mnt/MPD/USB/*
@@ -263,6 +263,7 @@ then
 fi
 #
 # shutdown & poweroff
-shutdown -P now
+#shutdown -P now
+reboot
 #---
 #End script

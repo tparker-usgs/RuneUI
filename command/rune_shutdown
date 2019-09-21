@@ -63,8 +63,11 @@ sleep 1
 export DISPLAY=:0
 xset dpms force off
 sleep 1
-umount -aft nfs
-umount -aft cifs
-rm -R /mnt/MPD/NAS/*
+#umount -aft nfs
+#umount -aft cifs
+#rm -R /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/USB/*
 rmdir /mnt/MPD/NAS/*
+rmdir /mnt/MPD/USB/*
 return 0
