@@ -53,13 +53,14 @@ do
 done
 #
 # run the shutdown poweroff script (this will also remove network mounts)
-/var/www/command/rune_shutdown poweroff
+#/var/www/command/rune_shutdown poweroff
 #
+# these are done in rune_shutdown. No need to duplicate
 # unmount USB drives and delete the mount points
-umount -Rf /mnt/MPD/USB/*
-umount -Rf /mnt/MPD/NAS/*
-rmdir /mnt/MPD/USB/*
-rmdir /mnt/MPD/NAS/*
+#umount -Rf /mnt/MPD/USB/*
+#umount -Rf /mnt/MPD/NAS/*
+#rmdir /mnt/MPD/USB/*
+#rmdir /mnt/MPD/NAS/*
 #rm -fr /mnt/MPD/USB/*
 #
 # install raspi-rotate
@@ -239,7 +240,11 @@ redis-cli set timezone "Pacific/Pago_Pago"
 #
 # shutdown redis and force a write all in-memory keys to disk (purges any cached values)
 redis-cli save
-redis-cli shutdown save
+# the next line is done in rune_shutdown
+#redis-cli shutdown save
+# run the shutdown poweroff script (this will also remove network mounts)
+/var/www/command/rune_shutdown poweroff
+
 #
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
@@ -263,7 +268,6 @@ then
 fi
 #
 # shutdown & poweroff
-#shutdown -P now
-reboot
+shutdown -P now
 #---
 #End script
