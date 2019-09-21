@@ -56,9 +56,11 @@ done
 /var/www/command/rune_shutdown poweroff
 #
 # unmount USB drives and delete the mount points
-umount -R /mnt/MPD/USB/*
+umount -f -R /mnt/MPD/USB/*
+umount -f -R /mnt/MPD/NAS/*
 rmdir /mnt/MPD/USB/*
-rm -fr /mnt/MPD/USB/*
+rmdir /mnt/MPD/NAS/*
+#rm -fr /mnt/MPD/USB/*
 #
 # install raspi-rotate
 /var/www/command/raspi-rotate-install.sh
