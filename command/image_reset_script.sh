@@ -142,8 +142,6 @@ rm -f /etc/samba/*.conf
 rm -f /etc/netctl/*
 # copy default settings and services
 cp -Rv /srv/http/app/config/defaults/etc/* /etc
-# link nginx.conf to the production version
-ln -s nginx-prod.conf nginx.conf
 cp -Rv /srv/http/app/config/defaults/usr/* /usr
 # copy a standard config.txt
 cp -Rv /srv/http/app/config/defaults/boot/* /boot
