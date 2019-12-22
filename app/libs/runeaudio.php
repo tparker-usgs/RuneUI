@@ -1320,7 +1320,8 @@ function runelog($title, $data = null, $function_name = null)
 {
 // Connect to Redis backend
     $store = new Redis();
-    $store->connect('127.0.0.1', 6379);
+    $store->pconnect('/run/redis/socket');
+//    $store->connect('127.0.0.1', 6379);
     $debug_level = $store->get('debug');
     if (isset($function_name)) {
         $function_name = '['.$function_name.'] ';
