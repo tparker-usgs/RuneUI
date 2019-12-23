@@ -184,8 +184,8 @@ function redisDatastore($redis,$action) {
             $redis->hSet('dlna', 'queueowner', 1);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 2);
-			$redis->hSet('dlna', 'radioname', '');
-			$redis->hSet('dlna', 'file', '');
+	    $redis->hSet('dlna', 'radioname', '');
+	    $redis->hSet('dlna', 'file', '');
             $redis->set('udevil', 1);
             $redis->hSet('spotify', 'enable', 0);
             $redis->hSet('spotify', 'user', 'user');
@@ -193,6 +193,8 @@ function redisDatastore($redis,$action) {
             $redis->hSet('spotify', 'plversion', 1);
             $redis->hSet('spotify', 'lastcmd', '');            
             $redis->set('coverart', 1);
+	    $redis->set('artist-info', 1);
+	    $redis->set('lyric', 1);
             $redis->set('playmod', 0);
             $redis->set('ramplay', 0);
             $redis->hSet('lastfm', 'enable', 0);
@@ -277,8 +279,8 @@ function redisDatastore($redis,$action) {
             $redis->set('pl_length', 0);
             $redis->set('nextsongid', 0);
             $redis->set('lastsongid', 0);
-			// Samba parameters
-			$redis->hSet('samba', 'enable', 0);
+	    // Samba parameters
+	    $redis->hSet('samba', 'enable', 0);
             $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
@@ -478,6 +480,8 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('lyrics', 'song') || $redis->hSet('lyrics', 'song', '');
             $redis->exists('udevil') || $redis->set('udevil', 1);
             $redis->exists('coverart') || $redis->set('coverart', 1);
+	    $redis->exists('artist-info') || $redis->set('artist-info', 1);
+	    $redis->exists('lyric') || $redis->set('lyric', 1);
             $redis->exists('playmod') || $redis->set('playmod', 0);
             $redis->exists('ramplay') || $redis->set('ramplay', 0);
             $redis->hExists('lastfm', 'enable') || $redis->hSet('lastfm', 'enable', 0);
