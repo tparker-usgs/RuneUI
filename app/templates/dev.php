@@ -177,7 +177,7 @@
 							<option value="S24_3LE" <?php if($this->airplayof === 'S24_3LE'): ?> selected <?php endif ?>> S24_3LE</option>
 							<option value="S24_3BE" <?php if($this->airplayof === 'S24_3BE'): ?> selected <?php endif ?>> S24_3BE</option>
 						</select>
-						<span class="help-block">Airplay is set up to play music at 41.1kHz with 16bit depth. This is the normal transmission mode for mobile Airplay devices. Normally you will not improve the sound by changing this setting.<br>
+						<span class="help-block">Airplay is set up to play music at 44.1kHz with 16bit depth. This is the normal transmission mode for mobile Airplay devices. Normally you will not improve the sound by changing this setting.<br>
 						However, some DAC cards and output devices have problems playing at 16bit depth. And if you use a Mac as source (not a iPhone or iPad) then 24bit can be supported (you need to manually switch this ON on the Mac).<br>
 						In these cases you can use this function change the bit depth to 16bit, 24bit or 32bit (S16, S24 or S32). Other values should only be set if you know what you are doing. Your sound card must be able to support your choice</span>
 					</div>
@@ -191,9 +191,9 @@
 							<option value="176400" <?php if($this->airplayor === '176400'): ?> selected <?php endif ?>> 176.4kHz</option>
 							<option value="352800" <?php if($this->airplayor === '352800'): ?> selected <?php endif ?>> 352.8kHz</option>
 						</select>
-						<span class="help-block">Airplay is set up to play music at 41.1kHz with 16bit depth. This is the normal transmission mode for mobile Airplay devices. Normally you will not improve the sound by changing this setting.<br>
+						<span class="help-block">Airplay is set up to play music at 44.1kHz with 16bit depth. This is the normal transmission mode for mobile Airplay devices. Normally you will not improve the sound by changing this setting.<br>
 						But if you use a Mac (not a iPhone or iPad) as source for your Airplay music stream it can support sample rates up to 96kHz (you need to manually switch this ON on the Mac).<br>
-						You can use this function to change the output sample rate to 41.1kHz, 88.2kHz, 176.4kHz or 352.8kHz. Your sound card must be able to support the chosen rate</span>
+						You can use this function to change the output sample rate to 44.1kHz, 88.2kHz, 176.4kHz or 352.8kHz. Your sound card must be able to support the chosen rate</span>
 					</div>
 				</div>
 			</div>
