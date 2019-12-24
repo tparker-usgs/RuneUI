@@ -3172,7 +3172,7 @@ function wrk_shairport($redis, $ao, $name = null)
 		$newArray = wrk_replaceTextLine('', $newArray, ' alsa_mixer_device', 'mixer_device="'.$mixer_device.'"; // alsa_mixer_device');
 	}
     $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_format', 'output_format="'.$redis->hGet('airplay', 'alsa_output_format').'"; // alsa_output_format');
-    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_rate', 'output_rate="'.$redis->hGet('airplay', 'alsa_output_rate').'"; // alsa_output_rate');
+    $newArray = wrk_replaceTextLine('', $newArray, ' alsa_output_rate', 'output_rate='.$redis->hGet('airplay', 'alsa_output_rate').'; // alsa_output_rate');
     $newArray = wrk_replaceTextLine('', $newArray, ' pipe_pipe_name', 'name="'.$redis->hGet('airplay', 'pipe_pipe_name').'"; // pipe_pipe_name');
 	if ($metadata_enabled === '') {
 		$newArray = wrk_replaceTextLine('', $newArray, ' metadata_enabled', '// enabled="'.$metadata_enabled.'"; // metadata_enabled');
