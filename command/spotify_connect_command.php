@@ -46,7 +46,7 @@ runelog('spotify_connect_command START');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // get the environment variables
 $track_id = trim(getenv('TRACK_ID', true));

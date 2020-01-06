@@ -46,7 +46,7 @@ runelog('spotify_connect_metadata_async START');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis.sock');
+$redis->connect('/run/redis/socket');
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
 // $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
