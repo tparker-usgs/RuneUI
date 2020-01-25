@@ -64,7 +64,13 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             // getPlayQueue($mpd2);
             // closeMpdSocket($mpd2);
             if ($activePlayer === 'MPD') {
+                // $resp = trim(getPlayQueue($mpd), "\x7f..\xff\x0..\x1f");
+                // if (substr($resp, 0, 2) == '\n') {
+                    // $resp = substr($resp, 2);
+                // }
+                // echo $resp;
                 echo getPlayQueue($mpd);
+                // echo trim(getPlayQueue($mpd), "\x7f..\xff\x0..\x1f");
             } elseif ($activePlayer === 'Spotify') {
                 echo getSpopQueue($spop);
             }

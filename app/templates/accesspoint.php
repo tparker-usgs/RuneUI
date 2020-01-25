@@ -29,7 +29,7 @@
                 <label for="accesspoint" class="control-label col-sm-2">AccessPoint</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input id="accesspoint" name="settings[enabled]" type="checkbox" value="1"<?php if($this->enabled === '1'): ?> checked="checked" <?php endif ?>>
+                        <input id="accesspoint" name="settings[enabled]" type="checkbox" value="1"<?php if((isset($this->enabled)) && ($this->enabled)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggle starting a wireless AccessPoint on start</span>

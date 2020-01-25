@@ -64,7 +64,7 @@
                 <label for="db_autorebuild" class="control-label col-sm-2">auto rebuild</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input id="db_autorebuild" name="sources[db_autorebuild]" type="checkbox" value="1"<?php if($this->db_autorebuild == 1): ?> checked="checked" <?php endif ?>>
+                        <input id="db_autorebuild" name="sources[db_autorebuild]" type="checkbox" value="1"<?php if ((isset($this->db_autorebuild)) && ($this->db_autorebuild)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Autorebuild MPD library when a USB device is plugged in</span>

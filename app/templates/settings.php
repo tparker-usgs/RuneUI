@@ -43,7 +43,7 @@
                     <label for="proxy" class="control-label col-sm-2">HTTP Proxy server</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="proxy" name="features[proxy]" type="checkbox" value="1"<?php if($this->proxy['enable'] == 1): ?> checked="checked" <?php endif ?>>
+                            <input id="proxy" name="features[proxy]" type="checkbox" value="1"<?php if((isset($this->proxy['enable'])) && ($this->proxy['enable'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                     </div>
@@ -224,7 +224,7 @@
                 <label for="audio_on_off" class="control-label col-sm-2">HDMI & 3,5mm jack</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="audio_on_off" type="checkbox" value="1"<?php if($this->audio_on_off == 1): ?> checked="checked" <?php endif ?>>
+                        <input name="audio_on_off" type="checkbox" value="1"<?php if((isset($this->audio_on_off)) && ($this->audio_on_off)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Set "ON" to enable or "OFF" to disable the onboard ALSA audio interface)</span>
@@ -299,12 +299,12 @@
         <fieldset id="features-management">
             <legend>Features management</legend>
             <p>Enable/disable optional modules that best suit your needs. Disabling unused features will free system resources and might improve the overall performance</p>
-            <div <?php if($this->airplay['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="airplayBox">
+            <div <?php if((isset($this->airplay['enable'])) && ($this->airplay['enable'])): ?>class="boxed-group"<?php endif ?> id="airplayBox">
                 <div class="form-group">
                     <label for="airplay" class="control-label col-sm-2">AirPlay</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="airplay" name="features[airplay][enable]" type="checkbox" value="1"<?php if($this->airplay['enable'] == 1): ?> checked="checked" <?php endif ?>>
+                            <input id="airplay" name="features[airplay][enable]" type="checkbox" value="1"<?php if((isset($this->airplay['enable'])) && ($this->airplay['enable'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">Toggle the capability of receiving wireless streaming of audio via AirPlay protocol</span>
@@ -320,12 +320,12 @@
                     </div>
                 </div>
             </div>
-            <div <?php if($this->spotify['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="spotifyBox">
+            <div <?php if((isset($this->spotify['enable'])) && ($this->spotify['enable'])): ?>class="boxed-group"<?php endif ?> id="spotifyBox">
                 <div class="form-group">
                     <label for="spotify" class="control-label col-sm-2">Spotify</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="spotify" name="features[spotify][enable]" type="checkbox" value="1"<?php if($this->spotify['enable'] === '1'): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'Spotify'): ?>disabled readonly<?php endif; ?>>
+                            <input id="spotify" name="features[spotify][enable]" type="checkbox" value="1"<?php if((isset($this->spotify['enable'])) && ($this->spotify['enable'])): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'Spotify'): ?>disabled readonly<?php endif; ?>>
                             <?php if($this->activePlayer === 'Spotify'): ?><input id="spotify" name="features[spotify][enable]" type="hidden" value="1"><?php endif; ?>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'Spotify'): ?>disabled<?php endif; ?>"></a>
                         </label>
@@ -351,12 +351,12 @@
                     </div>
                 </div>
             </div>
-            <div <?php if($this->dlna['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="dlnaBox">
+            <div <?php if((isset($this->dlna['enable'])) && ($this->dlna['enable'])): ?>class="boxed-group"<?php endif ?> id="dlnaBox">
                 <div class="form-group">
                     <label for="dlna" class="control-label col-sm-2">UPnP / DLNA</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="dlna" name="features[dlna][enable]" type="checkbox" value="1"<?php if($this->dlna['enable'] == 1): ?> checked="checked" <?php endif ?>>
+                            <input id="dlna" name="features[dlna][enable]" type="checkbox" value="1"<?php if((isset($this->dlna['enable'])) && ($this->dlna['enable'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">Toggle the capability of receiving wireless streaming of audio via UPnP / DLNA protocol<br>
@@ -373,7 +373,7 @@
                         <label class="control-label col-sm-2" for="dlna-queueowner">UPnP / DLNA is MPD queue owner</label>
                         <div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="dlna_queueowner" name="features[dlna][queueowner]" type="checkbox" value="1"<?php if($this->dlna['queueowner'] == 1): ?> checked="checked" <?php endif ?>>
+								<input id="dlna_queueowner" name="features[dlna][queueowner]" type="checkbox" value="1"<?php if((isset($this->dlna['queueowner'])) && ($this->dlna['queueowner'])): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
                             <span class="help-block">When ON: a UPnP / DLNA broadcast will clear the MPD queue and then add and play the song, clearing the queue with each successive song<br>
@@ -382,12 +382,12 @@
                     </div>
                 </div>
             </div>
-            <div <?php if($this->spotifyconnect['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="spotifyconnectBox">
+            <div <?php if((isset($this->spotifyconnect['enable'])) && ($this->spotifyconnect['enable'])): ?>class="boxed-group"<?php endif ?> id="spotifyconnectBox">
                 <div class="form-group">
                     <label for="spotifyconnect" class="control-label col-sm-2">Spotify Connect</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="spotifyconnect" name="features[spotifyconnect][enable]" type="checkbox" value="1"<?php if($this->spotifyconnect['enable'] === '1'): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled readonly<?php endif; ?>>
+                            <input id="spotifyconnect" name="features[spotifyconnect][enable]" type="checkbox" value="1"<?php if((isset($this->spotifyconnect['enable'])) && ($this->spotifyconnect['enable'])): ?> checked="checked" <?php endif ?> <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled readonly<?php endif; ?>>
                             <?php if($this->activePlayer === 'SpotifyConnect'): ?><input id="spotifyconnect" name="features[spotifyconnect][enable]" type="hidden" value="1"><?php endif; ?>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary <?php if($this->activePlayer === 'SpotifyConnect'): ?>disabled<?php endif; ?>"></a>
                         </label>
@@ -431,7 +431,7 @@
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="spotifyconnect_volume_normalisation">Volume Normalisation</label>
                         <div class="col-sm-10">
-							<select id="spotifyconnect_bitrate" class="selectpicker" name="features[spotifyconnect][volume_normalisation]" data-style="btn-default btn-lg">
+							<select id="spotifyconnect_volume_normalisation" class="selectpicker" name="features[spotifyconnect][volume_normalisation]" data-style="btn-default btn-lg">
 								<option value="true"  <?php if($this->spotifyconnect['volume_normalisation'] === 'true'): ?>  selected <?php endif ?>> ON</option>
 								<option value="false" <?php if($this->spotifyconnect['volume_normalisation'] === 'false'): ?> selected <?php endif ?>> OFF</option>
 							</select>
@@ -455,13 +455,13 @@
                     </div>
                 </div>
             </div>
-            <div <?php if($this->local_browser['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="local_browserBox">
+            <div <?php if((isset($this->local_browser['enable'])) && ($this->local_browser['enable'])): ?>class="boxed-group"<?php endif ?> id="local_browserBox">
 				<?php if($this->local_browseronoff): ?>
 				<div class="form-group">
 					<label for="local_browser" class="control-label col-sm-2">Local browser</label>
 					<div class="col-sm-10">
 						<label class="switch-light well" onclick="">
-							<input id="local_browser" name="features[local_browser][enable]" type="checkbox" value="1"<?php if($this->local_browser['enable'] == 1): ?> checked="checked" <?php endif ?>>
+							<input id="local_browser" name="features[local_browser][enable]" type="checkbox" value="1"<?php if((isset($this->local_browser['enable'])) && ($this->local_browser['enable'])): ?> checked="checked" <?php endif ?>>
 							<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 						</label>
 						<span class="help-block">Start a local browser on HDMI or TFT</span>
@@ -492,7 +492,7 @@
                         <label class="control-label col-sm-2" for="mouse_cursor">Mouse-cursor visible</label>
                         <div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="mouse_cursor" name="features[local_browser][mouse_cursor]" type="checkbox" value="1"<?php if($this->local_browser['mouse_cursor'] === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="mouse_cursor" name="features[local_browser][mouse_cursor]" type="checkbox" value="1"<?php if((isset($this->local_browser['mouse_cursor'])) && ($this->local_browser['mouse_cursor'])): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
                             <span class="help-block">Switch this ON if you use a mouse with your local browser display, this is not normally used with a touchscreen</span>
@@ -509,7 +509,7 @@
                         <label class="control-label col-sm-2" for="smallScreenSaver">Small ScreenSaver</label>
                         <div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="smallScreenSaver" name="features[local_browser][smallScreenSaver]" type="checkbox" value="1"<?php if($this->local_browser['smallScreenSaver'] === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="smallScreenSaver" name="features[local_browser][smallScreenSaver]" type="checkbox" value="1"<?php if((isset($this->local_browser['smallScreenSaver'])) && ($this->local_browser['smallScreenSaver'])): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
                             <span class="help-block">Optionally switch this ON if you use a very small local browser screen with the screensaver</span>
@@ -546,7 +546,7 @@
                 <label for="udevil" class="control-label col-sm-2">USB Automount</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="features[udevil]" type="checkbox" value="1"<?php if($this->udevil == 1): ?> checked="checked" <?php endif ?>>
+                        <input name="features[udevil]" type="checkbox" value="1"<?php if((isset($this->udevil)) && ($this->udevil)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggle automount for USB drives</span>
@@ -556,24 +556,24 @@
                 <label for="coverart" class="control-label col-sm-2">Display album cover</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="features[coverart]" type="checkbox" value="1"<?php if($this->coverart == 1): ?> checked="checked" <?php endif ?>>
+                        <input name="features[coverart]" type="checkbox" value="1"<?php if((isset($this->coverart)) && ($this->coverart)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggle the display of album art on the Playback main screen</span>
                 </div>
             </div>
-            <div <?php if($this->lastfm['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="lastfmBox">
+            <div <?php if((isset($this->lastfm['enable'])) && ($this->lastfm['enable'])): ?>class="boxed-group"<?php endif ?> id="lastfmBox">
                 <div class="form-group">
                     <label for="lastfm" class="control-label col-sm-2">Last.fm scrobbling</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="scrobbling-lastfm" name="features[lastfm][enable]" type="checkbox" value="1"<?php if($this->lastfm['enable'] === '1'): ?> checked="checked" <?php endif ?>>
+                            <input id="scrobbling-lastfm" name="features[lastfm][enable]" type="checkbox" value="1"<?php if((isset($this->lastfm['enable'])) && ($this->lastfm['enable'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">Send to Last.fm informations about the music you are listening to (requires a Last.fm account)</span>
                     </div>
                 </div>
-                <div class="<?php if($this->lastfm['enable'] != 1): ?>hide<?php endif ?>" id="lastfmAuth">
+                <div class="<?php if((!isset($this->lastfm['enable'])) || (!$this->lastfm['enable'])): ?>hide<?php endif ?>" id="lastfmAuth">
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="lastfm-usr">Username</label>
                         <div class="col-sm-10">
@@ -591,23 +591,23 @@
                     </div>
                 </div>
             </div>
-            <div <?php if($this->samba['enable'] === '1'): ?>class="boxed-group"<?php endif ?> id="sambaBox">
+            <div <?php if((isset($this->samba['enable'])) && ($this->samba['enable'])): ?>class="boxed-group"<?php endif ?> id="sambaBox">
                 <div class="form-group">
                     <label for="samba" class="control-label col-sm-2">Samba File-Server</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="samba" name="features[samba][enable]" type="checkbox" value="1"<?php if($this->samba['enable'] === '1'): ?> checked="checked" <?php endif ?>>
+                            <input id="samba" name="features[samba][enable]" type="checkbox" value="1"<?php if((isset($this->samba['enable'])) && ($this->samba['enable'])): ?> checked="checked" <?php endif ?>>
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">Enable Samba to share your music files on your network</span>
                     </div>
                 </div>
-                <div class="<?php if($this->samba['enable'] != 1): ?>hide<?php endif ?>" id="sambaAuth">
+                <div class="<?php if((!isset($this->samba['enable'])) || (!$this->samba['enable'])): ?>hide<?php endif ?>" id="sambaAuth">
                     <div class="form-group">
                         <label class="control-label col-sm-2" for="samba-readwrite">Read/Write access</label>
                         <div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="readwrite" name="features[samba][readwrite]" type="checkbox" value="1"<?php if($this->samba['readwrite'] === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="readwrite" name="features[samba][readwrite]" type="checkbox" value="1"<?php if((isset($this->samba['readwrite'])) && ($this->samba['readwrite'])): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
                             <span class="help-block">Choose Read-Only access (<strong>OFF</strong>) or Read/Write access (<strong>ON</strong>).<br>

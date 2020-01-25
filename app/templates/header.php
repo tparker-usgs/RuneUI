@@ -84,7 +84,7 @@
             <li class="<?=$this->uri(1, 'debug', 'active')?>"><a href="/debug/"><i class="fa fa-bug"></i> Debug</a></li>
             <li class="<?=$this->uri(1, 'credits', 'active')?>"><a href="/credits/"><i class="fa fa-trophy"></i> Credits</a></li>
             <li><a href="#poweroff-modal" data-toggle="modal"><i class="fa fa-power-off"></i> Turn off</a></li>
-            <?php if ($this->pwd_protection):?>
+            <?php if ((isset($this->pwd_protection)) && ($this->pwd_protection)):?>
               <li><a href="/logout.php"><i class="fa fa-sign-out"></i> Logout</a></li>
             <?php endif ?>
         </ul>

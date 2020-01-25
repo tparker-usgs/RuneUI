@@ -8,7 +8,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Clear PHP OPcache</label>
 					<div class="col-sm-10">
-						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if($this->opcache === '0'): ?> disabled <?php endif ?>>clear OPcache</a>
+						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if((isset($this->opcache)) && ($this->opcache)): ?> disabled <?php endif ?>>clear OPcache</a>
 					</div>
 				</div>            
 				<div class="form-group">
@@ -20,14 +20,14 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Restart PHP service</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg btn-lg" type="submit" name="syscmd" value="phprestart" id="syscmd-phprestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg btn-lg" type="submit" name="syscmd" value="phprestart" id="syscmd-phprestart" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 					</div>
 				</div> 
 			<div class="form-group">
 					<label class="col-sm-2 control-label">PHP OPcache (persistent cache)</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="opcache[enable]" type="checkbox" value="1"<?php if($this->opcache === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="opcache[enable]" type="checkbox" value="1"<?php if((isset($this->opcache)) && ($this->opcache)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">Enable PHP OPcache persistence. This drastically speeds up page render, but you must manually clear cache (use above button) at any source code change. This is enabled by default in production environment</span>
@@ -63,7 +63,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Reset the RuneAudio player</label>
                     <div class="col-sm-10">
-                        <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="blankplayerid" id="syscmd-blankplayerid" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                        <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="blankplayerid" id="syscmd-blankplayerid" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
                         <span class="help-block">Reset playerID and hwplatformID. The player will perform configuration initialisation routines during the next reboot.<br>
 						This function can be used as an alternative to re-flashing your Micro-SD card if Rune stops working correctly. In many cases it will fix the problems.<br> 
 						Always <strong>de-install</strong> Rern's Addons <strong>before</strong> choosing this option!<br>
@@ -74,7 +74,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Clear installation</label>
                     <div class="col-sm-10">
-                        <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="clearimg" id="syscmd-clearimg" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+                        <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="clearimg" id="syscmd-clearimg" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
                         <span class="help-block">Clear command history, logs, reset image parameters to default settings.<br>
                         NOTE: (Dev team function) Use this function prior to publication of a RuneOS image.<br>
                         WARNING: Automatic system shutdown and power-off after execution! Wait until it shuts down, it may take up to 5 minutes to complete!</span>
@@ -86,7 +86,7 @@
 					<label class="col-sm-2 control-label">Dev Mode</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[dev][enable]" type="checkbox" value="1"<?php if($this->dev === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[dev][enable]" type="checkbox" value="1"<?php if((isset($this->dev)) && ($this->dev)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 							<span class="help-block">Enable <i>developer mode (Set ON, Save setting and then refresh the screen)</i>.<br>
@@ -100,7 +100,7 @@
 					<label class="col-sm-2 control-label">Debug</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[debug][enable]" type="checkbox" value="1"<?php if($this->debug === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[debug][enable]" type="checkbox" value="1"<?php if((isset($this->debug)) && ($this->debug)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">Activate debug data collection. (You will find all log files in <strong>/var/log/runeaudio/</strong> directory)</span>
@@ -109,7 +109,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Check FS permissions</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="syschmod" id="syscmd-mpdrestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="syschmod" id="syscmd-mpdrestart" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">Check and restore the correct FS ownership and permissions in important system areas</span>
 					</div>
 				</div>
@@ -119,7 +119,7 @@
 					<label class="col-sm-2 control-label">SoXr for MPD</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[soxrmpdonoff][enable]" type="checkbox" value="1"<?php if($this->soxrmpdonoff === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[soxrmpdonoff][enable]" type="checkbox" value="1"<?php if((isset($this->soxrmpdonoff)) && ($this->soxrmpdonoff)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">SoXr for MPD is set ON or OFF depending on processor type. The MPD sample rate converter can not be switched off, it does nothing (and has no CPU overhead) unless sample rate conversion is required.
@@ -133,7 +133,7 @@
 					<label class="col-sm-2 control-label">SoXr for Airplay</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if($this->soxrairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if((isset($this->soxrairplayonoff)) && ($this->soxrairplayonoff)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">SoXr for Airplay is set OFF by default. Your system <strong>will crash</strong> if it is switched ON, please leave it switched OFF.<br>
@@ -145,7 +145,7 @@
 					<label class="col-sm-2 control-label">Airplay Metadata</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[metadataairplayonoff][enable]" type="checkbox" value="1"<?php if($this->metadataairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[metadataairplayonoff][enable]" type="checkbox" value="1"<?php if((isset($this->metadataairplayonoff)) && ($this->metadataairplayonoff)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">Metadata for Airplay is set ON or OFF depending on processor type.
@@ -157,7 +157,7 @@
 					<label class="col-sm-2 control-label">Airplay Cover Art</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[artworkairplayonoff][enable]" type="checkbox" value="1"<?php if($this->artworkairplayonoff === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[artworkairplayonoff][enable]" type="checkbox" value="1"<?php if((isset($this->artworkairplayonoff)) && ($this->artworkairplayonoff)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">Cover Art for Airplay is set ON or OFF depending on processor type.
@@ -202,7 +202,7 @@
 					<label class="col-sm-2 control-label">Player name in Menu</label>
 					<div class="col-sm-10">
 							<label class="switch-light well" onclick="">
-								<input id="opcache" name="mode[playernamemenu][enable]" type="checkbox" value="1"<?php if($this->playernamemenu === '1'): ?> checked="checked" <?php endif ?>>
+								<input id="opcache" name="mode[playernamemenu][enable]" type="checkbox" value="1"<?php if((isset($this->playernamemenu)) && ($this->playernamemenu)): ?> checked="checked" <?php endif ?>>
 								<span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
 							</label>
 						<span class="help-block">With this option you can add your player name (hostname) before the word '<strong>Menu</strong>' at the top right of your UI. 
@@ -226,7 +226,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Update RuneUI</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="gitpull" id="syscmd-gitpull" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">Download and install the latest updates<br>
 						A gitpull will effectively remove Rern's Addons, you will need to reinstall it after an update.<br>
 						An <strong>automatic reboot</strong> will be initiated after an update and Dev Mode will then be automatically switched OFF</span>
@@ -237,14 +237,14 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Restart MPD service</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdrestart" id="syscmd-mpdrestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdrestart" id="syscmd-mpdrestart" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">&nbsp;</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Restart Samba</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambarestart" id="syscmd-sambarestart" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">If you change the Samba configuration files a restart is required to activate your changes</span>
 					</div>
 				</div>
@@ -253,28 +253,28 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Reset NET config</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="netconfreset" id="syscmd-netconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="netconfreset" id="syscmd-netconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">&nbsp;</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Reset MPD config</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdconfreset" id="syscmd-mpdconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdconfreset" id="syscmd-mpdconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">&nbsp;</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Reset Airplay config</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="airplayconfreset" id="syscmd-airplayconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">This will reset the shairport-sync.conf file back to defaults and reinitialise Airplay</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Reset Samba config</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambaconfreset" id="syscmd-sambaconfreset" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="sambaconfreset" id="syscmd-sambaconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">This will reset the smb-prod.conf and smb-dev.conf files back to defaults, remove any Samba usernames/passwords and reinitialise Samba</span>
 					</div>
 				</div>
@@ -283,7 +283,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Install Rern's Addons Menu</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rerninstall" id="syscmd-rerninstall" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">See the RuneAudio forum for details: <a href="http://www.runeaudio.com/forum/addons-menu-install-addons-the-easy-way-t5370.html#p22376" target="_blank" rel="nofollow">Addons Menu - Install addons the easy way</a> <br>
 						We had intended to pre-install Rern's very popular Addons Menu in this image.
 						However we discovered that by installing the Addons Menu a significant security risk was created effectively giving the http user (this is the user which owns the web-server) root privileges.
@@ -298,7 +298,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Remove Rern's Addons Menu</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernremove" id="syscmd-rernremove" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="rernremove" id="syscmd-rernremove" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">If Rern's Addons Menu stops working, or the install command fails, or you cannot de-install it; this may fix it</span>
 					</div>
 				</div>
@@ -307,7 +307,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Extend the Linux Partition</label>
 					<div class="col-sm-10">
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="extendpartition" id="syscmd-extendpartition" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="extendpartition" id="syscmd-extendpartition" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">This RuneAudio image is designed to fit on a 4Gb Micro-SD card even though most SD-cards are now 16Gb or greater.
 						In most cases RuneAudio will work fine without extending the Linux Partition.
 						If you want to utilise the extra available space on the Micro-SD card you can use this option to extend the Linux Partition to its maximum size.
@@ -320,9 +320,9 @@
 					<label class="col-sm-2 control-label">Network Time Protocol Service</label>
 					<div class="col-sm-10">
                         <input class="form-control input-lg" type="text" id="chronydstatus" name="chronydstatus" value="<?php echo $this->chronydstatus; ?>" disabled autocomplete="off"><br>
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="chronydon" id="syscmd-chronydon" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>><br><br>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="chronydon" id="syscmd-chronydon" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>><br><br>
                         <input class="form-control input-lg" type="text" id="systemdstatus" name="systemdstatus" value="<?php echo $this->systemdstatus; ?>" disabled autocomplete="off"><br>
-						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="systemdon" id="syscmd-systemdon" <?php if($this->dev !== '1'): ?> disabled <?php endif ?>>
+						<input class="btn btn-default btn-lg" type="submit" name="syscmd" value="systemdon" id="syscmd-systemdon" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
 						<span class="help-block">With this option you can reset the NTP service or switch between the chronyd and systemd-timesyncd services.<br>
 						By default systemd-timesyncd is used which provides a fast start-up time. Using chronyd results in less Micro-SD card wear and is therefore be more reliable in the long term, but results in a much slower start-up times.<br>
 						You can can override the default setting here</span>

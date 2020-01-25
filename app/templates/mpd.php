@@ -227,7 +227,7 @@
                 <label class="control-label col-sm-2" for="autoplay">Autoplay</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="mpd[mpd_autoplay]" type="checkbox" value="1"<?php if($this->mpd['mpd_autoplay'] == 1): ?> checked="checked" <?php endif ?>>
+                        <input name="mpd[mpd_autoplay]" type="checkbox" value="1"<?php if((isset($this->mpd['mpd_autoplay'])) && ($this->mpd['mpd_autoplay'])): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">If set to ON the player starts automatically after boot</span>
@@ -237,7 +237,7 @@
                 <label class="control-label col-sm-2" for="globalrandom">Global random</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if($this->mpd['globalrandom'] == 1): ?> checked="checked" <?php endif ?>>
+                        <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if((isset($this->mpd['globalrandom'])) && ($this->mpd['globalrandom'])): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>

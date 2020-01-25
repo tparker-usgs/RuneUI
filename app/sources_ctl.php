@@ -36,9 +36,9 @@ if (isset($_POST)) {
     if ($_POST['rescanmpd'] == 1) sendMpdCommand($mpd, 'rescan');
     if ($_POST['updatempd'] == 1) sendMpdCommand($mpd, 'update');
     if ($_POST['mountall'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'mountall' ));
-    if ($_POST['umountall'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'umountall' ));
+    // if ($_POST['umountall'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'umountall' ));
     if ($_POST['remountall'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'remountall' ));
-    if ($_POST['reset'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'reset' ));
+    // if ($_POST['reset'] == 1) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'reset' ));
     if (isset($_POST['usb-umount'])) $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'umountusb', 'args' => $_POST['usb-umount']));
     if (!empty($_POST['mount'])) {
         $_POST['mount']['remotedir'] = str_replace('\\', '/', $_POST['mount']['remotedir']);
@@ -58,7 +58,9 @@ if (isset($_POST)) {
         }
     }
 }
-waitSyWrk($redis, $jobID);
+if (isset($jobID)) {
+    waitSyWrk($redis, $jobID);
+}
 // collect system status
 $template->db_autorebuild = $redis->get('usb_db_autorebuild');
 $template->hostname = $redis->get('hostname');

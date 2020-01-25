@@ -139,7 +139,11 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
 // set devmode
 $template->dev = $devmode;
 // plates: render layout (if you want to output direct, set $tplfile = 0 into controller)
-if ($tplfile !== 0) {
+if (isset($tplfile)) {
+    if ($tplfile !== 0) {
+        echo $template->render('default_lo');
+    }
+} else {
     echo $template->render('default_lo');
 }
 // close palyer backend connection

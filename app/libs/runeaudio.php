@@ -276,7 +276,7 @@ function getPlayQueue($sock)
 {
     sendMpdCommand($sock, 'playlistinfo');
     $playqueue = readMpdResponse($sock);
-    //return _parseFileListResponse($playqueue);
+    // return _parseFileListResponse($playqueue);
     return $playqueue;
 }
 
