@@ -108,9 +108,9 @@ function sendMpdCommand($sock, $cmd)
 // detect end of MPD response
 function checkEOR($chunk)
 {
-    if (strpos($chunk, "OK\n") !== false) {
+    if (strpos(" ".$chunk, "OK\n")) {
         return true;
-    } elseif (strpos($chunk, "ACK [") !== false) {
+    } elseif (strpos(" ".$chunk, "ACK [")) {
         if (preg_match("/(\[[0-9]@[0-9]\])/", $chunk) === 1) {
             return true;
         }
@@ -276,7 +276,7 @@ function getPlayQueue($sock)
 {
     sendMpdCommand($sock, 'playlistinfo');
     $playqueue = readMpdResponse($sock);
-    // return _parseFileListResponse($playqueue);
+    //return _parseFileListResponse($playqueue);
     return $playqueue;
 }
 
@@ -822,9 +822,22 @@ function _parseFileListResponse($resp)
         $plistLine = strtok($resp, "\n");
         // $plistFile = "";
         $plCounter = -1;
+		$element = '';
+		$value = '';
         $browseMode = TRUE;
         while ($plistLine) {
-            if (!strpos($plistLine,'@eaDir') && !strpos($plistLine,'.Trash')) list ($element, $value) = explode(': ', $plistLine, 2);
+			// runelog('_parseFileListResponse plistLine', $plistLine);
+            if (!strpos(' '.$plistLine,'@eaDir') && !strpos(' '.$plistLine,'.Trash')) {
+				if (strpos(' '.$plistLine, ': ')) {
+					list ($element, $value) = explode(': ', $plistLine, 2);
+				} else {
+					$element = '';
+					$value = '';
+				}
+			} else {
+				$element = '';
+				$value = '';
+			}
             // $blacklist = ['@eaDir', '.Trash'];
             // if (!strposa($plistLine, $blacklist)) list ($element, $value) = explode(': ', $plistLine, 2);
             if ($element === 'file' OR $element === 'playlist') {
@@ -857,8 +870,17 @@ function _parseFileListResponse($resp)
                     $plistArray[$plCounter]['genre'] = $value;
                 }
             } else {
-                $plistArray[$plCounter][$element] = $value;
-                $plistArray[$plCounter]['Time2'] = songTime($plistArray[$plCounter]['Time']);
+				// runelog('_parseFileListResponse Element', $element);
+				// runelog('_parseFileListResponse Value', $value);
+				// runelog('_parseFileListResponse plistArray [ plCounter ]', $plistArray[$plCounter]);
+				if ( $plCounter > -1 ) {
+					if (($element != '')) {
+						$plistArray[$plCounter][$element] = $value;
+					}
+					if ( $element === 'Time' ) {
+						$plistArray[$plCounter]['Time2'] = songTime($plistArray[$plCounter]['Time']);
+					}
+				}
             }
             $plistLine = strtok("\n");
         }
@@ -873,140 +895,150 @@ function _parseFileListResponse($resp)
 // format Output for "status"
 function _parseStatusResponse($redis, $resp)
 {
-    If (isset($resp)) {
+	if (isset($resp)) {
 		$resp = trim($resp);
 	} else {
 		return null;
 	}
 	if (is_null($resp)) {
-        return null;
-    } else if (empty($resp)) {
+		return null;
+	} else if (empty($resp)) {
 		return null;
 	} else {
-        $plistArray = array();
-        $plistLine = strtok($resp, "\n");
-        $plistFile = "";
-        $plCounter = -1;
-        while ($plistLine) {
-            list ($element, $value) = explode(": ", $plistLine, 2);
-            $plistArray[$element] = $value;
-            $plistLine = strtok("\n");
-        }
-        // "elapsed time song_percent" added to output array
-         $time = explode(":", $plistArray['time']);
-         if ($time[0] != 0 && $time[1] != 0) {
-			$percent = round(($time[0]*100)/$time[1]);
-         } else {
-            $percent = 0;
-         }
-         $plistArray["song_percent"] = $percent;
-         $plistArray["elapsed"] = $time[0];
-         $plistArray["time"] = $time[1];
+		$plistArray = array();
+		$plistLine = strtok($resp, "\n");
+		$plistFile = "";
+		$plCounter = -1;
+		while ($plistLine) {
+			// runelog('_parseStatusResponse plistLine', $plistLine);
+			if (strpos(' '.$plistLine,': ')) {
+				list ($element, $value) = explode(': ', $plistLine, 2);
+				$plistArray[$element] = $value;
+			}
+			$plistLine = strtok("\n");
+		}
+		// "elapsed time song_percent" added to output array
+		if (isset($plistArray['time'])) {
+			$time = explode(":", $plistArray['time']);
+			if ($time[0] != 0 && $time[1] != 0) {
+				$percent = round(($time[0]*100)/$time[1]);
+			} else {
+				$percent = 0;
+			}
+			$plistArray["song_percent"] = $percent;
+			$plistArray["elapsed"] = $time[0];
+			$plistArray["time"] = $time[1];
+		} else {
+			$plistArray["song_percent"] = 0;
+			$plistArray["elapsed"] = 0;
+			$plistArray["time"] = 0;
+		}
 
          // "audio format" output
-        $audio_format = explode(":", $plistArray['audio']);
-		$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
-        switch ($audio_format[0]) {
-            case '48000':
-                // no break
-            case '96000':
-                // no break
-            case '192000':
-            $plistArray['audio_sample_rate'] = rtrim(rtrim(number_format($audio_format[0]), 0), ',');
-                break;
-            case '44100':
-                // no break
-            case '88200':
-                // no break
-            case '176400':
-                // no break
-            case '352800':
-				$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-                break;
-            case 'dsd64':
-                // no break
-            case 'DSD64':
-				if (trim(retval[0]) != '') {
-					$audio_format[2] = $audio_format[1];
-					$audio_format[1] = 'dsd';
-					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-					$plistArray['bitrate'] = intval(44100 * 64 /1000);
+		 if (isset($plistArray['audio'])) {
+			$audio_format = explode(":", $plistArray['audio']);
+			$retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+			switch (strtoupper($audio_format[0])) {
+				case 'DSD64':
+				case 'DSD128':
+				case 'DSD256':
+				case 'DSD512':
+				case 'DSD1024':
+					if (trim($retval[0]) != '') {
+						$audio_format[2] = $audio_format[1];
+						$audio_format[1] = 'dsd';
+						$dsdRate = preg_replace('/[^0-9]/', '', $audio_format[0]);
+						$audio_format[0] = intval(explode(' ', $retval[0])[1]);
+						$plistArray['bitrate'] = intval(44100 * $dsdRate / 1000);
+						$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
+						$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+					}
+					break;
+				case '48000':
+					// no break
+				case '96000':
+					// no break
+				case '192000':
+					// no break
+				case '384000':
+					$plistArray['audio_sample_rate'] = rtrim(rtrim(number_format($audio_format[0]), 0), ',');
+					break;
+				case '44100':
+					// no break
+				case '88200':
+					// no break
+				case '176400':
+					// no break
+				case '352800':
+					// no break
+				default:
 					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				}
-                break;
-            case 'dsd128':
-                // no break
-            case 'DSD128':
-				if (trim(retval[0]) != '') {
-					$audio_format[2] = $audio_format[1];
-					$audio_format[1] = 'dsd';
-					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-					$plistArray['bitrate'] = intval(44100 * 128 / 1000);
-					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				}
-                break;
-            case 'dsd256':
-                // no break
-            case 'DSD256':
-				if (trim(retval[0]) != '') {
-					$audio_format[2] = $audio_format[1];
-					$audio_format[1] = 'dsd';
-					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-					$plistArray['bitrate'] = intval(44100 * 256 / 1000);
-					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				}
-                break;
-            case 'dsd512':
-                // no break
-            case 'DSD512':
-				if (trim(retval[0]) != '') {
-					$audio_format[2] = $audio_format[1];
-					$audio_format[1] = 'dsd';
-					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-					$plistArray['bitrate'] = intval(44100 * 512 / 1000);
-					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				}
-                break;
-            case 'dsd1024':
-                // no break
-            case 'DSD1024':
-				if (trim(retval[0]) != '') {
-					$audio_format[2] = $audio_format[1];
-					$audio_format[1] = 'dsd';
-					$audio_format[0] = intval(explode(' ', $retval[0])[1]);
-					$plistArray['bitrate'] = intval(44100 * 1024 / 1000);
-					$plistArray['audio_sample_rate'] = rtrim(number_format($audio_format[0], 0, ',', '.'),0);
-					$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
-				}
-                break;
-        }
+					break;
+			}
+		} else {
+			$audio_format[2] = 0;
+			$audio_format[1] = '';
+			$dsdRate = 0;
+			$audio_format[0] = 0;
+			$plistArray['bitrate'] = 0;
+			$plistArray['audio_sample_rate'] = 0;
+			$plistArray['audio'] = $audio_format[0].':'.$audio_format[1].':'.$audio_format[2];
+		 }
 		unset($retval);
-        // format "audio_sample_depth" string
-        $plistArray['audio_sample_depth'] = $audio_format[1];
-        // format "audio_channels" string
-        if ($audio_format[2] === "2") $plistArray['audio_channels'] = "Stereo";
-        if ($audio_format[2] === "1") $plistArray['audio_channels'] = "Mono";
-        // if ($audio_format[2] > 2) $plistArray['audio_channels'] = "Multichannel";
+		// format "audio_sample_depth" string
+		$plistArray['audio_sample_depth'] = $audio_format[1];
+		// format "audio_channels" string
+		if (is_numeric($audio_format[2])) {
+			if ($audio_format[2] === "2") {
+				$plistArray['audio_channels'] = "Stereo";
+			} else if ($audio_format[2] === "1") {
+				$plistArray['audio_channels'] = "Mono";
+			} else if ($audio_format[2] > "0") {
+				$plistArray['audio_channels'] = "Multichannel";
+			}
+		} else if ($plistArray['audio_channels'] != '') {
+			// do nothing
+		} else {
+			$plistArray['audio_channels'] = "Stereo";
+		}
 		//
-		// when bitrate is empty/0 use mediainfo to examine the file which is playing
+		// when bitrate still is empty use mediainfo to examine the file which is playing
 		// but only when the filename is available and mediainfo is installed
-		// ignore any line returned by mpd status containing a 'update'
+		// ignore any line returned by mpd status containing 'updating'
 		$status = sysCmd('mpc status | grep -vi updating');
-		if (($plistArray['bitrate'] == '0') && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
-			$retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($status[0]).'" | grep "Overall bit rate  "');
-			$bitrate = preg_replace('/[^0-9]/', '', $retval[0]);
+		// bit rate
+		if ((($plistArray['bitrate'] == '0') || ($plistArray['bitrate'] == '')) && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
+			$retval = sysCmd('mpc -f "[%file%]"');
+			$retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'" | grep "Overall bit rate  "');
+			$bitrate = trim(preg_replace('/[^0-9]/', '', $retval[0]));
 			If (!empty($bitrate)) {
-				$plistArray['bitrate'] = $bitrate;
+				$plistArray['bitrate'] = intval($bitrate);
 			}
 			unset($retval);
 		}
+		// sample rate
+		if ((($plistArray['audio_sample_rate'] == '0') || ($plistArray['audio_sample_rate'] == '')) && (count($status) == 3)) {
+			$retval = sysCmd('mpc -f "[%file%]"');
+			$retval = sysCmd('ffprobe -v error -show_entries stream=sample_rate -of default=noprint_wrappers=1 "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'"');
+			$samplerate = trim(preg_replace('/[^0-9]/', '', $retval[0]));
+			If (!empty($samplerate)) {
+				$plistArray['audio_sample_rate'] = rtrim(number_format($samplerate, 0, ',', '.'),0);
+			}
+			unset($retval);
+		}
+		// sample format
+		// if ((($plistArray['??'] == '0') || ($plistArray['??'] == '')) && (count($status) == 3)) {
+			// $retval = sysCmd('mpc -f "[%file%]"');
+			// $retval = sysCmd('ffprobe -v error -show_entries stream=sample_fmt -of default=noprint_wrappers=1 "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'"');
+			// $sampleformat = trim(preg_replace('/[^0-9]/', '', $retval[0]));
+			// If (!empty($sampleformat)) {
+				// $plistArray['??'] = $sampleformat;
+			// }
+			// unset($retval);
+		// }
 		unset($status);
-    }
-    return $plistArray;
+	}
+	return $plistArray;
 }
 
 function _parseSpopStatusResponse($resp)
@@ -4455,42 +4487,71 @@ function ui_status($mpd, $status)
 
 function ui_libraryHome($redis, $clientUUID=null)
 {
-    // LocalStorage
+	// Internet available 
+    $internetAvailable = $redis->hGet('service', 'internet');
+	// LocalStorage
     $localStorages = countDirs('/mnt/MPD/LocalStorage');
-    // runelog('networkmounts: ',$networkmounts);
+    // runelog('ui_libraryHome - networkmounts: ',$networkmounts);
     // Network mounts
-    $networkmounts = countDirs('/mnt/MPD/NAS');
-    // runelog('networkmounts: ',$networkmounts);
+    $networkMounts = countDirs('/mnt/MPD/NAS');
+    // runelog('ui_libraryHome - networkmounts: ',$networkmounts);
     // USB mounts
-    $usbmounts = countDirs('/mnt/MPD/USB');
-    // runelog('usbmounts: ',$usbmounts);
+    $usbMounts = countDirs('/mnt/MPD/USB');
+    // runelog('ui_libraryHome - usbmounts: ',$usbmounts);
     // Webradios
-    $webradios = count($redis->hKeys('webradios'));
-    // runelog('webradios: ',$webradios);
+	if ($redis->hGet('service', 'webradio')) {
+		$webradios = count($redis->hKeys('webradios'));
+		// runelog('ui_libraryHome - webradios: ',$webradios);
+	} else {
+		$webradios = '';
+	}
+    // Jamendo
+	if ($redis->hGet('service', 'jamendo')) {
+		$jamendo = 1;
+		// runelog('ui_libraryHome - jamendo: ',$jamendo);
+	} else {
+		$jamendo = '';
+	}
     // Dirble
-    $proxy = $redis->hGetall('proxy');
-    $dirblecfg = $redis->hGetAll('dirble');
-    $dirble = json_decode(curlGet($dirblecfg['baseurl'].'amountStation/apikey/'.$dirblecfg['apikey'], $proxy));
-    // runelog('dirble: ',$dirble);
+	if ($redis->hGet('service', 'dirble')) {
+		// dirble is available
+		$proxy = $redis->hGetall('proxy');
+		$dirblecfg = $redis->hGetAll('dirble');
+		$dirble = json_decode(curlGet($dirblecfg['baseurl'].'amountStation/apikey/'.$dirblecfg['apikey'], $proxy));
+		// runelog('ui_libraryHome - dirble: ',$dirble);
+		$dirbleAmount = $dirble->amount;
+	} else {
+		$dirbleAmount = '';
+	}
     // Spotify
-    $spotify = $redis->hGet('spotify', 'enable');
+	if ($redis->hGet('spotify', 'enable')) {
+		$spotify = 1;
+		// runelog('ui_libraryHome - spotify: ',$spotify);
+	} else {
+		$spotify = '';
+	}
     // Check current player backend
     $activePlayer = $redis->get('activePlayer');
     // Bookmarks
-    $redis_bookmarks = $redis->hGetAll('bookmarks');
-    $bookmarks = array();
-    foreach ($redis_bookmarks as $key => $data) {
-        $bookmark = json_decode($data);
-        runelog('bookmark details', $data);
-        // $bookmarks[] = array('bookmark' => $key, 'name' => $bookmark->name, 'path' => $bookmark->path);
-        $bookmarks[] = array('id' => $key, 'name' => $bookmark->name, 'path' => $bookmark->path);
-    }
+	$bookmarks = array();
+	if ($redis->Exists('bookmarks')) {
+		$redis_bookmarks = $redis->hGetAll('bookmarks');
+		$bookmarks = array();
+		foreach ($redis_bookmarks as $key => $data) {
+			$bookmark = json_decode($data);
+			runelog('ui_libraryHome - bookmark details', $data);
+			// $bookmarks[] = array('bookmark' => $key, 'name' => $bookmark->name, 'path' => $bookmark->path);
+			$bookmarks[] = array('id' => $key, 'name' => $bookmark->name, 'path' => $bookmark->path);
+		}
+	} else {
+		$bookmarks[0] = '';
+	}
     // runelog('bookmarks: ',$bookmarks);
     // $jsonHome = json_encode(array_merge($bookmarks, array(0 => array('networkMounts' => $networkmounts)), array(0 => array('USBMounts' => $usbmounts)), array(0 => array('webradio' => $webradios)), array(0 => array('Dirble' => $dirble->amount)), array(0 => array('ActivePlayer' => $activePlayer))));
     // $jsonHome = json_encode(array_merge($bookmarks, array(0 => array('networkMounts' => $networkmounts)), array(0 => array('USBMounts' => $usbmounts)), array(0 => array('webradio' => $webradios)), array(0 => array('Spotify' => $spotify)), array(0 => array('Dirble' => $dirble->amount)), array(0 => array('ActivePlayer' => $activePlayer))));
-    $jsonHome = json_encode(array('bookmarks' => $bookmarks, 'localStorages' => $localStorages, 'networkMounts' => $networkmounts, 'USBMounts' => $usbmounts, 'webradio' => $webradios, 'Spotify' => $spotify, 'Dirble' => $dirble->amount, 'ActivePlayer' => $activePlayer, 'clientUUID' => $clientUUID));
+    $jsonHome = json_encode(array('internetAvailable' => $internetAvailable, 'bookmarks' => $bookmarks, 'localStorages' => $localStorages, 'networkMounts' => $networkMounts, 'USBMounts' => $usbMounts, 'webradio' => $webradios, 'Spotify' => $spotify, 'Dirble' => $dirbleAmount, 'Jamendo' => $jamendo, 'ActivePlayer' => $activePlayer, 'clientUUID' => $clientUUID));
     // Encode UI response
-    runelog('libraryHome JSON: ', $jsonHome);
+    runelog('ui_libraryHome - JSON: ', $jsonHome);
     ui_render('library', $jsonHome);
 }
 

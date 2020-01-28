@@ -2,25 +2,131 @@
 #
 # internet_available_async
 # ------------------------
-# Test to see if an internet connection is available. Disable the artistinfo & lyrics functions when no internet is available
-# This will resolve UI freezing problems
+# Test to determine if an internet connection is available and check all the other services.
+# This will allow graceful disabling of Rune service functionality in the UI.
 #
-# see if we can see google.com, this command will give up after +/-20 seconds (= timeout x retries)
-wget --force-html --spider --timeout=10 --tries=2 https://www.google.com/ > /dev/null 2>&1
+# internet
+# determine if we can see google.com, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://www.google.com/ > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-#	internet connection is available, so make the artist info & lyric files executable
-	chown http.http /srv/http/command/lyric.sh
-	chown http.http /srv/http/command/artist_info.sh
-	chmod 755 /srv/http/command/lyric.sh
-	chmod 755 /srv/http/command/artist_info.sh
-	redis-cli set internetAvailable 1
+#	internet connection is available
+	redis-cli hset service internet 1
+	redis-cli hset service webradio 1
 else
-#	internet connection not available, so make the artist info & lyric files non-executable
-	chown root.root /srv/http/command/lyric.sh
-	chown root.root /srv/http/command/artist_info.sh
-	chmod 600 /srv/http/command/lyric.sh
-	chmod 600 /srv/http/command/artist_info.sh
-	redis-cli set internetAvailable 0
+#	internet connection not available
+	redis-cli hset service internet 0
+	redis-cli hset service webradio 0
+	redis-cli hset service dirble 0
+	redis-cli hset service lastfm 0
+	redis-cli hset service makeitpersonal 0
+	redis-cli hset service musicbrainz 0
+	redis-cli hset service coverartarchiveorg 0
+	redis-cli hset service wikipedia 0
+	redis-cli hset service azlyrics 0
+	redis-cli hset service discogs 0
+	redis-cli hset service fanarttv 0
+	redis-cli hset service jamendo 0
+	exit
+fi
+# dirble
+# determine if we can see dirble.com, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://www.dirble.com/ > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	dirble is available
+	redis-cli hset service dirble 1
+else
+#	dirble is not available
+	redis-cli hset service dirble 0
+fi
+# last.fm
+# determine if we can see ws.audioscrobbler.com, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://ws.audioscrobbler.com/ > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	last.fm is available
+	redis-cli hset service lastfm 1
+else
+#	last.fm is not available
+	redis-cli hset service lastfm 0
+fi
+# makeitpersonal lyrics
+# determine if we can see makeitpersonal.co/, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://makeitpersonal.co/ > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	lyrics is available
+	redis-cli hset service makeitpersonal 1
+else
+#	lyrics is not available
+	redis-cli hset service makeitpersonal 0
+fi
+# musicbrainz
+# determine if we can see musicbrainz.org/ws/2/, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://musicbrainz.org/ws/2/ > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	musicbrainz is available
+	redis-cli hset service musicbrainz 1
+else
+#	musicbrainz is not available
+	redis-cli hset service musicbrainz 0
+fi
+# coverartarchive.org
+# determine if we can see coverartarchive.org, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://coverartarchive.org > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	coverartarchive.org is available
+	redis-cli hset service coverartarchiveorg 1
+else
+#	coverartarchive.org is not available
+	redis-cli hset service coverartarchiveorg 0
+fi
+# wikipedia
+# determine if we can see upload.wikimedia.org, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://upload.wikimedia.org > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	wikipedia is available
+	redis-cli hset service wikipedia 1
+else
+#	wikipedia is not available
+	redis-cli hset service wikipedia 0
+fi
+# azlyrics
+# determine if we can see search.azlyrics.com/search.php, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://search.azlyrics.com/search.php > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	azlyrics is available
+	redis-cli hset service azlyrics 1
+else
+#	azlyrics is not available
+	redis-cli hset service azlyrics 0
+fi
+# discogs
+# determine if we can see www.discogs.com/search, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://www.discogs.com/search > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	discogs is available
+	redis-cli hset service discogs 1
+else
+#	discogs is not available
+	redis-cli hset service discogs 0
+fi
+# fanart.tv
+# determine if we can see webservice.fanart.tv/v3/audio, this command will give up after +/-20 seconds (= timeout x retries)
+wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://webservice.fanart.tv > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	fanart.tv is available
+	redis-cli hset service fanarttv 1
+else
+#	fanart.tv is not available
+	redis-cli hset service fanarttv 0
+fi
+# jamendo
+# determine if the warning message on the jamendo website has been removed, currently the stream links provided do not work
+count=$( curl -s -f --connect-timeout 1 -m 10 --retry 2 "https://developer.jamendo.com/v3.0/radios/stream" | grep -c "WARNING: actually the stream link returned doesn't work" )
+if [ $count -eq 0 ]; then
+#	the warning has gone so assume that jamendo is available
+	redis-cli hset service jamendo 1
+else
+#	the warning is still there, jamendo is not available
+	redis-cli hset service jamendo 0
 fi
 #---
 #End script

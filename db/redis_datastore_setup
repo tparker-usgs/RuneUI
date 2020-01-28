@@ -123,6 +123,19 @@ function redisDatastore($redis,$action) {
 			$redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
 			$redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
 			$redis->hSet('AccessPoint', 'enable-NAT', 1);
+			// Internet services
+			$redis->hSet('service', 'internet', 0);
+			$redis->hSet('service', 'webradio', 0);
+			$redis->hSet('service', 'dirble', 0);
+			$redis->hSet('service', 'lastfm', 0);
+			$redis->hSet('service', 'makeitpersonal', 0);
+			$redis->hSet('service', 'musicbrainz', 0);
+			$redis->hSet('service', 'coverartarchiveorg', 0);
+			$redis->hSet('service', 'wikipedia', 0);
+			$redis->hSet('service', 'azlyrics', 0);
+			$redis->hSet('service', 'discogs', 0);
+			$redis->hSet('service', 'fanarttv', 0);
+			$redis->hSet('service', 'jamendo', 0);
             // player features
             $redis->set('hostname', 'RuneAudio');
             $redis->set('ntpserver', 'pool.ntp.org');
@@ -406,6 +419,19 @@ function redisDatastore($redis,$action) {
 			$redis->hExists('AccessPoint', 'dhcp-option-dns') || $redis->hSet('AccessPoint', 'dhcp-option-dns', '192.168.5.1');
 			$redis->hExists('AccessPoint', 'dhcp-option-router') || $redis->hSet('AccessPoint', 'dhcp-option-router', '192.168.5.1');
 			$redis->hExists('AccessPoint', 'enable-NAT') || $redis->hSet('AccessPoint', 'enable-NAT', 1);
+			// Internet services
+			$redis->hExists('service', 'internet') || $redis->hSet('service', 'internet', 0);
+			$redis->hExists('service', 'webradio') || $redis->hSet('service', 'webradio', 0);
+			$redis->hExists('service', 'dirble') || $redis->hSet('service', 'dirble', 0);
+			$redis->hExists('service', 'lastfm') || $redis->hSet('service', 'lastfm', 0);
+			$redis->hExists('service', 'makeitpersonal') || $redis->hSet('service', 'makeitpersonal', 0);
+			$redis->hExists('service', 'musicbrainz') || $redis->hSet('service', 'musicbrainz', 0);
+			$redis->hExists('service', 'coverartarchiveorg') || $redis->hSet('service', 'coverartarchiveorg', 0);
+			$redis->hExists('service', 'wikipedia') || $redis->hSet('service', 'wikipedia', 0);
+			$redis->hExists('service', 'azlyrics') || $redis->hSet('service', 'azlyrics', 0);
+			$redis->hExists('service', 'discogs') || $redis->hSet('service', 'discogs', 0);
+			$redis->hExists('service', 'fanarttv') || $redis->hSet('service', 'fanarttv', 0);
+			$redis->hExists('service', 'jamendo') || $redis->hSet('service', 'jamendo', 0);
             // player features
             $redis->exists('hostname') || $redis->set('hostname', 'RuneAudio');
             $redis->exists('ntpserver') || $redis->set('ntpserver', 'pool.ntp.org');

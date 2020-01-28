@@ -560,7 +560,7 @@ function renderLibraryHome() {
         divClose = '</div>',
         toggleMPD = '',
         toggleSpotify = '',
-        notMPD = (obj.ActivePlayer === 'Spotify' || obj.ActivePlayer === 'Airplay' || obj.ActivePlayer === 'SpotifyConnect');
+        notMPD = (obj.ActivePlayer === 'Spotify' || obj.ActivePlayer === 'Airplay');
     if(isLocalHost) {
         content = '';
     } else {
@@ -572,10 +572,12 @@ function renderLibraryHome() {
     if (notMPD) {
         toggleMPD = ' inactive';
     }
+	if (chkKey(obj.bookmarks[0])) {
     // bookmarks blocks
-    for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
-        content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
-    }
+		for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
+			content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
+		}
+	}
     if (chkKey(obj.networkMounts)) {
     // network mounts block
 	    if(isLocalHost) {
@@ -716,19 +718,20 @@ function renderLibraryHome() {
 
     // Dirble block
     if (chkKey(obj.Dirble)) {
-        if(isLocalHost) {
-            content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3></div>' + divClose;
-        } else {
-            content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3>radio stations open directory</div>' + divClose;
-        }
+		if(isLocalHost) {
+			content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3></div>' + divClose;
+		} else {
+			content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3>radio stations open directory</div>' + divClose;
+		}
     }
-
-    // Jamendo (static)
-    if(isLocalHost) {
-        content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3></div>' + divClose;
-    } else {
-        content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3>world\'s largest platform for free music</div>' + divClose;
-    }
+    if (chkKey(obj.Jamendo)) {
+		// Jamendo
+		if(isLocalHost) {
+			content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3></div>' + divClose;
+		} else {
+			content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3>world\'s largest platform for free music</div>' + divClose;
+		}
+	}
 
     content += '</div>';
     document.getElementById('home-blocks').innerHTML = content;
@@ -1019,7 +1022,7 @@ function getPlaylistPlain(data) {
     var state = GUI.json.state;
     var content = '', time = '', artist = '', album = '', title = '', name='', str = '', filename = '', path = '', id = 0, songid = '', bottomline = '', totaltime = 0, playlisttime = 0, pos = 0;
     var i, line, lines = data.split('\n'), infos=[];
-    for (i = 1; (line = lines[i]); i += 1) {
+    for (i = 0; (line = lines[i]); i += 1) {
         //infos = line.split(': ');
         infos = line.split(/: (.+)?/);
         if ('Time' === infos[0]) {

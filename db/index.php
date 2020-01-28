@@ -39,19 +39,48 @@ ini_set('display_errors', -1);
 error_reporting('E_ALL');
 // check current player backend
 $activePlayer = $redis->get('activePlayer');
+if (!isset($_POST['browse'])) {
+	$_POST['browse'] = "";
+}
+if (!isset($_POST['browsemode'])) {
+	$_POST['browsemode'] = "";
+}
 if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
     switch ($_GET['cmd']) {
         case 'browse':
+			$file = '/var/log/runeaudio/browse_request_'.$_POST['path'].'.log';
+			$fp = fopen($file, 'w');
+			fwrite($fp, "---browse---\n");
+			fwrite($fp, $_POST['browse']);
+			fwrite($fp, "\n---browsemode---\n");
+			fwrite($fp, $_POST['browsemode']);
+			fwrite($fp, "\n---end---\n");
+			fclose($fp);
             if (isset($_POST['path']) && $_POST['path'] !== '') {
                 if ($_POST['path'] === 'Albums' OR $_POST['path'] === 'Artists' OR $_POST['path'] === 'Genres' OR $_POST['path'] === 'Composer') {
-                    echo json_encode(browseDB($mpd, $_POST['browsemode']));
+                    $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
+					$file = '/var/log/runeaudio/browse_respons_1_'.$_POST['path'].'.log';
+					$fp = fopen($file, 'w');
+					fwrite($fp, $resp);
+					fclose($fp);
+					echo $resp;
                 } else {
-                    echo json_encode(browseDB($mpd, $_POST['browsemode'], $_POST['path']));
+                    $resp = json_encode(browseDB($mpd, $_POST['browse'], $_POST['path']));
+					$file = '/var/log/runeaudio/browse_respons_2_'.$_POST['path'].'.log';
+					$fp = fopen($file, 'w');
+					fwrite($fp, $resp);
+					fclose($fp);
+					echo $resp;
                 }
             } else {
                 if ($activePlayer === 'MPD') {
                     // MPD
-                    echo json_encode(browseDB($mpd, $_POST['browsemode']));
+                    $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
+					$file = '/var/log/runeaudio/browse_respons_3_'.$_POST['path'].'.log';
+					$fp = fopen($file, 'w');
+					fwrite($fp, $resp);
+					fclose($fp);
+					echo $resp;
                 } elseif ($activePlayer === 'Spotify') {
                     // SPOP
                     echo json_encode('home');
@@ -64,13 +93,14 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             // getPlayQueue($mpd2);
             // closeMpdSocket($mpd2);
             if ($activePlayer === 'MPD') {
-                // $resp = trim(getPlayQueue($mpd), "\x7f..\xff\x0..\x1f");
-                // if (substr($resp, 0, 2) == '\n') {
-                    // $resp = substr($resp, 2);
-                // }
-                // echo $resp;
-                echo getPlayQueue($mpd);
-                // echo trim(getPlayQueue($mpd), "\x7f..\xff\x0..\x1f");
+                echo trim(getPlayQueue($mpd));
+				// debug
+				// $resp = getPlayQueue($mpd);
+				// $file = '/var/log/runeaudio/playlist_responce.log';
+				// $fp = fopen($file, 'w');
+				// fwrite($fp, trim($resp));
+				// fclose($fp);
+				// echo $resp;
             } elseif ($activePlayer === 'Spotify') {
                 echo getSpopQueue($spop);
             }
