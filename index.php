@@ -49,8 +49,8 @@ if (!is_localhost() && !isset($_SESSION["login"]) && $redis->get('pwd_protection
     $host  = $_SERVER['HTTP_HOST'];
     $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
     $extra = 'login.php';
-	header("Location: http://$host$uri/$extra");
-	die();
+    header("Location: http://$host$uri/$extra");
+    die();
 }
 // plates: create new engine
 $engine = new \League\Plates\Engine('/srv/http/app/templates');
@@ -70,7 +70,7 @@ $template->activePlayer = $activePlayer;
 $controllers = array(
     'alsamixer',
     'lyric',
-	'artist_info',
+    'artist_info',
     'coverart',
     'credits',
     'dev',

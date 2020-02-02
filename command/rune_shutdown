@@ -50,7 +50,7 @@ systemctl stop nginx
 systemctl stop local-browser
 disablesplash=$( redis-cli hget local_browser disable-splash )
 if [[ $disablesplash == 0 ]] ; then
-	ply-image "$splash"
+    ply-image "$splash"
 fi
 sleep 1
 redis-cli set lock_globalrandom 0

@@ -19,5 +19,5 @@ then
              systemctl start bluealsa-aplay@$BTMAC
        else
              log "Other action " $ACTION
-       fi 
+       fi
 fi

@@ -40,47 +40,47 @@ error_reporting('E_ALL');
 // check current player backend
 $activePlayer = $redis->get('activePlayer');
 if (!isset($_POST['browse'])) {
-	$_POST['browse'] = "";
+    $_POST['browse'] = "";
 }
 if (!isset($_POST['browsemode'])) {
-	$_POST['browsemode'] = "";
+    $_POST['browsemode'] = "";
 }
 if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
     switch ($_GET['cmd']) {
         case 'browse':
-			$file = '/var/log/runeaudio/browse_request_'.$_POST['path'].'.log';
-			$fp = fopen($file, 'w');
-			fwrite($fp, "---browse---\n");
-			fwrite($fp, $_POST['browse']);
-			fwrite($fp, "\n---browsemode---\n");
-			fwrite($fp, $_POST['browsemode']);
-			fwrite($fp, "\n---end---\n");
-			fclose($fp);
+            $file = '/var/log/runeaudio/browse_request_'.$_POST['path'].'.log';
+            $fp = fopen($file, 'w');
+            fwrite($fp, "---browse---\n");
+            fwrite($fp, $_POST['browse']);
+            fwrite($fp, "\n---browsemode---\n");
+            fwrite($fp, $_POST['browsemode']);
+            fwrite($fp, "\n---end---\n");
+            fclose($fp);
             if (isset($_POST['path']) && $_POST['path'] !== '') {
                 if ($_POST['path'] === 'Albums' OR $_POST['path'] === 'Artists' OR $_POST['path'] === 'Genres' OR $_POST['path'] === 'Composer') {
                     $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
-					$file = '/var/log/runeaudio/browse_respons_1_'.$_POST['path'].'.log';
-					$fp = fopen($file, 'w');
-					fwrite($fp, $resp);
-					fclose($fp);
-					echo $resp;
+                    $file = '/var/log/runeaudio/browse_respons_1_'.$_POST['path'].'.log';
+                    $fp = fopen($file, 'w');
+                    fwrite($fp, $resp);
+                    fclose($fp);
+                    echo $resp;
                 } else {
                     $resp = json_encode(browseDB($mpd, $_POST['browse'], $_POST['path']));
-					$file = '/var/log/runeaudio/browse_respons_2_'.$_POST['path'].'.log';
-					$fp = fopen($file, 'w');
-					fwrite($fp, $resp);
-					fclose($fp);
-					echo $resp;
+                    $file = '/var/log/runeaudio/browse_respons_2_'.$_POST['path'].'.log';
+                    $fp = fopen($file, 'w');
+                    fwrite($fp, $resp);
+                    fclose($fp);
+                    echo $resp;
                 }
             } else {
                 if ($activePlayer === 'MPD') {
                     // MPD
                     $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
-					$file = '/var/log/runeaudio/browse_respons_3_'.$_POST['path'].'.log';
-					$fp = fopen($file, 'w');
-					fwrite($fp, $resp);
-					fclose($fp);
-					echo $resp;
+                    $file = '/var/log/runeaudio/browse_respons_3_'.$_POST['path'].'.log';
+                    $fp = fopen($file, 'w');
+                    fwrite($fp, $resp);
+                    fclose($fp);
+                    echo $resp;
                 } elseif ($activePlayer === 'Spotify') {
                     // SPOP
                     echo json_encode('home');
@@ -94,13 +94,13 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             // closeMpdSocket($mpd2);
             if ($activePlayer === 'MPD') {
                 echo trim(getPlayQueue($mpd));
-				// debug
-				// $resp = getPlayQueue($mpd);
-				// $file = '/var/log/runeaudio/playlist_responce.log';
-				// $fp = fopen($file, 'w');
-				// fwrite($fp, trim($resp));
-				// fclose($fp);
-				// echo $resp;
+                // debug
+                // $resp = getPlayQueue($mpd);
+                // $file = '/var/log/runeaudio/playlist_responce.log';
+                // $fp = fopen($file, 'w');
+                // fwrite($fp, trim($resp));
+                // fclose($fp);
+                // echo $resp;
             } elseif ($activePlayer === 'Spotify') {
                 echo getSpopQueue($spop);
             }
@@ -140,19 +140,19 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     sendMpdCommand($mpd, 'clear');
                     addToQueue($mpd, $_POST['path']);
                     sendMpdCommand($mpd, 'play');
-					// send MPD response to UI
-					ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
-					// Get the current track and try to use LastFM to populate a similar playlist
-					$curTrack = getTrackInfo($mpd, $status['song']);
-					if (isset($curTrack[0]['Title'])) {
-						$status['currentartist'] = $curTrack[0]['Artist'];
-						$status['currentsong'] = $curTrack[0]['Title'];
-						$status['currentalbum'] = $curTrack[0]['Album'];
-						$status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
-						$proxy = $redis->hGetall('proxy');
-						$lastfm_apikey = $redis->get('lastfm_apikey');					
-						ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
-					}
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    // Get the current track and try to use LastFM to populate a similar playlist
+                    $curTrack = getTrackInfo($mpd, $status['song']);
+                    if (isset($curTrack[0]['Title'])) {
+                        $status['currentartist'] = $curTrack[0]['Artist'];
+                        $status['currentsong'] = $curTrack[0]['Title'];
+                        $status['currentalbum'] = $curTrack[0]['Album'];
+                        $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
+                        $proxy = $redis->hGetall('proxy');
+                        $lastfm_apikey = $redis->get('lastfm_apikey');
+                        ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
+                    }
                 }
             }
             break;
@@ -471,11 +471,11 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
-					$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
-					waitSyWrk($redis, $jobID);
-					ui_notify('Started Random Play from the playlist', $_POST['playlist']);
-					sleep(3);
-					ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
+                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
+                    waitSyWrk($redis, $jobID);
+                    ui_notify('Started Random Play from the playlist', $_POST['playlist']);
+                    sleep(3);
+                    ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
                 }
             }
             break;
@@ -485,7 +485,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 ui_notify('Use the MPD menu to switch Random Play off', '');
             }
             break;
-	}
+    }
 } else {
   echo 'MPD DB INTERFACE<br>';
   echo 'INTERNAL USE ONLY<br>';

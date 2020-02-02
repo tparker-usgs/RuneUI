@@ -5,9 +5,9 @@ set +e # continue on errors
 # Image reset script
 if [ "$1" == "full" ];
 then
-	echo "Running full cleanup and image initialisation for a distribution image"
+    echo "Running full cleanup and image initialisation for a distribution image"
 else
-	echo "Running quick image initialisation"
+    echo "Running quick image initialisation"
 fi
 #---
 #Before running the script...
@@ -23,9 +23,9 @@ systemctl unmask systemd-journald
 # for a distribution image disable systemd audit to reduce log files. Switch it on for a development image
 if [ "$1" == "full" ];
 then
-	systemctl mask systemd-journald-audit.socket
+    systemctl mask systemd-journald-audit.socket
 else
-	systemctl unmask systemd-journald-audit.socket
+    systemctl unmask systemd-journald-audit.socket
 fi
 # systemctl stops after an erroneous entry, use an array to run through all entries
 declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start)
@@ -166,16 +166,16 @@ then
     rm /usr/local/bin/ply-image
 else
     cp /usr/local/bin/ply-image /usr/bin/ply-image
-	rm /usr/local/bin/ply-image
-	chmod 755 /usr/bin/ply-image
+    rm /usr/local/bin/ply-image
+    chmod 755 /usr/bin/ply-image
 fi
 #
 # make sure that all files are unix format and have the correct ownerships and protections
 # the 'final' option also removes the dos2unix package
 if [ "$1" == "full" ]; then
-	/srv/http/command/convert_dos_files_to_unix_script.sh final
+    /srv/http/command/convert_dos_files_to_unix_script.sh final
 else
-	/srv/http/command/convert_dos_files_to_unix_script.sh
+    /srv/http/command/convert_dos_files_to_unix_script.sh
 fi
 #
 # set lyrics and artistinfo for no internet connection
@@ -187,7 +187,7 @@ chmod 600 /srv/http/command/artist_info.sh
 #for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
 if [ "$1" == "full" ];
 then
-	pacman -Sc --noconfirm
+    pacman -Sc --noconfirm
 fi
 #
 # reset systemd services so that any cached files are replaced by the latest ones
@@ -212,21 +212,21 @@ redis-cli save
 # this takes ages to run, but the zipped distribution image will then be very small
 if [ "$1" == "full" ];
 then
-	redis-cli save
-	echo "Zero filling the file system"
-	# zero fill the file system
-	cd /boot
-	sync
-	cat /dev/zero > zero.file
-	sync
-	rm zero.file
-	sync
-	cd /
-	cat /dev/zero > zero.file
-	sync
-	rm zero.file
-	sync
-	cd /home
+    redis-cli save
+    echo "Zero filling the file system"
+    # zero fill the file system
+    cd /boot
+    sync
+    cat /dev/zero > zero.file
+    sync
+    rm zero.file
+    sync
+    cd /
+    cat /dev/zero > zero.file
+    sync
+    rm zero.file
+    sync
+    cd /home
 fi
 #
 # shutdown & poweroff

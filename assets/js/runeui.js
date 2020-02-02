@@ -156,11 +156,11 @@ $(document).ready(function () {
             idleTime = 0;
             if (viewScreenSaver) {
                 $('.tab-content').show("slow");
-				if ((smallScreenSaver) && (isLocalHost)) {
-					$('.small-screen-saver-content').hide("slow");
-				} else {
-					$('.screen-saver-content').hide("slow");
-				}
+                if ((smallScreenSaver) && (isLocalHost)) {
+                    $('.small-screen-saver-content').hide("slow");
+                } else {
+                    $('.screen-saver-content').hide("slow");
+                }
                 $('#menu-bottom').show("slow");
                 $('#menu-top').show("slow");
                 viewScreenSaver = 0;
@@ -177,13 +177,13 @@ function timerIncrement() {
         idleTime = 0;
     }
     if (idleTime > SStime) {
-		removePlayerScrollbars();
+        removePlayerScrollbars();
         $('.tab-content').hide("slow");
-		if ((smallScreenSaver) && (isLocalHost)) {
-			$('.small-screen-saver-content').show("slow");
-		} else {
-			$('.screen-saver-content').show("slow");
-		}
+        if ((smallScreenSaver) && (isLocalHost)) {
+            $('.small-screen-saver-content').show("slow");
+        } else {
+            $('.screen-saver-content').show("slow");
+        }
         $('#menu-bottom').hide("slow");
         $('#menu-top').hide("slow");
         viewScreenSaver = 1;
@@ -192,25 +192,25 @@ function timerIncrement() {
 
 // remove/add scrollbars depending on playback state
 function checkPlayerState() {
-	if ($('#playback').hasClass('active')) {
-		removePlayerScrollbars();
-	} else {
-		addPlayerScrollbars();
-	}
+    if ($('#playback').hasClass('active')) {
+        removePlayerScrollbars();
+    } else {
+        addPlayerScrollbars();
+    }
 }
 
 // remove scrollbars form player window
 function removePlayerScrollbars() {
-	$('html').addClass('disable-scrollbar-0');
-	$('#section-index').addClass('disable-scrollbar-1');
-	$('#section-index').addClass('disable-scrollbar-2');
+    $('html').addClass('disable-scrollbar-0');
+    $('#section-index').addClass('disable-scrollbar-1');
+    $('#section-index').addClass('disable-scrollbar-2');
 }
 
 // add scrollbars form player window
 function addPlayerScrollbars() {
-	$('html').removeClass('disable-scrollbar-0');
-	$('#section-index').removeClass('disable-scrollbar-1');
-	$('#section-index').removeClass('disable-scrollbar-2');
+    $('html').removeClass('disable-scrollbar-0');
+    $('#section-index').removeClass('disable-scrollbar-1');
+    $('#section-index').removeClass('disable-scrollbar-2');
 }
 
 // update countdown
@@ -572,15 +572,15 @@ function renderLibraryHome() {
     if (notMPD) {
         toggleMPD = ' inactive';
     }
-	if (chkKey(obj.bookmarks[0])) {
+    if (chkKey(obj.bookmarks[0])) {
     // bookmarks blocks
-		for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
-			content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
-		}
-	}
+        for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
+            content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
+        }
+    }
     if (chkKey(obj.networkMounts)) {
     // network mounts block
-	    if(isLocalHost) {
+        if(isLocalHost) {
             if (obj.networkMounts === 0) {
                 if (notMPD) {
                     content += divOpen + '<div id="home-nas" class="home-block inactive"><i class="fa fa-sitemap"></i><h3>Network mounts (0)</h3></div>' + divClose;
@@ -600,7 +600,7 @@ function renderLibraryHome() {
             } else {
                 content += divOpen + '<div id="home-nas" class="home-block' + toggleMPD + '" data-path="NAS"><i class="fa fa-sitemap"></i><h3>Network mounts (' + obj.networkMounts + ')</h3>network attached storages</div>' + divClose;
             }
-		}
+        }
     }
     if (chkKey(obj.localStorages)) {
     // local storages block
@@ -718,20 +718,20 @@ function renderLibraryHome() {
 
     // Dirble block
     if (chkKey(obj.Dirble)) {
-		if(isLocalHost) {
-			content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3></div>' + divClose;
-		} else {
-			content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3>radio stations open directory</div>' + divClose;
-		}
+        if(isLocalHost) {
+            content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3></div>' + divClose;
+        } else {
+            content += divOpen + '<div id="home-dirble" class="home-block' + toggleMPD + '" data-plugin="Dirble" data-path="Dirble"><i class="fa fa-globe"></i><h3>Dirble</h3>radio stations open directory</div>' + divClose;
+        }
     }
     if (chkKey(obj.Jamendo)) {
-		// Jamendo
-		if(isLocalHost) {
-			content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3></div>' + divClose;
-		} else {
-			content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3>world\'s largest platform for free music</div>' + divClose;
-		}
-	}
+        // Jamendo
+        if(isLocalHost) {
+            content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3></div>' + divClose;
+        } else {
+            content += divOpen + '<div id="home-jamendo" class="home-block' + toggleMPD + '" data-plugin="Jamendo" data-path="Jamendo"><i class="fa fa-play-circle-o"></i><h3>Jamendo<span id="home-count-jamendo"></span></h3>world\'s largest platform for free music</div>' + divClose;
+        }
+    }
 
     content += '</div>';
     document.getElementById('home-blocks').innerHTML = content;
@@ -936,8 +936,8 @@ function updateGUI() {
         } else {
             $('#single').removeClass('btn-primary');
         }
-		if (GUI.currentsong !== currentsong) {
-			$('#lyric-text-overlay').html('');
+        if (GUI.currentsong !== currentsong) {
+            $('#lyric-text-overlay').html('');
             if (GUI.stream !== 'radio') {
                 $.ajax({
                     url: '/lyric/',
@@ -946,8 +946,8 @@ function updateGUI() {
                     },
                     cache: false
                 });
-			}
-		}
+            }
+        }
         GUI.currentsong = currentsong;
         var currentalbumstring = currentartist + ' - ' + currentalbum;
         if (GUI.old_state !== GUI.state || GUI.currentalbum !== currentalbumstring) {
@@ -971,24 +971,24 @@ function updateGUI() {
                             $('#artist-bio-ss').html(info.artist.bio.content.substring(0,550) + ' ... ');
                             $('#artist-bio-overlay').html(info.artist.bio.summary);
                             $('#artist-bio-full-overlay').html(info.artist.bio.content);
-						} else {
+                        } else {
                             $('#artist-bio-ss').html(currentartist + ', sorry, no details available ');
                             $('#artist-bio-overlay').html(currentartist + ', sorry, no details available ');
                             $('#artist-bio-full-overlay').html(currentartist + ', sorry, no details available ');
-						}
+                        }
                         if (typeof info.artist !== 'undefined' && info.artist.similar.artist[0].name !== '') {
                             $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
                             $('#addinfo-text-overlay').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name + '<br>&nbsp;<br>&nbsp;');
-						} else {
-							$('#addinfo-text-ss').html('');
+                        } else {
+                            $('#addinfo-text-ss').html('');
                             $('#addinfo-text-overlay').html('');
-						}
+                        }
                         if (typeof info.artist !== 'undefined' && info.artist.image[2] !== '') {
                             $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
-							$('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                            $('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
                         } else {
-							$('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
-							$('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
+                            $('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
+                            $('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
                         }
                     },
                     cache: false
@@ -1163,7 +1163,7 @@ function renderUI(text){
             // console.log('playlist = ', GUI.playlist);
         }
     }
-	checkPlayerState()
+    checkPlayerState()
 }
 
 // render saved playlists
@@ -1933,12 +1933,12 @@ function libraryHome(text) {
         getDB({
             path: 'Webradio',
             uplevel: 0
-		});
+        });
     }
-	if (GUI.forceGUIupdate === true) {
+    if (GUI.forceGUIupdate === true) {
         GUI.forceGUIupdate = false;
-		renderLibraryHome();
-	}
+        renderLibraryHome();
+    }
 }
 
 // list of in range wlans
@@ -2328,29 +2328,29 @@ if ($('#section-index').length) {
             }
         });
 
-		// switch between scrollable an non-scrollable features of the playback screen
+        // switch between scrollable an non-scrollable features of the playback screen
         $('#panel-sx').click(function(){
-			addPlayerScrollbars();
+            addPlayerScrollbars();
         });
-		
+        
         $('#panel-dx').click(function(){
-			addPlayerScrollbars();
+            addPlayerScrollbars();
         });
-		
+        
         $('button#songinfo-open').click(function(){
-			addPlayerScrollbars();
+            addPlayerScrollbars();
         });
-		
+        
         $('#playback').click(function(){
-			removePlayerScrollbars();
+            removePlayerScrollbars();
         });
 
         $('button#songinfo-close-x').click(function(){
-			removePlayerScrollbars();
+            removePlayerScrollbars();
         });
 
         $('button#songinfo-close-cancel').click(function(){
-			removePlayerScrollbars();
+            removePlayerScrollbars();
         });
 
 
@@ -3035,7 +3035,7 @@ if ($('#section-index').length) {
         // play source manual switch
         $('#playsource-mpd').click(function(){
             if ($(this).hasClass('inactive')) {
-				GUI.forceGUIupdate = true;
+                GUI.forceGUIupdate = true;
                 $.ajax({
                     url: '/command/?switchplayer=MPD',
                     cache: false
@@ -3047,7 +3047,7 @@ if ($('#section-index').length) {
         $('#playsource-spotify').click(function(){
             if ($(this).hasClass('inactive')) {
                 if (GUI.libraryhome.Spotify === '1') {
-					GUI.forceGUIupdate = true;
+                    GUI.forceGUIupdate = true;
                     $.ajax({
                         url: '/command/?switchplayer=Spotify',
                         cache: false
@@ -3266,7 +3266,7 @@ if ($('#section-index').length) {
                     $('#dlnaTidalBox').removeClass('boxed-group');
                 }
             });
-			
+            
             // show/hide UPnP/dlna Google Music name form
             $('#dlnaGoogle').change(function(){
                 if ($(this).prop('checked')) {
@@ -3277,7 +3277,7 @@ if ($('#section-index').length) {
                     $('#dlnaGoogleBox').removeClass('boxed-group');
                 }
             });
-			
+            
             // show/hide UPnP/dlna Qobuz streaming service name form
             $('#dlnaQobuz').change(function(){
                 if ($(this).prop('checked')) {

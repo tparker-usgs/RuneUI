@@ -1,5 +1,5 @@
 #!/usr/bin/php
-<?php 
+<?php
 /*
  * Copyright (C) 2013-2014 RuneAudio Team
  * http://www.runeaudio.com
@@ -103,10 +103,10 @@ foreach ($nics as $nic => $nicdetail) {
                 sysCmd('ip link set '.$nic.' up');
         }
         runelog('  try nic: '.$nic);
-        
+
         // test if service is enabled
         sysCmd('systemctl enable netctl-auto@'.$nic.'.service');
-        
+
         // get stored profiles
         $wlans_profiles = sysCmd("netctl-auto list | cut -c3-");
         $redis->set('stored_profiles',json_encode($wlans_profiles));
@@ -190,62 +190,62 @@ if (!empty($removed_nics)) {
 
 // start AP if configured and no IP is assigned
 if ($redis->hGet('AccessPoint', 'enabled') === '1') {
-	runelog('------------------ try to start AP if no IP is assigned ---------------------');
-	$got_one_IP = false;
-	if (!empty($active_nics)) {
-		foreach($active_nics as $nic) {
-			if (($nic === "wlan0") && (sysCmd('ip address show dev '.$nic.' | grep inet | wc -l')[0] !== '0')) {
-				runelog('########### got one IP for nic: '.$nic);
-				$got_one_IP = true;
-			}
-		}
-	}
+    runelog('------------------ try to start AP if no IP is assigned ---------------------');
+    $got_one_IP = false;
+    if (!empty($active_nics)) {
+        foreach($active_nics as $nic) {
+            if (($nic === "wlan0") && (sysCmd('ip address show dev '.$nic.' | grep inet | wc -l')[0] !== '0')) {
+                runelog('########### got one IP for nic: '.$nic);
+                $got_one_IP = true;
+            }
+        }
+    }
    // Start AP only if a supported nic is available by checking for the line '* AP' in the section 'Supported interface modes:' in the output from 'iw list'
    // 'iw list' returns nothing when some unsupported nics are installed. These unsupported nics seem only to work when netctl-auto@wlan0 is running, don't switch it off
    $iwAccessPointInfo = sysCmd("iw list | sed -n '/Supported interface modes:/,/:/p' | grep '* AP$'");
    if (($got_one_IP === false) && (trim($iwAccessPointInfo[0]) == '* AP')) {
    //if ($got_one_IP === false) {
-		runelog('########### no IP => start AP on wlan0');
-		sysCmd('systemctl stop netctl-auto@wlan0');
-		// change AP name
-		$file = '/etc/hostapd/hostapd.conf';
+        runelog('########### no IP => start AP on wlan0');
+        sysCmd('systemctl stop netctl-auto@wlan0');
+        // change AP name
+        $file = '/etc/hostapd/hostapd.conf';
         $newArray = wrk_replaceTextLine($file, '', 'ssid=', 'ssid='.$redis->hGet("AccessPoint", "ssid"));
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);
-		// change passphrase
-		$file = '/etc/hostapd/hostapd.conf';
+        // change passphrase
+        $file = '/etc/hostapd/hostapd.conf';
         $newArray = wrk_replaceTextLine($file, '', 'wpa_passphrase=', 'wpa_passphrase='.$redis->hGet("AccessPoint", "passphrase"));
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);
-		sysCmd('systemctl start hostapd');
-		// change dhcp-range
-		$file = '/etc/dnsmasq.conf';
+        sysCmd('systemctl start hostapd');
+        // change dhcp-range
+        $file = '/etc/dnsmasq.conf';
         $newArray = wrk_replaceTextLine($file, '', 'dhcp-range=', 'dhcp-range='.$redis->hGet("AccessPoint", "dhcp-range"));
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);
-		// change dhcp-option
-		$file = '/etc/dnsmasq.conf';
+        // change dhcp-option
+        $file = '/etc/dnsmasq.conf';
         $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:dns-server,', 'dhcp-option-force=option:dns-server,'.$redis->hGet("AccessPoint", "dhcp-option-dns"));
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);
-		$file = '/etc/dnsmasq.conf';
+        $file = '/etc/dnsmasq.conf';
         $newArray = wrk_replaceTextLine($file, '', 'dhcp-option-force=option:router,', 'dhcp-option-force=option:router,'.$redis->hGet("AccessPoint", "dhcp-option-router"));
         $fp = fopen($file, 'w');
         $return = fwrite($fp, implode("", $newArray));
         fclose($fp);
-		sysCmd('systemctl start dnsmasq');
-		sysCmd('ip addr add '.$redis->hGet("AccessPoint", "ip-address").'/24 broadcast '.$redis->hGet("AccessPoint", "broadcast").' dev wlan0');
-		if ($redis->hGet('AccessPoint', 'enable-NAT') === '1') {
-			sysCmd('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
-			sysCmd('iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT');
-			sysCmd('iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT');
-			sysCmd('sysctl net.ipv4.ip_forward=1');
-		}
-	}
+        sysCmd('systemctl start dnsmasq');
+        sysCmd('ip addr add '.$redis->hGet("AccessPoint", "ip-address").'/24 broadcast '.$redis->hGet("AccessPoint", "broadcast").' dev wlan0');
+        if ($redis->hGet('AccessPoint', 'enable-NAT') === '1') {
+            sysCmd('iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE');
+            sysCmd('iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT');
+            sysCmd('iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT');
+            sysCmd('sysctl net.ipv4.ip_forward=1');
+        }
+    }
 }
 // start AP end
 

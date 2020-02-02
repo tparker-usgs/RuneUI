@@ -48,7 +48,7 @@ runelog('--------------------------- start Audio Outputs refresh ---------------
 if ($lock === '0') {
     $redis->set('lock_refresh_ao', '1');
     wrk_mpdconf($redis, 'refresh');
-    ui_notify('Audio Output', 'configuration changed.');    
+    ui_notify('Audio Output', 'configuration changed.');
     sleep(1);
     $redis->set('lock_refresh_ao', '0');
 } else {

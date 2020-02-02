@@ -46,7 +46,7 @@ runelog('WORKER mount_async.php STARTING...');
 
 $allmounted = $redis->get('allmounted');
 if (!$allmounted) {
-	// parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
-	$allmounted = wrk_sourcemount($redis, 'mountall', null, true, false);
-	$redis->set('allmounted', $allmounted);
+    // parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
+    $allmounted = wrk_sourcemount($redis, 'mountall', null, true, false);
+    $redis->set('allmounted', $allmounted);
 }

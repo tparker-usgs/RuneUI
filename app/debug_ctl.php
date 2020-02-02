@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Copyright (C) 2013 RuneAudio Team
  * http://www.runeaudio.com

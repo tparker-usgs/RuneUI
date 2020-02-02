@@ -3,7 +3,7 @@
 # the spotifyd package must be installed first
 # there is no standard arch arm pacman version available
 # a custom spotifyd-rune package is available for armv6 (Pi1) and armv7 (pi2) on github
-# see here for the packages: 
+# see here for the packages:
 # see here for documentation: https://github.com/Spotifyd/spotifyd
 #
 set -x # echo all commands to cli
@@ -12,10 +12,10 @@ set +e # continue on errors
 # is spotifyd installed?
 if pacman -Q spotifyd ;
 then
-	echo "spotifyd installed"
+    echo "spotifyd installed"
 else
-	echo "spotifyd not installed - terminating"
-	exit 0
+    echo "spotifyd not installed - terminating"
+    exit 0
 fi
 #
 # make sure that the spotifyd redis varaiables are initialised

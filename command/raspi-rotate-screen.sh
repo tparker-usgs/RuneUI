@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Variables
+# Variables
 CONF_DIR="/srv/http/command"
 HOOKS_DIR="$CONF_DIR"
 HOOKS_SPLASH_FILE="$HOOKS_DIR/01-bootsplash.sh"
@@ -10,66 +10,65 @@ XORG_CONF_FILE="$XORG_CONF_DIR/99-raspi-rotate.conf"
 
 function usage
 {
-	echo "usage: $0 [rotation]"
-	echo "where rotation is one of:"
-	echo "    normal:                 no rotation"
-	echo "    cw, clockwise:          rotate 90° clockwise"
-	echo "    ccw, counter-clockwise: rotate 90° counter-clockwise"
-	echo "    ud:                     rotate 180°"
-	exit
+    echo "usage: $0 [rotation]"
+    echo "where rotation is one of:"
+    echo "    normal:                 no rotation"
+    echo "    cw, clockwise:          rotate 90° clockwise"
+    echo "    ccw, counter-clockwise: rotate 90° counter-clockwise"
+    echo "    ud:                     rotate 180°"
+    exit
 }
 
-#Parse argument and set variables
+# Parse argument and set variables
 if [ "$#" -gt 0 ]; then
         case "$1" in
         normal|NORMAL)
                 ROTATE="NORMAL"
-		MATRIX="1 0 0 0 1 0 0 0 1"
+        MATRIX="1 0 0 0 1 0 0 0 1"
                 ;;
         cw|clockwise|CW|CLOCKWISE)
                 ROTATE="CW"
-		MATRIX="0 1 0 -1 0 1 0 0 1"
+        MATRIX="0 1 0 -1 0 1 0 0 1"
                 ;;
         ccw|counter-clockwise|CCW|COUNTER-CLOCKWISE)
                 ROTATE="CCW"
-		MATRIX="0 -1 1 1 0 0 0 0 1"
+        MATRIX="0 -1 1 1 0 0 0 0 1"
                 ;;
         ud|upside-down|UD|UPSIDE-DOWN)
                 ROTATE="UD"
-		MATRIX="-1 0 1 0 -1 1 0 0 1"
+        MATRIX="-1 0 1 0 -1 1 0 0 1"
                 ;;
         *)
-		usage
-		;;
+        usage
+        ;;
         esac
 else
-	usage
+    usage
 fi
 
-#Build the config file
+# Build the config file
 TMP_FILE=$(mktemp /tmp/rotate.XXXXXX)
 
 if [ "$ROTATE" = "NORMAL" ]; then
-	grep -v "Option.*rotate.*ROTATION_SETTING" $XORG_TEMPLATE > $TMP_FILE
+    grep -v "Option.*rotate.*ROTATION_SETTING" $XORG_TEMPLATE > $TMP_FILE
 else
-	sed "s/ROTATION_SETTING/$ROTATE/" $XORG_TEMPLATE > $TMP_FILE
+    sed "s/ROTATION_SETTING/$ROTATE/" $XORG_TEMPLATE > $TMP_FILE
 fi
 
 sed -i "s/MATRIX_SETTING/$MATRIX/" $TMP_FILE
 
-#Install the config file
+# Install the config file
 mkdir -p "$XORG_CONF_DIR"
 chmod 644 "$TMP_FILE"
 mv "$TMP_FILE" "$XORG_CONF_FILE"
 
-#Run hooks
-#if [ -d "$HOOKS_DIR" ] ; then
-#	for f in $HOOKS_DIR/?*.sh ; do
-#		[ -x "$f" ] && . "$f"
-#	done
-#	unset f
-#fi
+# Run hooks
+# if [ -d "$HOOKS_DIR" ] ; then
+    # for f in $HOOKS_DIR/?*.sh ; do
+        # [ -x "$f" ] && . "$f"
+    # done
+    # unset f
+# fi
 eval $HOOKS_SPLASH_FILE $1
 
 echo "Rotation set to $ROTATE"
-

@@ -25,7 +25,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with RuneAudio; see the file COPYING.  If not, see
 #  <http://www.gnu.org/licenses/gpl-3.0.txt>.
-# 
+#
 #  file: command/orion_optimize.sh
 #  version: 1.3
 #  coder: Simone De Gregori
@@ -37,14 +37,14 @@ ver="1.3"
 ####################
 mpdprio_nice () {
 count=1
-for pid in $(pgrep -w mpd); 
+for pid in $(pgrep -w mpd);
 do
-    if ((count == 3)) 
+    if ((count == 3))
     then
         echo "### Set priority for: mpd-player thread ###";
         renice -15 $pid;
     fi
-    if ((count == 4))  
+    if ((count == 4))
     then
         echo "### Set priority for: mpd-output thread ###";
         renice -18 $pid;
@@ -60,14 +60,14 @@ done
 
 mpdprio_default () {
 count=1
-for pid in $(pgrep -w mpd); 
+for pid in $(pgrep -w mpd);
 do
-    if ((count == 3)) 
+    if ((count == 3))
     then
         echo "### Set priority for: mpd-player thread ###";
         renice 20 $pid;
     fi
-    if ((count == 4))  
+    if ((count == 4))
     then
         echo "### Set priority for: mpd-output thread ###";
         renice 20 $pid;
@@ -83,9 +83,9 @@ done
 
 # set cifsd priority
 cifsprio () {
-local "${@}" 
-if (( -n ${pid})) 
-then 
+local "${@}"
+if (( -n ${pid}))
+then
 echo "### Set priority for: cifsd ###"
 renice ${prio} ${pid}
 fi
@@ -97,7 +97,7 @@ modKschedLatency () {
     # RaspberryPi
     if (($((10#${hw})) == "1"))
     then
-	    echo "RaspberryPi"
+        echo "RaspberryPi"
         echo ${s01} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s01}
         sndusb_profile nrpacks=${u01}
@@ -107,7 +107,7 @@ modKschedLatency () {
     # CuBox
     if (($((10#${hw})) == "2"))
     then
-	    echo "CuBox"
+        echo "CuBox"
         echo ${s02} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s02}
         sndusb_profile nrpacks=${u02}
@@ -117,7 +117,7 @@ modKschedLatency () {
     if (($((10#${hw})) == "3"))
     then
         echo "UDOO"
-		echo ${s03} > /proc/sys/kernel/sched_latency_ns
+        echo ${s03} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s03}
         sndusb_profile nrpacks=${u03}
         echo "USB nrpacks="${u03}
@@ -125,7 +125,7 @@ modKschedLatency () {
     # BeagleBoneBlack
     if (($((10#${hw})) == "4"))
     then
-	    echo "BeagleBoneBlack"
+        echo "BeagleBoneBlack"
         echo ${s04} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s04}
         sndusb_profile nrpacks=${u04}
@@ -134,7 +134,7 @@ modKschedLatency () {
     # Compulab Utilite
     if (($((10#${hw})) == "5"))
     then
-	    echo "Utilite"
+        echo "Utilite"
         echo ${s04} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s04}
         sndusb_profile nrpacks=${u04}
@@ -143,7 +143,7 @@ modKschedLatency () {
     # Cubietruck
     if (($((10#${hw})) == "6"))
     then
-	    echo "Cubietruck"
+        echo "Cubietruck"
         echo ${s06} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s06}
         sndusb_profile nrpacks=${u06}
@@ -152,16 +152,16 @@ modKschedLatency () {
     # Cubox-i
     if (($((10#${hw})) == "7"))
     then
-		echo "Cubox-i"
+        echo "Cubox-i"
         echo ${s07} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s07}
         sndusb_profile nrpacks=${u07}
         echo "USB nrpacks="${u07}
     fi
     # RaspberryPi2/3
-    if (($((10#${hw})) == "8")) 
+    if (($((10#${hw})) == "8"))
     then
-	    echo "RaspberryPi2/3"
+        echo "RaspberryPi2/3"
         echo ${s08} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s08}
         # sndusb_profile nrpacks=${u08}    nrpacks not supported anymore on newer kernels
@@ -170,16 +170,16 @@ modKschedLatency () {
     # ODROID C1
     if (($((10#${hw})) == "9"))
     then
-	    echo "ODROIDC1"
+        echo "ODROIDC1"
         echo ${s09} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s09}
         # sndusb_profile nrpacks=${u09}    nrpacks not supported anymore on newer kernels
         # echo "USB nrpacks="${u09}
     fi
     # ODROID C2
-    if (($((10#${hw})) == "10")) 
+    if (($((10#${hw})) == "10"))
     then
-		echo "ODROIDC2"
+        echo "ODROIDC2"
         echo ${s10} > /proc/sys/kernel/sched_latency_ns
         echo "sched_latency_ns = "${s10}
         # sndusb_profile nrpacks=${u10}    nrpacks not supported anymore on newer kernels
@@ -204,7 +204,7 @@ mpc play > /dev/null 2>&1
 ##################
 # common startup #
 ##################
-#if [ "$PID" != null  ]; then 
+#if [ "$PID" != null  ]; then
 #echo "Set priority for: cifsd"
 #renice -20 $PID
 #fi
@@ -280,7 +280,7 @@ if [ "$1" == "OrionV3_iqaudio" ]; then
 ifconfig eth0 mtu 1000
 ifconfig eth0 txqueuelen 4000
 echo 0 > /proc/sys/vm/swappiness
-#modKschedLatency hw=$2 s01=139950 s02=2000000 s03=2000000 s04=2000000 s05=2000000 s06=2000000 s07=2000000 s08=2000000 s09=2000000 s10=2000000 u01=2 u02=2 u03=2 u04=2 u05=2 u06=2 u07=2 u08=2 u09=2 u10=2 
+#modKschedLatency hw=$2 s01=139950 s02=2000000 s03=2000000 s04=2000000 s05=2000000 s06=2000000 s07=2000000 s08=2000000 s09=2000000 s10=2000000 u01=2 u02=2 u03=2 u04=2 u05=2 u06=2 u07=2 u08=2 u09=2 u10=2
 if [ "$2" == "01" ]; then
     echo 1500000 > /proc/sys/kernel/sched_latency_ns
     echo 950000 > /proc/sys/kernel/sched_rt_period_us
@@ -300,7 +300,7 @@ if [ "$1" == "OrionV3_berrynosmini" ]; then
 ifconfig eth0 mtu 1000
 ifconfig eth0 txqueuelen 4000
 echo 0 > /proc/sys/vm/swappiness
-#modKschedLatency hw=$2 s01=139950 s02=2000000 s03=2000000 s04=2000000 s05=2000000 s06=2000000 s07=2000000 s08=2000000 s09=2000000 s10=2000000 u01=2 u02=2 u03=2 u04=2 u05=2 u06=2 u07=2 u08=2 u09=2 u10=2 
+#modKschedLatency hw=$2 s01=139950 s02=2000000 s03=2000000 s04=2000000 s05=2000000 s06=2000000 s07=2000000 s08=2000000 s09=2000000 s10=2000000 u01=2 u02=2 u03=2 u04=2 u05=2 u06=2 u07=2 u08=2 u09=2 u10=2
 if [ "$2" == "01" ]; then
     echo 60 > /proc/sys/vm/swappiness
     echo 145655 > /proc/sys/kernel/sched_latency_ns
@@ -332,7 +332,7 @@ echo "flush DEV sound profile 'fake'"
 fi
 
 if [ "$1" == "" ]; then
-echo "Orion Optimize Script v$ver" 
+echo "Orion Optimize Script v$ver"
 echo "Usage: $0 {default|RuneAudio|ACX|Orion|OrionV2|OrionV3_iqaudio|OrionV3_berrynosmini|Um3ggh1U} {architectureID}"
 exit 1
 fi

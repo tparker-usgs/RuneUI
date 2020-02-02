@@ -48,84 +48,84 @@ runelog('WORKER set_mpd_volume.php STARTING...');
 // what we are trying to do is set the mpd volume to preset start volume
 // and store a value of the last known mpd volume to be used when switching players
 if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
-	// Start MPD (if  not started) in order to set the startup volume (if needed and if set) then kill MPD (if required)
-	$retval = sysCmd('systemctl is-active mpd');
-	if ($retval[0] === 'active') {
-		// do nothing
-	} else {
-		sysCmd('systemctl start mpd');
-	}
-	unset($retval);
-	$mpdstartvolume = $redis->get('mpd_start_volume');
-	// sometimes mpd fails to start correctly (e.g. when the incorrect audio card overlay is specified)
-	// then it will never return a volume value so limit the number of retries with a counter
-	$retries_volume = 40;
-	if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
-		if ($mpdstartvolume != -1) {
-			do {
-				sleep(2);
-				// retry until MPD is up and returns the any valid volume value
-				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-				$initvolume = trim($retval[0]);
-				unset($retval);
-				if ($initvolume == $mpdstartvolume) {
-					// no need to do anything, volume is correct
-					$mpdvolume = $mpdstartvolume;
-				} else if ($initvolume == 'n/a') {
-					// something wrong, mismatch between redis and mpd 'disabled' values
-					$retries_volume = 0;
-					// set values so that mpd is not restarted
-					$mpdvolume = $mpdstartvolume;
-					$initvolume = $mpdstartvolume;
-				} else {
-					// set the mpd volume, do a soft increase/decrease
-					$setvolume = $initvolume-round((($initvolume-$mpdstartvolume)/2), 0, PHP_ROUND_HALF_UP);
-					$retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-					$mpdvolume = trim($retval[0]);
-					unset($retval);
-				}
-			} while (($mpdstartvolume != $mpdvolume) && (--$retries_volume > 0));
-		} else {
-			do {
-				sleep(2);
-				// retry until MPD is up and returns the any valid volume value
-				$retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-				$mpdvolume = trim($retval[0]);
-				unset($retval);
-				if ($mpdvolume == 'n/a') {
-					// mpd has returned something but, will not return an actual value
-					// default to 100%
-					$mpdvolume = 100;
-				}
-			} while ((!is_numeric($mpdvolume)) && (--$retries_volume > 0));
-		}
-	} else {
-		// mixer_type is disabled so set volume variable to 100%
-		$mpdvolume = 100;
-	}
-	// Save the last known MPD volume
-	if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
-		// save the values only when the active plater is MPD
-		if ($retries_volume > 0) {
-			// correctly set or disabled
-			$redis->set('lastmpdvolume', $mpdvolume);
-			sysCmd('mpc volume '.$mpdvolume);
-		} else if ($mpdstartvolume != -1) {
-			// failed to set it, but start volume has a value
-			$redis->set('lastmpdvolume', $mpdstartvolume);
-			sysCmd('mpc volume '.$mpdstartvolume);
-		} else {
-			// set it to 100% when we don't have a value
-			$redis->set('lastmpdvolume', 100);
-			sysCmd('mpc volume 100');
-		}
-		// start mpd if required
-		$retval = sysCmd('systemctl is-active mpd');
-		if ($retval[0] === 'active') {
-			// do nothing
-		} else {
-			sysCmd('systemctl start mpd');
-		}
-		unset($retval);
-	}
+    // Start MPD (if  not started) in order to set the startup volume (if needed and if set) then kill MPD (if required)
+    $retval = sysCmd('systemctl is-active mpd');
+    if ($retval[0] === 'active') {
+        // do nothing
+    } else {
+        sysCmd('systemctl start mpd');
+    }
+    unset($retval);
+    $mpdstartvolume = $redis->get('mpd_start_volume');
+    // sometimes mpd fails to start correctly (e.g. when the incorrect audio card overlay is specified)
+    // then it will never return a volume value so limit the number of retries with a counter
+    $retries_volume = 40;
+    if ($redis->hGet('mpdconf', 'mixer_type') != 'disabled') {
+        if ($mpdstartvolume != -1) {
+            do {
+                sleep(2);
+                // retry until MPD is up and returns the any valid volume value
+                $retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+                $initvolume = trim($retval[0]);
+                unset($retval);
+                if ($initvolume == $mpdstartvolume) {
+                    // no need to do anything, volume is correct
+                    $mpdvolume = $mpdstartvolume;
+                } else if ($initvolume == 'n/a') {
+                    // something wrong, mismatch between redis and mpd 'disabled' values
+                    $retries_volume = 0;
+                    // set values so that mpd is not restarted
+                    $mpdvolume = $mpdstartvolume;
+                    $initvolume = $mpdstartvolume;
+                } else {
+                    // set the mpd volume, do a soft increase/decrease
+                    $setvolume = $initvolume-round((($initvolume-$mpdstartvolume)/2), 0, PHP_ROUND_HALF_UP);
+                    $retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+                    $mpdvolume = trim($retval[0]);
+                    unset($retval);
+                }
+            } while (($mpdstartvolume != $mpdvolume) && (--$retries_volume > 0));
+        } else {
+            do {
+                sleep(2);
+                // retry until MPD is up and returns the any valid volume value
+                $retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
+                $mpdvolume = trim($retval[0]);
+                unset($retval);
+                if ($mpdvolume == 'n/a') {
+                    // mpd has returned something but, will not return an actual value
+                    // default to 100%
+                    $mpdvolume = 100;
+                }
+            } while ((!is_numeric($mpdvolume)) && (--$retries_volume > 0));
+        }
+    } else {
+        // mixer_type is disabled so set volume variable to 100%
+        $mpdvolume = 100;
+    }
+    // Save the last known MPD volume
+    if (($redis->get('activePlayer') == 'MPD') && ($redis->hGet('spotifyconnect', 'track_id') == '')) {
+        // save the values only when the active plater is MPD
+        if ($retries_volume > 0) {
+            // correctly set or disabled
+            $redis->set('lastmpdvolume', $mpdvolume);
+            sysCmd('mpc volume '.$mpdvolume);
+        } else if ($mpdstartvolume != -1) {
+            // failed to set it, but start volume has a value
+            $redis->set('lastmpdvolume', $mpdstartvolume);
+            sysCmd('mpc volume '.$mpdstartvolume);
+        } else {
+            // set it to 100% when we don't have a value
+            $redis->set('lastmpdvolume', 100);
+            sysCmd('mpc volume 100');
+        }
+        // start mpd if required
+        $retval = sysCmd('systemctl is-active mpd');
+        if ($retval[0] === 'active') {
+            // do nothing
+        } else {
+            sysCmd('systemctl start mpd');
+        }
+        unset($retval);
+    }
 }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Copyright (C) 2013-2014 RuneAudio Team
  * http://www.runeaudio.com
@@ -67,7 +67,7 @@ $template->hostname = $redis->get('hostname');
 
 
 $source = netMounts($redis, 'read');
-if($source !== true) { 
+if($source !== true) {
     foreach ($source as $mp) {
         if (wrk_checkStrSysfile('/proc/mounts', '/mnt/MPD/NAS/'.$mp['name'])) {
             $mp['status'] = 1;

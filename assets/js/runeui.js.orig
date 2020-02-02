@@ -537,7 +537,7 @@ function renderLibraryHome() {
     }
     if (chkKey(obj.networkMounts)) {
     // network mounts block
-	    if(isLocalHost) {
+        if(isLocalHost) {
             if (obj.networkMounts === 0) {
                 if (notMPD) {
                     content += divOpen + '<div id="home-nas" class="home-block inactive"><i class="fa fa-sitemap"></i><h3>Network mounts (0)</h3></div>' + divClose;
@@ -557,7 +557,7 @@ function renderLibraryHome() {
             } else {
                 content += divOpen + '<div id="home-nas" class="home-block' + toggleMPD + '" data-path="NAS"><i class="fa fa-sitemap"></i><h3>Network mounts (' + obj.networkMounts + ')</h3>network attached storages</div>' + divClose;
             }
-		}
+        }
     }
     if (chkKey(obj.localStorages)) {
     // local storages block
@@ -857,7 +857,7 @@ function updateGUI() {
             $('#artist-bio-overlay').html('');
             $('#artist-image-overlay').css('background-image', '');
             $('#addinfo-text-overlay').html('');
-			$('#lyric-text-overlay').html('');
+            $('#lyric-text-overlay').html('');
             if (GUI.stream !== 'radio') {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
@@ -873,15 +873,15 @@ function updateGUI() {
                             $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
                             $('#addinfo-text-overlay').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name + '<br>&nbsp;<br>&nbsp;');
                             $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
-							$('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                            $('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
                         } else {
                             $('#artist-bio-ss').html(' sorry, no info available ');
                             $('#artist-bio-overlay').html(' sorry, no info available ');
                             $('#addinfo-text-ss').html('');
                             $('#addinfo-text-overlay').html('');
-							$('#lyric-text-overlay').html('');
-							$('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
-							$('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
+                            $('#lyric-text-overlay').html('');
+                            $('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
+                            $('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
                         }
                     },
                     cache: false
@@ -1838,12 +1838,12 @@ function libraryHome(text) {
         getDB({
             path: 'Webradio',
             uplevel: 0
-		});
+        });
     }
-	if (GUI.forceGUIupdate === true) {
+    if (GUI.forceGUIupdate === true) {
         GUI.forceGUIupdate = false;
-		renderLibraryHome();
-	}
+        renderLibraryHome();
+    }
 }
 
 // list of in range wlans
@@ -2914,7 +2914,7 @@ if ($('#section-index').length) {
         // play source manual switch
         $('#playsource-mpd').click(function(){
             if ($(this).hasClass('inactive')) {
-				GUI.forceGUIupdate = true;
+                GUI.forceGUIupdate = true;
                 $.ajax({
                     url: '/command/?switchplayer=MPD',
                     cache: false
@@ -2926,7 +2926,7 @@ if ($('#section-index').length) {
         $('#playsource-spotify').click(function(){
             if ($(this).hasClass('inactive')) {
                 if (GUI.libraryhome.Spotify === '1') {
-					GUI.forceGUIupdate = true;
+                    GUI.forceGUIupdate = true;
                     $.ajax({
                         url: '/command/?switchplayer=Spotify',
                         cache: false

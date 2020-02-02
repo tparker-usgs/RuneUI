@@ -39,4 +39,3 @@ if ($proxy['enable'] === '1') {
 } else {
     echo curlGet(substr($_SERVER["REQUEST_URI"], 5));
 }
- 

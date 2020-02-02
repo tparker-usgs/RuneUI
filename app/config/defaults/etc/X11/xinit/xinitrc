@@ -4,7 +4,7 @@ export DISPLAY=":0" &
 
 # start the touchscreen calibration utility
 # needed for some screens (Pollin 7" tft)
-# for this to work you have to disable loading midori 
+# for this to work you have to disable loading midori
 #xinput_calibrator &
 
 # set power management options

@@ -58,32 +58,32 @@
         if (isset($_POST['mpdvol']['start_volume'])) {
             $redis->get('mpd_start_volume') == $_POST['mpdvol']['start_volume'] || $redis->set('mpd_start_volume', $_POST['mpdvol']['start_volume']);
         }
-	}
-	if (isset($_POST['mpd'])) {
+    }
+    if (isset($_POST['mpd'])) {
         if (isset($_POST['mpd']['crossfade'])) {
             sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
         }
-		if ($_POST['mpd']['globalrandom'] == "1") {
+        if ($_POST['mpd']['globalrandom'] == "1") {
             if ($redis->get('globalrandom') != 1) {
-				$redis->set('globalrandom', 1);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-			}
+                $redis->set('globalrandom', 1);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            }
         } else {
             if ($redis->get('globalrandom') != 0) {
-				$redis->set('globalrandom', 0);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-			}
+                $redis->set('globalrandom', 0);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            }
         }
-		if (isset($_POST['mpd']['addrandom'])) {
+        if (isset($_POST['mpd']['addrandom'])) {
             $redis->get('addrandom') == $_POST['mpd']['addrandom'] || $redis->set('addrandom', $_POST['mpd']['addrandom']);
         }
-		if ($_POST['mpd']['mpd_autoplay'] == "1") {
+        if ($_POST['mpd']['mpd_autoplay'] == "1") {
             $redis->get('mpd_autoplay') == 1 || $redis->set('mpd_autoplay', 1);
         } else {
             $redis->get('mpd_autoplay') == 0 || $redis->set('mpd_autoplay', 0);
         }
     }
-	// ----- RESET GLOBAL RANDOM -----
+    // ----- RESET GLOBAL RANDOM -----
     if ($_POST['resetrp'] == 1) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
  }
 waitSyWrk($redis, $jobID);
@@ -98,18 +98,18 @@ $template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
 $template->mpd['crossfade'] = $crossfade[1];
 if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
-	// random source is a playlist
-	$playlist = readlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-	$first_pl = strripos($playlist, '/') + 1;
-	$length_pl = stripos($playlist, '.m3u') - $first_pl;
-	$playlist = trim(substr($playlist, $first_pl, $length_pl));
-	if ($playlist != '') {
-		$template->ramdomsource = "Playlist '".$playlist."' is selected as random source";
-	} else {
-		$template->ramdomsource = 'Full MPD library is selected as random source';
-	}
+    // random source is a playlist
+    $playlist = readlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+    $first_pl = strripos($playlist, '/') + 1;
+    $length_pl = stripos($playlist, '.m3u') - $first_pl;
+    $playlist = trim(substr($playlist, $first_pl, $length_pl));
+    if ($playlist != '') {
+        $template->ramdomsource = "Playlist '".$playlist."' is selected as random source";
+    } else {
+        $template->ramdomsource = 'Full MPD library is selected as random source';
+    }
 } else {
-	$template->ramdomsource = 'Full MPD library is selected as random source';
+    $template->ramdomsource = 'Full MPD library is selected as random source';
 }
 if ($redis->hGet('mpdconf', 'version') >= '0.21.00') $template->mpdv21 = true;
 // check integrity of /etc/network/interfaces
@@ -154,7 +154,7 @@ if(!hashCFG('check_mpd', $redis)) {
         }
         $audio_cards[] = $acard_data;
     }
-	osort($audio_cards, 'extlabel');
+    osort($audio_cards, 'extlabel');
     // debug
     // print_r($audio_cards);
     $template->acards = $audio_cards;

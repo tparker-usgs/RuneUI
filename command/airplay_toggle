@@ -49,15 +49,15 @@ $status = $argv[1]; // "on" or "off"
 switch($status) {
     case "on":
         // start Airplay
-		$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaytoggle', 'action' => 'start'));
-		waitSyWrk($redis, $jobID);
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaytoggle', 'action' => 'start'));
+        waitSyWrk($redis, $jobID);
         // send notify
         ui_notify('AirPlay', 'Playback has been switched to an incoming Airplay stream.');
         break;
     case "off":
         // stop Airplay
-		$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaytoggle', 'action' => 'stop'));
-		waitSyWrk($redis, $jobID);
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplaytoggle', 'action' => 'stop'));
+        waitSyWrk($redis, $jobID);
         // send notify
         ui_notify('AirPlay', 'Airplay playback has completed. The player is now unlocked.');
         break;

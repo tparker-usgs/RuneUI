@@ -85,7 +85,7 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
             if (strpos($_GET['cmd'], 'seek') === 0) {
                 $seek = explode(" ", $_GET['cmd']);
                 $_GET['cmd'] = 'seek '.($seek[2] * 1000);
-            }                
+            }
             if (strpos($_GET['cmd'], 'play') === 0 && strpos($_GET['cmd'], ' ') === 4) {
                 $play_track = explode(" ", $_GET['cmd']);
                 $_GET['cmd'] = 'goto '.($play_track[1] + 1);
@@ -101,7 +101,7 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
         }
     }
     echo $response;
-// default response  
+// default response
 } else {
     echo 'MPD COMMAND INTERFACE<br>';
     echo 'INTERNAL USE ONLY<br>';

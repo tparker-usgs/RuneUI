@@ -50,16 +50,16 @@ $redis->Del('usbmounts');
 $usbmounts = sysCmd("df -hl | grep '/mnt/MPD/USB'");
 foreach ($usbmounts as $line) {
     $line = array_values(array_filter(explode(' ', trim($line))));
-	// fix any spaces in volume name
-	for ($cnt = 6; isset($line[$cnt]); $cnt++) {
-		if (!empty($line[$cnt])) {
-			$line[5] .= " ".$line[$cnt];
-		}
-		// should not be needed, but break at cnt 16 just in case, this is 10 spaces
-		if ($cnt = 16 ) {
-			break;
-		}
-	}
+    // fix any spaces in volume name
+    for ($cnt = 6; isset($line[$cnt]); $cnt++) {
+        if (!empty($line[$cnt])) {
+            $line[5] .= " ".$line[$cnt];
+        }
+        // should not be needed, but break at cnt 16 just in case, this is 10 spaces
+        if ($cnt = 16 ) {
+            break;
+        }
+    }
     // debug
     // print_r($line);
     $redis->hSet('usbmounts', $line[0], json_encode(array('device' => $line[0], 'size' => $line[1], 'use' => $line[4], 'name' => substr(trim($line[5]), 9))));
@@ -78,10 +78,10 @@ sysCmd('udevil clean');
 // check if usb autorebuild is set
 if ($redis->get('usb_db_autorebuild')) {
     //$mpd = openMpdSocket('/run/mpd/socket');
-	// next two lines should eventually be removed, at the moment mpd seems to have problems when requested to do an update too quickly
-	sysCmd('sync ; mpc status');
-	sleep(5);
-	sysCmd('mpc update USB');
+    // next two lines should eventually be removed, at the moment mpd seems to have problems when requested to do an update too quickly
+    sysCmd('sync ; mpc status');
+    sleep(5);
+    sysCmd('mpc update USB');
 }
 // update MPD database
 //sendMpdCommand($mpd, 'update USB');

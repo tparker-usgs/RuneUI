@@ -31,9 +31,9 @@
  *  coder: Frank Friedmann (aka hondagx35)
  *
  */
- 
+
 // include('/srv/http/app/libs/runeaudio.php');
- 
+
  if (isset($_POST)) {
     //
     if (isset($_POST['alsa_settings'])) {
@@ -51,8 +51,8 @@ foreach ($cards as $z => $card) {
     preg_match("/'([^']+)'/", $control, $value);
     $data = sysCmd('/usr/bin/amixer -c '.$card.' sget "'.$value[1].'"');
     foreach ($data as $i => $entry) {
-	  if ($i != 0) 
-	    $template->alsa_controls[$card][$value[1]][split(": ", ltrim($entry))[0]] = str_getcsv(split(": ", ltrim($entry))[1], ' ', "'");
+      if ($i != 0)
+        $template->alsa_controls[$card][$value[1]][split(": ", ltrim($entry))[0]] = str_getcsv(split(": ", ltrim($entry))[1], ' ', "'");
     }
   }
 }

@@ -31,9 +31,9 @@ set +e
 count=$( cat /srv/http/app/templates/header.php | grep -c '$this->hostname' )
 if [ $count -gt 2 ]
 then
-	redis-cli set playernamemenu '1'
+    redis-cli set playernamemenu '1'
 else
-	redis-cli set playernamemenu '0'
+    redis-cli set playernamemenu '0'
 fi
 redis-cli set restoreact '0'
 mpc update Webradio

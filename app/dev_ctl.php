@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Copyright (C) 2013-2014 RuneAudio Team
  * http://www.runeaudio.com
@@ -38,16 +38,16 @@ if (isset($_POST)) {
         if ((isset($_POST['mode']['dev']['enable'])) && ($_POST['mode']['dev']['enable'])) {
             // create worker job (start udevil)
             if ($redis->get('dev') != 1) {
-				$redis->set('dev', 1);
-				$redis->get('debug') == 1 || $redis->set('debug', 1);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
-			}
+                $redis->set('dev', 1);
+                $redis->get('debug') == 1 || $redis->set('debug', 1);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+            }
         } else {
             // create worker job (stop udevil)
             if ($redis->get('dev') != 0) {
-				$redis->set('dev', 0);
-				$jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
-			}
+                $redis->set('dev', 0);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambarestart'));
+            }
         }
     // ----- DEBUG -----
         if ((isset($_POST['mode']['debug']['enable'])) && ($_POST['mode']['debug']['enable'])) {
@@ -94,7 +94,7 @@ if (isset($_POST)) {
             // create worker job (set value and reset/restart MPD/Airplay)
             $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayoutputformat', 'args' => $_POST['mode']['airplayof']));
         }
-		// ----- Airplay output rate -----
+        // ----- Airplay output rate -----
         if ((isset($_POST['mode']['airplayor'])) && ($_POST['mode']['airplayor'] != $redis->hget('airplay', 'alsa_output_rate'))) {
             // create worker job (set on and reset/restart MPD/Airplay)
             $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayoutputrate', 'args' => $_POST['mode']['airplayor']));
@@ -116,14 +116,14 @@ if (isset($_POST)) {
         } else {
             // create worker job (disable php opcache)
             $redis->get('opcache') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'opcache', 'action' => 'disable'));
-        }    
+        }
     }
     if (isset($_POST['syscmd'])) {
         // ----- BLANK PLAYERID -----
         if ($_POST['syscmd'] === 'blankplayerid') {
-			$redis->set('playerid','');
-			$redis->set('hwplatformid','');
-		}
+            $redis->set('playerid','');
+            $redis->set('hwplatformid','');
+        }
         // ----- CLEARIMG -----
         if ($_POST['syscmd'] === 'clearimg') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'clearimg'));
         // ----- CHECK FS PERMISSIONS -----

@@ -36,7 +36,7 @@
 if (isset($_POST)) {
     if (isset($_POST['settings'])) {
         //ui_notify_async("'wrkcmd' => 'apcfg', 'action' => 'config'", $_POST['settings']);
-        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'apcfg', 'action' => 'config', 'args' => $_POST['settings']));        
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'apcfg', 'action' => 'config', 'args' => $_POST['settings']));
     }
 }
 

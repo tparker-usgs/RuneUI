@@ -8,7 +8,7 @@ ob_implicit_flush(0);
 
 ob_clean();
 flush();
-         
+
 // --------------------- All players ---------------------
 if (FALSE === $redis->Get('lyric')) {
     $redis->Set('lyric', 0);
