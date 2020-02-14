@@ -33,57 +33,74 @@
  */
 // Environment vars
 // common include
-include($_SERVER['HOME'].'/app/config/config.php');
-//include('/var/www/app/config/config.php');
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
+    include($_SERVER['HOME'].'/app/config/config.php');
+} else {
+    include('/var/www/app/config/config.php');
+}
 ini_set('display_errors', -1);
 error_reporting('E_ALL');
 // check current player backend
 $activePlayer = $redis->get('activePlayer');
-if (!isset($_POST['browse'])) {
-    $_POST['browse'] = "";
+
+$param = array("cmd" => "", "browsemode" => "", "path" => "", "query" => "", "querytype" => "", "id" => "", "name" => "", "args" => "", "plid" => "", "radio" => "", "filename" => "", "playlist" => "");
+// debug
+if (!empty($_GET['cmd'])) {
+    $file = '/var/log/runeaudio/db_index_'.$_GET['cmd'].'.log';
+} else {
+    $file = '/var/log/runeaudio/db_index.log';    
 }
-if (!isset($_POST['browsemode'])) {
-    $_POST['browsemode'] = "";
+$fp = fopen($file, 'w');
+fwrite($fp, "---start params---");
+foreach ($_GET as $key => $value) {
+    // fill the param array
+    $param[$key] = $value;
+    fwrite($fp, "\n---".$key."---\n");
+    fwrite($fp, $value);
 }
-if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
-    switch ($_GET['cmd']) {
+foreach ($_POST as $key => $value) {
+    // fill the param array
+    $param[$key] = $value;
+    fwrite($fp, "\n---".$key."---\n");
+    fwrite($fp, $value);
+}
+fwrite($fp, "\n---end params---\n");
+if (!empty($param['cmd'])) {
+    switch ($param['cmd']) {
         case 'browse':
-            $file = '/var/log/runeaudio/browse_request_'.$_POST['path'].'.log';
-            $fp = fopen($file, 'w');
-            fwrite($fp, "---browse---\n");
-            fwrite($fp, $_POST['browse']);
-            fwrite($fp, "\n---browsemode---\n");
-            fwrite($fp, $_POST['browsemode']);
-            fwrite($fp, "\n---end---\n");
-            fclose($fp);
-            if (isset($_POST['path']) && $_POST['path'] !== '') {
-                if ($_POST['path'] === 'Albums' OR $_POST['path'] === 'Artists' OR $_POST['path'] === 'Genres' OR $_POST['path'] === 'Composer') {
-                    $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
-                    $file = '/var/log/runeaudio/browse_respons_1_'.$_POST['path'].'.log';
-                    $fp = fopen($file, 'w');
+            if (!empty($param['path'])) {
+                if ($param['path'] === 'Albums' OR $param['path'] === 'Artists' OR $param['path'] === 'Genres' OR $param['path'] === 'Composer') {
+                    $resp = json_encode(browseDB($mpd, $param['browsemode']));
+                    // debug
+                    fwrite($fp, "\n---response---\n");
                     fwrite($fp, $resp);
-                    fclose($fp);
+                    fwrite($fp, "\n---end response---\n");
                     echo $resp;
                 } else {
-                    $resp = json_encode(browseDB($mpd, $_POST['browse'], $_POST['path']));
-                    $file = '/var/log/runeaudio/browse_respons_2_'.$_POST['path'].'.log';
-                    $fp = fopen($file, 'w');
+                    $resp = json_encode(browseDB($mpd, $param['browsemode'], $param['path']));
+                    // debug
+                    fwrite($fp, "\n---response---\n");
                     fwrite($fp, $resp);
-                    fclose($fp);
+                    fwrite($fp, "\n---end response---\n");
                     echo $resp;
                 }
             } else {
                 if ($activePlayer === 'MPD') {
                     // MPD
-                    $resp = json_encode(browseDB($mpd, $_POST['browsemode']));
-                    $file = '/var/log/runeaudio/browse_respons_3_'.$_POST['path'].'.log';
-                    $fp = fopen($file, 'w');
+                    $resp = json_encode(browseDB($mpd, $param['browsemode']));
+                    // debug
+                    fwrite($fp, "\n---response---\n");
                     fwrite($fp, $resp);
-                    fclose($fp);
+                    fwrite($fp, "\n---end response---\n");
                     echo $resp;
                 } elseif ($activePlayer === 'Spotify') {
                     // SPOP
-                    echo json_encode('home');
+                    $resp = json_encode('home');
+                    // debug
+                    fwrite($fp, "\n---response---\n");
+                    fwrite($fp, $resp);
+                    fwrite($fp, "\n---end response---\n");
+                    echo $resp;
                 }
             }
             break;
@@ -93,55 +110,53 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             // getPlayQueue($mpd2);
             // closeMpdSocket($mpd2);
             if ($activePlayer === 'MPD') {
-                echo trim(getPlayQueue($mpd));
+                $resp = trim(getPlayQueue($mpd));
                 // debug
-                // $resp = getPlayQueue($mpd);
-                // $file = '/var/log/runeaudio/playlist_responce.log';
-                // $fp = fopen($file, 'w');
-                // fwrite($fp, trim($resp));
-                // fclose($fp);
-                // echo $resp;
+                fwrite($fp, "\n---response---\n");
+                fwrite($fp, $resp);
+                fwrite($fp, "\n---end response---\n");
+                echo $resp;
             } elseif ($activePlayer === 'Spotify') {
                 echo getSpopQueue($spop);
             }
             break;
         case 'add':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addToQueue($mpd, $_POST['path']);
+                if (!empty($param['path'])) {
+                    addToQueue($mpd, $param['path']);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'addplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
+                if (!empty($param['path'])) {
+                    $status = _parseStatusresponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
-                    addToQueue($mpd, $_POST['path'], 1, $pos);
+                    addToQueue($mpd, $param['path'], 1, $pos);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'addreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                if (!empty($param['path'])) {
+                    addToQueue($mpd, $param['path'], 1, 0, 1); // last argument is for the "clear" command
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'lastfmaddreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
+                if (!empty($param['path'])) {
                     sendMpdCommand($mpd, 'clear');
-                    addToQueue($mpd, $_POST['path']);
+                    addToQueue($mpd, $param['path']);
                     sendMpdCommand($mpd, 'play');
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                     // Get the current track and try to use LastFM to populate a similar playlist
                     $curTrack = getTrackInfo($mpd, $status['song']);
                     if (isset($curTrack[0]['Title'])) {
@@ -150,7 +165,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $status['currentalbum'] = $curTrack[0]['Album'];
                         $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
                         $proxy = $redis->hGetall('proxy');
-                        $lastfm_apikey = $redis->get('lastfm_apikey');
+                        $lastfm_apikey = $redis->get('lastfm_apikey');                    
                         ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
                     }
                 }
@@ -158,41 +173,41 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             break;
         case 'update':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    sendMpdCommand($mpd, "update \"".html_entity_decode($_POST['path'])."\"");
+                if (!empty($param['path'])) {
+                    sendMpdCommand($mpd, "update \"".html_entity_decode($param['path'])."\"");
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'MPD update DB path:', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'MPD update DB path:', 'text' => $param['path']));
                 }
             }
             break;
         case 'rescan':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    sendMpdCommand($mpd, "rescan \"".html_entity_decode($_POST['path'])."\"");
+                if (!empty($param['path'])) {
+                    sendMpdCommand($mpd, "rescan \"".html_entity_decode($param['path'])."\"");
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'MPD rescan DB path:', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'MPD rescan DB path:', 'text' => $param['path']));
                 }
             }
             break;
         case 'search':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['query']) && isset($_GET['querytype'])) {
-                    echo json_encode(searchDB($mpd, $_GET['querytype'], $_POST['query']));
+                if (isset($param['query']) && isset($param['querytype'])) {
+                    echo json_encode(searchDB($mpd, $param['querytype'], $param['query']));
                 }
             }
             break;
         case 'bookmark':
-            if (isset($_POST['path'])) {
-                if (saveBookmark($redis, $_POST['path'])) {
-                    ui_notify('Bookmark saved', $_POST['path'].' added to bookmarks');
+            if (!empty($param['path'])) {
+                if (saveBookmark($redis, $param['path'])) {
+                    ui_notify('Bookmark saved', $param['path'].' added to bookmarks');
                     ui_libraryHome($redis);
                 } else {
                     ui_notify('Error saving bookmark', 'please try again later');
                 }
             }
-            if (isset($_POST['id'])) {
-                if (deleteBookmark($redis,$_POST['id'])) {
-                    ui_notify('Bookmark deleted', '"' . $_POST['name'] . '" successfully removed');
+            if (isset($param['id'])) {
+                if (deleteBookmark($redis,$param['id'])) {
+                    ui_notify('Bookmark deleted', '"' . $param['name'] . '" successfully removed');
                     ui_libraryHome($redis);
                 } else {
                     ui_notify('Error deleting bookmark', 'Please try again later');
@@ -205,49 +220,49 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 $dirblecfg = $redis->hGetAll('dirble');
                 $token = '?all=1&token='.$dirblecfg['apikey'];
                 $dirblecfg['baseurl'] = 'http://api.dirble.com/v2';
-                if (isset($_POST['querytype'])) {
-                    // if ($_POST['querytype'] === 'amountStation') {
-                    if ($_POST['querytype'] === 'amountStation') {
+                if (isset($param['querytype'])) {
+                    // if ($param['querytype'] === 'amountStation') {
+                    if ($param['querytype'] === 'amountStation') {
                         //$dirble = json_decode(curlGet($dirblecfg['baseurl'].'amountStation/apikey/'.$dirblecfg['apikey'], $proxy));
                         //echo $dirble->amount;
                         echo '4048'; // Just a fake value, we need a new implementation of this call in v2 api.
                     }
                     // Get primaryCategories
-                    if ($_POST['querytype'] === 'categories' OR $_POST['querytype'] === 'primaryCategories' ) {
+                    if ($param['querytype'] === 'categories' OR $param['querytype'] === 'primaryCategories' ) {
                         echo curlGet($dirblecfg['baseurl'].'/categories/primary'.$token, $proxy);
                     }
                     // Get childCategories by primaryid
-                    if ($_POST['querytype'] === 'childs' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/category/'.$_POST['args'].'/childs'.$token, $proxy);
+                    if ($param['querytype'] === 'childs' && isset($param['args'])) {
+                        echo curlGet($dirblecfg['baseurl'].'/category/'.$param['args'].'/childs'.$token, $proxy);
                     }
                     // Get childStations by primaryid
-                    if ($_POST['querytype'] === 'childs-stations' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/category/'.$_POST['args'].'/stations'.$token, $proxy);
+                    if ($param['querytype'] === 'childs-stations' && isset($param['args'])) {
+                        echo curlGet($dirblecfg['baseurl'].'/category/'.$param['args'].'/stations'.$token, $proxy);
                     }
                     // Get stations by primaryid
-                    if ($_POST['querytype'] === 'stations' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/category/'.$_POST['args'].'/stations'.$token, $proxy);
+                    if ($param['querytype'] === 'stations' && isset($param['args'])) {
+                        echo curlGet($dirblecfg['baseurl'].'/category/'.$param['args'].'/stations'.$token, $proxy);
                     }
                     // Get station by ID
-                    if ($_POST['querytype'] === 'station' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/station/'.$_POST['args'].$token, $proxy);
+                    if ($param['querytype'] === 'station' && isset($param['args'])) {
+                        echo curlGet($dirblecfg['baseurl'].'/station/'.$param['args'].$token, $proxy);
                     }
                     // Search radio station
-                    if ($_POST['querytype'] === 'search' && isset($_POST['args'])) {
-                        echo curlGet($dirblecfg['baseurl'].'/search/'.urlencode($_POST['args']).$token, $proxy);
+                    if ($param['querytype'] === 'search' && isset($param['args'])) {
+                        echo curlGet($dirblecfg['baseurl'].'/search/'.urlencode($param['args']).$token, $proxy);
                     }
                     // Get stations by continent
-                    //if ($_POST['querytype'] === 'continent' && isset($_POST['args'])) {
-                    //    echo curlGet($dirblecfg['baseurl'].'continent/apikey'.$dirblecfg['apikey'].'/continent/'.$_POST['args'], $proxy);
+                    //if ($param['querytype'] === 'continent' && isset($param['args'])) {
+                    //    echo curlGet($dirblecfg['baseurl'].'continent/apikey'.$dirblecfg['apikey'].'/continent/'.$param['args'], $proxy);
                     //}
                     // Get stations by country
-                    //if ($_POST['querytype'] === 'country' && isset($_POST['args'])) {
-                    //    echo curlGet($dirblecfg['baseurl'].'country/apikey'.$dirblecfg['apikey'].'/country/'.$_POST['args'], $proxy);
+                    //if ($param['querytype'] === 'country' && isset($param['args'])) {
+                    //    echo curlGet($dirblecfg['baseurl'].'country/apikey'.$dirblecfg['apikey'].'/country/'.$param['args'], $proxy);
                     //}
                     // Add station
-                    //if ($_POST['querytype'] === 'addstation' && isset($_POST['args'])) {
-                        // input array $_POST['args'] = array('name' => 'value', 'streamurl' => 'value', 'website' => 'value', 'country' => 'value', 'directory' => 'value')
-                    //    echo curlPost($dirblecfg['baseurl'].'station/apikey/'.$dirblecfg['apikey'], $_POST['args'], $proxy);
+                    //if ($param['querytype'] === 'addstation' && isset($param['args'])) {
+                        // input array $param['args'] = array('name' => 'value', 'streamurl' => 'value', 'website' => 'value', 'country' => 'value', 'directory' => 'value')
+                    //    echo curlPost($dirblecfg['baseurl'].'station/apikey/'.$dirblecfg['apikey'], $param['args'], $proxy);
                     //}
                 }
             }
@@ -256,7 +271,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             if ($activePlayer === 'MPD') {
                 $apikey = $redis->hGet('jamendo', 'clientid');
                 $proxy = $redis->hGetall('proxy');
-                if ($_POST['querytype'] === 'radio') {
+                if ($param['querytype'] === 'radio') {
                     $jam_channels = json_decode(curlGet('http://api.jamendo.com/v3.0/radios/?client_id='.$apikey.'&format=json&limit=200', $proxy));
                         foreach ($jam_channels->results as $station) {
                             $channel = json_decode(curlGet('http://api.jamendo.com/v3.0/radios/stream?client_id='.$apikey.'&format=json&name='.$station->name, $proxy));
@@ -267,15 +282,15 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // echo $redis->hGet('jamendo', 'ch_cache');
                     echo json_encode($jam_channels);
                 }
-                if ($_POST['querytype'] === 'radio' && !empty($_POST['args'])) {
-                    echo curlGet('http://api.jamendo.com/v3.0/radios/stream?client_id='.$apikey.'&format=json&name='.$_POST['args'], $proxy);
+                if ($param['querytype'] === 'radio' && !empty($param['args'])) {
+                    echo curlGet('http://api.jamendo.com/v3.0/radios/stream?client_id='.$apikey.'&format=json&name='.$param['args'], $proxy);
                 }
             }
             break;
         case 'spotify':
             if ($activePlayer === 'Spotify') {
-                if (isset($_POST['plid'])) {
-                    echo spopDB($spop, $_POST['plid']);
+                if (isset($param['plid'])) {
+                    echo spopDB($spop, $param['plid']);
                 } else {
                     echo spopDB($spop);
                 }
@@ -283,10 +298,10 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             break;
         case 'spadd':
             if ($activePlayer === 'Spotify') {
-                if ($_POST['querytype'] === 'spotify-playlist') {
-                    sendSpopCommand($spop, 'add '.$_POST['path']);
+                if ($param['querytype'] === 'spotify-playlist') {
+                    sendSpopCommand($spop, 'add '.$param['path']);
                 } else {
-                    $path = explode('-', $_POST['path']);
+                    $path = explode('-', $param['path']);
                     sendSpopCommand($spop, 'add '.$path[0].' '.$path[1]);
                 }
                 $redis->hSet('spotify', 'lastcmd', 'add');
@@ -295,12 +310,12 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             break;
         case 'spaddplay':
             if ($activePlayer === 'Spotify') {
-                $status = _parseSpopStatusResponse(SpopStatus($spop));
+                $status = _parseSpopStatusresponse(SpopStatus($spop));
                 $trackid = $status['playlistlength'] + 1;
-                if ($_POST['querytype'] === 'spotify-playlist') {
-                    sendSpopCommand($spop, 'add '.$_POST['path']);
+                if ($param['querytype'] === 'spotify-playlist') {
+                    sendSpopCommand($spop, 'add '.$param['path']);
                 } else {
-                    $path = explode('-', $_POST['path']);
+                    $path = explode('-', $param['path']);
                     sendSpopCommand($spop, 'add '.$path[0].' '.$path[1]);
                 }
                 $redis->hSet('spotify', 'lastcmd', 'add');
@@ -312,10 +327,10 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'spaddreplaceplay':
             if ($activePlayer === 'Spotify') {
                 sendSpopCommand($spop, 'qclear');
-                if ($_POST['querytype'] === 'spotify-playlist') {
-                    sendSpopCommand($spop, 'add '.$_POST['path']);
+                if ($param['querytype'] === 'spotify-playlist') {
+                    sendSpopCommand($spop, 'add '.$param['path']);
                 } else {
-                    $path = explode('-', $_POST['path']);
+                    $path = explode('-', $param['path']);
                     sendSpopCommand($spop, 'add '.$path[0].' '.$path[1]);
                 }
                 $redis->hSet('spotify', 'lastcmd', 'add');
@@ -326,26 +341,26 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             break;
         case 'addradio':
             if ($activePlayer === 'MPD') {
-            // input array= $_POST['radio']['label'] $_POST['radio']['url']
-                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'add', 'args' => $_POST['radio']));
+            // input array= $param['radio']['label'] $param['radio']['url']
+                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'add', 'args' => $param['radio']));
             }
             break;
         case 'editradio':
             if ($activePlayer === 'MPD') {
-                // input array= $_POST['radio']['label'] $_POST['radio']['newlabel'] $_POST['radio']['url']
-                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'edit', 'args' => $_POST['radio']));
+                // input array= $param['radio']['label'] $param['radio']['newlabel'] $param['radio']['url']
+                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'edit', 'args' => $param['radio']));
             }
             break;
         case 'readradio':
             if ($activePlayer === 'MPD') {
-                $name = parseFileStr(parseFileStr($_POST['filename'], '.', 1), '/');
+                $name = parseFileStr(parseFileStr($param['filename'], '.', 1), '/');
                 echo json_encode(array('name' => $name, 'url' => $redis->hGet('webradios', $name)));
             }
             break;
         case 'deleteradio':
             if ($activePlayer === 'MPD') {
-                // input array= $_POST['radio']['label']
-                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'delete', 'args' => $_POST['radio']));
+                // input array= $param['radio']['label']
+                wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'delete', 'args' => $param['radio']));
             }
             break;
         case 'test':
@@ -354,126 +369,126 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
             break;
         case 'albumadd':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addAlbumToQueue($mpd, $_POST['path']);
+                if (!empty($param['path'])) {
+                    addAlbumToQueue($mpd, $param['path']);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'albumaddplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
+                if (!empty($param['path'])) {
+                    $status = _parseStatusresponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
-                    addAlbumToQueue($mpd, $_POST['path'], 1, $pos);
+                    addAlbumToQueue($mpd, $param['path'], 1, $pos);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'albumaddreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addAlbumToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                if (!empty($param['path'])) {
+                    addAlbumToQueue($mpd, $param['path'], 1, 0, 1); // last argument is for the "clear" command
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'artistadd':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addArtistToQueue($mpd, $_POST['path']);
+                if (!empty($param['path'])) {
+                    addArtistToQueue($mpd, $param['path']);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'artistaddplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
+                if (!empty($param['path'])) {
+                    $status = _parseStatusresponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
-                    addArtistToQueue($mpd, $_POST['path'], 1, $pos);
+                    addArtistToQueue($mpd, $param['path'], 1, $pos);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'artistaddreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addArtistToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                if (!empty($param['path'])) {
+                    addArtistToQueue($mpd, $param['path'], 1, 0, 1); // last argument is for the "clear" command
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'genreadd':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addGenreToQueue($mpd, $_POST['path']);
+                if (!empty($param['path'])) {
+                    addGenreToQueue($mpd, $param['path']);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'genreaddplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
+                if (!empty($param['path'])) {
+                    $status = _parseStatusresponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
-                    addGenreToQueue($mpd, $_POST['path'], 1, $pos);
+                    addGenreToQueue($mpd, $param['path'], 1, $pos);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'genreaddreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addGenreToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                if (!empty($param['path'])) {
+                    addGenreToQueue($mpd, $param['path'], 1, 0, 1); // last argument is for the "clear" command
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'composeradd':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addComposerToQueue($mpd, $_POST['path']);
+                if (!empty($param['path'])) {
+                    addComposerToQueue($mpd, $param['path']);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'composeraddplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    $status = _parseStatusResponse($redis, MpdStatus($mpd));
+                if (!empty($param['path'])) {
+                    $status = _parseStatusresponse($redis, MpdStatus($mpd));
                     $pos = $status['playlistlength'] ;
-                    addComposerToQueue($mpd, $_POST['path'], 1, $pos);
+                    addComposerToQueue($mpd, $param['path'], 1, $pos);
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'composeraddreplaceplay':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['path'])) {
-                    addComposerToQueue($mpd, $_POST['path'], 1, 0, 1); // last argument is for the "clear" command
+                if (!empty($param['path'])) {
+                    addComposerToQueue($mpd, $param['path'], 1, 0, 1); // last argument is for the "clear" command
                     // send MPD response to UI
-                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $param['path']));
                 }
             }
             break;
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
-                if (isset($_POST['playlist'])) {
-                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
+                if (isset($param['playlist'])) {
+                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $param['playlist']));
                     waitSyWrk($redis, $jobID);
-                    ui_notify('Started Random Play from the playlist', $_POST['playlist']);
+                    ui_notify('Started Random Play from the playlist', $param['playlist']);
                     sleep(3);
                     ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
                 }
@@ -501,3 +516,5 @@ if ($activePlayer === 'MPD') {
 }
 // close Redis connection
 $redis->close();
+// debug
+fclose($fp);

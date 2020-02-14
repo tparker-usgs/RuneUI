@@ -572,11 +572,9 @@ function renderLibraryHome() {
     if (notMPD) {
         toggleMPD = ' inactive';
     }
-    if (chkKey(obj.bookmarks[0])) {
     // bookmarks blocks
-        for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
-            content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
-        }
+    for (i = 0; (bookmark = obj.bookmarks[i]); i += 1) {
+        content += divOpen + '<div id="home-bookmark-' + bookmark.id + '" class="home-block home-bookmark' + toggleMPD + '" data-path="' + bookmark.path + '"><i class="fa fa-star"></i><h3>' + bookmark.name + '</h3>bookmark</div>' + divClose;
     }
     if (chkKey(obj.networkMounts)) {
     // network mounts block
@@ -967,7 +965,7 @@ function updateGUI() {
                     url: '/artist_info/',
                     success: function(data){
                         var info = jQuery.parseJSON(data);
-                        if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
+                        if (typeof info.artist.bio.content !== 'undefined' && info.artist.bio.content !== '') {
                             $('#artist-bio-ss').html(info.artist.bio.content.substring(0,550) + ' ... ');
                             $('#artist-bio-overlay').html(info.artist.bio.summary);
                             $('#artist-bio-full-overlay').html(info.artist.bio.content);
@@ -976,14 +974,14 @@ function updateGUI() {
                             $('#artist-bio-overlay').html(currentartist + ', sorry, no details available ');
                             $('#artist-bio-full-overlay').html(currentartist + ', sorry, no details available ');
                         }
-                        if (typeof info.artist !== 'undefined' && info.artist.similar.artist[0].name !== '') {
+                        if (typeof info.artist.similar.artist[0] !== 'undefined' && info.artist.similar.artist[0].name !== '') {
                             $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
                             $('#addinfo-text-overlay').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name + '<br>&nbsp;<br>&nbsp;');
                         } else {
                             $('#addinfo-text-ss').html('');
                             $('#addinfo-text-overlay').html('');
                         }
-                        if (typeof info.artist !== 'undefined' && info.artist.image[2] !== '') {
+                        if (typeof info.artist.image[2]["#text"] !== 'undefined' && info.artist.image[2]["#text"] !== '') {
                             $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
                             $('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
                         } else {

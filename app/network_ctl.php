@@ -42,7 +42,7 @@ if (isset($_POST)) {
         //ui_notify_async("'wrkcmd' => 'netcfg', 'action' => 'refresh'", $_POST['nic']);
         $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'netcfg', 'action' => 'refresh'));
     }
-    if (isset($_POST['wifiprofile'])) {
+    if (isset($_POST['wifiprofile']['action'])) {
         switch ($_POST['wifiprofile']['action']) {
             case 'add':
                 //ui_notify_async("'wrkcmd' => 'wificfg', 'action' => 'add'", $_POST['wifiprofile']);

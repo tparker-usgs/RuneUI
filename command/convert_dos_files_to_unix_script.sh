@@ -108,8 +108,10 @@ find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;
 chmod 644 /etc/nginx/html/50x.html
 chmod 777 /run
 chmod 755 /srv/http/command/*
-chmod 755 /srv/http/db/redis_datastore_setup
-chmod 755 /srv/http/db/redis_acards_details
+chmod 755 /srv/http/db/*
+# chmod 755 /srv/http/db/redis_datastore_setup
+# chmod 755 /srv/http/db/redis_acards_details
+chmod 755 /srv/http/app/config/config.php
 chmod 755 /etc/X11/xinit/start_chromium.sh
 chown mpd.audio /mnt/MPD/*
 chown mpd.audio /mnt/MPD/USB/*

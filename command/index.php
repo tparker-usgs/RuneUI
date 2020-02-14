@@ -31,8 +31,12 @@
  *  coder: Simone De Gregori
  *
  */
-// common include
-include($_SERVER['HOME'].'/app/config/config.php');
+ // common include
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
+    include($_SERVER['HOME'].'/app/config/config.php');
+} else {
+    include('/var/www/app/config/config.php');
+}
 // check current player backend
 $activePlayer = $redis->get('activePlayer');
 if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {

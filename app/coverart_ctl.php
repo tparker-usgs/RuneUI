@@ -40,6 +40,13 @@ ob_implicit_flush(0);
 ob_clean();
 flush();
 
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME'])) {
+    $serverHome = $_SERVER['HOME'];
+} else {
+    $serverHome = '/var/www';
+}
+
+
 // --------------------- MPD ---------------------
 if ($activePlayer === 'MPD') {
     // output switch
@@ -193,8 +200,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
         header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
         header('Pragma: no-cache'); // HTTP 1.0.
         header('Expires: 0'); // Proxies.
-        header('Content-Type: ' .mime_content_type($_SERVER['HOME'].'/assets/img/cover-default.png'));
-        readfile($_SERVER['HOME'].'/assets/img/cover-default.png');
+        header('Content-Type: ' .mime_content_type($serverHome.'/assets/img/cover-default.png'));
+        readfile($serverHome.'/assets/img/cover-default.png');
         $output = 1;
     }
 } else if ($activePlayer === 'Spotify') {
@@ -223,12 +230,12 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     // clear the cache before testing for the existence of a file
     clearstatcache();
     // determine the file name and path
-    if (file_exists($_SERVER['HOME'].'/tmp/airplay/airplay-cover.jpg')) {
-        $imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-cover.jpg';
-    } else if (file_exists($_SERVER['HOME'].'/tmp/airplay/airplay-cover.png')) {
-        $imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-cover.png';
+    if (file_exists($serverHome.'/tmp/airplay/airplay-cover.jpg')) {
+        $imgfilename = $serverHome.'/tmp/airplay/airplay-cover.jpg';
+    } else if (file_exists($serverHome.'/tmp/airplay/airplay-cover.png')) {
+        $imgfilename = $serverHome.'/tmp/airplay/airplay-cover.png';
     } else {
-        $imgfilename = $_SERVER['HOME'].'/tmp/airplay/airplay-default.png';
+        $imgfilename = $serverHome.'/tmp/airplay/airplay-default.png';
     }
     // debug
     runelog('Airplay coverart match: ', $imgfilename);
@@ -243,12 +250,12 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     // clear the cache before testing for the existence of a file
     clearstatcache();
     // determine the file name and path
-    if (file_exists($_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.jpg')) {
-        $imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.jpg';
-    } else if (file_exists($_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.png')) {
-        $imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-cover.png';
+    if (file_exists($serverHome.'/tmp/spotify-connect/spotify-connect-cover.jpg')) {
+        $imgfilename = $serverHome.'/tmp/spotify-connect/spotify-connect-cover.jpg';
+    } else if (file_exists($serverHome.'/tmp/spotify-connect/spotify-connect-cover.png')) {
+        $imgfilename = $serverHome.'/tmp/spotify-connect/spotify-connect-cover.png';
     } else {
-        $imgfilename = $_SERVER['HOME'].'/tmp/spotify-connect/spotify-connect-default.png';
+        $imgfilename = $serverHome.'/tmp/spotify-connect/spotify-connect-default.png';
     }
     // debug
     runelog('SpotifyConnect coverart match: ', $imgfilename);

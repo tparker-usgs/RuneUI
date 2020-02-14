@@ -10,10 +10,12 @@ ob_clean();
 flush();
 
 // --------------------- All Players ---------------------
-if (FALSE === $redis->Get('artist-info')) {
+if (!$redis->Exists('artist-info')) {
     $redis->Set('artist-info', 0);
-}
-if ($redis->Get('artist-info')) {
+    echo '';
+} else if ($redis->Get('artist-info')) {
     echo sysCmd("sh /var/www/command/artist_info.sh")[1];
+} else {
+    echo '';
 }
 runelog("\n--------------------- artist info (end) ---------------------");

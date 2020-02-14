@@ -32,7 +32,7 @@
  *
  */
 // Environment vars
-if ($_SERVER["DOCUMENT_ROOT"] !== '') {
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
     define('APP',$_SERVER['HOME'].'/app/');
 } else {
     define('APP','/var/www/app/');
@@ -58,14 +58,15 @@ ini_set('log_errors', $activeLog);
 ini_set('error_log', '/var/log/runeaudio/runeui.log');
 ini_set('display_errors', $activeLog);
 // connect to MPD daemon
-if ($_SERVER["SCRIPT_FILENAME"] === '/var/www/command/index.php' && $activePlayer === 'MPD') {
+if ((isset($_SERVER["SCRIPT_FILENAME"])) && ($activePlayer === 'MPD') && (($_SERVER["SCRIPT_FILENAME"] === '/var/www/command/index.php') || ($_SERVER["SCRIPT_FILENAME"] === '/srv/http/command/index.php'))) {
     // debug
-    runelog('[connection.php] >>> OPEN MPD SOCKET [NORMAL MODE [0] (blocking)] <<<','');
+    runelog('[config.php] >>> OPEN MPD SOCKET [NORMAL MODE [0] (blocking)] <<<','');
     $mpd = openMpdSocket('/run/mpd/socket', 0);
 } elseif ($activePlayer === 'MPD') {
     // debug
-    runelog('[connection.php] >>> OPEN MPD SOCKET [BURST MODE [1] (blocking)] <<<','');
+    runelog('[config.php] >>> OPEN MPD SOCKET [BURST MODE [1] (blocking)] <<<','');
     $mpd = openMpdSocket('/run/mpd/socket', 1);
-} elseif ($redis->hGet('spotify', 'enable') === '1' && $activePlayer === 'Spotify') {
+} elseif (($redis->hGet('spotify', 'enable')) && ($activePlayer === 'Spotify')) {
+    runelog('[config.php] >>> OPEN SPOTIFY SOCKET [BURST MODE [1] (blocking)] <<<','');
     $spop = openSpopSocket('localhost', 6602, 1);
 }

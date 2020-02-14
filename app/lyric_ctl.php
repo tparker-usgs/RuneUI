@@ -10,11 +10,13 @@ ob_clean();
 flush();
 
 // --------------------- All players ---------------------
-if (FALSE === $redis->Get('lyric')) {
+if (!$redis->Exists('lyric')) {
     $redis->Set('lyric', 0);
-}
-if ($redis->Get('lyric')) {
+    echo '';
+} else if ($redis->Get('lyric')) {
     //echo str_replace ( "</br>" , "\n" , sysCmd("sh /var/www/command/lyric.sh")[2]);
     echo sysCmd("sh /var/www/command/lyric.sh")[2];
+} else {
+    echo '';
 }
 runelog("\n--------------------- lyric (end) ---------------------");

@@ -63,7 +63,7 @@
         if (isset($_POST['mpd']['crossfade'])) {
             sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
         }
-        if ($_POST['mpd']['globalrandom'] == "1") {
+        if ((isset($_POST['mpd']['globalrandom'])) && ($_POST['mpd']['globalrandom'])) {
             if ($redis->get('globalrandom') != 1) {
                 $redis->set('globalrandom', 1);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
@@ -74,17 +74,17 @@
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
             }
         }
-        if (isset($_POST['mpd']['addrandom'])) {
+        if ((isset($_POST['mpd']['addrandom'])) && (is_numeric($_POST['mpd']['addrandom']))) {
             $redis->get('addrandom') == $_POST['mpd']['addrandom'] || $redis->set('addrandom', $_POST['mpd']['addrandom']);
         }
-        if ($_POST['mpd']['mpd_autoplay'] == "1") {
+        if ((isset($_POST['mpd']['mpd_autoplay'])) && ($_POST['mpd']['mpd_autoplay'])) {
             $redis->get('mpd_autoplay') == 1 || $redis->set('mpd_autoplay', 1);
         } else {
             $redis->get('mpd_autoplay') == 0 || $redis->set('mpd_autoplay', 0);
         }
     }
     // ----- RESET GLOBAL RANDOM -----
-    if ($_POST['resetrp'] == 1) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+    if ((isset($_POST['resetrp'])) && ($_POST['resetrp'])) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
  }
 waitSyWrk($redis, $jobID);
 // collect system status

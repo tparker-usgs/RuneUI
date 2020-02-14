@@ -89,19 +89,21 @@ if (isset($_POST)) {
         }
 
         // autoswitch optimized kernel profile for BerryNOS mini DAC
-        if ($_POST['i2smodule'] === 'berrynosmini') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_berrynosmini'));
-        // autoswitch optimized kernel profile for IQaudIO Pi-DAC
-        if ($_POST['i2smodule'] === 'iqaudiopidac') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_iqaudio'));
+        if (isset($_POST['i2smodule'])) {
+            if ($_POST['i2smodule'] === 'berrynosmini') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_berrynosmini'));
+            // autoswitch optimized kernel profile for IQaudIO Pi-DAC
+            if ($_POST['i2smodule'] === 'iqaudiopidac') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => 'OrionV3_iqaudio'));
+        }
 
     // audio-on-off
-        if ($redis->get('audio_on_off') !== $_POST['audio_on_off']) {
+        if ((isset($_POST['audio_on_off'])) && ($redis->get('audio_on_off') !== $_POST['audio_on_off'])) {
             // submit worker job
             $notification = new stdClass();
             $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'audio_on_off', 'args' => $_POST['audio_on_off']));
             $notification->text = 'Please wait';
             wrk_notify($redis, 'startjob', $notification, $job);
             $jobID[] = $job;
-            if ($_POST['audio_on_off'] == 1) {
+            if ($_POST['audio_on_off']) {
                 $redis->get('audio_on_off') == 1 || $redis->set('audio_on_off', 1);
             } else {
                 $redis->get('audio_on_off') == 0 || $redis->set('audio_on_off', 0);
@@ -111,8 +113,9 @@ if (isset($_POST)) {
 
     // ----- FEATURES -----
     if (isset($_POST['features'])) {
-        if ($_POST['features']['airplay']['enable'] == 1) {
-            if ($redis->hGet('airplay','enable') !== $_POST['features']['airplay']['enable'] OR $redis->hGet('airplay','name') !== $_POST['features']['airplay']['name']) {
+        if ((isset($_POST['features']['airplay']['enable'])) && ($_POST['features']['airplay']['enable'])) {
+            if ((isset($_POST['features']['airplay']['name'])) && (($redis->hGet('airplay','enable') !== $_POST['features']['airplay']['enable']) || ($redis->hGet('airplay','name') !== $_POST['features']['airplay']['name']))) {
+                if (trim($_POST['features']['airplay']['name']) == "") $_POST['features']['airplay']['enable'] = "RuneAudio";
                 // create worker job (start shairport-sync)
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplay', 'action' => 'start', 'args' => $_POST['features']['airplay']['name']));
             }
@@ -120,8 +123,10 @@ if (isset($_POST)) {
             // create worker job (stop shairport-sync)
             $redis->hGet('airplay','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplay', 'action' => 'stop', 'args' => $_POST['features']['airplay']['name']));
         }
-        if ($_POST['features']['dlna']['enable'] == 1) {
-            if ($redis->hGet('dlna','enable') !== $_POST['features']['dlna']['enable'] OR $redis->hGet('dlna','name') !== $_POST['features']['dlna']['name'] OR $redis->hGet('dlna','queueowner') !== $_POST['features']['dlna']['queueowner']) {
+        if ((isset($_POST['features']['dlna']['enable'])) && ($_POST['features']['dlna']['enable'])) {
+            if (!isset($_POST['features']['dlna']['queueowner'])) $_POST['features']['dlna']['queueowner'] = 0;
+            if ((isset($_POST['features']['dlna']['name'])) && (($redis->hGet('dlna','enable') !== $_POST['features']['dlna']['enable']) || ($redis->hGet('dlna','name') !== $_POST['features']['dlna']['name']) || ($redis->hGet('dlna','queueowner') !== $_POST['features']['dlna']['queueowner']))) {
+                if (trim($_POST['features']['dlna']['name']) == "") $_POST['features']['dlna']['enable'] = "RuneAudio";
                 // create worker job (start upmpdcli)
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'start', 'args' => $_POST['features']['dlna']));
             }
@@ -129,23 +134,23 @@ if (isset($_POST)) {
             // create worker job (stop upmpdcli)
             $redis->hGet('dlna','enable') === '0' || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'dlna', 'action' => 'stop', 'args' => $_POST['features']['dlna']));
         }
-        if ($_POST['features']['local_browser']['enable'] == 1) {
+        if ((isset($_POST['features']['local_browser']['enable'])) && ($_POST['features']['local_browser']['enable'])) {
             $redis->hGet('local_browser', 'enable') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'start', 'args' => 1));
-            if ($_POST['features']['local_browser']['zoomfactor'] != $redis->hGet('local_browser', 'zoomfactor')) {
+            if ((isset($_POST['features']['local_browser']['zoomfactor'])) && ($_POST['features']['local_browser']['zoomfactor'] != $redis->hGet('local_browser', 'zoomfactor'))) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'zoomfactor', 'args' => $_POST['features']['local_browser']['zoomfactor']));
             }
-            if ($_POST['features']['local_browser']['rotate'] != $redis->hGet('local_browser', 'rotate')) {
+            if ((isset($_POST['features']['local_browser']['rotate'])) && ($_POST['features']['local_browser']['rotate'] != $redis->hGet('local_browser', 'rotate'))) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'rotate', 'args' => $_POST['features']['local_browser']['rotate']));
             }
-            if ($_POST['features']['local_browser']['mouse_cursor'] == 1) {
+            if ((isset($_POST['features']['local_browser']['mouse_cursor'])) && ($_POST['features']['local_browser']['mouse_cursor'])) {
                 $redis->hGet('local_browser', 'mouse_cursor') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 1));
             } else {
                 $redis->hGet('local_browser', 'mouse_cursor') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'mouse_cursor', 'args' => 0));
             }
-            if ($_POST['features']['local_browser']['localSStime'] != $redis->hGet('local_browser', 'localSStime')) {
+            if ((isset($_POST['features']['local_browser']['localSStime'])) && ($_POST['features']['local_browser']['localSStime'] != $redis->hGet('local_browser', 'localSStime'))) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'localSStime', 'args' => $_POST['features']['local_browser']['localSStime']));
             }
-            if ($_POST['features']['local_browser']['smallScreenSaver'] == 1) {
+            if ((isset($_POST['features']['local_browser']['smallScreenSaver'])) && ($_POST['features']['local_browser']['smallScreenSaver'])) {
                 $redis->hGet('local_browser', 'smallScreenSaver') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'smallScreenSaver', 'args' => 1));
             } else {
                 $redis->hGet('local_browser', 'smallScreenSaver') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'smallScreenSaver', 'args' => 0));
@@ -153,7 +158,7 @@ if (isset($_POST)) {
         } else {
             $redis->hGet('local_browser', 'enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'stop', 'args' => 0));
         }
-        if ($_POST['features']['pwd_protection'] == 1) {
+        if ((isset($_POST['features']['pwd_protection'])) && ($_POST['features']['pwd_protection'])) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
         } else {
             $redis->get('pwd_protection') == 0 || $redis->set('pwd_protection', 0);
@@ -161,29 +166,32 @@ if (isset($_POST)) {
         if (isset($_POST['features']['remoteSStime'])) {
             $redis->set('remoteSStime', $_POST['features']['remoteSStime']);
         }
-        if ($_POST['features']['udevil'] == 1) {
+        if ((isset($_POST['features']['udevil'])) && ($_POST['features']['udevil'])) {
             // create worker job (start udevil)
             $redis->get('udevil') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'udevil', 'action' => 'start'));
         } else {
             // create worker job (stop udevil)
             $redis->get('udevil') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'udevil', 'action' => 'stop'));
         }
-        if ($_POST['features']['coverart'] == 1) {
+        if ((isset($_POST['features']['coverart'])) && ($_POST['features']['coverart'])) {
             $redis->get('coverart') == 1 || $redis->set('coverart', 1);
         } else {
             $redis->get('coverart') == 0 || $redis->set('coverart', 0);
         }
-        if ($_POST['features']['lastfm']['enable'] == 1) {
+        if ((isset($_POST['features']['lastfm']['enable'])) && ($_POST['features']['lastfm']['enable'])) {
             // create worker job (start lastfm)
-            if (($_POST['features']['lastfm']['user'] != $redis->hGet('lastfm', 'user') OR $_POST['features']['lastfm']['pass'] != $redis->hGet('lastfm', 'pass')) OR $redis->hGet('lastfm', 'enable') != $_POST['features']['lastfm']['enable']) {
+            if ((!isset($_POST['features']['lastfm']['user'])) || (trim($_POST['features']['lastfm']['user']) == "")) $_POST['features']['lastfm']['user'] = "user";
+            if ((!isset($_POST['features']['lastfm']['pass'])) || (trim($_POST['features']['lastfm']['pass']) == "")) $_POST['features']['lastfm']['pass'] = "pass";
+            if (($_POST['features']['lastfm']['user'] != $redis->hGet('lastfm', 'user')) || ($_POST['features']['lastfm']['pass'] != $redis->hGet('lastfm', 'pass')) || ($redis->hGet('lastfm', 'enable') != $_POST['features']['lastfm']['enable'])) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'lastfm', 'action' => 'start', 'args' => $_POST['features']['lastfm']));
             }
         } else {
             // create worker job (stop lastfm)
             $redis->hGet('lastfm','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'lastfm', 'action' => 'stop'));
         }
-        if ($_POST['features']['samba']['enable'] == 1) {
+        if ((isset($_POST['features']['samba']['enable'])) && ($_POST['features']['samba']['enable'])) {
             // create worker job (start samba)
+            if ((!isset($_POST['features']['samba']['readwrite'])) || (empty($_POST['features']['samba']['readwrite']))) $_POST['features']['samba']['readwrite'] = 0;
             if (($_POST['features']['samba']['readwrite'] != $redis->hGet('samba', 'readwrite')) OR ($redis->hGet('samba', 'enable') != $_POST['features']['samba']['enable'])) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaonoff', 'action' => $_POST['features']['samba']['enable'], 'args' => $_POST['features']['samba']['readwrite']));
             }
@@ -191,17 +199,22 @@ if (isset($_POST)) {
             // create worker job (stop samba)
             $redis->hGet('samba','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaonoff', 'action' => $_POST['features']['samba']['enable'], 'args' => $_POST['features']['samba']['readwrite']));
         }
-        if ($_POST['features']['spotify']['enable'] == 1) {
+        if ((isset($_POST['features']['spotify']['enable'])) && ($_POST['features']['spotify']['enable'])) {
             // create worker job (start Spotify)
-            if (($_POST['features']['spotify']['user'] != $redis->hGet('spotify', 'user') OR $_POST['features']['spotify']['pass'] != $redis->hGet('spotify', 'pass')) OR $redis->hGet('spotify', 'enable') != $_POST['features']['spotify']['enable']) {
+            if ((!isset($_POST['features']['spotify']['user'])) || (trim($_POST['features']['spotify']['user']) == "")) $_POST['features']['spotify']['user'] = "user";
+            if ((!isset($_POST['features']['spotify']['pass'])) || (trim($_POST['features']['spotify']['pass']) == "")) $_POST['features']['spotify']['pass'] = "pass";
+            if (($_POST['features']['spotify']['user'] != $redis->hGet('spotify', 'user')) || ($_POST['features']['spotify']['pass'] != $redis->hGet('spotify', 'pass')) || ($redis->hGet('spotify', 'enable') != $_POST['features']['spotify']['enable'])) {
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotify', 'action' => 'start', 'args' => $_POST['features']['spotify']));
             }
         } else {
             // create worker job (stop Spotify)
             $redis->hGet('spotify','enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotify', 'action' => 'stop'));
         }
-        if ($_POST['features']['spotifyconnect']['enable'] == 1) {
+        if ((isset($_POST['features']['spotifyconnect']['enable'])) && ($_POST['features']['spotifyconnect']['enable'])) {
             // create worker job (start Spotify Connect)
+            if ((!isset($_POST['features']['spotifyconnect']['username'])) || (trim($_POST['features']['spotifyconnect']['username']) == "")) $_POST['features']['spotifyconnect']['username'] = "user";
+            if ((!isset($_POST['features']['spotifyconnect']['password'])) || (trim($_POST['features']['spotifyconnect']['password']) == "")) $_POST['features']['spotifyconnect']['password'] = "pass";
+            if ((!isset($_POST['features']['spotifyconnect']['device_name'])) || (trim($_POST['features']['spotifyconnect']['device_name']) == "")) $_POST['features']['spotifyconnect']['device_name'] = "RuneAudio";
             if (($_POST['features']['spotifyconnect']['username'] != $redis->hGet('spotifyconnect', 'username')
                     OR $_POST['features']['spotifyconnect']['password'] != $redis->hGet('spotifyconnect', 'password')
                     OR $_POST['features']['spotifyconnect']['device_name'] != $redis->hGet('spotifyconnect', 'device_name')
