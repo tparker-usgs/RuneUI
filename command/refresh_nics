@@ -39,7 +39,7 @@ ini_set('error_log', '/var/log/runeaudio/refresh_nics.log');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis/socket');
-include('/var/www/app/libs/runeaudio.php');
+require_once('/var/www/app/libs/runeaudio.php');
 include '/var/www/app/libs/vendor/ziegler/iwlist-parser.class.php';
 // startup - lock the scan system
 runelog('--------------------------- lock the scan system ---------------------------');

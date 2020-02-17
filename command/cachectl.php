@@ -32,7 +32,7 @@
  *
  */
 // common include
-include('/srv/http/app/config/config.php');
+require_once('/srv/http/app/config/config.php');
 opcache_invalidate ('/srv/http/command/cachectl.php');
 // insect GET['action']
 if (isset($_GET['action'])) {

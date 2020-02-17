@@ -32,9 +32,9 @@
  *
  */
 // load configuration
-include($_SERVER['HOME'].'/app/config/config.php');
+require_once($_SERVER['HOME'].'/app/config/config.php');
 // main include
-include($_SERVER['HOME'].'/app/libs/vendor/autoload.php');
+require_once($_SERVER['HOME'].'/app/libs/vendor/autoload.php');
 // open session
 session_start();
 
@@ -115,7 +115,7 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         // debug
         //runelog("index: selected controller(1)",APP.$template->uri(1));
         // load selected APP Controller
-        include(APP.$template->uri(1).'_ctl.php');
+        require_once(APP.$template->uri(1).'_ctl.php');
         // register current controller in SESSION
         if ($template->uri(1) !== 'coverart' && $template->uri(1) !== 'coverart2') {
         $_SESSION['controller'] = $template->uri(1);
@@ -124,7 +124,7 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         // debug
         //runelog("index: selected controller(2)",'playback_ctl.php');
         // load playback APP Controller
-        include(APP.'playback_ctl.php');
+        require_once(APP.'playback_ctl.php');
         $template->section = 'index';
         $template->content = 'playback';
         // register current controller in SESSION

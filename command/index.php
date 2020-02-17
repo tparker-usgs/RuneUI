@@ -33,9 +33,9 @@
  */
  // common include
 if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
-    include($_SERVER['HOME'].'/app/config/config.php');
+    require_once($_SERVER['HOME'].'/app/config/config.php');
 } else {
-    include('/var/www/app/config/config.php');
+    require_once('/var/www/app/config/config.php');
 }
 // check current player backend
 $activePlayer = $redis->get('activePlayer');

@@ -39,7 +39,7 @@ ini_set('error_log', '/var/log/runeaudio/cmd_async.log');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis/socket');
-include('/var/www/app/libs/runeaudio.php');
+require_once('/var/www/app/libs/runeaudio.php');
 
 if (isset($argv[1])) {
 $argv[1] = base64_decode($argv[1]);

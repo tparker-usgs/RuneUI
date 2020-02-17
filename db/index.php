@@ -33,8 +33,8 @@
  */
 // Environment vars
 // common include
-include($_SERVER['HOME'].'/app/config/config.php');
-//include('/var/www/app/config/config.php');
+require_once($_SERVER['HOME'].'/app/config/config.php');
+//require_once('/var/www/app/config/config.php');
 ini_set('display_errors', -1);
 error_reporting('E_ALL');
 // check current player backend

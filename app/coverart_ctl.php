@@ -51,7 +51,7 @@ if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME'])) {
 if ($activePlayer === 'MPD') {
     // output switch
     $output = 0;
-    include('getid3/audioinfo.class.php');
+    require_once('getid3/audioinfo.class.php');
     // get Last.FM api-key
     $lastfm_apikey = $redis->get('lastfm_apikey');
     // get HTTP proxy settings

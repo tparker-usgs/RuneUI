@@ -33,7 +33,7 @@
  *
  */
 // common include
-include('/srv/http/app/libs/runeaudio.php');
+require_once('/srv/http/app/libs/runeaudio.php');
 $start = microtime(true);
 $savecpu_rp = 12;
 $savecpu_mnt = 1;

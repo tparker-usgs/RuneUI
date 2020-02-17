@@ -36,7 +36,7 @@
 // common include
 ini_set('error_log', '/var/log/set_mpd_volume.log');
 define('APP', '/srv/http/app/');
-include('/srv/http/app/libs/runeaudio.php');
+require_once('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis/socket');

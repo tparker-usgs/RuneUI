@@ -39,7 +39,7 @@ ini_set('error_log','/var/log/runeaudio/ui_notify.log');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis/socket');
-include('/var/www/app/libs/runeaudio.php');
+require_once('/var/www/app/libs/runeaudio.php');
 // ---- end functions -----
 if ((isset($argv[2])) && (!isset($argv[3]))) {
 // Connect to Redis backend
