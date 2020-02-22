@@ -178,13 +178,7 @@ else
     /srv/http/command/convert_dos_files_to_unix_script.sh
 fi
 #
-# set lyrics and artistinfo for no internet connection
-chown root.root /srv/http/command/lyric.sh
-chown root.root /srv/http/command/artist_info.sh
-chmod 600 /srv/http/command/lyric.sh
-chmod 600 /srv/http/command/artist_info.sh
-#
-#for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
+# for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
 if [ "$1" == "full" ];
 then
     pacman -Sc --noconfirm
