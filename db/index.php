@@ -110,19 +110,19 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     sendMpdCommand($mpd, 'clear');
                     addToQueue($mpd, $_POST['path']);
                     sendMpdCommand($mpd, 'play');
-					// send MPD response to UI
-					ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
-					// Get the current track and try to use LastFM to populate a similar playlist
-					$curTrack = getTrackInfo($mpd, $status['song']);
-					if (isset($curTrack[0]['Title'])) {
-						$status['currentartist'] = $curTrack[0]['Artist'];
-						$status['currentsong'] = $curTrack[0]['Title'];
-						$status['currentalbum'] = $curTrack[0]['Album'];
-						$status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
-						$proxy = $redis->hGetall('proxy');
-						$lastfm_apikey = $redis->get('lastfm_apikey');					
-						ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
-					}
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
+                    // Get the current track and try to use LastFM to populate a similar playlist
+                    $curTrack = getTrackInfo($mpd, $status['song']);
+                    if (isset($curTrack[0]['Title'])) {
+                        $status['currentartist'] = $curTrack[0]['Artist'];
+                        $status['currentsong'] = $curTrack[0]['Title'];
+                        $status['currentalbum'] = $curTrack[0]['Album'];
+                        $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
+                        $proxy = $redis->hGetall('proxy');
+                        $lastfm_apikey = $redis->get('lastfm_apikey');					
+                        ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
+                    }
                 }
             }
             break;
@@ -441,11 +441,11 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
-					$jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
-					waitSyWrk($redis, $jobID);
-					ui_notify('Started Random Play from the playlist', $_POST['playlist']);
-					sleep(3);
-					ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
+                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
+                    waitSyWrk($redis, $jobID);
+                    ui_notify('Started Random Play from the playlist', $_POST['playlist']);
+                    sleep(3);
+                    ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
                 }
             }
             break;
@@ -455,7 +455,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 ui_notify('Use the MPD menu to switch Random Play off', '');
             }
             break;
-	}
+    }
 } else {
   echo 'MPD DB INTERFACE<br>';
   echo 'INTERNAL USE ONLY<br>';
