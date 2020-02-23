@@ -35,11 +35,12 @@ cd /home
 #
 # Convert leading tabs to 4 spaces is the files
 #
+set +x # echo all commands to cli
 echo "Convert leading tabs to 4 spaces is the files"
 FILES="/srv/http/assets/js/*
 /srv/http/db/*
 /srv/http/app/*
-/srv/http/app/template/*
+/srv/http/app/templates/*
 /srv/http/app/libs/*
 /srv/http/command/*
 /srv/http/*"
@@ -57,7 +58,7 @@ do
     expand -i -t4 "$f" > /home/file.temp
     cp /home/file.temp "$f"
     rm /home/file.temp
-    # echo "Tabs to spaces: $f"
+    echo "Tabs to spaces: $f"
 done
 #
 # When requested, remove trailing whitespace in lines from bin/bash files, but exclude vendor files
@@ -74,7 +75,7 @@ if [ "$1" == "cleanfiles" ]; then
         if [ "$numstrpace" == "0" ] ; then
             continue # no trailing whitespace in the file
         fi
-        # echo "Trailing whitespace bin/bash: $f"
+        echo "Trailing whitespace bin/bash: $f"
         sed -i 's/[ \t]*$//' "$f"
     done
 fi
@@ -93,10 +94,30 @@ if [ "$1" == "cleanfiles" ]; then
         if [ "$numstrpace" == "0" ] ; then
             continue # no trailing whitespace in the file
         fi
-        # echo "Trailing whitespace php: $f"
+        echo "Trailing whitespace php: $f"
         sed -i 's/[ \t]*$//' "$f"
     done
 fi
+#
+# When requested, remove trailing whitespace from php files, but exclude vendor files
+#
+if [ "$1" == "cleanfiles" ]; then
+    echo "Removing trailing whitespace from listed files"
+    FILES="/srv/http/app/templates/*"
+    for f in $FILES
+    do
+        if [ -d "$f" ] ; then
+            continue # its a directory not a file
+        fi
+        numstrpace=$(grep -c '[[:blank:]]$' "$f")
+        if [ "$numstrpace" == "0" ] ; then
+            continue # no trailing whitespace in the file
+        fi
+        echo "Trailing whitespace php: $f"
+        sed -i 's/[ \t]*$//' "$f"
+    done
+fi
+set -x # echo all commands to cli
 #
 # Check file protections and ownership
 #
