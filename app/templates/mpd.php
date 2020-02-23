@@ -79,7 +79,7 @@
                     <select id="log-level" name="conf[user]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="mpd" <?php if($this->conf['user'] == 'mpd'): ?> selected <?php endif ?>>mpd : audio (default)</option>
                         <option value="root" <?php if($this->conf['user'] == 'root'): ?> selected <?php endif ?>>root : root</option>
-                    </select>         
+                    </select>
                     <span class="help-block">This specifies the system user : group that MPD will run as.</span>
                 </div>
             </div>
@@ -88,11 +88,11 @@
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[log_level]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="default" <?php if($this->conf['log_level'] == 'default'): ?> selected <?php endif ?>>default</option>
-                        <option value="secure" <?php if($this->conf['log_level'] == 'secure'): ?> selected <?php endif ?>>secure</option>    
+                        <option value="secure" <?php if($this->conf['log_level'] == 'secure'): ?> selected <?php endif ?>>secure</option>
                         <option value="verbose" <?php if($this->conf['log_level'] == 'verbose'): ?> selected <?php endif ?>>verbose</option>
-                    </select>         
+                    </select>
                     <span class="help-block">This setting controls the type of information which is logged. Available settings are "default", "secure" or "verbose".
-					The "verbose" setting is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
+                    The "verbose" setting is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
                 </div>
             </div>
             <div class="form-group">
@@ -101,37 +101,37 @@
                     <select id="log-level" name="conf[state_file]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if(isset($this->conf['state_file'])): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if(!isset($this->conf['state_file'])): ?> selected <?php endif ?>>disabled</option>
-                    </select>         
+                    </select>
                     <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
                 </div>
-            </div>                   
+            </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="ffmpeg">FFmpeg decoder plugin</label>
                 <div class="col-sm-10">
                     <select id="ffmpeg" name="conf[ffmpeg]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['ffmpeg'] === 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['ffmpeg'] === 'no'): ?> selected <?php endif ?>>disabled</option>
-                    </select>         
+                    </select>
                     <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh.</span>
                 </div>
             </div>
-			<?php if(!$this->mpdv21): ?>
+            <?php if(!$this->mpdv21): ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 playback</label>
                 <div class="col-sm-10">
                     <select id="gapless-mp3-playback" name="conf[gapless_mp3_playback]" class="selectpicker" data-style="btn-default btn-lg">
-                        <option value="yes" <?php if($this->conf['gapless_mp3_playback'] == 'yes'): ?> selected <?php endif ?>>enabled</option>    
+                        <option value="yes" <?php if($this->conf['gapless_mp3_playback'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['gapless_mp3_playback'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
                     <span class="help-block">If you have a problem with your MP3s ending abruptly it is recommended that you set this argument to "no" to attempt to fix the problem. If this solves the problem,
                     it is highly recommended to fix the MP3 files with vbrfix (available as vbrfix in the debian archive), at which point gapless MP3 playback can be enabled.</span>
                 </div>
             </div>
-			<?php endif ?>
+            <?php endif ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">DSD support</label>
                 <?php if($this->hwplatformid === '08' || $this->hwplatformid === '10'): ?>
-				<div class="col-sm-10">
+                <div class="col-sm-10">
                     <select id="dsd-usb" name="conf[dsd_usb]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="DSDNATIVE" <?php if($this->conf['dsd_usb'] == 'DSDNATIVE'): ?> selected <?php endif ?>>DSD (native)</option>
                         <option value="DSDDOP" <?php if($this->conf['dsd_usb'] == 'DSDDOP'): ?> selected <?php endif ?>>DSD (DOP)</option>
@@ -140,7 +140,7 @@
                     <span class="help-block">Enable DSD audio support.</span>
                 </div>
                 <?php else:?>
-				<div class="col-sm-10">
+                <div class="col-sm-10">
                     <select id="dsd-usb" name="conf[dsd_usb]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['dsd_usb'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['dsd_usb'] == 'no'): ?> selected <?php endif ?>>disabled</option>
@@ -153,14 +153,14 @@
                 <label class="col-sm-2 control-label" for="replaygain">ReplayGain</label>
                 <div class="col-sm-10">
                     <select id="replaygain" name="conf[replaygain]" class="selectpicker" data-style="btn-default btn-lg">
-                        <option value="off" <?php if($this->conf['replaygain'] == 'off'): ?> selected <?php endif ?>>off</option>    
+                        <option value="off" <?php if($this->conf['replaygain'] == 'off'): ?> selected <?php endif ?>>off</option>
                         <option value="album" <?php if($this->conf['replaygain'] == 'album'): ?> selected <?php endif ?>>album</option>
                         <option value="track" <?php if($this->conf['replaygain'] == 'track'): ?> selected <?php endif ?>>track</option>
                         <option value="auto" <?php if($this->conf['replaygain'] == 'auto'): ?> selected <?php endif ?>>auto</option>
                     </select>
-                    <span class="help-block">If specified, mpd will adjust the volume of songs played using ReplayGain tags (see <a href="http://www.replaygain.org/" target="_blank">http://www.replaygain.org/</a>). 
-                    Setting this to "album" will adjust volume using the album's ReplayGain tags, while setting it to "track" will adjust it using the track ReplayGain tags. 
-                    "auto" uses the track ReplayGain tags if random play is activated otherwise the album ReplayGain tags. 
+                    <span class="help-block">If specified, mpd will adjust the volume of songs played using ReplayGain tags (see <a href="http://www.replaygain.org/" target="_blank">http://www.replaygain.org/</a>).
+                    Setting this to "album" will adjust volume using the album's ReplayGain tags, while setting it to "track" will adjust it using the track ReplayGain tags.
+                    "auto" uses the track ReplayGain tags if random play is activated otherwise the album ReplayGain tags.
                     Currently only FLAC, Ogg Vorbis, Musepack, and MP3 (through ID3v2 ReplayGain tags, not APEv2) are supported.</span>
                 </div>
             </div>
@@ -168,7 +168,7 @@
                 <label class="col-sm-2 control-label" for="volume-normalization">Volume normalization</label>
                 <div class="col-sm-10">
                     <select id="volume-normalization" name="conf[volume_normalization]" class="selectpicker" data-style="btn-default btn-lg">
-                        <option value="yes" <?php if($this->conf['volume_normalization'] == 'yes'): ?> selected <?php endif ?>>enabled</option>    
+                        <option value="yes" <?php if($this->conf['volume_normalization'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['volume_normalization'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
                     <span class="help-block">If yes, mpd will normalize the volume of songs as they play. The default is no. NOTE: Enabling this feature means your audio will no longer be bit perfect.</span>
@@ -181,26 +181,26 @@
                     <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
                 </div>
             </div>
-			<?php if(!$this->mpdv21): ?>
+            <?php if(!$this->mpdv21): ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="dsd-usb">Buffer before play</label>
                 <div class="col-sm-10">
                     <select id="buffer-before-play" name="conf[buffer_before_play]" class="selectpicker" data-style="btn-default btn-lg">
-                        <option value="0%" <?php if($this->conf['buffer_before_play'] == '0%'): ?> selected <?php endif ?>>disabled</option>\n";    
-                        <option value="10%" <?php if($this->conf['buffer_before_play'] == '10%'): ?> selected <?php endif ?>>10%</option>\n";    
-                        <option value="20%" <?php if($this->conf['buffer_before_play'] == '20%'): ?> selected <?php endif ?>>20%</option>\n";    
-                        <option value="30%" <?php if($this->conf['buffer_before_play'] == '30%'): ?> selected <?php endif ?>>30%</option>\n";                    
+                        <option value="0%" <?php if($this->conf['buffer_before_play'] == '0%'): ?> selected <?php endif ?>>disabled</option>\n";
+                        <option value="10%" <?php if($this->conf['buffer_before_play'] == '10%'): ?> selected <?php endif ?>>10%</option>\n";
+                        <option value="20%" <?php if($this->conf['buffer_before_play'] == '20%'): ?> selected <?php endif ?>>20%</option>\n";
+                        <option value="30%" <?php if($this->conf['buffer_before_play'] == '30%'): ?> selected <?php endif ?>>30%</option>\n";
                     </select>
                     <span class="help-block">This specifies how much of the audio buffer should be filled before playing a song. Try increasing this if you hear skipping when manually changing songs. The default is 10%, a little over 2 second of CD-quality audio with the default buffer size</span>
                 </div>
             </div>
-			<?php endif ?>
+            <?php endif ?>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="auto-update">Auto update</label>
                 <div class="col-sm-10">
                     <select id="auto-update" name="conf[auto_update]" class="selectpicker" data-style="btn-default btn-lg">
-                        <option value="yes" <?php if($this->conf['auto_update'] == 'yes'): ?> selected <?php endif ?>>enabled</option>    
-                        <option value="no" <?php if($this->conf['auto_update'] == 'no'): ?> selected <?php endif ?>>disabled</option>                
+                        <option value="yes" <?php if($this->conf['auto_update'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
+                        <option value="no" <?php if($this->conf['auto_update'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
                     <span class="help-block">This setting enables automatic update of MPD's database when files in music_directory are changed.</span>
                 </div>
@@ -241,21 +241,21 @@
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
-					You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
-					Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF</span>
-					<div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
-						<input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
-					</div>
+                    You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
+                    Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF</span>
+                    <div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
+                        <input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
+                    </div>
                 </div>
-				<div class="form-group form-actions">
-					<div class="col-sm-offset-2 col-sm-10">
-						<br><a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
-						<button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
-						<button type="submit" class="btn btn-primary btn-lg" name="resetrp" value="1" id="resetrp">Reset Random Play</button>
-						<span class="help-block">Select Cancel, Save and apply or Reset Random Play.<br>
-						Selecting <strong>Reset Random Play</strong> will reset global random and will remove random play based on a selected playlist, the full MPD library will then be used</span>
-					</div>
-				</div>
+                <div class="form-group form-actions">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <br><a href="/mpd/" class="btn btn-default btn-lg">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+                        <button type="submit" class="btn btn-primary btn-lg" name="resetrp" value="1" id="resetrp">Reset Random Play</button>
+                        <span class="help-block">Select Cancel, Save and apply or Reset Random Play.<br>
+                        Selecting <strong>Reset Random Play</strong> will reset global random and will remove random play based on a selected playlist, the full MPD library will then be used</span>
+                    </div>
+                </div>
             </div>
         </fieldset>
     </form>

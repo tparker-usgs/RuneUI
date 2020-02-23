@@ -120,7 +120,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $status['currentalbum'] = $curTrack[0]['Album'];
                         $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
                         $proxy = $redis->hGetall('proxy');
-                        $lastfm_apikey = $redis->get('lastfm_apikey');					
+                        $lastfm_apikey = $redis->get('lastfm_apikey');
                         ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
                     }
                 }

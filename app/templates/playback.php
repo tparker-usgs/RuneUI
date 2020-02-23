@@ -5,82 +5,82 @@
 </script>
 <div class="screen-saver-content" style="display:none;">
     <!-- NORMAL SCREEN SAVER PANEL -->
-	<div class="container-fluid">
-		<div class="leftpanel-expandable-ss">
-			<div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
-			<div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
-			<div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
-		</div>
-		<div class="rightpanel-compactable-ss">
-			<div id="extrainfo-ss">
-				<div id="playlist-position-ss"><span></span></div>
-				<div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
-			</div>
-		</div>
-	</div>
-	<div class="container-fluid">
-		<div class="leftpanel-ss">
-			<div class="col-sm-4 coverart-ss">
-				<img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
-			</div>
-			<div id="countdown-display-ss"><i class="fa fa-spinner fa-spin"></i></div>
-			<div id="total-ss"><i class="fa fa-spinner fa-spin"></i></div>
-		</div>
-		<div class="rightpanel-ss">
-			<div style="height: 100%">
-				<div class="col-sm-4 coverart">
-					<div id="artist-ss"><i>Artist:</i></div>
-					<img id="artist-image-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
-					<div id="artist-bio-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
-				</div>
-			</div>
-			<div style="height: auto">
-				<div class="col-sm-4 coverart">
-					<div id="addinfo-ss"><i>Additional Info:</i></div>
-					<div id="addinfo-text-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container-fluid">
+        <div class="leftpanel-expandable-ss">
+            <div id="currentartist-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div id="currentsong-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div id="currentalbum-ss"><i class="fa fa-spinner fa-spin"></i></div>
+        </div>
+        <div class="rightpanel-compactable-ss">
+            <div id="extrainfo-ss">
+                <div id="playlist-position-ss"><span></span></div>
+                <div id="format-bitrate-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="leftpanel-ss">
+            <div class="col-sm-4 coverart-ss">
+                <img id="cover-art-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+            </div>
+            <div id="countdown-display-ss"><i class="fa fa-spinner fa-spin"></i></div>
+            <div id="total-ss"><i class="fa fa-spinner fa-spin"></i></div>
+        </div>
+        <div class="rightpanel-ss">
+            <div style="height: 100%">
+                <div class="col-sm-4 coverart">
+                    <div id="artist-ss"><i>Artist:</i></div>
+                    <img id="artist-image-ss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square"></img>
+                    <div id="artist-bio-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+                </div>
+            </div>
+            <div style="height: auto">
+                <div class="col-sm-4 coverart">
+                    <div id="addinfo-ss"><i>Additional Info:</i></div>
+                    <div id="addinfo-text-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="small-screen-saver-content" style="display:none;">
-	<!-- SMALL SCREEN SCREEN SAVER PANEL -->
-	<div class="container-fluid">
-		<div class="leftpanel-sss">
-			<div class="col-sm-4 coverart-sss">
-				<img id="cover-art-sss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
-			</div>
-		</div>
-		<div class="rightpanel-sss">
-			<div style="height: auto">
-				<div class="col-sm-4 coverart">
-					<div class="top-sss">
-						<div id="currentartist-sss"><i class="fa fa-spinner fa-spin"></i></div>
-						<div id="currentsong-sss"><i class="fa fa-spinner fa-spin"></i></div>
-						<div id="currentalbum-sss"><i class="fa fa-spinner fa-spin"></i></div>
-					</div>
-					<div class="bottom-sss">
-						<div id="playlist-position-sss"><span></span></div>
-						<div id="format-bitrate-sss"><i class="fa fa-spinner fa-spin"></i></div>
-						<div id="countdown-display-sss"><i class="fa fa-spinner fa-spin"></i></div>
-						<div id="total-sss"><i class="fa fa-spinner fa-spin"></i></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- SMALL SCREEN SCREEN SAVER PANEL -->
+    <div class="container-fluid">
+        <div class="leftpanel-sss">
+            <div class="col-sm-4 coverart-sss">
+                <img id="cover-art-sss" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="transparent-square">
+            </div>
+        </div>
+        <div class="rightpanel-sss">
+            <div style="height: auto">
+                <div class="col-sm-4 coverart">
+                    <div class="top-sss">
+                        <div id="currentartist-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                        <div id="currentsong-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                        <div id="currentalbum-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                    </div>
+                    <div class="bottom-sss">
+                        <div id="playlist-position-sss"><span></span></div>
+                        <div id="format-bitrate-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                        <div id="countdown-display-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                        <div id="total-sss"><i class="fa fa-spinner fa-spin"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="tab-content">
     <!-- PLAYBACK PANEL -->
     <div id="playback" class="tab-pane active disable-scrollbar-1 disable-scrollbar-2">
         <div class="container-fluid">
-			<span id="currentartist"><i class="fa fa-spinner fa-spin"></i></span>
+            <span id="currentartist"><i class="fa fa-spinner fa-spin"></i></span>
             <span id="currentsong"><i class="fa fa-spinner fa-spin"></i></span>
             <span id="currentalbum"><i class="fa fa-spinner fa-spin"></i></span>
-			<div id="overlay-playsource-open" title="View and change playback source" <?php if ($this->spotify === '0'): ?>class="disabled"<?php endif; ?>>
-				<span id="playlist-position"><button class="btn btn-default btn-xs">MPD</button><span></span></span>
-				<span id="format-bitrate"><i class="fa fa-spinner fa-spin"></i></span>
-			</div>
+            <div id="overlay-playsource-open" title="View and change playback source" <?php if ($this->spotify === '0'): ?>class="disabled"<?php endif; ?>>
+                <span id="playlist-position"><button class="btn btn-default btn-xs">MPD</button><span></span></span>
+                <span id="format-bitrate"><i class="fa fa-spinner fa-spin"></i></span>
+            </div>
             <div class="knobs row">
                 <div id="time-knob" class="col-sm-<?=$this->colspan ?>">
                     <input id="time" value="0" data-width="230" data-height="230" data-bgColor="#34495E" data-fgcolor="#0095D8" data-thickness="0.30" data-min="0" data-max="1000" data-displayInput="false" data-displayPrevious="true">
@@ -236,14 +236,14 @@
             <li><a href="javascript:;" data-cmd="wrsave"><i class="fa fa-microphone sx"></i> Save in My Webradios</a></li>
         </ul>
     </div>
-	<div id="context-menu-spotify-pl" class="context-menu">
+    <div id="context-menu-spotify-pl" class="context-menu">
         <ul class="dropdown-menu" role="menu">
             <li><a href="javascript:;" data-cmd="spadd" data-type="spotify-playlist"><i class="fa fa-plus-circle sx"></i> Add</a></li>
             <li><a href="javascript:;" data-cmd="spaddplay" data-type="spotify-playlist"><i class="fa fa-play sx"></i> Add and play</a></li>
             <li><a href="javascript:;" data-cmd="spaddreplaceplay" data-type="spotify-playlist"><i class="fa fa-share-square-o sx"></i> Add, replace and play</a></li>
         </ul>
     </div>
-	<div id="context-menu-spotify" class="context-menu">
+    <div id="context-menu-spotify" class="context-menu">
         <ul class="dropdown-menu" role="menu">
             <li><a href="javascript:;" data-cmd="spadd" data-type="spotify-track"><i class="fa fa-plus-circle sx"></i> Add</a></li>
             <li><a href="javascript:;" data-cmd="spaddplay" data-type="spotify-track"><i class="fa fa-play sx"></i> Add and play</a></li>
@@ -264,7 +264,7 @@
             <li><a href="javascript:;" data-cmd="pl-add"><i class="fa fa-plus-circle sx"></i> Add to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-replace"><i class="fa fa-undo sx"></i> Replace the queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-addreplaceplay"><i class="fa fa-share-square-o sx"></i> Replace and play the queue</a></li>
-			<li><a href="javascript:;" data-cmd="pl-ashuffle"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-ashuffle"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
             <li><a href="javascript:;" data-cmd="pl-rename"><i class="fa fa-edit sx"></i> Rename</a></li>
             <li><a href="javascript:;" data-cmd="pl-rm"><i class="fa fa-trash-o sx"></i> Delete</a></li>
         </ul>
@@ -437,8 +437,8 @@
                         <div id="lyric-text-overlay" style="font-size: 20px; box-sizing: border-box;"><pre class="fa fa-spinner fa-spin"></pre></div>
                     </div>
                 </div>
-			</div>
-			<div class="modal-footer">
+            </div>
+            <div class="modal-footer">
                 <button id="songinfo-close-cancel" class="btn btn-default btn-lg" data-dismiss="modal" aria-hidden="true">Cancel</button>
             </div>
         </div>
@@ -460,19 +460,19 @@
     <nav>
         <ul>
             <li><span>Playback source</span></li>
-			<li><a href="javascript:;" id="playsource-mpd" class="btn btn-default btn-lg btn-block" title="Switch to MPD"><i class="fa fa-linux sx"></i> MPD</a></li>
-			<?php if ($this->spotify): ?>hidden
-			<li><a href="javascript:;" id="playsource-spotify" class="btn btn-default btn-lg btn-block inactive" title="Switch to Spotify"><i class="fa fa-spotify sx"></i> <span>spop</span> Spotify</a></li>
-			<?php endif; ?>
-			<?php if ($this->spotifyconnect): ?>
-			<li><a href="javascript:;" id="playsource-spotify-connect" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-spotify sx"></i> <span>spotyfyd</span> Spotify Connect</a></li>
-			<?php endif; ?>
-			<?php if ($this->airplay): ?>
-			<li><a href="javascript:;" id="playsource-airplay" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-apple sx"></i> <span>shairport-sync</span> Airplay</a></li>
-			<?php endif; ?>
-			<?php if ($this->dlna): ?>
-			<li><a href="javascript:;" id="playsource-dlna" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-puzzle-piece sx"></i> <span>upmpdcli</span> DLNA</a></li>
-			<?php endif; ?>
+            <li><a href="javascript:;" id="playsource-mpd" class="btn btn-default btn-lg btn-block" title="Switch to MPD"><i class="fa fa-linux sx"></i> MPD</a></li>
+            <?php if ($this->spotify): ?>hidden
+            <li><a href="javascript:;" id="playsource-spotify" class="btn btn-default btn-lg btn-block inactive" title="Switch to Spotify"><i class="fa fa-spotify sx"></i> <span>spop</span> Spotify</a></li>
+            <?php endif; ?>
+            <?php if ($this->spotifyconnect): ?>
+            <li><a href="javascript:;" id="playsource-spotify-connect" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-spotify sx"></i> <span>spotyfyd</span> Spotify Connect</a></li>
+            <?php endif; ?>
+            <?php if ($this->airplay): ?>
+            <li><a href="javascript:;" id="playsource-airplay" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-apple sx"></i> <span>shairport-sync</span> Airplay</a></li>
+            <?php endif; ?>
+            <?php if ($this->dlna): ?>
+            <li><a href="javascript:;" id="playsource-dlna" class="btn btn-default btn-lg btn-block inactive disabled"><i class="fa fa-puzzle-piece sx"></i> <span>upmpdcli</span> DLNA</a></li>
+            <?php endif; ?>
             <li><button id="overlay-playsource-close" class="btn btn-link" type="button"><i class="fa fa-times"></i> close this layer</button></li>
         </ul>
     </nav>

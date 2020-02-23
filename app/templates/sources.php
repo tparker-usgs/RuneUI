@@ -8,7 +8,7 @@
             <button class="btn btn-lg btn-primary" type="submit" name="rescanmpd" value="1" id="rescanmpddb"><i class="fa fa-refresh sx"></i>Rebuild MPD Library</button>
         </form>
     </div>
-    
+
     <h2>Network mounts</h2>
     <p>List of configured network mounts. Click an existing entry to edit it, or add a new one.</p>
     <form id="mount-list" class="button-list" action="" method="post">
@@ -22,11 +22,11 @@
         <!-- <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="umountall" value="1" id="umountall"><i class="fa fa-refresh sx"></i> Unmount all sources</button></p>
         <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="reset" value="1" id="reset"><i class="fa fa-refresh sx"></i> Remove all sources</button></p> -->
     </form>
-    
+
     <h2>USB mounts</h2>
     <p>List of mounted USB drives. To safe unmount a drive, click on it and confirm at the dialog prompt.<br>
     If a drive is connected but not shown in the list, please check if <a href="/settings/#features-management">USB automount</a> is enabled.</p>
-    <div id="usb-mount-list" class="button-list">    
+    <div id="usb-mount-list" class="button-list">
     <?php if( $this->usbmounts !== null ): foreach($this->usbmounts as $usbmount): ?>
         <p><a class="btn btn-lg btn-default btn-block" href="#umount-modal" data-toggle="modal" data-mount="<?=$usbmount->device ?>"><i class="fa fa-check green sx"></i><?=$usbmount->device ?>&nbsp;&nbsp;&nbsp;&nbsp;<?=$usbmount->name ?>&nbsp;&nbsp;&nbsp;&nbsp;<?php if (!empty($usbmount->size)): ?><span>(size:&nbsp;<?=$usbmount->size ?>B,&nbsp&nbsp;<?=$usbmount->use ?>&nbsp;in use)</span><?php endif; ?></a></p>
     <?php endforeach; ?>
@@ -56,7 +56,7 @@
         <p><button class="btn btn-lg btn-disabled btn-block" disabled="disabled">no USB mounts present</button></p>
     <?php endif; ?>
     </div>
-    
+
     <form class="form-horizontal" action="" method="post" data-parsley-validate>
         <legend>Library auto rebuild</legend>
         <fieldset>

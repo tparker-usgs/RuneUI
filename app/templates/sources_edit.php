@@ -1,5 +1,5 @@
 <div class="container credits">
-    <h1>NAS mounts</h1>    
+    <h1>NAS mounts</h1>
     <form class="form-horizontal" action="/sources/" method="post" role="form" data-parsley-validate>
         <fieldset>
             <legend><?=$this->title?> <span class="<?php if($this->action == 'add'): ?>hide<?php endif ?>">(<a href="#source-delete-modal" data-toggle="modal">remove this mount</a>)</span></legend>
@@ -10,34 +10,34 @@
                 </div>
                 <label class="col-sm-2 control-label" for="nas-name">Source name</label>
                 <div class="col-sm-10">
-					<?php if($this->action == 'edit'): ?>
-						<input class="form-control osk-trigger input-lg" type="text" id="nas-name" name="mount[name]" value="<?=$this->mount['name']?>" data-trigger="change" autocomplete="off" placeholder="es: Classical" required>
-						<input type="hidden" name="mount[id]" value="<?=$this->mount['id']?>">
-						<input type="hidden" name="action" value="<?=$this->action ?>">
-					<?php else: ?>
-						<input class="form-control osk-trigger input-lg" type="text" id="nas-name" name="mount[name]" data-trigger="change" autocomplete="off" placeholder="es: Classical" required>
-						<input type="hidden" name="mount[id]" value="">
-						<input type="hidden" name="action" value="<?=$this->action ?>">
-					<?php endif ?>
+                    <?php if($this->action == 'edit'): ?>
+                        <input class="form-control osk-trigger input-lg" type="text" id="nas-name" name="mount[name]" value="<?=$this->mount['name']?>" data-trigger="change" autocomplete="off" placeholder="es: Classical" required>
+                        <input type="hidden" name="mount[id]" value="<?=$this->mount['id']?>">
+                        <input type="hidden" name="action" value="<?=$this->action ?>">
+                    <?php else: ?>
+                        <input class="form-control osk-trigger input-lg" type="text" id="nas-name" name="mount[name]" data-trigger="change" autocomplete="off" placeholder="es: Classical" required>
+                        <input type="hidden" name="mount[id]" value="">
+                        <input type="hidden" name="action" value="<?=$this->action ?>">
+                    <?php endif ?>
                     <span class="help-block">The name you want to give to this source (no spaces allowed). It will appear in your database tree structure</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="nas-type">Fileshare protocol</label>
                 <div class="col-sm-10">
-					<?php if($this->action == 'edit'): ?>
-						<select id="mount-type" name="mount[type]" class="selectpicker" data-style="btn-default btn-lg">
-						<option value="cifs" <?php if($this->mount['type'] == 'cifs'): ?> selected <?php endif ?>>SMB/CIFS</option>
-						<option value="osx" <?php if($this->mount['type'] == 'osx'): ?> selected <?php endif ?>>SMB/CIFS (OS X share)</option>
-						<option value="nfs" <?php if($this->mount['type'] == 'nfs'): ?> selected <?php endif ?>>NFS</option>
-						</select>
-					<?php else: ?>
-						<select id="mount-type" name="mount[type]" class="selectpicker" data-style="btn-default btn-lg">
-						<option value="cifs" selected >SMB/CIFS</option>
-						<option value="osx">SMB/CIFS (OS X share)</option>
-						<option value="nfs">NFS</option>
-						</select>
-					<?php endif ?>
+                    <?php if($this->action == 'edit'): ?>
+                        <select id="mount-type" name="mount[type]" class="selectpicker" data-style="btn-default btn-lg">
+                        <option value="cifs" <?php if($this->mount['type'] == 'cifs'): ?> selected <?php endif ?>>SMB/CIFS</option>
+                        <option value="osx" <?php if($this->mount['type'] == 'osx'): ?> selected <?php endif ?>>SMB/CIFS (OS X share)</option>
+                        <option value="nfs" <?php if($this->mount['type'] == 'nfs'): ?> selected <?php endif ?>>NFS</option>
+                        </select>
+                    <?php else: ?>
+                        <select id="mount-type" name="mount[type]" class="selectpicker" data-style="btn-default btn-lg">
+                        <option value="cifs" selected >SMB/CIFS</option>
+                        <option value="osx">SMB/CIFS (OS X share)</option>
+                        <option value="nfs">NFS</option>
+                        </select>
+                    <?php endif ?>
                     <span class="help-block">Select SMB/CIFS for Windows, Samba or OS X file shares, NFS for unix file shares</span>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="nas-ip" name="mount[address]" value="<?php if($this->action == 'edit'): ?><?=$this->mount['address']?><?php endif ?>" data-trigger="change" autocomplete="off" placeholder="es: 192.168.1.250" required>
                     <span class="help-block">Specify your NAS address. For fixed IP addresses enter the IP address (normally no spaces allowed).<br>
-					You can also specify <i>hostname</i>.local, this works well for many devices which do not have a fixed IP address. For example, another RuneAudio player with Samba enabled</span>
+                    You can also specify <i>hostname</i>.local, this works well for many devices which do not have a fixed IP address. For example, another RuneAudio player with Samba enabled</span>
                 </div>
             </div>
             <div class="form-group">
@@ -65,7 +65,7 @@
                             <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">Log in with guest account (no user/password required) for CIFS mounts (not used for NFS)<br>
-						<i>Note: The use of Guest access for mounting Windows shares is not supported by the latest versions of Windows, you must use a valid username and password</i></span>
+                        <i>Note: The use of Guest access for mounting Windows shares is not supported by the latest versions of Windows, you must use a valid username and password</i></span>
                     </div>
                 </div>
                 <div id="mount-auth" class="optional disabled">
@@ -104,16 +104,16 @@
                 <label class="col-sm-2 control-label" for="nas-charset">Charset</label>
                 <div class="col-sm-10">
                     <?php if($this->action == 'edit'): ?>
-						<select id="log-level" name="mount[charset]" class="selectpicker" data-style="btn-default btn-lg">
-						<option value="utf8" <?php if($this->mount['charset'] === 'utf8'): ?> selected <?php endif ?>>UTF8 (default)</option>\n";    
-						<option value="iso8859-1" <?php if($this->mount['charset'] === 'iso8859-1'): ?> selected <?php endif ?>>ISO 8859-1</option>
-						</select>
-					<?php else: ?>
-						<select id="log-level" name="mount[charset]" class="selectpicker" data-style="btn-default btn-lg">
-						<option value="utf8" selected>UTF8 (default)</option>\n";    
-						<option value="iso8859-1">ISO 8859-1</option>
-						</select>
-					<?php endif ?>
+                        <select id="log-level" name="mount[charset]" class="selectpicker" data-style="btn-default btn-lg">
+                        <option value="utf8" <?php if($this->mount['charset'] === 'utf8'): ?> selected <?php endif ?>>UTF8 (default)</option>\n";
+                        <option value="iso8859-1" <?php if($this->mount['charset'] === 'iso8859-1'): ?> selected <?php endif ?>>ISO 8859-1</option>
+                        </select>
+                    <?php else: ?>
+                        <select id="log-level" name="mount[charset]" class="selectpicker" data-style="btn-default btn-lg">
+                        <option value="utf8" selected>UTF8 (default)</option>\n";
+                        <option value="iso8859-1">ISO 8859-1</option>
+                        </select>
+                    <?php endif ?>
                     <span class="help-block">Change this settings if you experience problems with character encoding</span>
                 </div>
             </div>
@@ -133,12 +133,12 @@
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="options">Mount flags</label>
-				<div class="col-sm-10">
-					<input class="form-control osk-trigger input-lg" type="text" id="options" name="mount[options]" value="<?php if($this->action == 'edit'): ?><?=$this->mount['options']?><?php endif ?>" data-trigger="change" autocomplete="off" placeholder="cache=none,noserverino,ro,sec=ntlmssp">
-					<input type="hidden" name="mount[error]" value="<?=$this->mount['error']?>">
-					<span class="help-block">Advanced mount flags. Don't use this field if you don't know what you are doing.<br>
-					Empty this field if you are experiencing mount problems</span>
-				</div>
+                <div class="col-sm-10">
+                    <input class="form-control osk-trigger input-lg" type="text" id="options" name="mount[options]" value="<?php if($this->action == 'edit'): ?><?=$this->mount['options']?><?php endif ?>" data-trigger="change" autocomplete="off" placeholder="cache=none,noserverino,ro,sec=ntlmssp">
+                    <input type="hidden" name="mount[error]" value="<?=$this->mount['error']?>">
+                    <span class="help-block">Advanced mount flags. Don't use this field if you don't know what you are doing.<br>
+                    Empty this field if you are experiencing mount problems</span>
+                </div>
             </div>
         </fieldset>
         <div class="form-group form-actions">

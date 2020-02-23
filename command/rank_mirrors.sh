@@ -7,10 +7,10 @@
 
 # rank_mirrors.sh
 # Adapted form Rern's rankmirrors, see: https://github.com/rern/RuneAudio/tree/master/rankmirrors
-# mitigate download errors by enable(uncomment) and 
+# mitigate download errors by enable(uncomment) and
 # rank servers in /etc/pacman.d/mirrorlist by download speed
 
-# timestart 
+# timestart
 
 (( $# > 0 )) && title -l = $bar Rank Mirror Package Servers ...
 
@@ -51,12 +51,12 @@ for server in ${servers[@]}; do # download from each mirror
     else
         latency=999
     fi
-    
+
     server0='Server = '$server'/$arch/$repo'
     speed=$(( dl / sec ))
     dl_server="$dl_server$server0 $speed $latency\n"
     printf "%6d. %-23s :%7d kB/s%5s ms\n" $i ${server/archlinux*}.. $speed $latency
-    
+
     rm -f $tmpdir/* # remove downloaded file
 done
 

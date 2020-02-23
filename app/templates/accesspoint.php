@@ -11,17 +11,17 @@
         &nbsp;<br>
         <div class="col-sm-offset-2 col-sm-10">
             <h2>Your WiFi dongle is not capable to be used as AccessPoint!</h2>
-			<span class="help-block">A reboot may be required to activate the dongle</span>
+            <span class="help-block">A reboot may be required to activate the dongle</span>
             <a href="/network" class="btn btn-default btn-lg">Cancel</a>
         </div>
     <?php else : ?>
-	<?php if($this->wififullfunction === 0): ?>
+    <?php if($this->wififullfunction === 0): ?>
         &nbsp;<br>
         <div class="col-sm-offset-2 col-sm-10">
             <h4>Warning! This WiFi dongle may not have full simultaneous Access Point and SSID Search functionality</h4>
-			<span class="help-block">You will need to add your Network manually if no networks are shown in the 'Wi-Fi networks in range' list</span>
+            <span class="help-block">You will need to add your Network manually if no networks are shown in the 'Wi-Fi networks in range' list</span>
         </div>
-		&nbsp;<br>
+        &nbsp;<br>
     <?php endif ?>
     <div <?php if($this->enabled === '1'): ?>class="boxed-group"<?php endif ?> id="accesspointBox">
         <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
@@ -103,7 +103,7 @@
                     <div class="checkbox">
                         <br>
                         <label>
-                            <input class="sx" type="checkbox" name="settings[restart]" value="1"> Restart Accesspoint 
+                            <input class="sx" type="checkbox" name="settings[restart]" value="1"> Restart Accesspoint
                         </label>
                         <label>
                             <input class="sx" type="checkbox" name="settings[reboot]" value="1"> Save settings and reboot

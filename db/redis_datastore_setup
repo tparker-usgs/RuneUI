@@ -108,7 +108,7 @@ function redisDatastore($redis,$action) {
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
             $redis->set('internetAvailable', 0);
-            // UI login password 
+            // UI login password
             $redis->set('pwd_protection', 0);
             $option = array('cost' => 12);
             $hash = password_hash('rune', PASSWORD_BCRYPT, $option);
@@ -202,9 +202,9 @@ function redisDatastore($redis,$action) {
             $redis->set('udevil', 1);
             $redis->hSet('spotify', 'enable', 0);
             $redis->hSet('spotify', 'user', 'user');
-            $redis->hSet('spotify', 'pass', 'pass'); 
+            $redis->hSet('spotify', 'pass', 'pass');
             $redis->hSet('spotify', 'plversion', 1);
-            $redis->hSet('spotify', 'lastcmd', '');            
+            $redis->hSet('spotify', 'lastcmd', '');
             $redis->set('coverart', 1);
         $redis->set('artist-info', 1);
         $redis->set('lyric', 1);

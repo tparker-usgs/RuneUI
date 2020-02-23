@@ -2,12 +2,12 @@
     <h1>Network interface</h1>
     <?php if ($this->nic->wireless === 1): ?>
     <legend>Wi-Fi networks in range</legend>
-    <span class="help-block">The list of available Wi-Fi networks is automatically refreshed while you are on this page 
-		(so be sure to close this page to avoid unnecessary system load).</span>
+    <span class="help-block">The list of available Wi-Fi networks is automatically refreshed while you are on this page
+        (so be sure to close this page to avoid unnecessary system load).</span>
     <span class="help-block">Click on an entry to connect or to generate a new profile.</span>
-    <span class="help-block"><i>Note: If you are using a WiFi dongle and are connected using the built in Access Point, it is possible that the dongle 
-		cannot support simultaneous Access Point and network search functions. If this is the case no networks will be 
-		shown, you can add a WiFi profile manually by selecting SHOW then ADD&nbsp;NEW&nbsp;PROFILE</i></span>
+    <span class="help-block"><i>Note: If you are using a WiFi dongle and are connected using the built in Access Point, it is possible that the dongle
+        cannot support simultaneous Access Point and network search functions. If this is the case no networks will be
+        shown, you can add a WiFi profile manually by selecting SHOW then ADD&nbsp;NEW&nbsp;PROFILE</i></span>
     <fieldset>
         <div id="wifiNetworks" class="boxed">
             <p><a class="btn btn-lg btn-default btn-block" href="#"><i class="fa fa-cog fa-spin sx"></i>scanning for networks...</a></p>
@@ -71,7 +71,7 @@
                     <span class="help-block">Choose between DHCP and Static configuration</span>
                 </div>
             </div>
-            <div id="network-manual-config" class="hide">        
+            <div id="network-manual-config" class="hide">
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="nic[ip]">IP address</label>
                     <div class="col-sm-10">

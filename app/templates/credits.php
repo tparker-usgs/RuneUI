@@ -7,13 +7,13 @@
             </div>
             <h2>RuneAudio team</h2><h3>Version 0.5</h3>
             <div class="alert alert-info">
-				<a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio support and Chromium local browser</span><br>
-				<a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>janui</strong></a> <span class="help-block">- RuneUI - Shairport sync with metadata, random play and autostart rework, Samba optimisation and 101 bugfixes</span><br>
-				<span class="help-block"><i>A special thanks to our test team: englishtim, ianhaynes, nic, R101, Stephane, tml3nr, PhilHill, thisisjay, jlynton, popov, s.k., klassikmann & Colin</i></span><br>
+                <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio support and Chromium local browser</span><br>
+                <a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>janui</strong></a> <span class="help-block">- RuneUI - Shairport sync with metadata, random play and autostart rework, Samba optimisation and 101 bugfixes</span><br>
+                <span class="help-block"><i>A special thanks to our test team: englishtim, ianhaynes, nic, R101, Stephane, tml3nr, PhilHill, thisisjay, jlynton, popov, s.k., klassikmann & Colin</i></span><br>
             </div>
             <h3>Version 0.4</h3>
             <div class="alert alert-info">
-				<a href="https://github.com/hondagx35" target="_blank" rel="nofollow"><strong>Frank Friedmann</strong></a> (aka hondagx35) <span class="help-block">- A grand solo effort, AP, Local Browser, Lyrics, many upgrades, bugfixes and other improvements</span><br>
+                <a href="https://github.com/hondagx35" target="_blank" rel="nofollow"><strong>Frank Friedmann</strong></a> (aka hondagx35) <span class="help-block">- A grand solo effort, AP, Local Browser, Lyrics, many upgrades, bugfixes and other improvements</span><br>
             </div>
             <h3>Version 0.1 - 0.3</h3>
             <div class="alert alert-info">
@@ -23,24 +23,24 @@
             </div>
             <h2>Main contributors</h2><h3>Version 0.1 - 0.3</h3>
             <div class="alert alert-info">
-				<a href="https://github.com/cristianp6" target="_blank" rel="nofollow"><strong>Cristian Pascottini</strong></a> <span class="help-block">- RuneUI Javascript optimizations</span><br>
-				<a href="https://github.com/vabatta"><strong>Valerio Battaglia</strong></a> <span class="help-block">- RuneUI Javascript optimizations</span><br>
-				<a href="https://github.com/hondagx35" target="_blank" rel="nofollow"><strong>Frank Friedmann</strong></a> (aka hondagx35) <span class="help-block">- RuneUI/RuneOS PHP backend code debug, refactoring of network management, RuneOS porting for Cubietruck</span><br>
-				<a href="https://github.com/kdubious" target="_blank" rel="nofollow"><strong>Kevin Welsh</strong></a> (aka kdubious) <span class="help-block">- RuneUI/RuneOS Frontend & backend development</span><br> 
-				<a href="https://github.com/GitAndrer" target="_blank" rel="nofollow"><strong>Andrea Rizzato</strong></a> (aka AandreR) <span class="help-block">- RuneUI/RuneOS PHP backend code debug, integration of Wolfson Audio Card</span><br>
-				<a href="http://www.runeaudio.com/forum/member275.html" target="_blank" rel="nofollow"><strong>Saman</strong></a> <span class="help-block">- RuneOS RT Linux kernel for Wolfson Audio Card (RaspberryPi)</span><br>
-				<a href="https://github.com/Mte90" target="_blank" rel="nofollow"><strong>Daniele Scasciafratte</strong></a> (aka Mte90) <span class="help-block">- RuneUI Firefox integration</span><br>
-				<a href="https://github.com/fcasarsa"><strong>Francesco Casarsa</strong></a> (aka CAS)<span class="help-block">- Shairport patch</span><br>
-			</div>
+                <a href="https://github.com/cristianp6" target="_blank" rel="nofollow"><strong>Cristian Pascottini</strong></a> <span class="help-block">- RuneUI Javascript optimizations</span><br>
+                <a href="https://github.com/vabatta"><strong>Valerio Battaglia</strong></a> <span class="help-block">- RuneUI Javascript optimizations</span><br>
+                <a href="https://github.com/hondagx35" target="_blank" rel="nofollow"><strong>Frank Friedmann</strong></a> (aka hondagx35) <span class="help-block">- RuneUI/RuneOS PHP backend code debug, refactoring of network management, RuneOS porting for Cubietruck</span><br>
+                <a href="https://github.com/kdubious" target="_blank" rel="nofollow"><strong>Kevin Welsh</strong></a> (aka kdubious) <span class="help-block">- RuneUI/RuneOS Frontend & backend development</span><br>
+                <a href="https://github.com/GitAndrer" target="_blank" rel="nofollow"><strong>Andrea Rizzato</strong></a> (aka AandreR) <span class="help-block">- RuneUI/RuneOS PHP backend code debug, integration of Wolfson Audio Card</span><br>
+                <a href="http://www.runeaudio.com/forum/member275.html" target="_blank" rel="nofollow"><strong>Saman</strong></a> <span class="help-block">- RuneOS RT Linux kernel for Wolfson Audio Card (RaspberryPi)</span><br>
+                <a href="https://github.com/Mte90" target="_blank" rel="nofollow"><strong>Daniele Scasciafratte</strong></a> (aka Mte90) <span class="help-block">- RuneUI Firefox integration</span><br>
+                <a href="https://github.com/fcasarsa"><strong>Francesco Casarsa</strong></a> (aka CAS)<span class="help-block">- Shairport patch</span><br>
+            </div>
         </div>
         <div class="col-md-4">
             <h3 class="txtmid">Support us!</h3>
-			<form id="form-paypal" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-				<input type="hidden" name="cmd" value="_s-xclick">
-				<input type="hidden" name="hosted_button_id" value="AZ5L5M5PGHJNJ">
-				<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-			</form>
+            <form id="form-paypal" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_s-xclick">
+                <input type="hidden" name="hosted_button_id" value="AZ5L5M5PGHJNJ">
+                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+            </form>
             <h3 class="txtmid">Sharing is caring</h3>
             <p class="social-buttons">
                 <a class="btn btn-default" target="_blank" rel="nofollow" href="https://github.com/RuneAudio" title="RuneAudio on GitHub"><i class="fa fa-github"></i></a>
@@ -56,16 +56,16 @@
     </div>
     <h2>License &amp; Copyright</h2>
     <div id="license" class="alert alert-info">
-        <p>This Program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation either version 3, 
-        or (at your option) any later version. This Program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-        See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with RuneAudio; see the file COPYING. 
+        <p>This Program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation either version 3,
+        or (at your option) any later version. This Program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+        See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with RuneAudio; see the file COPYING.
         If not, see <a href="http://www.gnu.org/licenses/gpl-3.0.txt" target="_blank" rel="nofollow">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
     </div>
     <p><strong>Copyright (C) 2013-2014 RuneAudio Team</strong> <span class="help-block">- Andrea Coiutti &amp; Simone De Gregori &amp; Carmelo San Giovanni</span><br>
     <strong>RuneUI</strong> <span class="help-block">- copyright (C) 2013-2014 – Andrea Coiutti (aka ACX) &amp; Simone De Gregori (aka Orion)</span><br>
     <strong>RuneOS</strong>    <span class="help-block">- copyright (C) 2013-2014 – Simone De Gregori (aka Orion) &amp; Carmelo San Giovanni (aka Um3ggh1U)</span></p>
     <h2>RuneUI credits</h2>
-	<p><i>In alphabetical order, credits for all versions included</i></p>
+    <p><i>In alphabetical order, credits for all versions included</i></p>
     <p><strong>(cs)spinner</strong> by <a href="https://github.com/jh3y" target="_blank" rel="nofollow">jhey tompkins</a><br><a href="http://jh3y.github.io/-cs-spinner/" target="_blank" rel="nofollow">http://jh3y.github.io/-cs-spinner/</a></p>
     <p><strong>Bootstrap Context Menu</strong> by <a href="https://github.com/sydcanem" target="_blank" rel="nofollow">@sydcanem</a><br><a href="https://github.com/sydcanem/bootstrap-contextmenu" target="_blank" rel="nofollow">https://github.com/sydcanem/bootstrap-contextmenu</a></p>
     <p><strong>Bootstrap-select</strong> by <a href="https://github.com/caseyjhol" target="_blank" rel="nofollow">caseyjhol</a><br><a href="http://silviomoreto.github.io/bootstrap-select/" target="_blank" rel="nofollow">http://silviomoreto.github.io/bootstrap-select</a></p>
@@ -92,9 +92,9 @@
     <p><strong>jQuery Knob</strong> by <a href="http://anthonyterrien.com/" target="_blank" rel="nofollow">Anthony Terrien</a><br><a href="https://github.com/aterrien/jQuery-Knob" target="_blank" rel="nofollow">https://github.com/aterrien/jQuery-Knob</a></p>
     <p><strong>jQuery scrollTo</strong> by <a href="http://flesler.blogspot.com/" target="_blank" rel="nofollow">Ariel Flesler</a><br><a href="http://flesler.blogspot.it/2007/10/jqueryscrollto.html" target="_blank" rel="nofollow">http://flesler.blogspot.it/2007/10/jqueryscrollto.html</a></p>
     <p>Also thanks to B. Carlisle (<strong>MPD-class</strong> <a href="http://mpd.24oz.com/" target="_blank" rel="nofollow">http://mpd.24oz.com</a>) for code inspiration on some data-parsing functions.</p>
-	<p><i>Please contact us if you think we have forgotten someone</i></p>
+    <p><i>Please contact us if you think we have forgotten someone</i></p>
     <h2>RuneOS credits</h2>
-	<p><i>In alphabetical order, credits for all versions included</i></p>
+    <p><i>In alphabetical order, credits for all versions included</i></p>
     <p>Alac by Timothy Gu<br><a href="https://github.com/TimothyGu" target="_blank" rel="nofollow">https://github.com/TimothyGu</a></p>
     <p>Amixer-webui by Jiří Škorpil<br><a href="https://github.com/JiriSko" target="_blank" rel="nofollow">https://github.com/JiriSko</a></p>
     <p>ArchLinux (base distro)<br><a href="https://www.archlinux.org/" target="_blank" rel="nofollow">https://www.archlinux.org</a></p>
@@ -123,5 +123,5 @@
     <p>Spop by Thomas Jost<br><a href="https://github.com/Schnouki/spop" target="_blank" rel="nofollow">https://github.com/Schnouki/spop</a></p>
     <p>Upmpdcli by Jean-Francois Dockes<br><a href="http://www.lesbonscomptes.com/upmpdcli/upmpdcli.html" target="_blank" rel="nofollow">http://www.lesbonscomptes.com/upmpdcli/upmpdcli.html</a></p>
     <p>Upmpdcli by lesbonscomptes.com<br><a href="http://www.lesbonscomptes.com/upmpdcli/index.html" target="_blank" rel="nofollow">http://www.lesbonscomptes.com/upmpdcli/index.html</a></p>
-	<p><i>Please contact us if you think we have forgotten someone</i></p>	
+    <p><i>Please contact us if you think we have forgotten someone</i></p>
 </div>

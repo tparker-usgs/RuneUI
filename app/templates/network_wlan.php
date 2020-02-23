@@ -18,7 +18,7 @@
                             <?php if (!empty($signal_strength)): ?>
                             <th>Signal strength:</th>
                             <td>
-    
+
                                 <div id="wifi-signal-strength" class="progress">
                                     <div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $signal_strength; ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $signal_strength; ?>%;">
                                         <?php echo $signal_strength; ?>%
@@ -43,7 +43,7 @@
                 <div class="col-sm-12">
                     <a class="btn btn-default btn-lg" href="/network/edit/<?=$this->uri(3) ?>">Cancel</a>
                     <button class="btn btn-primary btn-lg" name="wifiprofile[action]" value="disconnect" type="submit">Disconnect</button>
-					<button class="btn btn-primary btn-lg" name="wifiprofile[action]" value="disconnect-delete" type="submit">Disconnect-Delete</button>
+                    <button class="btn btn-primary btn-lg" name="wifiprofile[action]" value="disconnect-delete" type="submit">Disconnect-Delete</button>
                     <input type="hidden" name="wifiprofile[ssid]" value="<?=urldecode($this->uri(4)) ?>">
                     <input type="hidden" name="wifiprofile[nic]" value="<?=$this->uri(3) ?>">
                 </div>
@@ -119,7 +119,7 @@
                     <span class="help-block">Set if your SSID is hidden</span>
                 </div>
             </div>
-                <div id="network-manual-config" class="hide">        
+                <div id="network-manual-config" class="hide">
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="nic[ip]">IP address</label>
                         <div class="col-sm-10">
@@ -186,7 +186,7 @@
                     <input type="hidden" name="nic[AuthenticationSuites2]" value="<?=$this->{urldecode($this->uri(4))}->{'Authentication Suites (2)'} ?>">
                     <input type="hidden" name="nic[ie]"                    value="<?=$this->{urldecode($this->uri(4))}->{'IE'} ?>">
                 <?php endif; ?>
-				<span class="help-block"><br>A <strong>Reboot</strong> is often required to activate the profile after saving</span>
+                <span class="help-block"><br>A <strong>Reboot</strong> is often required to activate the profile after saving</span>
             </div>
         </div>
         <?php endif; ?>
@@ -200,10 +200,10 @@
                         <tr><th>Status:</th><td><?php if ($this->nic->speed !== ' Unknown!' && $this->nic->speed !== null): ?><i class="fa fa-check green sx"></i>connected<?php else: ?><i class="fa fa-times red sx"></i>no network connected<?php endif; ?></td></tr>
                         <?php if(isset($this->nic->currentssid) && $this->nic->currentssid !== 'off/any'): ?><tr><th>Associated SSID:</th><td><strong><?=$this->nic->currentssid ?></strong></td></tr><?php endif; ?>
                         <tr><th>IP:</th><td><?php if ($this->nic->ip !== null): ?><strong><?php echo $this->nic->ip; ?></strong><?php else: ?>none<?php endif; ?></td></tr>
-						<tr><th>GW:</th><td><?php if ($this->nic->gw !== null): ?><strong><?php echo $this->nic->gw; ?></strong><?php else: ?>none<?php endif; ?></td></tr>
+                        <tr><th>GW:</th><td><?php if ($this->nic->gw !== null): ?><strong><?php echo $this->nic->gw; ?></strong><?php else: ?>none<?php endif; ?></td></tr>
                         <tr><th>DNS1:</th><td><?php if ($this->nic->dns1 !== null): ?><strong><?php echo $this->nic->dns1; ?></strong><?php else: ?>none<?php endif; ?></td></tr>
-						<tr><th>DNS2:</th><td><?php if ($this->nic->dns2 !== null): ?><strong><?php echo $this->nic->dns2 ?></strong><?php else: ?>none<?php endif; ?></td></tr>
-						<tr><th>Speed:</th><td><?php if ($this->nic->speed !== ' Unknown!' && $this->nic->speed !== null): ?><?=$this->nic->speed ?><?php else: ?>unknown<?php endif; ?></td></tr>
+                        <tr><th>DNS2:</th><td><?php if ($this->nic->dns2 !== null): ?><strong><?php echo $this->nic->dns2 ?></strong><?php else: ?>none<?php endif; ?></td></tr>
+                        <tr><th>Speed:</th><td><?php if ($this->nic->speed !== ' Unknown!' && $this->nic->speed !== null): ?><?=$this->nic->speed ?><?php else: ?>unknown<?php endif; ?></td></tr>
                     </tbody>
                     <!--
                     <tfoot>
