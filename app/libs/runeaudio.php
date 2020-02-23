@@ -108,7 +108,7 @@ function closeMpdSocket($sock)
     sendMpdCommand($sock, 'close');
     // socket_shutdown($sock, 2);
     // debug
-    runelog("[close][".$sockResource."]\t<<<<<< CLOSE MPD SOCKET (".socket_strerror(socket_last_error($sock)).") >>>>>>",'');
+    runelog("[close][".$sockResource."]\t<<<<<< CLOSE MPD SOCKET (".socket_strerror(socket_last_error($sockResource)).") >>>>>>",'');
     socket_close($sockResource);
 }
 

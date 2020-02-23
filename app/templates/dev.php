@@ -8,7 +8,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Clear PHP OPcache</label>
 					<div class="col-sm-10">
-						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if((isset($this->opcache)) && ($this->opcache)): ?> disabled <?php endif ?>>clear OPcache</a>
+						<a class="btn btn-default btn-lg btn-lg" type="submit" href="/clear" name="syscmd" id="syscmd-viewphpcache" target="_blank" <?php if((!isset($this->opcache)) || (!$this->opcache)): ?> disabled <?php endif ?>>clear OPcache</a>
 					</div>
 				</div>            
 				<div class="form-group">
@@ -383,17 +383,6 @@
 						Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI</span>
 					</div>
 				</div>    
-				<div class="form-group">
-					<label class="col-sm-2 control-label">Missing bit-rates in the player UI</label>
-					<div class="col-sm-10">
-						<span class="help-block">For some reason MPD is incapable of providing the bit-rate for some audio file types.
-						This results in the bit-rate not being displayed in the player UI.<br>
-						A solution for this problem has been implemented but not fully included in this version in order to minimise the image size.
-						If missing bit-rates is a problem for you, installing the package 'mediainfo' may provide a solution. This is quite a large package and you should first extend the Linux Partition on your Micro-SD card.<br>
-						See the Extend the Linux Partition System Command above. You can also find instructions for extending the Linux partition <a href="http://www.runeaudio.com/documentation/troubleshooting/extend-partition-sd/" title="EXTEND A PARTITION" rel="nofollow" target="_blank">here</a>.<br>
-						You can then use the following command to install the 'mediainfo' package: <strong>pacman -Sy mediainfo</strong></span>
-					</div>
-				</div>
 			</div>
         </fieldset>
     </form>
