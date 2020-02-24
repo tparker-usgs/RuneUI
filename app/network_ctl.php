@@ -73,8 +73,9 @@ if (isset($_POST)) {
         }
     }
 }
-
-waitSyWrk($redis,$jobID);
+if (isset($jobID)) {
+    waitSyWrk($redis, $jobID);
+}
 
 $template->addprofile = 0;
 $template->stored = 0;

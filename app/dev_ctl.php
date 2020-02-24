@@ -158,7 +158,9 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'systemdon') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'NTPswitch', 'action' => 'systemd'));
     }
 }
-waitSyWrk($redis, $jobID);
+if (isset($jobID)) {
+    waitSyWrk($redis, $jobID);
+}
 $template->dev = $redis->get('dev');
 $template->debug = $redis->get('debug');
 $template->playerid = $redis->get('playerid');

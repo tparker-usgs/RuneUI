@@ -240,7 +240,9 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'activate') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'restoreact'));
     }
 }
-waitSyWrk($redis,$jobID);
+if (isset($jobID)) {
+    waitSyWrk($redis, $jobID);
+}
 // push backup file
 if ($_POST['syscmd'] === 'backup') {
     pushFile($redis->hGet('w_msg', $jobID[0]));

@@ -86,7 +86,9 @@
     // ----- RESET GLOBAL RANDOM -----
     if ((isset($_POST['resetrp'])) && ($_POST['resetrp'])) $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
  }
-waitSyWrk($redis, $jobID);
+if (isset($jobID)) {
+    waitSyWrk($redis, $jobID);
+}
 // collect system status
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->realtime_volume = $redis->get('dynVolumeKnob');
