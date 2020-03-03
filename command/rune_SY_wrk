@@ -412,7 +412,7 @@ if ($playerid_db === '') {
     } else {
         sysCmd('systemctl start php-fpm');
         // workaround for nginx needing restart with php7.x (it now seems to work fine without)
-        // sysCmd('systemctl restart nginx');
+        sysCmd('systemctl restart nginx');
     }
     unset($retval);
 

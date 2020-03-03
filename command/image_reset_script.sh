@@ -139,7 +139,8 @@ echo -e "rune\nrune" | passwd root
 # the following commands should also be run after a system update or any package updates
 rm -f /etc/nginx/nginx.conf
 rm -f /etc/samba/*.conf
-rm -f /etc/netctl/*
+#rm -f /etc/netctl/*
+rm -f /var/lib/connman/*
 # copy default settings and services
 cp -Rv /srv/http/app/config/defaults/etc/* /etc
 cp -Rv /srv/http/app/config/defaults/usr/* /usr

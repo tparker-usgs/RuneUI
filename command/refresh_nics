@@ -55,7 +55,27 @@ $active_nics = sysCmd("ifconfig | grep UP | cut -d ':' -f 1");
 $detected_nics = sysCmd("ip addr |grep \"BROADCAST,\" |cut -d':' -f1-2 |cut -d' ' -f2");
 $detected_nics = array_diff($detected_nics, $excluded_nics);
 $inactive_nics = array_diff($detected_nics, $active_nics);
-$configured_nics = array_map("trim", sysCmd("netctl list | cut -d ' ' -f 2,3"));
+// configured nics will show with *A in connman. 
+// to parse the connman info, we need the MAC of all addresses
+// this gives the MAC of eth0 "ip link show dev eth0 |grep "link/ether" | sed 's/^[ \t]*//' |cut -d " " -f 2 | tr -d ':'"
+$eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+$wlan0MAC = sysCmd("ip link show dev wlan0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+//$configured_nics = array_map("trim", sysCmd("netctl list | cut -d ' ' -f 2,3"));
+$configured_nics = array_map("trim",sysCmd("connmanctl services | grep '*A' | cut -b 26-"));
+// this provides the list of known networks to connman we need to parse them
+// and put them in Rune format, eth0 and SSIDs
+$i=0;
+foreach($configured_nics as &$value){
+if (strpos($value,$eth0MAC[0])) {
+    $value = 'eth0';
+}
+elseif (strpos($value,$wlan0MAC[0])) {
+    $value = sysCmd("connmanctl services | grep '*A' | cut -b 5-25 | sed 's/ //g'")[$i];
+}
+// need to think about how to add more wlan MACs
+$i=$i+1;
+}
+
 $removed_nics = array_diff($configured_nics, $detected_nics);
 // debug
 runelog('########### active_nics ########### ', $active_nics);
@@ -72,27 +92,35 @@ runelog('########### configured_nics ########### ', $configured_nics);
 runelog('########### removed_nics ########### ', $removed_nics);
 // check if wlan0/1 is detected
 if (!in_array("wlan0", $detected_nics)) {
-    $retval = sysCmd('systemctl is-enabled netctl-auto@wlan0');
-    if ($retval[0] === 'enabled') {
-        sysCmd ("systemctl stop netctl-auto@wlan0");
-        sysCmd ("systemctl disable netctl-auto@wlan0");
-        runelog('######## Disabled netctl-auto@wlan0 ########');
+// with netctl we restart service. with connman, need to see if it is up
+// then turn it on then connect
+    //$retval = sysCmd('systemctl is-enabled netctl-auto@wlan0');
+    $retval = sysCmd('iwctl device list | grep -c "off"');
+    if ($retval[0] === '0') {
+        //sysCmd ("systemctl stop netctl-auto@wlan0");
+        //sysCmd ("systemctl disable netctl-auto@wlan0");
+        sysCmd ("connmanctl disable wifi");
+
+        runelog('######## Disabled wlan0 ########');
     }
 }
-if (!in_array("wlan1", $detected_nics)) {
-    $retval = sysCmd('systemctl is-enabled netctl-auto@wlan1');
-    if ($retval[0] === 'enabled') {
-        sysCmd ("systemctl stop netctl-auto@wlan1");
-        sysCmd ("systemctl disable netctl-auto@wlan1");
-        runelog('######## Disabled netctl-auto@wlan1 ########');
-    }
-}
+//if (!in_array("wlan1", $detected_nics)) {
+//    //$retval = sysCmd('systemctl is-enabled netctl-auto@wlan1');
+//    $retval = sysCmd('iwctl device list | grep -c "off"');
+//    if ($retval[0] === '0') {
+//        //sysCmd ("systemctl stop netctl-auto@wlan1");
+//        //sysCmd ("systemctl disable netctl-auto@wlan1");
+//        sysCmd ("connmanctl disable wifi");
+//        runelog('######## Disabled wlan1 ########');
+//    }
+//}
 // handle inactive nics
 runelog('--------------------------- handle inactive nics ---------------------------');
 unset($nic);
 runelog('--------------------------- handle active nics ---------------------------');
 // check if there is a stored profile
 // refesh visible wifi networks.
+runelog('######## Enabled wlan0 ########');
 $iw = new iwlist_parser;
 wrk_netconfig($redis, 'setnics');
 $nics = wrk_netconfig($redis, 'getnics');
@@ -101,18 +129,22 @@ foreach ($nics as $nic => $nicdetail) {
         if (empty(sysCmd('ifconfig | grep '.$nic.''))) {
             runelog('########### restart link for nic: '.$nic);
                 sysCmd('ip link set '.$nic.' up');
+                sysCmd ("connmanctl enable wifi");
         }
         runelog('  try nic: '.$nic);
 
         // test if service is enabled
-        sysCmd('systemctl enable netctl-auto@'.$nic.'.service');
-
+        // don't know what this is for
+        //sysCmd('systemctl enable netctl-auto@'.$nic.'.service');
         // get stored profiles
-        $wlans_profiles = sysCmd("netctl-auto list | cut -c3-");
+		// these are configured ssids for wlan
+        //$wlans_profiles = sysCmd("netctl-auto list | cut -c3-");
+        $wlans_profiles = sysCmd("connmanctl services | grep wifi | grep '*A' | cut -c5-25 | tr -d ' \t\n\r'");
         $redis->set('stored_profiles',json_encode($wlans_profiles));
         // scan for ap in range
         $scan = $iw->parseScanDev( $nic );
         $tmp_wlans = array();
+
         $redis->set('wlans',json_encode($scan));
         foreach ($scan as $nicname => $nicscan) {
             runelog('    scan for nic: '.$nic.' nicname = '.$nicname);
@@ -131,6 +163,10 @@ foreach ($nics as $nic => $nicdetail) {
                                 $wlans[$count]['connected'] = 1;
                             } else {
                                 $wlans[$count]['connected'] = 0;
+//$ssid_exists = sysCmd("iwctl known-networks list | grep -c '.$value.' | tr -d ' \t\n\r'");
+// how do I make this a variable instead of an array element???
+//if ($ssid_exists[0] == 1){                      
+//sysCmd('iwctl station wlan0 connect '.$value);       
                             }
                             foreach($wlans_profiles as $item){
                                 if($item === $value){
@@ -169,7 +205,10 @@ foreach ($nics as $nic => $nicdetail) {
         runelog('wlans response(encoded): ', $wlans);
         ui_render('wlans', $wlans);
     } else {
-        sysCmd('systemctl enable netctl-ifplugd@'.$nic.'.service');
+        // cabled ethernet?
+        //sysCmd('systemctl enable netctl-ifplugd@'.$nic.'.service');
+        //should make the system connect to any known networks
+        sysCmd('commman connect ethernet_'.$eth0MAC[0].'_cable');
     }
 }
 // send nics status to RuneUI
@@ -181,9 +220,11 @@ if (!empty($removed_nics)) {
     foreach($removed_nics as $nic) {
         // check for orphan netctl startup profiles
         if (!empty(sysCmd('ls /etc/systemd/system/multi-user.target.wants/ | grep '.$nic))) {
+			// this does nothing as connman does not interact with systemd like this. 
+			// the only reason we should delete a profile is manually.
             runelog('########### disable netctl profiles for nic: '.$nic);
-            sysCmd('systemctl disable netctl-ifplugd@'.$nic);
-            sysCmd('systemctl disable netctl-auto@'.$nic);
+            //sysCmd('systemctl disable netctl-ifplugd@'.$nic);
+            //sysCmd('systemctl disable netctl-auto@'.$nic);
         }
     }
 }
@@ -206,7 +247,9 @@ if ($redis->hGet('AccessPoint', 'enabled') === '1') {
    if (($got_one_IP === false) && (trim($iwAccessPointInfo[0]) == '* AP')) {
    //if ($got_one_IP === false) {
         runelog('########### no IP => start AP on wlan0');
-        sysCmd('systemctl stop netctl-auto@wlan0');
+        //sysCmd('systemctl stop netctl-auto@wlan0');
+		sysCmd('connmanctl disable wifi');
+		sysCmd('connmanctl enable wifi');
         // change AP name
         $file = '/etc/hostapd/hostapd.conf';
         $newArray = wrk_replaceTextLine($file, '', 'ssid=', 'ssid='.$redis->hGet("AccessPoint", "ssid"));

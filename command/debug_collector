@@ -233,22 +233,27 @@ function debug_data($redis)
     $command = sysCmd('ifconfig');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### Network netctl profiles (netctl list) ######\n";
-    $command = sysCmd('netctl list');
+    $output .= "###### Network network profiles (connman list) ######\n";
+    //$command = sysCmd('connmanctl services');
+	$command = sysCmd('connmanctl services | grep "*"');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $command = sysCmd("netctl list | cut -d ' ' -f 2,3");
+    //$command = sysCmd("connmanctl list | cut -d ' ' -f 2,3");
+	$command = sysCmd('connmanctl services | grep "*" | cut -b 26-');
     foreach ($command as $interface) {
-        $command = sysCmd('netctl status "'.trim($interface).'"');
-        $output .= $interface." netctl status\n";
+        //$command = sysCmd('netctl status "'.trim($interface).'"');
+		$command = sysCmd('cat /var/lib/connman/'.$interface.'/settings');
+        //$output .= $interface." connman status\n";
+        //$output .= "--------------------------------------------------------\n";
+        //$output .= implode("\n",$command)."\n\n";
+        $output .= $interface." connman profile\n";
         $output .= "--------------------------------------------------------\n";
-        $output .= implode("\n",$command)."\n\n";
-        $output .= $interface." netctl profile\n";
-        $output .= "--------------------------------------------------------\n";
-        $command = sysCmd('cat /etc/netctl/"'.trim($interface).'"');
+        $command = sysCmd('cat /var/lib/connman/'.$interface.'/settings');
         // go through all settings and mask out the PSK
         foreach ($command as $line) {
-            if (stripos($line, "psk=") != FALSE) $line = '    \'psk="***************"\'';
+            if (stripos($line, "Pass") !== false){ 
+			    $line = 'Passphrase=***************';
+			}
             $output .= $line."\n";
         }
         $output .= "\n";
