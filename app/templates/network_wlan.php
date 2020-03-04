@@ -67,7 +67,7 @@
                     <div class="col-sm-10">
                         <select id="wifi-security" name="nic[encryption]" class="selectpicker" data-style="btn-default btn-lg">
                             <option value="none" <?php if(urldecode($this->uri(4)) !== null && strpos($this->{urldecode($this->uri(4))}->{'Encryption key'}, 'off') OR $this->profile_{urldecode($this->uri(4))}->encryption === 'open'): ?>selected<?php endif; ?>>none (Open network)</option>
-                            <option value="wpa" <?php if(urldecode($this->uri(4)) !== null && strpos($this->{urldecode($this->uri(4))}->IE, 'WPA') OR $this->profile_{urldecode($this->uri(4))}->encryption === 'wpa' ): ?>selected<?php endif; ?>>WPA/WPA2 PSK</option>
+                            <option value="psk" <?php if(urldecode($this->uri(4)) !== null && strpos($this->{urldecode($this->uri(4))}->IE, 'WPA') OR $this->profile_{urldecode($this->uri(4))}->encryption === 'wpa' ): ?>selected<?php endif; ?>>WPA/WPA2 PSK</option>
                             <option value="wep" <?php if(urldecode($this->uri(4)) !== null && $this->{urldecode($this->uri(4))}->{'Encryption key'} === 'on' && !strpos($this->{urldecode($this->uri(4))}->IE, 'WPA') OR $this->profile_{urldecode($this->uri(4))}->encryption === 'wep'): ?>selected<?php endif; ?>>WEP</option>
                         </select>
                         <span class="help-block">Choose the security type of the Wi-Fi you want to connect.</span>

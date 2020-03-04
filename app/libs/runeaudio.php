@@ -2004,13 +2004,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                     }
                 switch ($args->encryption) {
                     case 'none':
-                        $enc = 'none';
-                        //$nic .= "    'key_mgmt=NONE'\n";
                         break;
                     case 'wep':
-                        //$nic .= "    'key_mgmt=NONE'\n";
-                        //$nic .= "    'wep_tx_keyidx=0'\n";
-                        $enc = 'wep';
                         $wepkey = $args->key;
                         if (ctype_xdigit($wepkey) && (strlen($wepkey) == 10 OR strlen($wepkey) == 26 OR strlen($wepkey) == 32)) {
                             $pass = $wepkey;
@@ -2023,8 +2018,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                        }
                         //            auth_alg=SHARED
                         break;
-                    case 'wpa':
-                        $enc = 'psk';
+                    case 'psk':
                         $wpakey = $args->key;
                         if (ctype_xdigit($wpakey) && strlen($wpakey) == 64) {
                             $pass = $wpakey;
@@ -2047,7 +2041,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 $nic .= "[service_".$args->ssid."]\n";
                 $nic .= "Type = wifi\n";
                 $nic .= "SSID = ".bin2hex($args->ssid)."\n";
-                $nic .= "Security = ".$enc."\n";
+                $nic .= "Security = ".$args->encryption."\n";
                 $nic .= "Hidden = ".$hidden."\n";
                 $nic .= "Passphrase = ".$pass."\n";
             } else {
