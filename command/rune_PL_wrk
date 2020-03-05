@@ -150,7 +150,7 @@ while (1) {
                     $redis->hSet('lyrics', 'art', 'assets/img/cover-radio.jpg');
                     $redis->hSet('lyrics', 'arturl', '127.0.0.1/assets/img/cover-radio.jpg');
                     $status['currentalbum'] = $status['radioname'];
-                    if (!is_null($status['currentsong']) && is_null($status['currentartist']) && $redis->get('internetAvailable')) {
+                    if (!is_null($status['currentsong']) && is_null($status['currentartist']) && $redis->hGet('service','internet')) {
                         $url = 'http://ws.audioscrobbler.com/2.0/?method=track.search&track='.$status['currentsong'].'&api_key='.$lastfm_apikey.'&format=json&limit=1';
                         $retval = json_decode(curlGet($url, $proxy), true);
                         if ($retval['results']['trackmatches']['track'][0]['name'] != '') {
