@@ -34,7 +34,7 @@
  *
  */
 // common include
-ini_set('error_log', '/var/log/set_mpd_volume.log');
+ini_set('error_log', '/var/log/runeaudio/set_mpd_volume.log');
 define('APP', '/srv/http/app/');
 require_once('/srv/http/app/libs/runeaudio.php');
 // Connect to Redis backend

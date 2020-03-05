@@ -1809,6 +1809,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     // nics blacklist
     $excluded_nics = array('ifb0', 'ifb1', 'p2p0', 'bridge');
     $updateh = 0;
+	$eth0MAC = $redis->Get('eth0MAC');
+	$wlan0MAC = $redis->Get('wlan0MAC');
     switch ($action) {
         case 'setnics':
             // clear cache - redis, filesystem and php
@@ -2170,6 +2172,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
 
 function wrk_wifiprofile($redis, $action, $args)
 {
+	$wlan0MAC = $redis->Get('wlan0MAC');
 	$wifi_profile = sysCmd('ls /var/lib/connman | grep '.bin2hex($args->ssid));
     switch ($action) {
         case 'add':
@@ -2198,8 +2201,8 @@ function wrk_wifiprofile($redis, $action, $args)
             runelog('**** wrk_wifiprofile CONNECT ****', $args->ssid);
             // need to deal with more than one wlan?  
             //sysCmd('iwctl station wlan0 scan');
-			//sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_psk);
-            sysCmdAsync('connmanctl connect '.$wifi_profile[0]);
+			sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_psk');
+            //sysCmdAsync('connmanctl connect '.$wifi_profile[0]);
 			$redis->Set('wlan_autoconnect', 1);
             $return = 1;
             break;

@@ -59,7 +59,13 @@ $inactive_nics = array_diff($detected_nics, $active_nics);
 // to parse the connman info, we need the MAC of all addresses
 // this gives the MAC of eth0 "ip link show dev eth0 |grep "link/ether" | sed 's/^[ \t]*//' |cut -d " " -f 2 | tr -d ':'"
 $eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+//print_r($eth0MAC);
 $wlan0MAC = sysCmd("ip link show dev wlan0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+//print_r($wlan0MAC);
+runelog('########### Set eth MACs ###########');
+// can probably automate this to grab all MACs and put them in an array in redis for use...
+$redis->Set('eth0MAC',$eth0MAC[0]);
+$redis->Set('wlan0MAC',$wlan0MAC[0]);
 //$configured_nics = array_map("trim", sysCmd("netctl list | cut -d ' ' -f 2,3"));
 $configured_nics = array_map("trim",sysCmd("connmanctl services | grep '*A' | cut -b 26-"));
 // this provides the list of known networks to connman we need to parse them
@@ -141,7 +147,20 @@ foreach ($nics as $nic => $nicdetail) {
         //$wlans_profiles = sysCmd("netctl-auto list | cut -c3-");
         $wlans_profiles = sysCmd("connmanctl services | grep wifi | grep '*A' | cut -c5-25 | tr -d ' \t\n\r'");
         $redis->set('stored_profiles',json_encode($wlans_profiles));
-        // scan for ap in range
+		// scan for ap in range
+// done with iwlist-parser.class.php (zeigler) - very inefficient
+// the format is:
+// "8":{"nic":"wlan0","origin":"scan","encryption":"on","ESSID":"insight-shared","connected":0}
+// need to wrap the output of:
+//  iwctl station wlan0 scan
+//  iwctl station wlan0 get-networks | sed -e 's/^[ \t]*//' | sed -e "/^ *$/d" |  sed -e '1,4d' | tr -s ' '
+// which provides: {insight-shared psk ****} ( 3 fields SSID, Encryption, Strength (4 stars of grey or white))
+// the other option is to use connmanctl services which responds with the *AO/R space name...
+// connmanctl services | grep wifi |  sed -e "/^ *$/d"
+// yields this:
+// *AR insight-shared       wifi_74da383afc2e_696e73696768742d736861726564_managed_psk
+//     Sequoia              wifi_74da383afc2e_536571756f6961_managed_psk
+// to display it in the UI...
         $scan = $iw->parseScanDev( $nic );
         $tmp_wlans = array();
 
