@@ -69,16 +69,21 @@ $redis->Set('wlan0MAC',$wlan0MAC[0]);
 //$configured_nics = array_map("trim", sysCmd("netctl list | cut -d ' ' -f 2,3"));
 $configured_nics = array_map("trim",sysCmd("connmanctl services | grep '*A' | cut -b 26-"));
 // this provides the list of known networks to connman we need to parse them
-// and put them in Rune format, eth0 and SSIDs
+// and format them
+// this is currently either ethx (the nic) or the SSID of the connected network (not a nics)...
+// I think this should be actual nics...
 $i=0;
 foreach($configured_nics as &$value){
 if (strpos($value,$eth0MAC[0])) {
     $value = 'eth0';
 }
 elseif (strpos($value,$wlan0MAC[0])) {
-    $value = sysCmd("connmanctl services | grep '*A' | cut -b 5-25 | sed 's/ //g'")[$i];
+    //$value = sysCmd("connmanctl services | grep '*A' | cut -b 5-25 | sed 's/ //g'")[$i];
+    $value = 'wlan0';
 }
-// need to think about how to add more wlan MACs
+// need to think about how to add more wlan MACs or a better way of doing this. 
+// if we could ues ip addr and look at all entries which are not lo: the second field would be
+// an array of network interfaces... if only I could parse this into php...
 $i=$i+1;
 }
 
@@ -100,14 +105,11 @@ runelog('########### removed_nics ########### ', $removed_nics);
 if (!in_array("wlan0", $detected_nics)) {
 // with netctl we restart service. with connman, need to see if it is up
 // then turn it on then connect
-    //$retval = sysCmd('systemctl is-enabled netctl-auto@wlan0');
     $retval = sysCmd('iwctl device list | grep -c "off"');
     if ($retval[0] === '0') {
-        //sysCmd ("systemctl stop netctl-auto@wlan0");
-        //sysCmd ("systemctl disable netctl-auto@wlan0");
         sysCmd ("connmanctl disable wifi");
-
-        runelog('######## Disabled wlan0 ########');
+        sysCmd ("connmanctl enable wifi");
+        runelog('######## Enabled wlan0 ########');
     }
 }
 //if (!in_array("wlan1", $detected_nics)) {
@@ -125,10 +127,13 @@ runelog('--------------------------- handle inactive nics ----------------------
 unset($nic);
 runelog('--------------------------- handle active nics ---------------------------');
 // check if there is a stored profile
+// if ethernet is not connected, connect it
+// if wlan is available. look for a known SSID and connect to it
 // refesh visible wifi networks.
 runelog('######## Enabled wlan0 ########');
-$iw = new iwlist_parser;
+//$iw = new iwlist_parser;
 wrk_netconfig($redis, 'setnics');
+runelog('######## We return from library ##########');
 $nics = wrk_netconfig($redis, 'getnics');
 foreach ($nics as $nic => $nicdetail) {
     if ($nicdetail->wireless === 1) {
@@ -161,8 +166,35 @@ foreach ($nics as $nic => $nicdetail) {
 // *AR insight-shared       wifi_74da383afc2e_696e73696768742d736861726564_managed_psk
 //     Sequoia              wifi_74da383afc2e_536571756f6961_managed_psk
 // to display it in the UI...
-        $scan = $iw->parseScanDev( $nic );
-        $tmp_wlans = array();
+        //$scan = $iw->parseScanDev( $nic );
+        runelog('--------------------------- Scan Wifis ---------------------------');
+        //$scan = sysCmd("iwctl station ".$nic." get-networks | sed -e '1,4d' |sed $'s/[^[:print:]\t]//g' file.txt | tr -s ' '");
+        // this shows the non printing charcters
+        // iwctl station wlan0 get-networks | sed -e '1,4d' |sed -e 's/[^[:print:]\t]//g' | tr -s ' '
+        // we really want to reomve all characters between the '[1;30m' and the '[0m' to make this useful and I have not figured
+        // out how. the current command gets rid of the '>' for the connected network, but all networks now show as power
+        // level 4 which is not right... kg
+        $scan1 = sysCmd("iwctl station wlan0 get-networks | sed -e '1,4d' | sed 's/^ *//g' | tr -s ' ' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's|> ||'");
+// this works although I have a trailing blank I cannot get rid of. 
+// this has a blank line at the end and I cheated by going to one less than the count 
+
+        $numSSIDs = count ($scan1);
+        for ($x = 0; $x < $numSSIDs -1; $x++) {
+        $scan [$x] = explode (" ",$scan1[$x]);
+        }
+
+        // this breaks it up into each row is an array of 'ssid', 'security', and 'power level'
+        // but I do not know how to give each key a name...
+
+        // in my for loop so I do not load it into redis with a blank
+        // I think we need to call the array by the name of the nic 'wlan0' to be consistent
+        // with previous and also to differentiate between wlan0 and wlan1...
+
+// then go through the list and see if we know it from this list: If you look at the 
+// result in wlans in redis, it is what I want, though the variables have no names
+// and I do not yet know how to do that so that the rest of this script runs... 
+// from here to end is mostly from the netctl version.
+// this should cycle through the known SSIDs and connect if they are in range
 
         $redis->set('wlans',json_encode($scan));
         foreach ($scan as $nicname => $nicscan) {
@@ -225,9 +257,8 @@ foreach ($nics as $nic => $nicdetail) {
         ui_render('wlans', $wlans);
     } else {
         // cabled ethernet?
-        //sysCmd('systemctl enable netctl-ifplugd@'.$nic.'.service');
         //should make the system connect to any known networks
-        sysCmd('commman connect ethernet_'.$eth0MAC[0].'_cable');
+        sysCmd('connmanctl connect ethernet_'.$eth0MAC[0].'_cable');
     }
 }
 // send nics status to RuneUI
@@ -249,6 +280,7 @@ if (!empty($removed_nics)) {
 }
 
 // start AP if configured and no IP is assigned
+// it appears that this can be done with iwctl instead of hostapd, but we leave it in here for now
 if ($redis->hGet('AccessPoint', 'enabled') === '1') {
     runelog('------------------ try to start AP if no IP is assigned ---------------------');
     $got_one_IP = false;
