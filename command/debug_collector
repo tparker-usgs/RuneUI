@@ -235,14 +235,14 @@ function debug_data($redis)
     unset($command);
     $output .= "###### Network network profiles (connman list) ######\n";
     //$command = sysCmd('connmanctl services');
-	$command = sysCmd('connmanctl services | grep "*"');
+    $command = sysCmd('connmanctl services | grep "*"');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
     //$command = sysCmd("connmanctl list | cut -d ' ' -f 2,3");
-	$command = sysCmd('connmanctl services | grep "*" | cut -b 26-');
+    $command = sysCmd('connmanctl services | grep "*" | cut -b 26-');
     foreach ($command as $interface) {
         //$command = sysCmd('netctl status "'.trim($interface).'"');
-		$command = sysCmd('cat /var/lib/connman/'.$interface.'/settings');
+        $command = sysCmd('cat /var/lib/connman/'.$interface.'/settings');
         //$output .= $interface." connman status\n";
         //$output .= "--------------------------------------------------------\n";
         //$output .= implode("\n",$command)."\n\n";
@@ -252,8 +252,8 @@ function debug_data($redis)
         // go through all settings and mask out the PSK
         foreach ($command as $line) {
             if (stripos($line, "Pass") !== false){ 
-			    $line = 'Passphrase=***************';
-			}
+                $line = 'Passphrase=***************';
+            }
             $output .= $line."\n";
         }
         $output .= "\n";

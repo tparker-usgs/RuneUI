@@ -112,7 +112,7 @@ if (isset($template->action)) {
             }
             // check if the current nic is wireless
             if ($template->nic->wireless === 1) {
-                $template->wlans = json_decode($redis->get('wlans'));
+                $template->wlans = json_decode($redis->get('networkInfo'));
                 $template->wlan_profiles = new stdClass();
                 if ($wlan_profiles = wrk_netconfig($redis, 'getstoredwlans')) {
                     foreach ($wlan_profiles as $key => $value) {
@@ -129,7 +129,7 @@ if (isset($template->action)) {
                 // we are connecting to a visible network
                 //  /network/edit/wlan0/<Some SSID>
 
-                $template->wlans = json_decode($redis->get('wlans'));
+                $template->wlans = json_decode($redis->get('networkInfo'));
                 foreach ($template->wlans->{$template->uri(3)} as $key => $value) {
                     $SSID = urldecode($template->uri(4));
                     // if we are in a stored profile, retrieve his details

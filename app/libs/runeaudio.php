@@ -1809,8 +1809,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
     // nics blacklist
     $excluded_nics = array('ifb0', 'ifb1', 'p2p0', 'bridge');
     $updateh = 0;
-	$eth0MAC = $redis->Get('eth0MAC');
-	$wlan0MAC = $redis->Get('wlan0MAC');
+    $eth0MAC = $redis->Get('eth0MAC');
+    $wlan0MAC = $redis->Get('wlan0MAC');
     switch ($action) {
         case 'setnics':
             // clear cache - redis, filesystem and php
@@ -1824,8 +1824,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             $interfaces = array_diff($interfaces, $excluded_nics);
             foreach ($interfaces as $interface) {
                 $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
-                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP lease expires
-                // in this situation both IP addresses are valid for a given interface
+                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP 
+                // lease expires. In this situation both IP addresses are valid for a given interface
                 // when more than one IP address is valid the following code determines which one to use
                 // the first IP address is the default, but if one matches a predefined fixed address then that one is used
                 $ipidx = 0;
@@ -1904,8 +1904,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             $interfaces = array_diff($interfaces, $excluded_nics);
             foreach ($interfaces as $interface) {
                 $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
-                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP lease expires
-                // in this situation both IP addresses are valid for a given interface
+                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP 
+                // lease expires. In this situation both IP addresses are valid for a given interface
                 // when more than one IP address is valid the following code determines which one to use
                 // the first IP address is the default, but if one matches a predefined fixed address then that one is used
                 $ipidx = 0;
@@ -1996,8 +1996,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             if ($args->wireless === '1') {
             // Wireless configuration
             // get the MAC address of wlan0 may no longer need these
-            $wlan0MAC = sysCmd("ip link show dev wlan0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
-            $eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+            //$wlan0MAC = sysCmd("ip link show dev wlan0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+            //$eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
                 if ($args->hidden === '1') {
                     $hidden = 'true';
                     }
@@ -2034,13 +2034,13 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 }
 //ip addr |grep "link/ether" | sed 's/^[ \t]*//' |cut -d " " -f 2 | tr -d ':'
 // this will extract the mac w/o colons, but gets all of them
-// this will change the mane to the hex hash of it... 
+// this will change the name to the hex hash of it... 
 // od -An -t x1 | tr -d ' ' | sed 's/0a//'
                 // according to the man page here: https://www.mankier.com/5/connman-service.config
                 $nic = "[global]\n";
                 $nic .= "Name = ".$args->ssid."\n";
                 $nic .= "Description =\n";
-                $nic .= "[service_".$args->ssid."]\n";
+                $nic .= "[service_".bin2hex($args->ssid)."]\n";
                 $nic .= "Type = wifi\n";
                 $nic .= "SSID = ".bin2hex($args->ssid)."\n";
                 $nic .= "Security = ".$args->encryption."\n";
@@ -2081,7 +2081,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             fclose($fp);
             // tell the system to update /etc/resolv.conf
             sysCmd('resolvconf -u');
-			
+            
             // write current network config
             runelog("wireless = ".$args->wireless);
             if ($args->wireless === '1') {
@@ -2090,12 +2090,12 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 if ($args->newssid === "add") {
                     $redis->Set($args->ssid, json_encode($args));
                     //$fp = fopen('/etc/netctl/'.$args->newssid, 'w');
-                    $file = '/var/lib/connman/'.$args->ssid.'.config';
+                    $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
                     $fp = fopen($file, 'w');
                 } else {
                     $redis->Set($args->newssid, json_encode($args));
                     //$fp = fopen('/etc/netctl/'.$args->newssid, 'w');
-                    $file = '/var/lib/connman/'.$args->newssid.'.config';
+                    $file = '/var/lib/connman/'.bin2hex($args->newssid).'.config';
                     $fp = fopen($file, 'w');
                 }
             } else {
@@ -2103,7 +2103,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 runelog("save as wired");
                 $redis->Set($args->name, json_encode($args));
                 //$fp = fopen('/etc/netctl/'.$args->name, 'w');
-                $file = '/var/lib/connman/'.$args->ssid.'.config';
+                $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
                 $fp = fopen($file, 'w');
             }
             fwrite($fp, $nic);
@@ -2112,7 +2112,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             //$updateh = 1;
             break;
         case 'manual':
-            $file = '/var/lib/connman/'.$args->ssid.'.config';
+            $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
             $fp = fopen($file, 'w');
             fwrite($fp, $args['config']);
             fclose($fp);
@@ -2139,16 +2139,17 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
         if ($args->wireless !== '1') {
             //sysCmd('systemctl reenable netctl-ifplugd@'.$args->name);
             //sysCmd ('systemctl restart connman');
-			// in case the wifi is not enabled...
+            // in case the wifi is not enabled...
             sysCmd ('connmanctl enable wifi');
             if ($args->reboot === '1') {
                 runelog('**** reboot requested ****', $args->name);
                 $return = 'reboot';
             } else {
                 runelog('**** no reboot requested ****', $args->name);
-				// don't think we need to do anything here.
-				// maybe connect to the wireless network we just set up?
-				sysCmd('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$enc);
+                // don't think we need to do anything here.
+                // maybe connect to the wireless network we just set up?
+                $wlan0MAC = $redis->Get('wlan0MAC');
+                sysCmd('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$enc);
                 $return[] = '';
             }
         } else {
@@ -2156,7 +2157,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
             //sysCmd('systemctl reload-or-restart netctl-auto@'.$args->name);
             //sysCmd('netctl-auto enable '.$args->newssid);
             //sysCmd('netctl-auto switch-to '.$args->newssid);
-			// the next 2 will scan, but not connect
+            // the next 2 will scan, but not connect
             //sysCmd ("connmanctl enable wifi");
             //sysCmd ("iwctl station wlan0 scan");
             runelog('**** wireless => do not reboot ****', $args->name);
@@ -2172,8 +2173,8 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
 
 function wrk_wifiprofile($redis, $action, $args)
 {
-	$wlan0MAC = $redis->Get('wlan0MAC');
-	$wifi_profile = sysCmd('ls /var/lib/connman | grep '.bin2hex($args->ssid));
+    $wlan0MAC = $redis->Get('wlan0MAC');
+    $wifi_profile = sysCmd('ls /var/lib/connman | grep '.bin2hex($args->ssid));
     switch ($action) {
         case 'add':
             runelog('**** wrk_wifiprofile ADD ****', $args->ssid);
@@ -2189,27 +2190,28 @@ function wrk_wifiprofile($redis, $action, $args)
             $redis->Del($args->ssid);
             $redis->Del('stored_profiles');
             //sysCmdAsync('iwctl known-networks '.$args->ssid.'forget');
-            sysCmd('rm /var/lib/connman/'.escapeshellarg($args_>ssid).'.config');
+            sysCmd('rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
+            runelog('***** delete rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
             // also delete the folder based on this
-			// cannot be done using connmanctl or iwdctl
+            // cannot be done using connmanctl or iwdctl
             //sysCmd("rm -rf /var/lib/connman/wifi_".$wlan0MAC."_".bin2hex($args->ssid)."_managed_psk);
-			// this deletes the whole connman directory
+            // this deletes the whole connman directory
             //sysCmd('rm -rf /var/lib/connman/'.$wifi_profile[0]);
-			$return = 1;
+            $return = 1;
             break;
         case 'connect':
             runelog('**** wrk_wifiprofile CONNECT ****', $args->ssid);
             // need to deal with more than one wlan?  
             //sysCmd('iwctl station wlan0 scan');
-			sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_psk');
+            sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_psk');
             //sysCmdAsync('connmanctl connect '.$wifi_profile[0]);
-			$redis->Set('wlan_autoconnect', 1);
+            $redis->Set('wlan_autoconnect', 1);
             $return = 1;
             break;
         case 'disconnect':
             runelog('**** wrk_wifiprofile DISCONNECT ****', $args->ssid);
             sysCmdAsync('iwctl station wlan0 disconnect');
-			sysCmdAsync('iwctl known-networks '.$args->ssid.' forget');
+            sysCmdAsync('iwctl known-networks '.$args->ssid.' forget');
             $redis->Set('wlan_autoconnect', 0);
             $return = 1;
             break;
