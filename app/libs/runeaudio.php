@@ -2149,7 +2149,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 // don't think we need to do anything here.
                 // maybe connect to the wireless network we just set up?
                 $wlan0MAC = $redis->Get('wlan0MAC');
-                sysCmd('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$enc);
+                sysCmd('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$encryption);
                 $return[] = '';
             }
         } else {
@@ -2190,11 +2190,12 @@ function wrk_wifiprofile($redis, $action, $args)
             $redis->Del($args->ssid);
             $redis->Del('stored_profiles');
             //sysCmdAsync('iwctl known-networks '.$args->ssid.'forget');
-            sysCmd('rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
-            runelog('***** delete rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
+            //sysCmd('rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
+            sysCmd('rm /var/lib/connman/'.bin2hex($args_>ssid).'.config');
+            runelog('***** delete rm /var/lib/connman/'.bin2hex($args_>ssid).'.config');
             // also delete the folder based on this
             // cannot be done using connmanctl or iwdctl
-            //sysCmd("rm -rf /var/lib/connman/wifi_".$wlan0MAC."_".bin2hex($args->ssid)."_managed_psk);
+            //sysCmd("rm -rf /var/lib/connman/wifi_".$wlan0MAC."_".bin2hex($args->ssid)."_managed_".$encryption);
             // this deletes the whole connman directory
             //sysCmd('rm -rf /var/lib/connman/'.$wifi_profile[0]);
             $return = 1;
@@ -2203,7 +2204,7 @@ function wrk_wifiprofile($redis, $action, $args)
             runelog('**** wrk_wifiprofile CONNECT ****', $args->ssid);
             // need to deal with more than one wlan?  
             //sysCmd('iwctl station wlan0 scan');
-            sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_psk');
+            sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$encryption);
             //sysCmdAsync('connmanctl connect '.$wifi_profile[0]);
             $redis->Set('wlan_autoconnect', 1);
             $return = 1;
