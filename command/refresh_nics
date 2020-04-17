@@ -295,10 +295,10 @@ $redis->set('networkinfo', json_encode($networkInfo));
 /*
     [73706732] => Array
         (
-            [ssid] => spg2
-            [ssidHex] => 73706732
+            [ssid] => SSID
+            [ssidHex] => Hex Representation of the SSID
             [status] => *AO
-            [connmanString] => wifi_b827eb281848_73706732_managed_psk
+            [connmanString] => wifi_macAddress_ssidHex_managed_psk
             [macAddress] => b827eb281848
             [security] => psk
             [strength] => 61
@@ -310,9 +310,9 @@ $redis->set('networkinfo', json_encode($networkInfo));
             [ready] =>
             [ipStatus] => UP
             [ipInfo] => <BROADCAST,MULTICAST,UP,LOWER_UP>
-            [ipv4Address] => 192.168.2.24/24
-            [ipv6Address] => fe80::ba27:ebff:fe28:1848/64
-            [ipv4Rest] => brd 192.168.2.255 scope global wlan0 valid_lft forever preferred_lft forever
+            [ipv4Address] => 192.168.x.xx/24
+            [ipv6Address] => fe80::ba27:ebff:fe28:xxxx/64
+            [ipv4Rest] => brd 192.168.x.255 scope global wlan0 valid_lft forever preferred_lft forever
             [ipv6Rest] => scope link valid_lft forever preferred_lft forever
         )
 */
@@ -348,17 +348,6 @@ foreach ($networkInfo as $network) {
 // to display it in the UI...
 // get stored profilesand see what SSIDs are in range (including hidden ones)
 // compare the 2 and display the stored ones with the info if ey are scanned or not
-// format is:
-/*    [4] => Array
-        (
-            [nic] => wlan0
-            [ESSID] => test
-            [connected] => 0
-            [storedprofile] => 1
-            [encryption] => unknown
-            [origin] => storage
-        )
-*/
         //$scan = $iw->parseScanDev( $nic );
         //$redis->set('wlans',json_encode($networkInfo));
         //foreach ($scan as $nicname => $nicscan) {
@@ -421,13 +410,10 @@ if (!empty($removed_nics)) {
     }
 }
 	}
-//kg
-// turn on mDNS for each interface 
-// we do it as a CLI command until I can figure out how to do it through connman setting
-//foreach ($configured_nics as $nic) {
-//	sysCmd('resolvectl mdns '.$nic.' on');
-//}
-//kg
+// turn on mDNS for each interface as this makes Avahi more responsive
+foreach ($configured_nics as $nic) {
+	sysCmd('resolvectl mdns '.$nic.' on');
+}
 
 // start AP if configured and no IP is assigned on wlan0
 // it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now
