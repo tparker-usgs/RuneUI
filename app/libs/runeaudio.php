@@ -1522,8 +1522,10 @@ function wrk_avahiconfig($redis, $hostname)
         $redis->set('avahiconfchange', 1);
         syscmd('cp '.$newfile.' '.$file);
         syscmd('rm -f '.$newfile);
-        // also modify /etc/hosts replace line beginning with 127.0.0.1, sed is fastest
+        // also modify /etc/hosts replace line beginning with 127.0.0.1 (PIv4)
         syscmd('sed -i "/^127.0.0.1/c\127.0.0.1       localhost localhost.localdomain '.$hostname.'.local '.$hostname.'" /etc/hosts');
+        // and line beginning with ::1 (IPv6)
+        syscmd('sed -i "/^::1/c\::1       localhost localhost.localdomain '.$hostname.'.local '.$hostname.'" /etc/hosts');
     }
 }
 
