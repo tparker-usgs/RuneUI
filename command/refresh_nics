@@ -76,17 +76,17 @@ $configured_nics = array_map("trim",sysCmd("connmanctl services | grep '*A' | cu
 // I think this should be actual nics...
 $i=0;
 foreach($configured_nics as &$value){
-	if (strpos($value,$eth0MAC[0])) {
-		$value = 'eth0';
-	}
-	elseif (strpos($value,$wlan0MAC[0])) {
-		//$value = sysCmd("connmanctl services | grep '*A' | cut -b 5-25 | sed 's/ //g'")[$i];
-		$value = 'wlan0';
-	}
-	// need to think about how to add more wlan MACs or a better way of doing this. 
-	// if we could ues ip addr and look at all entries which are not lo: the second field would be
-	// an array of network interfaces... if only I could parse this into php...
-	$i=$i+1;
+    if (strpos($value,$eth0MAC[0])) {
+        $value = 'eth0';
+    }
+    elseif (strpos($value,$wlan0MAC[0])) {
+        //$value = sysCmd("connmanctl services | grep '*A' | cut -b 5-25 | sed 's/ //g'")[$i];
+        $value = 'wlan0';
+    }
+    // need to think about how to add more wlan MACs or a better way of doing this. 
+    // if we could ues ip addr and look at all entries which are not lo: the second field would be
+    // an array of network interfaces... if only I could parse this into php...
+    $i=$i+1;
 }
 
 $removed_nics = array_diff($configured_nics, $detected_nics);
@@ -105,8 +105,8 @@ runelog('########### configured_nics ########### ', $configured_nics);
 runelog('########### removed_nics ########### ', $removed_nics);
 // check if wlan0/1 is detected
 if (!in_array("wlan0", $detected_nics)) {
-	// with netctl we restart service. with connman, need to see if it is up
-	// then turn it on then connect
+    // with netctl we restart service. with connman, need to see if it is up
+    // then turn it on then connect
     $retval = sysCmd('iwctl device list | grep -c "off"');
     if ($retval[0] === '0') {
         sysCmd ("connmanctl disable wifi");
@@ -144,140 +144,140 @@ foreach ($nics as $nic => $nicdetail) {
         }
         runelog('  try nic: '.$nic);
         // get stored profiles
-		// this looks like it allows display in the UI of the 'stored profile' section of the wlan page
-		// stored_profiles uses the human readable representation. to use this programatically, we need
-		// to convert it to HEX.
+        // this looks like it allows display in the UI of the 'stored profile' section of the wlan page
+        // stored_profiles uses the human readable representation. to use this programatically, we need
+        // to convert it to HEX.
         $wlans_profiles = sysCmd("connmanctl services | grep wifi | grep '*A' | cut -c5-25 | tr -d ' \t\n\r'");
-		// saves known ssids by human readable name. We can convert using the foreach loop but HR SSID  
-		// permeates all the templates for display in teh UI and would need to be converted everywhere...
-		//foreach ($wlans_profiles as &$wlans_profile) {
-		//	$wlans_profile = bin2hex($wlans_profile);
-		//}
+        // saves known ssids by human readable name. We can convert using the foreach loop but HR SSID  
+        // permeates all the templates for display in teh UI and would need to be converted everywhere...
+        //foreach ($wlans_profiles as &$wlans_profile) {
+        //	$wlans_profile = bin2hex($wlans_profile);
+        //}
         $redis->set('stored_profiles',json_encode($wlans_profiles));
         // scan for ap in range
-		// done with iwlist-parser.class.php (zeigler) - very inefficient
-		// the format is:
-		// "8":{"nic":"wlan0","origin":"scan","encryption":"on","ESSID":"insight-shared","connected":0}
-		// need to wrap the output of:
-		//  iwctl station wlan0 scan
-		//  iwctl station wlan0 get-networks | sed -e 's/^[ \t]*//' | sed -e "/^ *$/d" |  sed -e '1,4d' | tr -s ' '
-		//  --------------------------
-		$networkInfo = array();
-		$networkInterfaces = array();
-		$ipAddress = array();
-		// ip addresses per device
-		$addrs = sysCmd("ip -o  addr | sed 's,[ ]\+, ,g'");
-		foreach ($addrs as $addr) {
-			$addrArray = explode(' ', $addr, 5);
-			$device = $addrArray[1];
-			$ipAddress[$device]['device'] = $device;
-			if ($addrArray[2] === 'inet') {
-				$ipAddress[$device]['ipv4Address'] = $addrArray[3];
-				$ipAddress[$device]['ipv4Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
-			} else if ($addrArray[2] === 'inet6') {
-				$ipAddress[$device]['ipv6Address'] = $addrArray[3];
-				$ipAddress[$device]['ipv6Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
-			}
-			// devices without an ip address willl not be added
-		}
-		// mac addresses
-		$links = sysCmd("ip -o -br link | sed 's,[ ]\+, ,g'");
-		foreach ($links as $link) {
-			$linkArray = explode(' ', $link);
-			$macAddress = str_replace(':', '', $linkArray[2]);
-			$device = $linkArray[0];
-			$networkInterfaces[$macAddress]['macAddress'] = $macAddress;
-			$networkInterfaces[$macAddress]['device'] = $device;
-			$networkInterfaces[$macAddress]['ipStatus'] = $linkArray[1];
-			$networkInterfaces[$macAddress]['ipInfo'] = $linkArray[3];
-			// for devices which are down (and have no ip address)
-			$ipAddress[$device]['device'] = $device;
-		}
-		// avalable networks
-		// refresh network list
-		sysCmd('iwctl station wlan0 scan');
-		$hiddenCount = 0;
-		$services = sysCmd("connmanctl services");
-		foreach ($services as $service) {
-			$status = trim(substr($service, 0, 4));
-			$ssid = trim(substr($service, 4, 21));
-			$connmanString = trim(substr($service, 25));
-			$macAddress = explode('_', $connmanString)[1];
-			$security = explode('_', $connmanString)[4];
-			if (isset($networkInterfaces[$macAddress]['device'])) {
-				$device = $networkInterfaces[$macAddress]['device'];
-			} else {
-				$device = '000000';
-			}
-			if ($ssid === 'Wired') {
-				// there can be more Wired network connections make the ssid unique by adding the device
-				$ssid .= '-'.$device;
-				$strength = "";
-				$strengthStars = "";
-			} else {
-				// this is for WiFi
-				if ($ssid === '') {
-					// when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one 
-					$ssid = '<Hidden'.++$hiddenCount.'>';
-				}
-				// get the signal strength from connman
-				$strength = sysCmd("connmanctl services ".$connmanString." | grep -i 'Strength'");
-				$strength = explode('=', $strength[0]);
-				// stregth is a value from 1 to 100
-				$strength = trim($strength[1]);
-				// $stengthStars contains 0 to 10 stars
-				$strengthStars = str_repeat("*", round($strength/10));
-			}
-			$ssidHex = implode(unpack("H*", $ssid));
-			$networkInfo[$ssidHex]['ssid'] = $ssid;
-			$networkInfo[$ssidHex]['ssidHex'] = $ssidHex;
-			$networkInfo[$ssidHex]['status'] = $status;
-			$networkInfo[$ssidHex]['connmanString'] = $connmanString;
-			$networkInfo[$ssidHex]['macAddress'] = $macAddress;
-			$networkInfo[$ssidHex]['security'] = $security;
-			$networkInfo[$ssidHex]['strength'] = $strength;
-			$networkInfo[$ssidHex]['strengthStars'] = $strengthStars;
-			if ($device != '000000') {
-				$networkInfo[$ssidHex]['device'] = $device;
-			}
-			if ($status) {
-				$networkInfo[$ssidHex]['configured'] = true;
-				if (strpos(' '.$status, 'A')) {
-					$networkInfo[$ssidHex]['autoconnect'] = true;
-				} else {
-					$networkInfo[$ssidHex]['autoconnect'] = false;
-				}
-				if (strpos(' '.$status, 'O')) {
-					$networkInfo[$ssidHex]['online'] = true;
-				} else {
-					$networkInfo[$ssidHex]['online'] = false;
-				}
-				if (strpos(' '.$status, 'R')) {
-					$networkInfo[$ssidHex]['ready'] = true;
-				} else {
-					$networkInfo[$ssidHex]['ready'] = false;
-				}
-				if (isset($networkInterfaces[$macAddress]['ipStatus'])) {
-					$networkInfo[$ssidHex]['ipStatus'] = $networkInterfaces[$macAddress]['ipStatus'];
-				}
-				if (isset($networkInterfaces[$macAddress]['ipInfo'])) {
-					$networkInfo[$ssidHex]['ipInfo'] = $networkInterfaces[$macAddress]['ipInfo'];
-				}
-				if (isset($ipAddress[$device]['ipv4Address'])) {
-					$networkInfo[$ssidHex]['ipv4Address'] = $ipAddress[$device]['ipv4Address'];
-				}
-				if (isset($ipAddress[$device]['ipv6Address'])) {
-					$networkInfo[$ssidHex]['ipv6Address'] = $ipAddress[$device]['ipv6Address'];
-				}
-				if (isset($ipAddress[$device]['ipv4Rest'])) {
-					$networkInfo[$ssidHex]['ipv4Rest'] = $ipAddress[$device]['ipv4Rest'];
-				}
-				if (isset($ipAddress[$device]['ipv6Rest'])) {
-					$networkInfo[$ssidHex]['ipv6Rest'] = $ipAddress[$device]['ipv6Rest'];
-				}
-			} else {
-				$networkInfo[$ssidHex]['configured'] = false;
-			}
+        // done with iwlist-parser.class.php (zeigler) - very inefficient
+        // the format is:
+        // "8":{"nic":"wlan0","origin":"scan","encryption":"on","ESSID":"insight-shared","connected":0}
+        // need to wrap the output of:
+        //  iwctl station wlan0 scan
+        //  iwctl station wlan0 get-networks | sed -e 's/^[ \t]*//' | sed -e "/^ *$/d" |  sed -e '1,4d' | tr -s ' '
+        //  --------------------------
+        $networkInfo = array();
+        $networkInterfaces = array();
+        $ipAddress = array();
+        // ip addresses per device
+        $addrs = sysCmd("ip -o  addr | sed 's,[ ]\+, ,g'");
+        foreach ($addrs as $addr) {
+            $addrArray = explode(' ', $addr, 5);
+            $device = $addrArray[1];
+            $ipAddress[$device]['device'] = $device;
+            if ($addrArray[2] === 'inet') {
+                $ipAddress[$device]['ipv4Address'] = $addrArray[3];
+                $ipAddress[$device]['ipv4Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
+            } else if ($addrArray[2] === 'inet6') {
+                $ipAddress[$device]['ipv6Address'] = $addrArray[3];
+                $ipAddress[$device]['ipv6Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
+            }
+            // devices without an ip address willl not be added
+        }
+        // mac addresses
+        $links = sysCmd("ip -o -br link | sed 's,[ ]\+, ,g'");
+        foreach ($links as $link) {
+            $linkArray = explode(' ', $link);
+            $macAddress = str_replace(':', '', $linkArray[2]);
+            $device = $linkArray[0];
+            $networkInterfaces[$macAddress]['macAddress'] = $macAddress;
+            $networkInterfaces[$macAddress]['device'] = $device;
+            $networkInterfaces[$macAddress]['ipStatus'] = $linkArray[1];
+            $networkInterfaces[$macAddress]['ipInfo'] = $linkArray[3];
+            // for devices which are down (and have no ip address)
+            $ipAddress[$device]['device'] = $device;
+        }
+        // avalable networks
+        // refresh network list
+        sysCmd('iwctl station wlan0 scan');
+        $hiddenCount = 0;
+        $services = sysCmd("connmanctl services");
+        foreach ($services as $service) {
+            $status = trim(substr($service, 0, 4));
+            $ssid = trim(substr($service, 4, 21));
+            $connmanString = trim(substr($service, 25));
+            $macAddress = explode('_', $connmanString)[1];
+            $security = explode('_', $connmanString)[4];
+            if (isset($networkInterfaces[$macAddress]['device'])) {
+                $device = $networkInterfaces[$macAddress]['device'];
+            } else {
+                $device = '000000';
+            }
+            if ($ssid === 'Wired') {
+                // there can be more Wired network connections make the ssid unique by adding the device
+                $ssid .= '-'.$device;
+                $strength = "";
+                $strengthStars = "";
+            } else {
+                // this is for WiFi
+                if ($ssid === '') {
+                    // when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one 
+                    $ssid = '<Hidden'.++$hiddenCount.'>';
+                }
+                // get the signal strength from connman
+                $strength = sysCmd("connmanctl services ".$connmanString." | grep -i 'Strength'");
+                $strength = explode('=', $strength[0]);
+                // stregth is a value from 1 to 100
+                $strength = trim($strength[1]);
+                // $stengthStars contains 0 to 10 stars
+                $strengthStars = str_repeat("*", round($strength/10));
+            }
+            $ssidHex = implode(unpack("H*", $ssid));
+            $networkInfo[$ssidHex]['ssid'] = $ssid;
+            $networkInfo[$ssidHex]['ssidHex'] = $ssidHex;
+            $networkInfo[$ssidHex]['status'] = $status;
+            $networkInfo[$ssidHex]['connmanString'] = $connmanString;
+            $networkInfo[$ssidHex]['macAddress'] = $macAddress;
+            $networkInfo[$ssidHex]['security'] = $security;
+            $networkInfo[$ssidHex]['strength'] = $strength;
+            $networkInfo[$ssidHex]['strengthStars'] = $strengthStars;
+            if ($device != '000000') {
+                $networkInfo[$ssidHex]['device'] = $device;
+            }
+            if ($status) {
+                $networkInfo[$ssidHex]['configured'] = true;
+                if (strpos(' '.$status, 'A')) {
+                    $networkInfo[$ssidHex]['autoconnect'] = true;
+                } else {
+                    $networkInfo[$ssidHex]['autoconnect'] = false;
+                }
+                if (strpos(' '.$status, 'O')) {
+                    $networkInfo[$ssidHex]['online'] = true;
+                } else {
+                    $networkInfo[$ssidHex]['online'] = false;
+                }
+                if (strpos(' '.$status, 'R')) {
+                    $networkInfo[$ssidHex]['ready'] = true;
+                } else {
+                    $networkInfo[$ssidHex]['ready'] = false;
+                }
+                if (isset($networkInterfaces[$macAddress]['ipStatus'])) {
+                    $networkInfo[$ssidHex]['ipStatus'] = $networkInterfaces[$macAddress]['ipStatus'];
+                }
+                if (isset($networkInterfaces[$macAddress]['ipInfo'])) {
+                    $networkInfo[$ssidHex]['ipInfo'] = $networkInterfaces[$macAddress]['ipInfo'];
+                }
+                if (isset($ipAddress[$device]['ipv4Address'])) {
+                    $networkInfo[$ssidHex]['ipv4Address'] = $ipAddress[$device]['ipv4Address'];
+                }
+                if (isset($ipAddress[$device]['ipv6Address'])) {
+                    $networkInfo[$ssidHex]['ipv6Address'] = $ipAddress[$device]['ipv6Address'];
+                }
+                if (isset($ipAddress[$device]['ipv4Rest'])) {
+                    $networkInfo[$ssidHex]['ipv4Rest'] = $ipAddress[$device]['ipv4Rest'];
+                }
+                if (isset($ipAddress[$device]['ipv6Rest'])) {
+                    $networkInfo[$ssidHex]['ipv6Rest'] = $ipAddress[$device]['ipv6Rest'];
+                }
+            } else {
+                $networkInfo[$ssidHex]['configured'] = false;
+            }
 }
 
 $redis->set('networkinfo', json_encode($networkInfo));
@@ -351,47 +351,47 @@ foreach ($networkInfo as $network) {
         //$scan = $iw->parseScanDev( $nic );
         //$redis->set('wlans',json_encode($networkInfo));
         //foreach ($scan as $nicname => $nicscan) {
-		// the connman list is all networks including cabled.
-		// we want $wlans to be a listing of all scanned and saved wlans
-		$wlans = array();
-		$count = 0;
+        // the connman list is all networks including cabled.
+        // we want $wlans to be a listing of all scanned and saved wlans
+        $wlans = array();
+        $count = 0;
         foreach ($networkInfo as $scan) {
-			//print_r ($scan);
+            //print_r ($scan);
             //runelog('    scan for nic: '.$nic.' nicname = '.$nicname);
                 //runelog('      scan for nic: '.$nic.' AP = '.$count);
-				// duplicating the previous format with connnman info
+                // duplicating the previous format with connnman info
                 if ($scan['macAddress'] === $wlan0MAC[0]) {
-					// populate the info accordingly
-					$wlans[++$count]['nic'] = 'wlan0';
-					$wlans[$count]['origin'] = 'scan';
-					if ($scan['security']!='none'){
-						$wlans[$count]['encryption'] = 'on';
-					}
-					else {
-						$wlans[$count]['encryption'] = "off";
-						}
-					$wlans[$count]['ESSID'] = $scan['ssid'];
-					if ($scan['ready'] == 1 || $scan['online'] == 1) {
-						$wlans[$count]['connected'] = 1;
-					}
-					else {$wlans[$count]['connected'] = 0;}
-					if ($scan['configured'] == 1) {
-						$wlans[$count]['storedprofile'] = 1;
-					}
-					else {$wlans[$count]['storedprofile'] = 0;}
-						
+                    // populate the info accordingly
+                    $wlans[++$count]['nic'] = 'wlan0';
+                    $wlans[$count]['origin'] = 'scan';
+                    if ($scan['security']!='none'){
+                        $wlans[$count]['encryption'] = 'on';
+                    }
+                    else {
+                        $wlans[$count]['encryption'] = "off";
+                        }
+                    $wlans[$count]['ESSID'] = $scan['ssid'];
+                    if ($scan['ready'] == 1 || $scan['online'] == 1) {
+                        $wlans[$count]['connected'] = 1;
+                    }
+                    else {$wlans[$count]['connected'] = 0;}
+                    if ($scan['configured'] == 1) {
+                        $wlans[$count]['storedprofile'] = 1;
+                    }
+                    else {$wlans[$count]['storedprofile'] = 0;}
+                        
                 //    runelog('        SSID already found');
-				// populate wlan info consistent with the v4 system
+                // populate wlan info consistent with the v4 system
                 }
         }
 
-	//runelog('wlans response: ', $wlans);
-	print_r($wlans);
-	$redis->set('wlans',json_encode($wlans));
-	$wlans = json_encode($wlans);
-	runelog('wlans response(encoded): ', $wlans);
-	ui_render('wlans', $wlans);
-	}	
+    //runelog('wlans response: ', $wlans);
+    print_r($wlans);
+    $redis->set('wlans',json_encode($wlans));
+    $wlans = json_encode($wlans);
+    runelog('wlans response(encoded): ', $wlans);
+    ui_render('wlans', $wlans);
+    }	
 // send nics status to RuneUI
 ui_render('nics', json_encode($nics));
 unset($nic);
@@ -409,10 +409,10 @@ if (!empty($removed_nics)) {
         }
     }
 }
-	}
+    }
 // turn on mDNS for each interface as this makes Avahi more responsive
 foreach ($configured_nics as $nic) {
-	sysCmd('resolvectl mdns '.$nic.' on');
+    sysCmd('resolvectl mdns '.$nic.' on');
 }
 
 // start AP if configured and no IP is assigned on wlan0
