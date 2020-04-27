@@ -33,10 +33,13 @@
  */
  // common include
 if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
-    require_once($_SERVER['HOME'].'/app/config/config.php');
+    $serverHome = $_SERVER['HOME'];
 } else {
-    require_once('/var/www/app/config/config.php');
+    $serverHome = '/var/www';
 }
+// common include
+require($serverHome.'/app/config/config.php');
+
 // check current player backend
 $activePlayer = $redis->get('activePlayer');
 if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {

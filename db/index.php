@@ -33,8 +33,13 @@
  */
 // Environment vars
 // common include
-require_once($_SERVER['HOME'].'/app/config/config.php');
-//require_once('/var/www/app/config/config.php');
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
+    $serverHome = $_SERVER['HOME'];
+} else {
+    $serverHome = '/var/www';
+}
+// common include
+require($serverHome.'/app/config/config.php');
 ini_set('display_errors', -1);
 error_reporting('E_ALL');
 // check current player backend

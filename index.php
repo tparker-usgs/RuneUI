@@ -32,9 +32,16 @@
  *
  */
 // load configuration
-require_once($_SERVER['HOME'].'/app/config/config.php');
+// common include & main include
+if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/root')) {
+    $serverHome = $_SERVER['HOME'];
+} else {
+    $serverHome = '/var/www';
+}
+// common include
+require($serverHome.'/app/config/config.php');
 // main include
-require_once($_SERVER['HOME'].'/app/libs/vendor/autoload.php');
+require($serverHome.'/app/libs/vendor/autoload.php');
 // open session
 session_start();
 
@@ -53,9 +60,9 @@ if (!is_localhost() && !isset($_SESSION["login"]) && $redis->get('pwd_protection
     die();
 }
 // plates: create new engine
-$engine = new \League\Plates\Engine('/srv/http/app/templates');
+$engine = new \League\Plates\Engine($serverHome.'/app/templates');
 // plates: load asset extension
-$engine->loadExtension(new \League\Plates\Extension\Asset('/srv/http/assets', true));
+$engine->loadExtension(new \League\Plates\Extension\Asset($serverHome.'/assets', true));
 // plates: load URI extension
 $engine->loadExtension(new \League\Plates\Extension\URI($_SERVER['REQUEST_URI']));
 // plates: create a new template
@@ -115,7 +122,7 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         // debug
         //runelog("index: selected controller(1)",APP.$template->uri(1));
         // load selected APP Controller
-        require_once(APP.$template->uri(1).'_ctl.php');
+        require(APP.$template->uri(1).'_ctl.php');
         // register current controller in SESSION
         if ($template->uri(1) !== 'coverart' && $template->uri(1) !== 'coverart2') {
         $_SESSION['controller'] = $template->uri(1);
@@ -124,7 +131,7 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         // debug
         //runelog("index: selected controller(2)",'playback_ctl.php');
         // load playback APP Controller
-        require_once(APP.'playback_ctl.php');
+        require(APP.'playback_ctl.php');
         $template->section = 'index';
         $template->content = 'playback';
         // register current controller in SESSION

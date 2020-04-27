@@ -41,7 +41,7 @@ if ((isset($_SERVER['HOME'])) && ($_SERVER['HOME']) && ($_SERVER['HOME'] != '/ro
 $libs = APP.'libs/vendor';
 set_include_path(get_include_path() . PATH_SEPARATOR . $libs);
 // RuneAudio Library include
-require_once(APP.'libs/runeaudio.php');
+require(APP.'libs/runeaudio.php');
 // Connect to Redis backend
 $redis = new Redis();
 //$redis->pconnect('127.0.0.1');
