@@ -410,10 +410,6 @@ if (!empty($removed_nics)) {
     }
 }
     }
-// turn on mDNS for each interface as this makes Avahi more responsive
-foreach ($configured_nics as $nic) {
-    sysCmd('resolvectl mdns '.$nic.' on');
-}
 
 // start AP if configured and no IP is assigned on wlan0
 // it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now
