@@ -95,6 +95,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Pragma: no-cache'); // HTTP 1.0.
             header('Expires: 0'); // Proxies.
             header('Content-Type: '.$lastfm_img_mime);
+            header('Content-Length: '.strlen($lastfm_img));
             echo $lastfm_img;
             $output = 1;
         }
@@ -134,6 +135,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Pragma: no-cache'); // HTTP 1.0.
             header('Expires: 0'); // Proxies.
             header('Content-Type: ' .$auinfo['comments']['picture'][0]['image_mime']);
+            header('Content-Length: '.strlen($auinfo['comments']['picture'][0]['data']));
             echo $auinfo['comments']['picture'][0]['data'];
             $output = 1;
         }
@@ -161,7 +163,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Pragma: no-cache'); // HTTP 1.0.
             header('Expires: 0'); // Proxies.
             header('Content-Type: ' .mime_content_type($local_cover_path));
-
+            header('Content-Length: '.filesize($local_cover_path));
             readfile($local_cover_path);
         }
     }
@@ -189,6 +191,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Pragma: no-cache'); // HTTP 1.0.
             header('Expires: 0'); // Proxies.
             header('Content-Type: '.$lastfm_img_mime);
+            header('Content-Length: '.strlen($lastfm_img));
             echo $lastfm_img;
             $output = 1;
         }
@@ -201,6 +204,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
         header('Pragma: no-cache'); // HTTP 1.0.
         header('Expires: 0'); // Proxies.
         header('Content-Type: ' .mime_content_type($serverHome.'/assets/img/cover-default.png'));
+        header('Content-Length: '.filesize($serverHome.'/assets/img/cover-default.png'));
         readfile($serverHome.'/assets/img/cover-default.png');
         $output = 1;
     }
@@ -225,6 +229,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     header('Pragma: no-cache'); // HTTP 1.0.
     header('Expires: 0'); // Proxies.
     header('Content-Type: '.$spotify_cover_mime);
+    header('Content-Length: '.strlen($spotify_cover));
     echo $spotify_cover;
 } else if ($activePlayer === 'Airplay') {
     // clear the cache before testing for the existence of a file
