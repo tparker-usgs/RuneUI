@@ -4836,3 +4836,56 @@ function lyricsStringClean($string, $type=null)
     $string = trim($string[0], "\x0..\x2F\x3A..\x40\x5B..\x60\x7B..\x7F");
     return $string;
 }
+
+// function to correct a cheap network card which all seem to have the same mac address (00:e0:4c:53:44:58)
+function fix_mac($redis, $nic)
+{
+    // first check that the mac address needs to be changed "ip -o -br link | sed 's,[ ]\+, ,g'"
+    $response = sysCmd('ip -br link show '.$nic." | sed 's,[ ]\+, ,g'");
+    $macCurrent = trim(explode(' ', $response[0])[2]);
+    if ($macCurrent != '00:e0:4c:53:44:58') {
+        // MAC address does not need to be changed
+        return $macCurrent;
+    }
+    // the MAC address does needs to be changed
+    // determine the new MAC address
+    if ($redis->hExists('fix_mac', $nic)) {
+        // the MAC address was changed in the past so use the same one
+        $macNew = $redis->hGet('fix_mac', $nic);
+    } else {
+        // generate a new random MAC address
+        $macNew = implode(':', str_split(substr(md5(mt_rand()), 0, 12), 2));
+        // use the first 8 characters of the old MAC address to preserve the vendor code
+        $macNew = substr($macCurrent, 0, 8).substr($macNew, 8, 9);
+        // save the new MAC address so that the same one will be used in the future
+        $redis->hSet('fix_mac', $nic, $macNew);
+    }
+    // change the MAC address
+    sysCmd('ip link set dev '.$nic.' address '.$macNew);
+    // construct a systemd unit file to automatically change the MAC address on boot
+    $file = '/etc/systemd/system/macfix_'.$nic.'.service';
+    if ((!file_exists($file)) || (!sysCmd('grep -ic '.$macNew.' '.$file)[0])) {
+        // create the systemd unit file only when it needs to be created
+        $fileContent = '# file /etc/systemd/system/macfix_'.$nic.'.service'."\n"
+            .'# some cheap network cards have an identical mac address for all cards (00:e0:4c:53:44:58)'."\n"
+            .'# change it to a fixed (previouly ranomised) address'."\n\n"
+            .'[Unit]'."\n"
+            .'Description=MAC Address Fix for '.$nic."\n"
+            .'Wants=network-pre.target'."\n"
+            .'Before=network-pre.target'."\n"
+            .'BindsTo=sys-subsystem-net-devices-'.$nic.'.device'."\n"
+            .'After=sys-subsystem-net-devices-'.$nic.'.device'."\n\n"
+            .'[Service]'."\n"
+            .'Type=oneshot'."\n"
+            .'ExecStart=/usr/bin/ip link show '.$nic.' | /usr/bin/grep -ci 00:e0:4c:53:44:58 && /usr/bin/ip link set dev '.$nic.' address '.$macNew."\n"
+            .'[Install]'."\n"
+            .'WantedBy=multi-user.target'."\n";
+        // write the file
+        $fp = fopen($file, 'w');
+        fwrite($fp, $fileContent);
+        fclose($fp);
+    }
+    // enable the service
+    sysCmd('systemctl enable macfix_'.$nic);
+    return $macNew;
+}
