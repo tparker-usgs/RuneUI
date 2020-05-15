@@ -1,14 +1,22 @@
 #!/bin/bash
-
+#
 # Fix DNSSEC script
 #
-# If DNSSEC is switched on the nts time servers will be accessable at boot because time is incorrect.
+# When systemd-resolved is running with DNSSEC is switched on the nts time servers will not be accessable
+# at boot because time is incorrect. The incorrect time prevents systemd-resolved resoving the NTS URL's.
+#
 # The workaround is to let RuneAudio boot with DNSSEC switched off and after a timesync has taken place to
-# restart systemd resolve with DNSSEC switched on. After restarting systemd resolve the resolved
+# restart systemd-resolved with DNSSEC switched on. After restarting systemd-resolved the resolved
 # configuration file is modified to switch DNSSEC off for the next boot.
-
-# first check that a timesync has taken place, maybe there is no intenet connection
-timesync_yes=$( timedatectl show -a | grep NTPSynchronized | grep -ci yes )
+#
+# first check that systemd-resolved is running, if not just exit (some other fix has been implemented)
+resolved_active=$( systemctl is-active systemd-resolved.service )
+if [ "$resolved_active" != "active" ];
+then
+    exit
+fi
+# check that a timesync has taken place, maybe there is no intenet connection
+timesync_yes=$( timedatectl show -a | grep -i NTPSynchronized | grep -ci yes )
 # also check that DNSSEC is still switched off, maybe this routine has already been run
 dnssec_yes=$( resolvectl status | grep -i 'dnssec setting' | grep -ci yes )
 if [ "$timesync_yes" = "0" ];
@@ -32,6 +40,5 @@ else
         systemctl restart systemd-resolved.service
         # switch it off in the configurartion file for the next reboot
         sed -i '/DNSSEC=/c\DNSSEC=no' /etc/systemd/resolved.conf
-        exit
     fi
 fi
