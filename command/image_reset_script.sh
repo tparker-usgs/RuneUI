@@ -28,7 +28,7 @@ else
     systemctl unmask systemd-journald-audit.socket
 fi
 # systemctl stops after an erroneous entry, use an array to run through all entries
-declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start)
+declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start systemd-resolved)
 declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd bootsplash dbus iwd connman)
 declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil)
 #
@@ -51,7 +51,12 @@ for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"
 done
-
+# disable resolved
+systemctl mask systemd-resolved
+# delete the file/ling at /etc/resolv.conf
+rm -f /etc/resolv.conf
+# link it to connman's dynamically created resolv.conf
+ln -s /run/connman/resolv.conf /etc/resolv.conf
 # install raspi-rotate
 /var/www/command/raspi-rotate-install.sh
 #
