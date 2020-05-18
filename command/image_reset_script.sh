@@ -53,7 +53,7 @@ do
 done
 # disable resolved
 systemctl mask systemd-resolved
-# delete the file/ling at /etc/resolv.conf
+# delete the file/link at /etc/resolv.conf
 rm -f /etc/resolv.conf
 # link it to connman's dynamically created resolv.conf
 ln -s /run/connman/resolv.conf /etc/resolv.conf
@@ -145,7 +145,7 @@ echo -e "rune\nrune" | passwd root
 rm -f /etc/nginx/nginx.conf
 rm -f /etc/samba/*.conf
 #rm -f /etc/netctl/*
-rm -f /var/lib/connman/*
+rm -rf /var/lib/connman/*
 # copy default settings and services
 cp -Rv /srv/http/app/config/defaults/etc/* /etc
 cp -Rv /srv/http/app/config/defaults/usr/* /usr
