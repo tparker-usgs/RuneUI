@@ -6,6 +6,6 @@
     <type>_http._tcp</type>
     <port>80</port>
     <txt-record>skin_name=RuneUI</txt-record>
-    <txt-record>runeos_version=0.5-gearhead-janui</txt-record>
+    <txt-record>runeos_version=0.6C-gearhead-janui</txt-record>
   </service>
 </service-group>
