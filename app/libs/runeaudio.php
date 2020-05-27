@@ -2073,7 +2073,7 @@ function wrk_netconfig($redis, $action, $args = null, $configonly = null)
                 }
             }
             $nic .= "IPv6 = auto\n";
-            $nic .= "IPv6.Privacy = preferred\n";
+            $nic .= "IPv6.Privacy = disabled\n";
 
             // set advanced DNS options
             $newArray = wrk_replaceTextLine('/etc/resolvconf.conf', '', 'resolv_conf_options=', "resolv_conf_options=('timeout:".$redis->hGet('resolvconf', 'timeout')." attempts:".$redis->hGet('resolvconf', 'attempts')."')", '#name_servers=127.0.0.1', 1);
