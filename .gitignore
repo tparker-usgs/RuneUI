@@ -1,3 +1,7 @@
 test/
 sync.ffs_db
 node_modules
+.alsaequal.bin
+.cache/
+.config/
+.pki/
