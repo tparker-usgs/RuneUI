@@ -8,6 +8,7 @@ After=network.target
 
 [Service]
 Type=notify
+RuntimeDirectory=php-fpm
 PIDFile=/run/php-fpm/php-fpm.pid
 ExecStart=/usr/bin/php-fpm --nodaemonize --fpm-config /etc/php/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID

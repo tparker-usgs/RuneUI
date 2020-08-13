@@ -6,6 +6,7 @@ After=network.target sound.target
 [Service]
 User=mpd
 Type=notify
+RuntimeDirectory=mpd
 ExecStart=/usr/bin/mpd --no-daemon
 
 # Enable this setting to ask systemd to watch over MPD, see
