@@ -3225,7 +3225,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 $mp['charset'] = '';
             }
             // check that it is not already mounted
-            $retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+            $retval = sysCmd('grep "'.$mp['address'].'" /proc/self/mountinfo | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
             if ($retval[0]) {
                 // already mounted, do nothing and return
                 return 1;
