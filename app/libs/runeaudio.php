@@ -3629,6 +3629,12 @@ function wrk_sourcecfg($redis, $action, $args=null)
             break;
         case 'umountusb':
             $return = sysCmd('udevil umount '.$args);
+            // for some unknown reason usb devices sometimes get mounted twice check that is is dismounted, if not run again
+            if (wrk_checkMount($args)) {
+                sysCmd('udevil umount '.$args);
+            }
+            // clean up any invalid mount points
+            sysCmd('udevil clean');
             break;
     }
     return $return;
