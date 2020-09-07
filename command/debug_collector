@@ -42,10 +42,20 @@ $redis = new Redis();
 $redis->connect('/run/redis/socket');
 function debug_data($redis)
 {
-    $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d ' ' -f 2");
     $output = "\n";
     $output .= "###### System info ######\n";
     $output .=  file_get_contents('/proc/version')."\n";
+    $output .= "Hardware model:\t".implode('\n', sysCmd('cat /proc/device-tree/model'))."\n";
+    $bit = ' '.sysCmd('uname -m')[0];
+    if (strpos($bit, '64')) {
+        $bit = ' (64 bit)';
+    } else if (strpos($bit, '7')) {
+        $bit = ' (32 bit)';
+    } else {
+        $bit = '';
+    }
+    $output .= "Linux version:\t".implode('\n', sysCmd('uname -r')).$bit."\n";
+    unset($bit);
     $output .= "System time:\t".implode('\n', sysCmd('date'))."\n";
     $output .= "System load:\t".file_get_contents('/proc/loadavg');
     $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";

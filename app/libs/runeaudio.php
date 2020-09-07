@@ -3764,6 +3764,10 @@ function wrk_getHwPlatform($redis)
                         // no break;
                     case "0E":
                         // 0D = Pi3A+
+                        // no break;
+                    case "11":
+                        // 0d = Pi4B+
+                        // no break;
                         $arch = '08';
                         $redis->exists('soxrmpdonoff') || $redis->set('soxrmpdonoff', 1);
                         $redis->hExists('airplay', 'soxronoff') || $redis->hSet('airplay', 'soxronoff', 0);
