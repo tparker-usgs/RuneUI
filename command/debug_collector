@@ -56,15 +56,9 @@ function debug_data($redis)
     $output .= "Git Branch:\t".$redis->hget('git', 'branch')."\n";
     $output .= "PlayerID:\t".$redis->get('playerid')."\n\n\n";
     unset($command);
-    $output .= "Git Branch:\t".$redis->hget('git', 'branch')."\n";
-    $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";
-    $output .= "Build version:\t".$redis->get('buildversion')."-".$redis->get('patchlevel')."\n";
-    $output .= "PlayerID:\t".$redis->get('playerid')."\n";
-    $output .= "\n";
-    $output .= "\n";
     $output .= "###### Boot configuration (cat /boot/config.txt) ######\n";
     $command = sysCmd("grep -v -e '^[[:space:]]*$' /boot/config.txt | grep -v '#.*='");
-    $output .= implode("\n", $command)."\n\n\n";
+    $output .= implode("\n", $command)."\n";
     unset($command);
     $output .= "##################################################\n\n\n";
     $output .= "###### System load statistics (procinfo -H) ######\n";

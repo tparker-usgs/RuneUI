@@ -3493,8 +3493,11 @@ if ($('#section-index').length) {
             });
 
         }
+        
 
         // on screen keyboard
+        // ----------------------------------------------------------------------------------------------------
+
         if (document.location.hostname == "localhost")
             $('.osk-trigger').onScreenKeyboard({
                 'draggable': true
