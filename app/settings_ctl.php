@@ -244,7 +244,7 @@ if (isset($jobID)) {
     waitSyWrk($redis, $jobID);
 }
 // push backup file
-if ($_POST['syscmd'] === 'backup') {
+if (isset($_POST['syscmd']) && ($_POST['syscmd'] === 'backup')) {
     pushFile($redis->hGet('w_msg', $jobID[0]));
     $redis->hDel('w_msg', $jobID[0]);
 }
