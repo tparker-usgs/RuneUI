@@ -321,20 +321,20 @@ function redisDatastore($redis,$action) {
             $redis->set('disk_error', 0);
             // pre-installed Rern's add-ons
             $redis->hSet('addons', 'update', '0');
-            $redis->hSet('addons', 'font', '20170901');
+            $redis->hSet('addons', 'font', '20220901');
             // PHP precache (prime) scripts
             $redis->del('php_opcache_prime');
             $transaction = $redis->multi();
             // RuneAudio Libs & config
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/config/config.php');
             // RuneAudio Controllers
-            $transaction->sAdd('php_opcache_prime', '/srv/http/index.php');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/db/index.php');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/command/index.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/accesspoint_ctl.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/alsamixer_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/coverart_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/credits_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/debug_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/dev_ctl.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/lyric_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/login_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/mpd_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/network_ctl.php');
@@ -342,7 +342,12 @@ function redisDatastore($redis,$action) {
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/settings_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/sources_ctl.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/tun_ctl.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/index.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/db/index.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/index.php');
             // RuneAudio Templates
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/accesspoint.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/alsamixer.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/credits.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/debug.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/default_lo.php');
@@ -354,9 +359,9 @@ function redisDatastore($redis,$action) {
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/mpd.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/mpd_manual.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network.php');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_edit.php');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_edit_manual.php');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_wlan.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_ethernet_edit.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_wifi_edit.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/network_wifi_scan.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/playback.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/settings.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/templates/sources.php');
@@ -387,13 +392,26 @@ function redisDatastore($redis,$action) {
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/libs/vendor/getid3/module.tag.lyrics3.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/app/libs/vendor/react/promise/src/React/Promise/functions.php');
             // RuneAudio Commands
-            $transaction->sAdd('php_opcache_prime', '/srv/http/command/refresh_nics');
-            $transaction->sAdd('php_opcache_prime', '/srv/http/command/ui_notify.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/command/debug_collector');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/info.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/mount_async.php');
             $transaction->sAdd('php_opcache_prime', '/srv/http/command/opcache.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/refresh_ao');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/refresh_nics');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/restore.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/session.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/set_mpd_volume.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/spotify_connect_command.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/spotify_connect_metadata_async.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/ui_notify.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/ui_update_async');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/update_os.php');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/upmpdcli_toggle');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/usbmount');
             // RuneAudio Workers
-            $transaction->sAdd('php_opcache_prime', '/srv/http/command/rune_PL_wrk');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/rune_SSM_wrk');
             $transaction->sAdd('php_opcache_prime', '/srv/http/command/rune_SY_wrk');
+            $transaction->sAdd('php_opcache_prime', '/srv/http/command/rune_PL_wrk');
             $transaction->exec();
             sysCmd('redis-cli KEYS "mount_*" | xargs redis-cli DEL');
             break;
@@ -595,7 +613,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('disk_error') || $redis->set('disk_error', 0);
             // pre-installed Rern's add-ons
             $redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', '0');
-            $redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20170901');
+            $redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20220901');
             break;
     }
 }

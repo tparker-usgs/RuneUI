@@ -12,7 +12,7 @@ fi
 #---
 #Before running the script...
 #Connect via Wired ethernet, remove all WiFi profiles
-#Dismount all NAS and USB sources, clear all NAS information. Unplug USB sources
+#Dismount all NAS and USB sources, clear all NAS information. Unplug all USB decvices
 #Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
 #
 # clean up any no longer valid mounts
@@ -46,7 +46,7 @@ for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"
 done
-# stop twice, some services try to restart themselves (e.g. ashuffle)
+# stop twice, rune_SY_wrk will try to restart some services (e.g. ashuffle)
 for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"

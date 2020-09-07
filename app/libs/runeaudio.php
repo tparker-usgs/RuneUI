@@ -1048,7 +1048,7 @@ function _parseStatusResponse($redis, $resp)
         }
         //
         // when bitrate still is empty use mediainfo to examine the file which is playing
-        // but only when the filename is available and mediainfo is installed
+        // but only when the file-name is available and mediainfo is installed
         // ignore any line returned by mpd status containing 'updating'
         $status = sysCmd('mpc status | grep -vi updating');
         // bit rate
@@ -1072,7 +1072,7 @@ function _parseStatusResponse($redis, $resp)
             unset($retval);
         }
         // sample format
-        // if ((($plistArray['??'] == '0') || ($plistArray['??'] == '')) && (count($status) == 3)) {
+        // if ((($plistArray['??'] == '0') || ($plistArray['??'] == '')) && (count($status) === 3)) {
             // $retval = sysCmd('mpc -f "[%file%]"');
             // $retval = sysCmd('ffprobe -v error -show_entries stream=sample_fmt -of default=noprint_wrappers=1 "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'"');
             // $sampleformat = trim(preg_replace('/[^0-9]/', '', $retval[0]));
@@ -1146,7 +1146,7 @@ function _parseOutputsResponse($input, $active)
         $value = explode(':', $line);
         $outputs[$i][$value[0]] = trim($value[1]);
             if (isset($active)) {
-                if ($value[0] == 'outputenabled' && $outputs[$i][$value[0]] == 1) {
+                if ($value[0] === 'outputenabled' && $outputs[$i][$value[0]]) {
                     $active = $i;
                 }
             }
@@ -1372,7 +1372,7 @@ function hashCFG($action, $redis)
         case 'check_net':
             // --- CODE REWORK NEEDED ---
             //$hash = md5_file('/etc/netctl/eth0');
-            // have to find the settings file by mac address in connman
+            // have to find the settings file by MAC address in connman
             $eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
             $hash = md5_file('/var/lib/connman/ethernet_'.$eth0MAC[0].'_cable/settings');
             if ($redis->get('netconfhash') !== $hash) {
@@ -1513,7 +1513,7 @@ function wrk_avahiconfig($redis, $hostname)
     fwrite($fp, implode("", $newArray));
     fclose($fp);
     // check that the conf file has changed
-    if (md5_file($file) == md5_file($newfile)) {
+    if (md5_file($file) === md5_file($newfile)) {
         // nothing has changed, set avahiconfchange off
         $redis->set('avahiconfchange', 0);
         syscmd('rm -f '.$newfile);
@@ -1663,7 +1663,7 @@ runelog('wrk_opcache ', $action);
     switch ($action) {
         case 'prime':
             opcache_reset();
-            if ($redis->get('opcache') == 1) sysCmd('curl http://127.0.0.1/command/cachectl.php?action=prime');
+            if ($redis->get('opcache')) sysCmd('curl http://127.0.0.1/command/cachectl.php?action=prime');
             break;
         case 'forceprime':
             opcache_reset();
@@ -2825,7 +2825,7 @@ if ($action === 'reset') {
             fwrite($fh, $output);
             fclose($fh);
             // check whether the mpd.conf file has changed
-            if ($redis->get('mpdconfhash') == md5_file('/tmp/mpd.conf')) {
+            if ($redis->get('mpdconfhash') === md5_file('/tmp/mpd.conf')) {
                 // nothing has changed, set mpdconfchange off
                 $redis->set('mpdconfchange', 0);
                 syscmd('rm -f /tmp/mpd.conf');
@@ -2924,7 +2924,7 @@ if ($action === 'reset') {
             // set mpdconfchange off
             $redis->set('mpdconfchange', 0);
             // set process priority
-            sysCmdAsync('sleep 5 && rune_prio nice');
+            sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
             break;
         case 'stop':
             $redis->set('mpd_playback_status', wrk_mpdPlaybackStatus($redis));
@@ -3162,7 +3162,7 @@ function wrk_shairport($redis, $ao, $name = null)
     fwrite($fp, implode("", $newArray));
     fclose($fp);
     // check that the conf file has changed
-    if (md5_file($file) == md5_file($newfile)) {
+    if (md5_file($file) === md5_file($newfile)) {
         // nothing has changed, set sssconfchange off
         $redis->set('sssconfchange', 0);
         syscmd('rm -f '.$newfile);
@@ -3181,7 +3181,7 @@ function wrk_shairport($redis, $ao, $name = null)
     fwrite($fp, implode("", $newArray));
     fclose($fp);
     // check that the conf file has changed
-    if (md5_file($file) == md5_file($newfile)) {
+    if (md5_file($file) === md5_file($newfile)) {
         // nothing has changed, set libaoconfchange off
         $redis->set('libaoconfchange', 0);
         syscmd('rm -f '.$newfile);
@@ -3272,7 +3272,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                     sleep(3);
                 }
             }
-            if (strlen($mp['remotedir']) === 0) {
+            if ($mp['remotedir']) {
                 // normally valid as a remote directory name should be specified
                 $mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - empty - continuing';
                 if (!$quiet) {
@@ -3328,7 +3328,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 $mountstr = "mount -t cifs -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
             // create the mount point
-            sysCmd("mkdir -p \"/mnt/MPD/NAS/".$mp['name']."\"");
+            sysCmd("mkdir -p '/mnt/MPD/NAS/".$mp['name']."'");
             // debug
             runelog('mount string', $mountstr);
             $count = 10;
@@ -3348,7 +3348,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                     $noaddress += substr_count($line, 'Unable to find suitable address');
                 }
             }
-            runelog('system response', var_dump($retval));
+            runelog('system response: ', implode("\n", $retval));
             if (empty($retval)) {
                 // mounted OK
                 $mp['error'] = '';
@@ -3364,7 +3364,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 return 1;
             } else {
                 unset($retval);
-                $retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+                $retval = sysCmd('grep "'.$mp['address'].'" /proc/self/mountinfo | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
                 if ($retval[0]) {
                     // mounted OK
                     $mp['error'] = '';
@@ -3390,7 +3390,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                     ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
                     sleep(3);
                 }
-                if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+                if(!empty($mp['name'])) sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
                 return 0;
             }
             if ($type === 'cifs') {
@@ -3471,7 +3471,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                                 $busy += substr_count($line, 'resource busy');
                             }
                         }
-                        runelog('system response',var_dump($retval));
+                        runelog('system response: ', implode("\n", $retval));
                         if (empty($retval)) {
                             // mounted OK
                             $mp['error'] = '';
@@ -3487,7 +3487,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                             return 1;
                         } else {
                             unset($retval);
-                            $retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+                            $retval = sysCmd('grep "'.$mp['address'].'" /proc/self/mountinfo | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
                             if ($retval[0]) {
                                 // mounted OK
                                 $mp['error'] = '';
@@ -3510,7 +3510,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 }
             }
             // mount failed
-            if(!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+            if(!empty($mp['name'])) sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
             if (!$quiet) {
                 ui_notify($type.' mount', $mp['error']);
                 sleep(3);
@@ -3563,10 +3563,10 @@ function wrk_sourcecfg($redis, $action, $args=null)
             $redis->hMset('mount_'.$args['id'], $args);
             sysCmd('mpc stop');
             usleep(500000);
-            sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
+            sysCmd("umount -f '/mnt/MPD/NAS/".$mp['name']."'");
             if ($mp['name'] != $args['name']) {
-                sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
-                sysCmd("mkdir \"/mnt/MPD/NAS/".$args['name']."\"");
+                sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
+                sysCmd("mkdir '/mnt/MPD/NAS/".$args['name']."'");
             }
             $return = wrk_sourcemount($redis, 'mount', $args['id']);
             runelog('wrk_sourcecfg(edit) exit status', $return);
@@ -3575,9 +3575,9 @@ function wrk_sourcecfg($redis, $action, $args=null)
             $mp = $redis->hGetAll('mount_'.$args->id);
             sysCmd('mpc stop');
             usleep(500000);
-            sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
+            sysCmd("umount -f '/mnt/MPD/NAS/".$mp['name']."'");
             sleep(3);
-            if (!empty($mp['name'])) sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+            if (!empty($mp['name'])) sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
             $return = $redis->del('mount_'.$args->id);
             break;
         case 'reset':
@@ -3588,8 +3588,8 @@ function wrk_sourcecfg($redis, $action, $args=null)
             foreach ($source as $key) {
                 $mp = $redis->hGetAll($key);
                 runelog('wrk_sourcecfg() umount loop $mp[name]',$mp['name']);
-                sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
-                sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+                sysCmd("umount -f '/mnt/MPD/NAS/".$mp['name']."'");
+                sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
                 $return = $redis->del($key);
             }
             // reset mount index
@@ -3597,7 +3597,7 @@ function wrk_sourcecfg($redis, $action, $args=null)
             sysCmd('systemctl start mpd');
             // ashuffle gets started automatically
             // set process priority
-            sysCmdAsync('sleep 1 && rune_prio nice');
+            sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
             break;
         case 'umountall':
             sysCmd('mpc stop');
@@ -3607,13 +3607,13 @@ function wrk_sourcecfg($redis, $action, $args=null)
             foreach ($source as $key) {
                 $mp = $redis->hGetAll($key);
                 runelog('wrk_sourcecfg() umount loop $mp[name]',$mp['name']);
-                sysCmd("umount -f \"/mnt/MPD/NAS/".$mp['name']."\"");
-                sysCmd("rmdir \"/mnt/MPD/NAS/".$mp['name']."\"");
+                sysCmd("umount -f '/mnt/MPD/NAS/".$mp['name']."'");
+                sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
             }
             sysCmd('systemctl start mpd');
             // ashuffle gets started automatically
             // set process priority
-            sysCmdAsync('sleep 1 && rune_prio nice');
+            sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
             break;
         case 'mountall':
             // Note: wrk_sourcemount() will not do anything for existing mounts
@@ -3970,7 +3970,7 @@ function wrk_startAirplay($redis)
 function wrk_stopAirplay($redis)
 {
     $activePlayer = $redis->get('activePlayer');
-    if ($activePlayer == 'Airplay') {
+    if ($activePlayer === 'Airplay') {
 
         $stoppedPlayer = $redis->get('stoppedPlayer');
         runelog('stoppedPlayer = ', $stoppedPlayer);
@@ -4111,7 +4111,7 @@ function wrk_switchplayer($redis, $playerengine)
             $return = sysCmd('systemctl stop spopd');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
-            sysCmdAsync('rune_prio nice');
+            sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
             break;
 
         case 'Spotify':
@@ -4126,7 +4126,7 @@ function wrk_switchplayer($redis, $playerengine)
             $redis->set('mpd_playback_status', 'stop');
             $return = sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
             // set process priority
-            sysCmdAsync('rune_prio nice');
+            sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
             break;
     }
     return $return;
@@ -4330,7 +4330,7 @@ function wrk_changeHostname($redis, $newhostname)
     }
     $redis->set('avahiconfchange', 0);
     // set process priority
-    sysCmdAsync('sleep 1 && rune_prio nice');
+    sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
 }
 
 function wrk_upmpdcli($redis, $name = null, $queueowner = null)
@@ -4358,7 +4358,7 @@ function wrk_upmpdcli($redis, $name = null, $queueowner = null)
         sysCmd('systemctl reload-or-restart upmpdcli');
     }
     // set process priority
-    sysCmdAsync('sleep 1 && rune_prio nice');
+    sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
 }
 
 function alsa_findHwMixerControl($cardID)

@@ -35,7 +35,7 @@ cd /home
 #
 # Convert leading tabs to 4 spaces is the files
 #
-set +x # echo all commands to cli
+set +x # echo no commands to cli
 echo "Convert leading tabs to 4 spaces is the files"
 FILES="/srv/http/assets/js/*
 /srv/http/db/*
@@ -63,7 +63,7 @@ done
 #
 # When requested, remove trailing whitespace in lines from bin/bash files, but exclude vendor files
 #
-if [ "$1" == "cleanfiles" ]; then
+if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
     echo "Removing trailing whitespace from bin/bash files"
     FILES=$(grep -lr '^#!/bin/bash' /srv/http | grep -v '/vendor/')
     for f in $FILES
@@ -82,7 +82,7 @@ fi
 #
 # When requested, remove trailing whitespace from php files, but exclude vendor files
 #
-if [ "$1" == "cleanfiles" ]; then
+if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
     echo "Removing trailing whitespace from php files"
     FILES=$(grep -lr '^<?php' /srv/http | grep -v '/vendor/')
     for f in $FILES
@@ -101,8 +101,8 @@ fi
 #
 # When requested, remove trailing whitespace from php files, but exclude vendor files
 #
-if [ "$1" == "cleanfiles" ]; then
-    echo "Removing trailing whitespace from listed files"
+if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
+    echo "Removing trailing whitespace from /srv/http/app/templates/* files"
     FILES="/srv/http/app/templates/*"
     for f in $FILES
     do
@@ -142,7 +142,7 @@ chown -R mpd.audio /var/lib/mpd
 #
 # Remove dos2unix if requested
 #
-if [ "$1" == "final" ]; then
+if [ "$1" == "final" ] || [ "$2" == "final" ]; then
     echo "Removing dos2unix package"
     pacman -Rs dos2unix --noconfirm
 fi

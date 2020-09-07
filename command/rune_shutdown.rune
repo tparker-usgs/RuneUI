@@ -53,19 +53,19 @@ if [[ $disablesplash == 0 ]] ; then
     ply-image "$splash"
 fi
 sleep 1
-redis-cli set lock_refresh_ao 0
-redis-cli save
-systemctl stop spotifyd shairport-sync spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
 redis-cli set lock_globalrandom 0
 redis-cli set lock_refresh_ao 0
 redis-cli set lock_wifiscan 0
+redis-cli save
+systemctl stop spotifyd shairport-sync spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
 redis-cli shutdown save
 sleep 1
 export DISPLAY=:0
 xset dpms force off
 sleep 1
-umount -aft nfs
-umount -aft cifs
-rm -R /mnt/MPD/NAS/*
+# unmount the local an network devices
+umount -Rf /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/USB/*
 rmdir /mnt/MPD/NAS/*
+rmdir /mnt/MPD/USB/*
 return 0

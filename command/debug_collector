@@ -48,13 +48,13 @@ function debug_data($redis)
     $output .=  file_get_contents('/proc/version')."\n";
     $output .= "System time:\t".implode('\n', sysCmd('date'))."\n";
     $output .= "System load:\t".file_get_contents('/proc/loadavg');
-    $output .= "Hardware model:\t".implode('\n', sysCmd('cat /proc/device-tree/model'))."\n";
-    $output .= "Linux version:\t".implode('\n', sysCmd('uname -r'))."\n";
-    $command = sysCmd("cat /etc/motd | grep -i 'RuneUI:' | cut -d ':' -f 2");
-    $output .= "RuneOS/UI:\t".trim($command[0])." - ";
+    $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";
+    $command = sysCmd("grep -i 'RuneOS:' /etc/motd | cut -d ':' -f 2");
+    $output .= "RuneOS:\t\t".trim($command[0])."\n";
     unset($command);
-    $command = sysCmd("cat /etc/motd | grep -i 'RuneOS:' | cut -d ':' -f 2");
-    $output .= trim($command[0])."\n";
+    $output .= "RuneUI:\t\t".$redis->get('buildversion')."-".$redis->get('patchlevel')."\n";
+    $output .= "Git Branch:\t".$redis->hget('git', 'branch')."\n";
+    $output .= "PlayerID:\t".$redis->get('playerid')."\n\n\n";
     unset($command);
     $output .= "Git Branch:\t".$redis->hget('git', 'branch')."\n";
     $output .= "HW platform:\t".$redis->get('hwplatform')." (".$redis->get('hwplatformid').")\n";
@@ -81,22 +81,18 @@ function debug_data($redis)
     $output .= "Card list: (/proc/asound/cards)\n";
     $output .= "--------------------------------------------------\n";
     $output .=  file_get_contents('/proc/asound/cards');
-    $output .= "\n";
-    $output .= "\n";
+    $output .= "\n\n";
     $output .= "PLAYBACK devices: (aplay -l)\n";
     $output .= "--------------------------------------------------\n";
     $output .= implode("\n", sysCmd('aplay -l'));
-    $output .= "\n";
-    $output .= "\n";
-    $output .= "\n";
+    $output .= "\n\n\n";
     $output .= "PCM devices: (aplay -L)\n";
     $output .= "--------------------------------------------------\n";
     $output .= implode("\n", sysCmd('aplay -L'));
-    $output .= "\n";
-    $output .= "\n";
-    $output .= "\n";
+    $output .= "\n\n\n";
     $output .= "Simple mixer controls: (amixer scontrols)\n";
     $output .= "--------------------------------------------------\n";
+    $acards = sysCmd("grep : /proc/asound/cards | cut -d ' ' -f 2");
     foreach ($acards as $card) {
         $output .= "card ".$card.":\n";
         $command = implode("\n", sysCmd('amixer -c '.$card.' scontrols'));
@@ -115,18 +111,19 @@ function debug_data($redis)
         $output .= "\n\n";
     }
     $output .= "\n";
+    unset($command, $acards, $card);
     $output .= "MPD audio outputs status: (mpc outputs)\n";
     $output .= "--------------------------------------------------\n";
     $command = implode("\n", sysCmd('mpc outputs'));
     $output .= $command;
     unset($command);
-    $output .= "\n\n";
+    $output .= "\n\n\n";
     $output .= "MPD statistics: (mpc stats)\n";
     $output .= "--------------------------------------------------\n";
     $command = implode("\n", sysCmd('mpc stats'));
     $output .= $command;
     unset($command);
-    $output .= "\n\n";
+    $output .= "\n\n\n";
     // TODO: better collect stream info
     // $output .= "ALSA interface #0: (/proc/asound/card0/pcm0p/info)\n";
     // $output .= "--------------------------------------------------\n";
@@ -156,10 +153,10 @@ function debug_data($redis)
     $command = implode("\n", sysCmd('mpd --version'));
     $output .= "###### mpd version ######\n";
     $output .= $command;
-    $output .= "\n\n";
+    $output .= "\n\n\n";
     $output .= "###### mpd.conf ######\n";
     $output .= file_get_contents('/etc/mpd.conf');
-    $output .= "\n";
+    $output .= "##################################################\n\n\n";
     $output .= "###### Kernel optimization parameters ######\n";
     $output .= "hardware platform:\t".$redis->get('hwplatform')."\n";
     $output .= "current orionprofile:\t".$redis->get('orionprofile')."\n";
@@ -174,10 +171,9 @@ function debug_data($redis)
     $output .=  "/proc/sys/kernel/sched_rr_timeslice_ms:\t\t".file_get_contents('/proc/sys/kernel/sched_rr_timeslice_ms');
     $output .=  "/proc/sys/kernel/sched_min_granularity_ns:\t".file_get_contents('/proc/sys/kernel/sched_min_granularity_ns');
     $output .=  "/proc/sys/kernel/sched_wakeup_granularity_ns:\t".file_get_contents('/proc/sys/kernel/sched_wakeup_granularity_ns');
-    $output .= "\n";
-    $output .= "\n";
+    $output .= "\n\n";
     $output .= "###### Kernel module snd_usb_audio settings ######\n";
-    $command = sysCmd('systool -v -m snd_usb_audio');
+    $command = sysCmd('systool -v -m snd_usb_audio | grep -vi error');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
     $output .= "###### Systemd active startup scripts (ls -lah /etc/systemd/system/multi-user.target.wants/) ######\n";
@@ -264,12 +260,19 @@ function debug_data($redis)
     $output .= implode("\n", $command)."\n\n";
     unset($command);
     $output .= "###### Network WiFi Access Point (redis-cli hgetall AccessPoint) ######\n";
-    $command = sysCmd('redis-cli hgetall AccessPoint');
-    $output .= implode("\n", $command)."\n\n";
-    unset($command);
+    $command = $redis->hgetall('AccessPoint');
+    foreach ($command as $key => $value) {
+        $output .= $key.': '.$value."\n";
+    }
+    $output .= "\n\n";
+    unset($command, $key, $value);
     $output .= "###### Rern's Addons (redis-cli hgetall addons) ######\n";
-    $command = sysCmd('redis-cli hgetall addons');
-    $output .= implode("\n", $command)."\n\n";
+    $command = $redis->hgetall('addons');
+    foreach ($command as $key => $value) {
+        $output .= $key.': '.$value."\n";
+    }
+    $output .= "\n\n";
+    unset($command, $key, $value);
     unset($command);
     // $output .= "###### Network wifi site-scan (iwlist scan) ######\n";
     // $command = sysCmd('iwlist scan');
@@ -294,8 +297,7 @@ function debug_data($redis)
     $output .= "###### PHP backend ######\n";
     $output .= "php version:\t".phpversion()."\n";
     $output .= "debug level:\t".$redis->get('debug')."\n";
-    $output .= "\n";
-    $output .= "\n";
+    $output .= "\n\n";
     // $output .= "###### SESSION ######\n";
     // $output .= "\n";
     // $output .= "STATUS:\t\t".session_status()."\n";

@@ -353,7 +353,7 @@ function volumeStepSet() {
     setvol(GUI.stepVolumeDelta);
     // console.log('set volume to = ', GUI.stepVolumeDelta);
 }
-    
+
 // custom scrolling
 function customScroll(list, destination, speed) {
     // console.log('list = ' + list + ', destination = ' + destination + ', speed = ' + speed);
@@ -959,8 +959,8 @@ function updateGUI() {
             // if (GUI.stream !== 'radio') {
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
-                $('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
-                $('#cover-art-sss').css('background-image','url("/coverart/?v=' + covercachenum + '")');            
+                $('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');
+                $('#cover-art-sss').css('background-image','url("/coverart/?v=' + covercachenum + '")');
                 $.ajax({
                     url: '/artist_info/',
                     success: function(data){

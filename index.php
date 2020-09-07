@@ -92,13 +92,13 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
     if (!empty($template->uri(1)) && ($template->uri(1) !== 'playback')) {
         // decode ACTION
         if (!empty($template->uri(2))) {
-        $template->action = $template->uri(2);
-                // assign SUB-TEMPLATE
-                if ($template->action === 'add') {
-                    $subtpl = 'edit';
-                } else {
-                    $subtpl = $template->action;
-                }
+            $template->action = $template->uri(2);
+            // assign SUB-TEMPLATE
+            if ($template->action === 'add') {
+                $subtpl = 'edit';
+            } else {
+                $subtpl = $template->action;
+            }
             // decode ARG
             if(!empty($template->uri(3))) {
                 $template->arg = $template->uri(3);
@@ -108,6 +108,8 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         } else {
             // assign TEMPLATE
             $template->content = $template->uri(1);
+            $template->action = '';
+            $template->arg = '';
         }
         $template->section = $template->uri(1);
         // debug
@@ -118,7 +120,7 @@ if (in_array($template->uri(1), $controllers) OR empty($template->uri(1))) {
         require_once(APP.$template->uri(1).'_ctl.php');
         // register current controller in SESSION
         if ($template->uri(1) !== 'coverart' && $template->uri(1) !== 'coverart2') {
-        $_SESSION['controller'] = $template->uri(1);
+            $_SESSION['controller'] = $template->uri(1);
         }
     } else {
         // debug
@@ -146,7 +148,7 @@ if (isset($tplfile)) {
 } else {
     echo $template->render('default_lo');
 }
-// close palyer backend connection
+// close player backend connection
 if ($activePlayer === 'MPD') {
     // close MPD connection
     closeMpdSocket($mpd);

@@ -247,7 +247,7 @@ if ($playerid_db === '') {
         sysCmd('chronyc waitsync 12');
     }
     unset($retval);
-
+    //
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
     $retval = sysCmd('hostname');
     $hn = trim($retval[0]);
@@ -255,7 +255,7 @@ if ($playerid_db === '') {
         wrk_changeHostname($redis, $redis->get('hostname'));
     }
     unset($retval);
-
+    //
     // read activePlayer state
     $activePlayer = $redis->get('activePlayer');
     if ($activePlayer === 'MPD') {
@@ -296,15 +296,15 @@ if ($playerid_db === '') {
         unset($retval);
         // ashuffle gets started automatically
     }
-
+    //
     // check that MPD only has one output enabled
     // it is possible that an output pipe has been defined which is always active, so be careful
-    $retval = sysCmd('mpc outputs | grep -c -i enabled');
+    $retval = sysCmd('mpc outputs | grep -ci enabled');
     $countmpdenabled = $retval[0];
     unset($retval);
     if ($countmpdenabled != 1) {
         // none or more than one outputs enabled
-        $retval = sysCmd('mpc outputs | grep -c -i output');
+        $retval = sysCmd('mpc outputs | grep -ci output');
         $countmpdoutput = $retval[0];
         unset($retval);
         if ($countmpdoutput == 1) {
@@ -332,15 +332,15 @@ if ($playerid_db === '') {
             }
         }
     }
-
+    //
     // check ENV files
     //if ($arch !== '--') {
         // wrk_sysOBEnvCheck($arch,0);
     //}
-
+    // //
     // start Samba services (if required)
     //wrk_restartSamba($redis);
-
+    //
     $kernel = $redis->get('kernel');
     // load i2smodule
     if ($redis->get('i2smodule') !== 'none') {
@@ -354,6 +354,7 @@ if ($playerid_db === '') {
         }
         if ($loadi2s === true) wrk_i2smodule($redis, $redis->get('i2smodule'));
     }
+    //
     // start shairport-sync
     if ($redis->hGet('airplay', 'enable')) {
         runelog('service: SHAIRPORT-SYNC start','');
@@ -367,6 +368,7 @@ if ($playerid_db === '') {
         // start shairport-sync if it is not already started
         sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
     }
+    //
     // start spotifyd
     if ($redis->hGet('spotifyconnect', 'enable')) {
         runelog('service: SPOTIFYD start','');
@@ -417,39 +419,42 @@ if ($playerid_db === '') {
         sysCmd('systemctl restart nginx');
     }
     unset($retval);
-
+    //
     // PHP 5.5 OPCache
     if (!$redis->get('dev')) {
         // prime PHP OPCache
         runelog('prime PHP OPCache');
         sysCmdAsync("curl -s -X GET 'http://127.0.0.1/command/cachectl.php?action=prime'");
     }
-
+    //
     // start rune_PL_wrk
     sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
     $start4 = microtime(true);
     $starttime = ($start4-$start3)+$firstlap;
     runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
     ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
-
+    //
     // start the local browser
     if (($redis->hGet('local_browser', 'enable')) && (file_exists('/usr/bin/xinit'))) {
         sysCmdAsync('systemctl start local-browser');
     } else {
         sysCmdAsync('systemctl stop local-browser');
     }
-
+    //
     // turn wifi power saving off
     sysCmd('iwconfig wlan0 power off');
-
+    //
     // close startup Redis connection
     $redis->close();
+    //
     // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
     sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
     runelog('--- NORMAL STARTUP');
     // --- NORMAL STARTUP //
 }
+//
 runelog('WORKER MAIN LOOP ---');
+//
 // WORKER MAIN LOOP --- //
 while (1) {
     // Connect to Redis backend
@@ -553,7 +558,7 @@ while (1) {
                         sysCmd('systemctl enable bootsplash');
                         // start the local browser
                         sysCmd('systemctl start local-browser');
-                        sysCmdAsync('/srv/http/command/rune_prio nice');
+                        sysCmdAsync('nice --adjustment=1 /srv/http/command/rune_prio nice');
                     } else if ($job->action === 'stop') {
                         // save the local browser values
                         $redis->hSet('local_browser', 'enable', $job->args);

@@ -56,4 +56,4 @@ foreach ($cards as $z => $card) {
         }
     }
 }
-var_dump($template->alsa_controls);
+// var_dump($template->alsa_controls);
