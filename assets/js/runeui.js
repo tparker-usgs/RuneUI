@@ -3478,17 +3478,33 @@ if ($('#section-index').length) {
         
         if ($('#section-debug').length) {
 
-            ZeroClipboard.config({swfPath: '/assets/js/vendor/ZeroClipboard.swf'});
-            var client = new ZeroClipboard(document.getElementById('copy-to-clipboard'));
-            client.on('ready', function(readyEvent){
-                // alert('ZeroClipboard SWF is ready!');
-                client.on('aftercopy', function(event){
-                    // alert('Copied text to clipboard: ' + event.data['text/plain']);
-                    new PNotify({
-                        title: 'Copied to clipboard',
-                        text: 'The debug output was copied successfully in your clipboard.',
-                        icon: 'fa fa-check'
-                    });
+            // this code was removed because ZeroClipboard uses Adobe Flash Player.
+            // Adobe Flash Player will no longer be supported form 2021 (EOL).
+            // Replacement code added below...
+            //
+            // ZeroClipboard.config({swfPath: '/assets/js/vendor/ZeroClipboard.swf'});
+            // var client = new ZeroClipboard(document.getElementById('copy-to-clipboard'));
+            // client.on('ready', function(readyEvent){
+                // // alert('ZeroClipboard SWF is ready!');
+                // client.on('aftercopy', function(event){
+                    // // alert('Copied text to clipboard: ' + event.data['text/plain']);
+                    // new PNotify({
+                        // title: 'Copied to clipboard',
+                        // text: 'The debug output was copied successfully in your clipboard.',
+                        // icon: 'fa fa-check'
+                    // });
+                // });
+            // });
+
+            $('#copyText').click(function(){
+                $('#text2copy').removeClass('hide');
+                $('#text2copy').select();
+                document.execCommand("copy");
+                $('#text2copy').addClass('hide');
+                new PNotify({
+                    title: 'Copied to clipboard',
+                    text: 'The debug output was copied successfully in your clipboard.',
+                    icon: 'fa fa-check'
                 });
             });
 
