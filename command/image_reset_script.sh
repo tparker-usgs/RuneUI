@@ -95,6 +95,18 @@ rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 rm -rf /home/*
 rm -rf /var/lib/bluetooth/*
+rm -f /var/lib/connman/*.service
+rm -rf /var/lib/connman/ethernet_*
+rm -rf /var/lib/connman/wifi_*
+rm -rf /var/lib/connman/bluetooth_*
+#
+# remove mac spoofing scripts
+rm /etc/systemd/system/macfix_*.service
+rm /etc/systemd/system/multi-user.target.wants/macfix_*.service
+#
+# keep the old nic name format (e.g. eth0, eth1, wlan0, wlan1, etc.)
+# remove this symlink to enable the new 'predictable' format
+ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
 #
 # redis reset
 redis-cli del AccessPoint
@@ -111,6 +123,10 @@ redis-cli del spotifyconnect
 redis-cli del usbmounts
 redis-cli del debugdata
 redis-cli del local_browser
+redis-cli del fix_mac
+redis-cli del network_interfaces
+redis-cli del translate_mac_nic
+redis-cli del network_info
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
@@ -145,10 +161,10 @@ echo -e "rune\nrune" | passwd root
 rm -f /etc/nginx/nginx.conf
 rm -f /etc/samba/*.conf
 #rm -f /etc/netctl/*
-rm -rf /var/lib/connman/*
 # copy default settings and services
 cp -Rv /srv/http/app/config/defaults/etc/* /etc
 cp -Rv /srv/http/app/config/defaults/usr/* /usr
+cp -Rv /srv/http/app/config/defaults/var/* /var
 # copy a standard config.txt
 cp -Rv /srv/http/app/config/defaults/boot/* /boot
 # make appropriate links

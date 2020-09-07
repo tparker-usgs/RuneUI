@@ -602,6 +602,11 @@ function redisDatastore($redis,$action) {
             // network parameters
             $redis->hExists('resolvconf', 'timeout') || $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hExists('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', '1');
+            $redis->exists('network_autoOptimiseWifi') || $redis->set('network_autoOptimiseWifi', 1);
+            $redis->exists('network_info') || $redis->set('network_info', json_encode(array()));
+            $redis->exists('translate_mac_nic') || $redis->set('translate_mac_nic', json_encode(array()));
+            $redis->exists('network_interfaces') || $redis->set('network_interfaces', json_encode(array()));
+            $redis->exists('network_storedProfiles') || $redis->set('network_storedProfiles', json_encode(array()));
             // lock keys
             $redis->exists('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             $redis->exists('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);

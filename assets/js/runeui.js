@@ -3360,11 +3360,11 @@ if ($('#section-index').length) {
             
             // show/hide static network configuration based on select value
             var netManualConf = $('#network-manual-config');
-            if ($('#dhcp').val() === '0') {
+            if ($('#dhcp').val() === 'Static') {
                 netManualConf.removeClass('hide');
             }
             $('#dhcp').change(function(){
-                if ($(this).val() === '0') {
+                if ($(this).val() === 'Static') {
                     netManualConf.removeClass('hide');
                 }
                 else {
