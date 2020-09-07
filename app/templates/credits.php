@@ -5,6 +5,12 @@
             <div class="alert alert-info">
                 Release version: <strong id="release-version"><?=$this->release ?></strong> (<a href="http://www.runeaudio.com/forum/runeaudio-0-5-beta-for-all-raspberry-pi-models-t6532.html#p25819" target="_blank">build: <?=$this->buildversion ?></a>)
             </div>
+            <h2>RuneAudio team</h2><h3>Version 0.6</h3>
+            <div class="alert alert-info">
+                <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio, 64bit version, migration to PHP V7</span><br>
+                <a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>janui</strong></a> <span class="help-block">- RuneUI - migration to PHP V7, connman based network UI</span><br>
+                <span class="help-block"><i>A special thanks to our test team: ...</i></span><br>
+            </div>
             <h2>RuneAudio team</h2><h3>Version 0.5</h3>
             <div class="alert alert-info">
                 <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio support and Chromium local browser</span><br>
@@ -72,7 +78,7 @@
     <p><strong>CSS Toggle Switch</strong> by <a href="http://ghinda.net/" target="_blank" rel="nofollow">Ionuț Colceriu</a><br><a href="https://github.com/ghinda/css-toggle-switch" target="_blank" rel="nofollow">https://github.com/ghinda/css-toggle-switch</a></p>
     <p><strong>FastClick</strong> by <a href="https://github.com/ftlabs" target="_blank" rel="nofollow">ftlabs</a><br><a href="http://ftlabs.github.io/fastclick/" target="_blank" rel="nofollow">http://ftlabs.github.io/fastclick</a></p>
     <p><strong>Font Awesome</strong> by <a href="https://twitter.com/davegandy" target="_blank" rel="nofollow">Dave Gandy</a><br><a href="http://fontawesome.io/" target="_blank" rel="nofollow">http://fontawesome.io</a></p>
-    <p><strong>Lato-Fonts</strong> by <a href="http://alfabety.pl/" target="_blank" rel="nofollow">Lukasz Dziedzic</a><br><a href="http://www.latofonts.com/lato-free-fonts/" target="_blank" rel="nofollow">http://www.latofonts.com/lato-free-fonts</a></p>
+    <p><strong>Lato-Fonts</strong> by <a href="http://alfabety.pl/" target="_blank" rel="nofollow">Lukasz Dziedzic</a><br><a href="https://www.latofonts.com/lato-free-fonts/" target="_blank" rel="nofollow">https://www.latofonts.com/lato-free-fonts</a></p>
     <p><strong>last.fm artist information and albumart services</strong> by <a href="https://www.last.fm/" target="_blank" rel="nofollow">last.fm</a><br><a href="https://www.last.fm/" target="_blank" rel="nofollow">https://www.last.fm/</a></p>
     <p><strong>makeitpersonal song lyrics service</strong> by <a href="https://github.com/febuiles" target="_blank" rel="nofollow">Federico Builes</a><br><a href="https://github.com/febuiles/makeitpersonal" target="_blank" rel="nofollow">https://github.com/febuiles/makeitpersonal</a> and <a href="https://makeitpersonal.co/" target="_blank" rel="nofollow">https://makeitpersonal.co/</a></p>
     <p><strong>NGiNX Push Stream Module</strong><br><a href="http://wiki.nginx.org/HttpPushStreamModule" target="_blank" rel="nofollow">http://wiki.nginx.org/HttpPushStreamModule</a></p>
@@ -96,7 +102,7 @@
     <h2>RuneOS credits</h2>
     <p><i>In alphabetical order, credits for all versions included</i></p>
     <p>Alac by Timothy Gu<br><a href="https://github.com/TimothyGu" target="_blank" rel="nofollow">https://github.com/TimothyGu</a></p>
-    <p>Amixer-webui by Jiří Škorpil<br><a href="https://github.com/JiriSko" target="_blank" rel="nofollow">https://github.com/JiriSko</a></p>
+    <p>Amixer-webui by Jiří Škorpil<br><a href="https://github.com/JiriSko" target="_blank" rel="nofollow">https://github.com/JiriSko</a><br>adapted for optimised for RuneAudio by Frank Friedmann (aka hondagx35) <br><a href="https://github.com/hondagx35" target="_blank" rel="nofollow">https://github.com/hondagx35</a></p>
     <p>ArchLinux (base distro)<br><a href="https://www.archlinux.org/" target="_blank" rel="nofollow">https://www.archlinux.org</a></p>
     <p>ArchLinux (patch for alsa 384kHz audio support) by Gerarhead<br><a href="https://github.com/gearhead" target="_blank" rel="nofollow">https://github.com/gearhead</a></p>
     <p>Ashuffle by Josh Kunz<br><a href="https://github.com/joshkunz" target="_blank" rel="nofollow">https://github.com/joshkunz</a></p>
