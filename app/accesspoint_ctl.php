@@ -45,9 +45,19 @@ waitSyWrk($redis,$jobID);
 $template->enabled = $redis->hGet('AccessPoint', 'enabled');
 $template->accesspoint = $redis->hGetAll('AccessPoint');
 $template->hostname = $redis->get('hostname');
-exec('ifconfig -a', $phyinfo);
-$template->wifiavailable = (preg_match_all("/^.*\wlan0:/m", implode("\n", $phyinfo))) ? 1 : 0;
-exec('iw phy phy0 info', $phyinfo);
-$template->wififullfunction = (preg_match_all("/^.*\interface combinations are not supported/m", implode("\n", $phyinfo))) ? 0 : 1;
-exec('iw phy phy0 info | sed -n "/Supported interface modes:/,/:/p"', $phyinfo);
-$template->wififeatureAP = (preg_match_all("/^.*\* AP$/m", implode("\n", $phyinfo))) ? 1 : 0;
+$nics = json_decode($redis->Get('network_interfaces'), true);
+$template->wifiavailable = 0;
+$template->wififeatureAP = 0;
+$template->wififullfunction = 0;
+foreach ($nics as $nic) {
+    if ($nic['technology'] == 'wifi') {
+        $template->wifiavailable = 1;
+        if ($nic['apSupported']) {
+            $template->wififeatureAP = 1;
+        }
+        if ($nic['apFull']) {
+            $template->wififullfunction = 1;
+        }
+    }
+}
+unset($nics, $nic);

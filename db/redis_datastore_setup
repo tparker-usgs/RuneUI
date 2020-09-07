@@ -297,6 +297,12 @@ function redisDatastore($redis,$action) {
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
             $redis->hSet('resolvconf', 'attempts', '1');
+            $redis->set('network_autoOptimiseWifi', 1);
+            $redis->set('network_info', json_encode(array()));
+            $redis->set('translate_mac_nic', json_encode(array()));
+            $redis->set('network_interfaces', json_encode(array()));
+            $redis->set('network_storedProfiles', json_encode(array()));
+            $redis->set('network_storedProfiles', json_encode(array()));
             // proxy settings
             $redis->hSet('proxy', 'enable', 0);
             $redis->hSet('proxy', 'host', '');

@@ -99,13 +99,19 @@ if (isset($_POST)) {
             // create worker job (set on and reset/restart MPD/Airplay)
             $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayoutputrate', 'args' => $_POST['mode']['airplayor']));
         }
-    // ----- Player name Menu-----
+    // ----- Player name Menu -----
         if ((isset($_POST['mode']['playernamemenu']['enable'])) && ($_POST['mode']['playernamemenu']['enable'])) {
             // create worker job (set on)
             $redis->get('playernamemenu') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'playernamemenu', 'action' => 1));
         } else {
             // create worker job (set off)
             $redis->get('playernamemenu') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'playernamemenu', 'action' => 0));
+        }
+    // ----- Automatic Wi-Fi Optimisation-----
+        if ((isset($_POST['mode']['optwifionof']['enable'])) && ($_POST['mode']['optwifionof']['enable'])) {
+            $redis->get('network_autoOptimiseWifi') || $redis->set('network_autoOptimiseWifi', 1);
+        } else {
+            !$redis->get('network_autoOptimiseWifi') || $redis->set('network_autoOptimiseWifi', 0);
         }
     }
     // ----- OPCACHE -----
@@ -179,6 +185,7 @@ $template->chronydstatus = $redis->hGet('NTPtime', 'chronyd');
 $template->systemdstatus = $redis->hGet('NTPtime', 'systemd');
 $template->airplayof = $redis->hGet('airplay', 'alsa_output_format');
 $template->airplayor = $redis->hGet('airplay', 'alsa_output_rate');
+$template->optwifionof = $redis->get('network_autoOptimiseWifi');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

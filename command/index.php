@@ -67,10 +67,6 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
             $socket = $spop;
         }
         $response = ui_update($redis, $socket, $_GET['clientUUID']);
-    } elseif ($_GET['cmd'] === 'wifiscan') {
-        wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'wificfg', 'action' => 'scan'));
-        echo 'wlan scan queued';
-        die;
     } else {
         if ($activePlayer === 'MPD') {
             sendMpdCommand($mpd, $_GET['cmd']);

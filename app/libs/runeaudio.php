@@ -1805,421 +1805,449 @@ function wrk_apconfig($redis, $action, $args = null)
     return $return;
 }
 
-function wrk_netconfig($redis, $action, $args = null, $configonly = null)
+function wrk_netconfig($redis, $action, $arg = '', $args = array())
 {
-    $return = array();
-    // nics blacklist
-    $excluded_nics = array('ifb0', 'ifb1', 'p2p0', 'bridge');
-    $updateh = 0;
-    $eth0MAC = $redis->Get('eth0MAC');
-    $wlan0MAC = $redis->Get('wlan0MAC');
-    switch ($action) {
-        case 'setnics':
-            // clear cache - redis, filesystem and php
-            $redis->save();
-            sysCmd("sync");
-            clearstatcache();
-            // flush nics Redis hash table
-            $transaction = $redis->multi();
-            $transaction->del('nics');
-            $interfaces = sysCmd("ip addr |grep \"BROADCAST,\" |cut -d':' -f1-2 |cut -d' ' -f2");
-            $interfaces = array_diff($interfaces, $excluded_nics);
-            foreach ($interfaces as $interface) {
-                $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
-                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP 
-                // lease expires. In this situation both IP addresses are valid for a given interface
-                // when more than one IP address is valid the following code determines which one to use
-                // the first IP address is the default, but if one matches a predefined fixed address then that one is used
-                $ipidx = 0;
-                $countip = count($ip);
-                if ($countip > 1) {
-                    // more than one valid IP address for this interface detected
-                    // determine the fixed IP addresses (if any)
-                    //$command = 'cat /etc/netctl/* | grep -i "Address=(" | cut -d "'."'".'" -f 2 | cut -d "/" -f 1';
-                    $command = "cat /var/lib/connman/*/settings | grep Address | cut -d \"=\" -f2";
-                    $fixedip = sysCmd($command);
-                    // use another IP address if it matches one set up as a fixed IP address
-                    for ($j = 0; $j < $countip; $j++) {
-                        // report each valid IP address in the UI
-                        ui_notify_async('More than one valid IP address for '.$interface, $ip[$j].'\n');
-                        for ($i = 0, $countfixedip = count($fixedip); $i < $countfixedip; $i++) {
-                            if ($ip[$j] == $fixedip[$i]) {
-                                $ipidx = $j;
-                            }
-                        }
-                    }
-                }
-                //***
-                // KEW: Do we need to assume this may be CIDR & may be Netmask notatation?
-                $netmask = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f2");
-                if (isset($netmask[$ipidx])) {
-                    //$netmask = netmask($netmask[$ipidx]);
-                    $netmask = net_CidrToNetmask($netmask[$ipidx]);
-                } else {
-                    unset($netmask);
-                }
-                $gw = sysCmd("route -n |grep \"0.0.0.0\" |grep \"UG\" |cut -d' ' -f10");
-                $dns = sysCmd("cat /etc/resolv.conf |grep \"nameserver\" |cut -d' ' -f2");
-                $type = sysCmd("iwconfig ".$interface." 2>&1 | grep \"no wireless\"");
-                runelog('interface type', (isset($type[0]) ? $type[0] : NULL));
-                // if (empty(sysCmd("iwlist ".$interface." scan 2>&1 | grep \"Interface doesn't support scanning\""))) {
-                if (empty($type[0])) {
-                    $speed = sysCmd("iwconfig ".$interface." 2>&1 | grep 'Bit Rate' | cut -d '=' -f 2 | cut -d ' ' -f 1-2");
-                    //$currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
-                    $currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
-                    $transaction->hSet('nics',
-                        $interface,
-                        json_encode(array(
-                            'ip' => $ip[$ipidx],
-                            'netmask' => $netmask,
-                            'gw' => (isset($gw[0]) ? $gw[0] : null),
-                            'dns1' => (isset($dns[0]) ? $dns[0] : null),
-                            'dns2' => (isset($dns[1]) ? $dns[1] : null),
-                            'speed' => (isset($speed[0]) ? $speed[0] : null),
-                            'wireless' => 1,
-                            'currentssid' => $currentSSID[0])));
-                    //// $scanwifi = 1;
-                } else {
-                    $speed = sysCmd("ethtool ".$interface." 2>&1 | grep -i speed | cut -d':' -f2");
-                    $transaction->hSet('nics',
-                        $interface,
-                        json_encode(array(
-                            'ip' => $ip[$ipidx],
-                            'netmask' => $netmask,
-                            'gw' => (isset($gw[0]) ? $gw[0] : null),
-                            'dns1' => (isset($dns[0]) ? $dns[0] : null),
-                            'dns2' => (isset($dns[1]) ? $dns[1] : null),
-                            'speed' => (isset($speed[0]) ? $speed[0] : null),
-                            'wireless' => 0)));
-                }
-            }
-            $transaction->exec();
-            break;
-        case 'getnics':
-            $gw = array();
-            $dns = array();
-            $speed = array();
-            // clear cache - filesystem and php
-            sysCmd("sync");
-            clearstatcache();
-            $interfaces = sysCmd("ip addr |grep \"BROADCAST,\" |cut -d':' -f1-2 |cut -d' ' -f2");
-            $interfaces = array_diff($interfaces, $excluded_nics);
-            foreach ($interfaces as $interface) {
-                $ip = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f1");
-                // after setting a fixed IP address the existing address stays valid until it is no longer used and the DHCP 
-                // lease expires. In this situation both IP addresses are valid for a given interface
-                // when more than one IP address is valid the following code determines which one to use
-                // the first IP address is the default, but if one matches a predefined fixed address then that one is used
-                $ipidx = 0;
-                $countip = count($ip);
-                if ($countip > 1) {
-                    // more than one valid IP address for this interface detected
-                    // determine the fixed IP addresses (if any)
-                    //$command = 'cat /etc/netctl/* | grep -i "Address=(" | cut -d "'."'".'" -f 2 | cut -d "/" -f 1';
-                    $command = "cat /var/lib/connman/*/settings | grep Address | cut -d \"=\" -f2";
-                    $fixedip = sysCmd($command);
-                    // use another IP address if it matches one set up as a fixed IP address
-                    for ($j = 0; $j < $countip; $j++) {
-                        // report each valid IP address in the UI
-                        ui_notify_async('More than one valid IP address for '.$interface, $ip[$j].'\n');
-                        for ($i = 0, $countfixedip = count($fixedip); $i < $countfixedip; $i++) {
-                            if ($ip[$j] == $fixedip[$i]) {
-                                $ipidx = $j;
-                            }
-                        }
-                    }
-                }
-                $netmask = sysCmd("ip addr list ".$interface." |grep \"inet \" |cut -d' ' -f6|cut -d/ -f2");
-                if (isset($netmask[$ipidx]) && isset($ip[$ipidx])) {
-                    //$netmask = "255.255.255.0";//netmask($netmask[$ipidx]);
-                    //$netmask = netmask($netmask[$ipidx]);
-                    $netmask = net_CidrToNetmask($netmask[$ipidx]);
-                } else {
-                    unset($netmask);
-                }
-                if (isset($netmask)) {
-                    $gw = sysCmd("route -n |grep \"0.0.0.0\" |grep \"UG\" |cut -d' ' -f10");
-                    $dns = sysCmd("cat /etc/resolv.conf |grep \"nameserver\" |cut -d' ' -f2");
-                }
-                $type = sysCmd("iwconfig ".$interface." 2>&1 | grep \"no wireless\"");
-                if (empty($type[0])) {
-                    $speed = sysCmd("iwconfig ".$interface." 2>&1 | grep 'Bit Rate' | cut -d ':' -f 2 | cut -d ' ' -f 1-2");
-                    $currentSSID = sysCmd("iwconfig ".$interface." | grep 'ESSID' | cut -d ':' -f 2 | cut -d '\"' -f 2");
-                    $actinterfaces[$interface] = (object) [
-                        'ip' => (isset($ip[$ipidx]) ? $ip[$ipidx] : null),
-                        'netmask' => (isset($netmask) ? $netmask : null),
-                        'gw' => (isset($gw[0]) ? $gw[0] : null),
-                        'dns1' => (isset($dns[0]) ? $dns[0] : null),
-                        'dns2' => (isset($dns[1]) ? $dns[1] : null),
-                        'speed' => (isset($speed[0]) ? $speed[0] : null),
-                        'wireless' => 1,
-                        'currentssid' => (isset($currentSSID[0]) ? $currentSSID[0] : null)
-                        ];
-
-                    $redis->hSet('nics', $interface,
-                        json_encode(array(
-                            'ip' => (isset($ip[$ipidx]) ? $ip[$ipidx] : null),
-                            'netmask' => (isset($netmask) ? $netmask : null),
-                            'gw' => (isset($gw[0]) ? $gw[0] : null),
-                            'dns1' => (isset($dns[0]) ? $dns[0] : null),
-                            'dns2' => (isset($dns[1]) ? $dns[1] : null),
-                            'speed' => (isset($speed[0]) ? $speed[0] : null),
-                            'wireless' => 1,
-                            'currentssid' => (isset($currentSSID[0]) ? $currentSSID[0] : null)
-                            )));
-                } else {
-                    $speed = sysCmd("ethtool ".$interface." 2>&1 | grep -i speed | cut -d':' -f2");
-                    $actinterfaces[$interface] = (object) ['ip' => $ip[$ipidx], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0], 'wireless' => 0];
-                    $redis->hSet('nics', $interface , json_encode(array('ip' => $ip[$ipidx], 'netmask' => $netmask, 'gw' => $gw[0], 'dns1' => $dns[0], 'dns2' => $dns[1], 'speed' => $speed[0],'wireless' => 0)));
-                }
-            }
-            return $actinterfaces;
-            break;
-        case 'getstoredwlans':
-            $wlans = array();
-            $connected = 0;
-            sysCmd('/www/command/refresh_nics');
-            $wlans_profiles = json_decode($redis->Get('stored_profiles'));
-            foreach ($wlans_profiles as $profile) {
-                runelog('  Get stored wlan profiles:'.$profile);
-
-                 //*** Does this work? where do we get $nicdetail??   https://github.com/RuneAudio/RuneUI/blob/dev/app/libs/runeaudio.php#L1460
-                 //if ($nicdetail->currentssid === $profile) {
-                 //    $connected = 1;
-                 //} else {
-                 //    $connected = 0;
-                 //}
-                $wlans[] = json_encode(array('ssid' => $profile, 'encryption' => 'on', 'connected' => $connected, 'storedprofile' => 1));
-            }
-            return $wlans;
-            //break;
-        case 'writecfg':
-            // ArchLinux create connman.config for network
-            if ($args->wireless === '1') {
-            // Wireless configuration
-            // get the MAC address of wlan0 may no longer need these
-            //$wlan0MAC = sysCmd("ip link show dev wlan0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
-            //$eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
-                if ($args->hidden === '1') {
-                    $hidden = 'true';
-                    }
-                    else {
-                    $hidden = 'false';
-                    }
-                switch ($args->encryption) {
-                    case 'none':
-                        break;
-                    case 'wep':
-                        $wepkey = $args->key;
-                        if (ctype_xdigit($wepkey) && (strlen($wepkey) == 10 OR strlen($wepkey) == 26 OR strlen($wepkey) == 32)) {
-                            $pass = $wepkey;
-                        } elseif (strlen($wepkey) <= 16) {
-                            $pass = $wepkey;
-                        } else {
-                            $pass = "* wrong wepkey *";
-                            ui_notify_async('WIFI-Config ERROR', "You entered a wrong key!\n");
-                            return '';
-                       }
-                        //            auth_alg=SHARED
-                        break;
-                    case 'psk':
-                        $wpakey = $args->key;
-                        if (ctype_xdigit($wpakey) && strlen($wpakey) == 64) {
-                            $pass = $wpakey;
-                        } elseif (strlen($wpakey) >= 8 && strlen($wpakey) <= 63) {
-                            $pass = $wpakey;
-                        } else {
-                            $pass = "* wrong wepkey *";
-                            ui_notify_async('WIFI-Config ERROR', "You entered a wrong key!\n");
-                            return '';
-                        }
-                }
-//ip addr |grep "link/ether" | sed 's/^[ \t]*//' |cut -d " " -f 2 | tr -d ':'
-// this will extract the mac w/o colons, but gets all of them
-// this will change the name to the hex hash of it... 
-// od -An -t x1 | tr -d ' ' | sed 's/0a//'
-                // according to the man page here: https://www.mankier.com/5/connman-service.config
-                $nic = "[global]\n";
-                $nic .= "Name = ".$args->ssid."\n";
-                $nic .= "Description =\n";
-                $nic .= "[service_".bin2hex($args->ssid)."]\n";
-                $nic .= "Type = wifi\n";
-                $nic .= "SSID = ".bin2hex($args->ssid)."\n";
-                $nic .= "Security = ".$args->encryption."\n";
-                $nic .= "Hidden = ".$hidden."\n";
-                $nic .= "Passphrase = ".$pass."\n";
-            } else {
-                // Wired configuration
-                $nic = "[global]\n";
-                $nic .= "Name = eth0\n";
-                $nic .= "Type = ethernet\n";
-            }
-            if ($args->dhcp === '1') {
-                // DHCP configuration
-                $nic .= "IPv4 = dhcp\n";
-                // Prepare data object for Redis record
-                $dhcpargs = array( 'name' => $args->name, 'dhcp' => $args->dhcp );
-                $dhcpargs = (object) $args;
-            } else {
-                // STATIC configuration
-                // KEW
-                // Need address in CIDR notation 0.0.0.0/0
-                $cidr = net_NetmaskToCidr($args->netmask);
-                $nic .= "IPv4 = ".$args->ip."/".$cidr."/".$args->gw."\n";
-                if (!empty($args->dns2)) {
-                    $nic .= "Nameservers = ".$args->dns1."', '".$args->dns2."\n";
-                } else {
-                    $nic .= "Nameservers = ".$args->dns1."\n";
-                }
-            }
-            $nic .= "IPv6 = auto\n";
-            $nic .= "IPv6.Privacy = disabled\n";
-
-            // set advanced DNS options
-            $newArray = wrk_replaceTextLine('/etc/resolvconf.conf', '', 'resolv_conf_options=', "resolv_conf_options=('timeout:".$redis->hGet('resolvconf', 'timeout')." attempts:".$redis->hGet('resolvconf', 'attempts')."')", '#name_servers=127.0.0.1', 1);
-            // Commit changes to /etc/resolvconf.conf
-            $fp = fopen('/etc/resolvconf.conf', 'w');
-            fwrite($fp, implode("", $newArray));
-            fclose($fp);
-            // tell the system to update /etc/resolv.conf
-            sysCmd('resolvconf -u');
-            
-            // write current network config
-            runelog("wireless = ".$args->wireless);
-            if ($args->wireless === '1') {
-                // wireless
-                runelog("save as wireless");
-                if ($args->newssid === "add") {
-                    $redis->Set($args->ssid, json_encode($args));
-                    //$fp = fopen('/etc/netctl/'.$args->newssid, 'w');
-                    $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
-                    $fp = fopen($file, 'w');
-                } else {
-                    $redis->Set($args->newssid, json_encode($args));
-                    //$fp = fopen('/etc/netctl/'.$args->newssid, 'w');
-                    $file = '/var/lib/connman/'.bin2hex($args->newssid).'.config';
-                    $fp = fopen($file, 'w');
-                }
-            } else {
-                // wired
-                runelog("save as wired");
-                $redis->Set($args->name, json_encode($args));
-                //$fp = fopen('/etc/netctl/'.$args->name, 'w');
-                $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
-                $fp = fopen($file, 'w');
-            }
-            fwrite($fp, $nic);
-            fclose($fp);
-            if (!isset($configonly)) $updateh = 1;
-            //$updateh = 1;
-            break;
-        case 'manual':
-            $file = '/var/lib/connman/'.bin2hex($args->ssid).'.config';
-            $fp = fopen($file, 'w');
-            fwrite($fp, $args['config']);
-            fclose($fp);
-            $updateh = 1;
-            break;
-        case 'reset':
-            wrk_netconfig($redis, 'setnics');
-            $args = new stdClass;
-            $args->dhcp = '1';
-            $args->name = 'eth0';
-            wrk_netconfig($redis, 'writecfg', $args);
-           // make sure we delete the config file
-            $updateh = 1;
-            break;
-    }
-    if ($updateh === 1) {
-        // save playback status
-        wrk_mpdPlaybackStatus($redis);
-        // pause mpd
-        sysCmd('mpc pause');
-        //sysCmd('systemctl stop mpd');
-        // activate configuration (RuneOS)
-        runelog("wireless = ".$args->wireless);
-        if ($args->wireless !== '1') {
-            //sysCmd('systemctl reenable netctl-ifplugd@'.$args->name);
-            //sysCmd ('systemctl restart connman');
-            // in case the wifi is not enabled...
-            sysCmd ('connmanctl enable wifi');
-            if ($args->reboot === '1') {
-                runelog('**** reboot requested ****', $args->name);
-                $return = 'reboot';
-            } else {
-                runelog('**** no reboot requested ****', $args->name);
-                // don't think we need to do anything here.
-                // maybe connect to the wireless network we just set up?
-                $wlan0MAC = $redis->Get('wlan0MAC');
-                sysCmd('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$encryption);
-                $return[] = '';
-            }
-        } else {
-            //sysCmd('systemctl reenable netctl-auto@'.$args->name);
-            //sysCmd('systemctl reload-or-restart netctl-auto@'.$args->name);
-            //sysCmd('netctl-auto enable '.$args->newssid);
-            //sysCmd('netctl-auto switch-to '.$args->newssid);
-            // the next 2 will scan, but not connect
-            //sysCmd ("connmanctl enable wifi");
-            //sysCmd ("iwctl station wlan0 scan");
-            runelog('**** wireless => do not reboot ****', $args->name);
-            $return[] = '';
+    // valid netcfg $action values:
+    //    boot-initialise, refresh, refreshAsync, saveWifi, saveEthernet, reconnect, connect,
+    //    autoconnect-on, autoconnect-off, disconnect, disconnect-delete, delete & reset
+    // $arg and $args are optional, $arg contains the connman string, $args contains an array to modify a profile
+    // debug
+    $redis->set('wrk_netconfig_'.$action, json_encode($args));
+    $args['action'] = $action;
+    if (isset($arg)) {
+        $argN = trim($arg);
+        if ($argN) {
+            // $args has a value so use it in the array
+            $args['connmanString'] = $argN;
         }
     }
-    // update hash if necessary
-    $updateh === 0 || $redis->set($args->name.'_hash', md5_file('/var/lib/connman/ethernet_'.$eth0MAC[0].'_cable/settings'));
-    // set mpd to play if it was playing before the pause
-    wrk_mpdRestorePlayerStatus($redis);
-    return $return;
-}
-
-function wrk_wifiprofile($redis, $action, $args)
-{
-    $wlan0MAC = $redis->Get('wlan0MAC');
-    $wifi_profile = sysCmd('ls /var/lib/connman | grep '.bin2hex($args->ssid));
+    // some values are sometimes not set for Wi-Fi
+    if (isset($args['ssidHex'])) {
+        $args['ssidHex'] = trim($args['ssidHex']);
+    } else {
+        $args['ssidHex'] = '';
+    }
+    if (isset($args['security'])) {
+        $args['security'] = trim($args['security']);
+    } else {
+        $args['security'] = '';
+    }
+    if (isset($args['ssid'])) {
+        $args['ssid'] = trim($args['ssid']);
+    } else {
+        $args['ssid'] = '';
+    }
+    if (strlen($args['ssid'])) {
+        if (!$args['ssidHex']) {
+            // empty string
+            $args['ssidHex'] = trim(implode(unpack("H*", $args['ssid'])));
+        }
+        if (!$args['security']) {
+            // empty string
+            $args['security'] = 'PSK';
+        }
+    }
+    if (isset($args['macAddress'])) {
+        $args['macAddress'] = trim($args['macAddress']);
+    } else {
+        $args['macAddress'] = '';
+    }
+    // the keys in the stored profile array must contain a letter, so add an indicator
+    $ssidHexKey = 'ssidHex:'.$args['ssidHex'];
+    $macAddressKey = 'macAddress:'.$args['macAddress'];
+    // debug
+    $redis->set('wrk_netconfig_'.$action.'_1', json_encode($args));
+    // get the stored profiles
+    if ($redis->exists('network_storedProfiles')) {
+        $storedProfiles = json_decode($redis->get('network_storedProfiles'), true);
+    } else {
+        // create an empty array when the redis variable is not set
+        $storedProfiles = array();
+    }
     switch ($action) {
-        case 'add':
-            runelog('**** wrk_wifiprofile ADD ****', $args->ssid);
-            wrk_wifiprofile($redis, 'connect', $args);
+        case 'boot-initialise':
+            // this is a routine which helps when setting up Wi-Fi on RuneAudio for the first time
+            // the routine looks in the directory /boot/wifi for any files, all files will be processed, except:
+            //      a file called readme and the directory /boot/wifi/examples and its contents
+            // it steps through the files and or directories and deletes them after processing (regardless of success)
+            // any file with lines containing 'Name=<value>' and 'Passphrase=<value>' will be used to set up a Wi-Fi profile
+            // the optional value 'Hidden=[true]|[false]' will also be processed if present
+            // multiple entries in the same file will be processed, a 'Name=<value>' starts the new network
+            // the files can be added with a text editor when the Micro-SD card is plugged into a computer
+            // get a list of files, ignoring the 'readme', 'examples', '.' and '..' file entries
+            $profilearray = array();
+            $counter = -1;
+            $directory = '/boot/wifi';
+            $fileNames = array_diff(scandir($directory), array('..', '.', 'readme', 'examples'));
+            foreach ($fileNames as $fileName) {
+                if (is_dir($directory.DIRECTORY_SEPARATOR.$fileName)) {
+                    // remove unknown directories
+                    sysCmd('rmdir --ignore-fail-on-non-empty \''.$directory.DIRECTORY_SEPARATOR.$fileName.'\'');
+                    continue;
+                }
+                // load the file data into an array, ignoring empty lines and removing any <cr> or <lf>
+                // $filerecords = file($directory.DIRECTORY_SEPARATOR.$fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $filerecords = file($directory.DIRECTORY_SEPARATOR.$fileName);
+                foreach ($filerecords as $filerecord) {
+                    $recordcontent = explode('=', $filerecord, 2);
+                    if (count($recordcontent) != 2) {
+                        continue;
+                    } else {
+                        $parameter = strtolower(trim($recordcontent[0]));
+                        $value = trim($recordcontent[1]);
+                        if ($parameter === 'name' && $value) {
+                            // a name has been found and it has a value
+                            // on a new name increment the counter
+                            $profilearray[++$counter]['name'] = $value;
+                        } else if ($parameter === 'passphrase' && $value) {
+                            // a passphrase has been found and it has a value
+                            $profilearray[$counter]['passphrase'] = $value;
+                        } else if ($parameter === 'hidden') {
+                            // a hidden indicator has been found
+                            // 1, "1", "true", "on" and "yes" are true, anything else is false
+                            $profilearray[$counter]['hidden'] = filter_var(strtolower($value), FILTER_VALIDATE_BOOLEAN);
+                        }
+                    }
+                }
+                // delete the file
+                sysCmd('rm \''.$directory.DIRECTORY_SEPARATOR.$fileName.'\'');
+            }
+            // debug 
+            // $redis->set('boot_wifi_filenames', json_encode($fileNames));
+            // $redis->set('boot_wifi_filerecords', json_encode($filerecords));
+            // $redis->set('boot_wifi_profilearray', json_encode($profilearray));
+            // create the profiles
+            foreach ($profilearray as $profile) {
+                if (!isset($profile['name']) || !isset($profile['passphrase'])) {
+                    // name and passphrase must be set
+                    // invalid file content continue with the next one
+                    continue;
+                }
+                // a valid Wi-Fi specification available
+                // calculate the ssidhex value
+                $ssidHex = implode(unpack("H*", trim($profile['name'])));
+                $ssidHexKey = 'ssidHex:'.$ssidHex;
+                if (isset($storedProfiles[$ssidHexKey])) {
+                    // remove existing profile for this network
+                    unset($storedProfiles[$ssidHexKey]);
+                }
+                // add the new values to the stored profile array
+                $storedProfiles[$ssidHexKey]['technology'] = 'wifi';
+                $storedProfiles[$ssidHexKey]['ssidHex'] = $ssidHex;
+                $storedProfiles[$ssidHexKey]['ssid'] = $profile['name'];
+                $storedProfiles[$ssidHexKey]['passphrase'] = $profile['passphrase'];
+                $storedProfiles[$ssidHexKey]['ipAssignment'] = 'DHCP';
+                if (isset($profile['hidden'])) {
+                    if ($profile['hidden']) {
+                        $storedProfiles[$ssidHexKey]['hidden'] = true;
+                    } else {
+                        $storedProfiles[$ssidHexKey]['hidden'] = false;
+                    }
+                }
+                // create the config file in '/var/lib/connman/', the name is 'wifi_<ssidHex>.config'
+                $profileFileName = '/var/lib/connman/wifi_'.$args['ssidHex'].'.config';
+                $profileFileContent =
+                    '[global]'."\n".
+                    'Description=Boot generated DHCP Wi-Fi network configuration for network (SSID) "'.$profile['name'].'", with SSID hex value "'.$args['ssidHex']."\"\n".
+                    '[service_'.$args['ssidHex'].']'."\n".
+                    'Type=wifi'."\n".
+                    'SSID='.$args['ssidHex']."\n".
+                    'Passphrase='.$profile['passphrase']."\n";
+                if (isset($profile['hidden'])) {
+                    if ($profile['hidden']) {
+                        $profileFileContent .= 'Hidden=true'."\n";
+                    } else {
+                        $profileFileContent .= 'Hidden=false'."\n";
+                    }
+                }
+                // sort the profile array on ssid (case insensitive)
+                $ssidCol = array_column($storedProfiles, 'ssid');
+                $ssidCol = array_map('strtolower', $ssidCol);
+                array_multisort($ssidCol, SORT_ASC, $storedProfiles);
+                // save the profile array
+                $redis->set('network_storedProfiles', json_encode($storedProfiles));
+                // commit the config file, creating a new file triggers connman to use it
+                $fp = fopen($profileFileName, 'w');
+                fwrite($fp, $profileFileContent);
+                fclose($fp);
+            }
+            // restore the default boot-initialise Wi-Fi files
+            sysCmd('mkdir -p /boot/wifi/examples');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme /boot/wifi/readme');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples /boot/wifi/examples');
+            // run refresh_nics to finish off
+            wrk_netconfig($redis, 'refreshAsync');
             break;
-        case 'edit':
-            runelog('**** wrk_wifiprofile EDIT ****', $args->ssid);
-            wrk_wifiprofile($redis, 'connect', $args);
+        case 'refresh':
+            // check the lock status
+            $lockWifiscan = $redis->Get('lock_wifiscan');
+            if ($lockWifiscan) {
+                if ($lockWifiscan >= 7) {
+                    // its not really a great problem if this routine runs twice at the same time
+                    // but spread the attempts, so let it run on the 7th attempt
+                } else {
+                    $redis->Set('lock_wifiscan', ++$lockWifiscan);
+                    break;
+                }
+            }
+            // run the refresh nics routine and wait until it finishes
+            sysCmd('/srv/http/command/refresh_nics');
             break;
-        case 'delete':
-            runelog('**** wrk_wifiprofile DELETE ****', $args->ssid);
-            wrk_wifiprofile($redis, 'disconnect', $args);
-            $redis->Del($args->ssid);
-            $redis->Del('stored_profiles');
-            //sysCmdAsync('iwctl known-networks '.$args->ssid.'forget');
-            //sysCmd('rm /var/lib/connman/'.escapeshellarg(bin2hex($args_>ssid)).'.config');
-            sysCmd('rm /var/lib/connman/'.bin2hex($args_>ssid).'.config');
-            runelog('***** delete rm /var/lib/connman/'.bin2hex($args_>ssid).'.config');
-            // also delete the folder based on this
-            // cannot be done using connmanctl or iwdctl
-            //sysCmd("rm -rf /var/lib/connman/wifi_".$wlan0MAC."_".bin2hex($args->ssid)."_managed_".$encryption);
-            // this deletes the whole connman directory
-            //sysCmd('rm -rf /var/lib/connman/'.$wifi_profile[0]);
-            $return = 1;
+        case 'refreshAsync':
+            // check the lock status
+            $lockWifiscan = $redis->Get('lock_wifiscan');
+            if ($lockWifiscan) {
+                if ($lockWifiscan >= 7) {
+                    // its not really a great problem if this routine runs twice at the same time
+                    // but spread the attempts, so let it run on the 7th attempt
+                } else {
+                    $redis->Set('lock_wifiscan', ++$lockWifiscan);
+                    break;
+                }
+            }
+            // run the refresh nics routine async don't wait until it finishes
+            sysCmdAsync('nice --adjustment=2 /srv/http/command/refresh_nics');
             break;
+        case 'saveWifi':
+            // is used to create/modify a wifi config file and stored profile
+            // add a config file and stored profile
+            // if the passphrase is not set, try to retrieve the passphrase from the profile
+            if (isset($args['passphrase'])) {
+                $args['passphrase'] = trim($args['passphrase']);
+            } else {
+                $args['passphrase'] = '';
+            }
+            if (!strlen($args['passphrase'])) {
+                // passphase not set in the UI
+                if (isset($storedProfiles[$ssidHexKey]['passphrase'])) {
+                    // there is a passphrase in the stored profile, save it
+                    $args['passphrase'] = trim($storedProfiles[$ssidHexKey]['passphrase']);
+                }
+            }
+            // delete the current profile
+            if (isset($storedProfiles[$ssidHexKey])) {
+                unset($storedProfiles[$ssidHexKey]);
+            }
+            // set up the net profile array
+            foreach ($args as $key => $value) {
+                $val = trim($value);
+                if (strpos('|manual|connmanString|action|reboot|', $key)) {
+                    // omit some of the values
+                    continue;
+                }
+                if (($args['ipAssignment'] === 'DHCP') && strpos('|ipv4Address|ipv4Mask|defaultGateway|primaryDns|secondaryDns|', $key)) {
+                    // omit extra values if IP Assignment is DHCP
+                    continue;
+                }
+                if (!$val) {
+                    // there is no value
+                    continue;
+                }
+                // otherwise save the UI values
+                $storedProfiles[$ssidHexKey][$key] = $val;
+            }
+            $storedProfiles[$ssidHexKey]['technology'] = 'wifi';
+            // create the config file in '/var/lib/connman/', the name is 'wifi_<ssidHex>.config'
+            $profileFileName = '/var/lib/connman/wifi_'.$args['ssidHex'].'.config';
+            $tmpFileName = '/tmp/wifi_'.$args['ssidHex'].'.config';
+            $profileFileContent =
+                '[global]'."\n".
+                'Description=';
+            if ($args['ipAssignment'] === 'DHCP') {
+                $profileFileContent .= 'DHCP ';
+            } else {
+                $profileFileContent .= 'Static ';
+            }
+            $profileFileContent .= $args['security'].' Wi-Fi network configuration for network (SSID) "'.$args['ssid'].'", with SSID hex value "'.$args['ssidHex']."\"\n".
+                '[service_'.$args['ssidHex'].']'."\n".
+                'Type=wifi'."\n".
+                'SSID='.$args['ssidHex']."\n";
+            if (isset($args['autoconnect'])) {
+                $profileFileContent .= 'Security=open'."\n";
+                if ($args['autoconnect']) {
+                    $profileFileContent .= 'AutoConnect=true'."\n";
+                } else {
+                    $profileFileContent .= 'AutoConnect=false'."\n";
+                }
+            } else {
+                $profileFileContent .= 'Security='.strtolower($args['security'])."\n".
+                    'Passphrase='.$args['passphrase']."\n";
+            }
+            if (isset($args['hidden']) && $args['hidden']) {
+                $profileFileContent .= 'Hidden=true'."\n";
+            } else {
+                $profileFileContent .= 'Hidden=false'."\n";
+            }
+            if ($args['ipAssignment'] === 'DHCP') {
+                if (isset($args['connmanString'])) {
+                    $args['connmanString'] = trim($args['connmanString']);
+                    if ($args['connmanString']) {
+                        // make sure that connman has the correct values
+                        sysCmd('connmanctl config '.$args['connmanString'].' --ipv6 auto');
+                        sysCmd('connmanctl config '.$args['connmanString'].' --ipv4 dhcp');
+                    }
+                }
+            } else {
+                $profileFileContent .= 'IPv4='.$args['ipv4Address'].'/'.$args['ipv4Mask'].'/'.$args['defaultGateway']."\n".
+                    'IPv6=off'."\n";
+                if ($args['primaryDns'] && !$args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['primaryDns']."\n";
+                } else if (!$args['primaryDns'] && $args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['secondaryDns']."\n";
+                } else if ($args['primaryDns'] && $args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['secondaryDns'].','.$args['secondaryDns']."\n";
+                }
+            }
+            // sort the profile array on ssid (case insensitive)
+            $ssidCol = array_column($storedProfiles, 'ssid');
+            $ssidCol = array_map('strtolower', $ssidCol);
+            array_multisort($ssidCol, SORT_ASC, $storedProfiles);
+            // save the profile array
+            $redis->set('network_storedProfiles', json_encode($storedProfiles));
+            // commit the config file, creating a new file triggers connman to use it
+            $fp = fopen($tmpFileName, 'w');
+            fwrite($fp, $profileFileContent);
+            fclose($fp);
+            // don't replace the existing connman configuration file if the new file is identical
+            if (md5_file($profileFileName) != md5_file($tmpFileName)) {
+                rename($tmpFileName, $profileFileName);
+            } else {
+                unlink($tmpFileName);
+            }
+            break;
+        case 'saveEthernet':
+            // is only used to set/remove a static IP-address
+            if ($args['ipAssignment'] === 'DHCP') {
+                // just delete the config file and remove the stored profile
+                wrk_netconfig($redis, 'delete', '', $args);
+                // make sure that connman has the correct values
+                sysCmd('connmanctl config '.$args['connmanString'].' --ipv6 auto');
+                sysCmd('connmanctl config '.$args['connmanString'].' --ipv4 dhcp');
+            } else {
+                // add a config file and stored profile
+                // set up the profile array
+                foreach ($args as $key => $value) {
+                    if (strpos('|connmanString|', $key)) {
+                        // omit some of the values
+                        continue;
+                    }
+                    $storedProfiles[macAddressKey][$key] = $value;
+                }
+                $storedProfiles[macAddressKey]['technology'] = 'ethernet';
+                // create the config file in '/var/lib/connman/', the name is 'ethernet_<macAddress>.config'
+                $profileFileName = '/var/lib/connman/ethernet_'.$args['macAddress'].'.config';
+                $tmpFileName = '/tmp/ethernet_'.$args['macAddress'].'.config';
+                $macAddress = join(":", str_split($args['macAddress'], 2));
+                $profileFileContent =
+                    '[global]'."\n".
+                    'Description=Static IP configuration for nic "'.$args['nic'].'", with MAC address "'.$macAddress."\"\n".
+                    '[service_'.$args['macAddress'].']'."\n".
+                    // add colons to the MAC address
+                    'MAC='.$macAddress."\n".
+                    'Type=ethernet'."\n".
+                    'IPv4='.$args['ipv4Address'].'/'.$args['ipv4Mask'].'/'.$args['defaultGateway']."\n".
+                    'IPv6=off'."\n";
+                if ($args['primaryDns'] && !$args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['primaryDns']."\n";
+                } else if (!$args['primaryDns'] && $args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['secondaryDns']."\n";
+                } else if ($args['primaryDns'] && $args['secondaryDns']) {
+                    $profileFileContent .= 'Nameservers='.$args['secondaryDns'].','.$args['secondaryDns']."\n";
+                }
+                // save the profile array
+                $redis->set('network_storedProfiles', json_encode($storedProfiles));
+                // commit the config file, creating a new file triggers connman to use it
+                $fp = fopen($tmpFileName, 'w');
+                fwrite($fp, $profileFileContent);
+                fclose($fp);
+                // don't replace the existing connman configuration file if the new file is identical
+                if (md5_file($profileFileName) != md5_file($tmpFileName)) {
+                    rename($tmpFileName, $profileFileName);
+                } else {
+                    unlink($tmpFileName);
+                }
+            }
+            break;
+        case 'reconnect':
+            // no break;
         case 'connect':
-            runelog('**** wrk_wifiprofile CONNECT ****', $args->ssid);
-            // need to deal with more than one wlan?  
-            //sysCmd('iwctl station wlan0 scan');
-            sysCmdAsync('connmanctl connect wifi_'.$wlan0MAC.'_'.bin2hex($args->ssid).'_managed_'.$encryption);
-            //sysCmdAsync('connmanctl connect '.$wifi_profile[0]);
-            $redis->Set('wlan_autoconnect', 1);
-            $return = 1;
+            // manual connect 
+            sysCmd('connmanctl connect '.$args['connmanString']);
+            break;
+        case 'autoconnect-on':
+            // manually set autoconnet on
+            sysCmd('connmanctl config '.$args['connmanString'].' --autoconnect on');
+            break;
+        case 'autoconnect-off':
+            // manually set autoconnet off
+            sysCmd('connmanctl config '.$args['connmanString'].' --autoconnect off');
             break;
         case 'disconnect':
-            runelog('**** wrk_wifiprofile DISCONNECT ****', $args->ssid);
-            sysCmdAsync('iwctl station wlan0 disconnect');
-            sysCmdAsync('iwctl known-networks '.$args->ssid.' forget');
-            $redis->Set('wlan_autoconnect', 0);
-            $return = 1;
+            // manual disconnect, to avoid automatic reconnection autoconnect is set off
+            sysCmd('connmanctl config '.$args['connmanString'].' --autoconnect off');
+            sysCmd('connmanctl disconnect '.$args['connmanString']);
+            break;
+        case 'disconnect-delete':
+            // manual disconnect, to avoid automatic reconnection autoconnect is set off, then continues to delete
+            sysCmd('connmanctl config '.$args['connmanString'].' --autoconnect off');
+            sysCmd('connmanctl disconnect '.$args['connmanString']);
+            // no break;
+        case 'delete':
+            // delete a connection, also removes the stored profile and configuration files
+            // wifi
+            if (isset($args['ssidHex']) && isset($storedProfiles[$ssidHexKey])) {
+                unset($storedProfiles[$ssidHexKey]);
+                unlink('/var/lib/connman/wifi_'.$args['ssidHex'].'.config');
+                sysCmd('rmdir --ignore-fail-on-non-empty \'/var/lib/connman/wifi_*'.$args['ssidHex'].'*\'');
+            }
+            // ethernet
+            if (isset($args['macAddress']) && isset($storedProfiles[macAddressKey])) {
+                unset($storedProfiles[macAddressKey]);
+                unlink('/var/lib/connman/ethernet_'.$args['macAddress'].'.config');
+                sysCmd('rmdir --ignore-fail-on-non-empty \'/var/lib/connman/ethernet_'.$args['macAddress'].'*\'');
+            }
+            $redis->set('network_storedProfiles', json_encode($storedProfiles));
+            break;
+        case 'reset':
+            // delete all stored profiles and configuration files and restore the  system defaults
+            // automatic reboot follows
+            // first disconnect all the networks
+            if ($redis->exists('network_info')) {
+                $networks = json_decode($redis->get('network_info'), true);
+                foreach ($networks as $network) {
+                    wrk_netconfig($redis, 'disconnect', $network['connmanString']);
+                }
+            }
+            // stop connman, otherwise it may recreate the configuration files after deletion
+            sysCmd('systemctl stop connman');
+            // clear the network array
+            $redis->set('network_info', json_encode(array()));
+            // clear the stored profiles
+            $redis->set('network_storedProfiles', json_encode(array()));
+            // delete all connman config files
+            sysCmd('rm -r /var/lib/connman/*');
+            // restore the default connman configuration file
+            sysCmd('mkdir -p /home/var/lib/connman');
+            sysCmd('cp /srv/http/app/config/defaults/var/lib/connman/settings /var/lib/connman/settings');
+            sysCmd('chmod 600 /var/lib/connman/settings');
+            // restore the default boot-initialise Wi-Fi files
+            sysCmd('mkdir -p /boot/wifi/examples');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme /boot/wifi/readme');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples /boot/wifi/examples');
+            // start connman
+            sysCmd('systemctl start connman');
+            // set automatic Wi-Fi optimisation
+            $redis->set('network_autoOptimiseWifi', 1);
+            // run refresh_nics
+            wrk_netconfig($redis, 'refresh');
+            // set reboot to true
+            $args['reboot'] = true;
             break;
     }
-    return $return;
+    if (isset($args['reboot']) && $args['reboot']) {
+        // reboot requested
+        wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
+    }
 }
 
 function wrk_restore($redis, $backupfile)
@@ -4837,10 +4865,559 @@ function lyricsStringClean($string, $type=null)
     return $string;
 }
 
-// function to correct a cheap network card which all seem to have the same mac address (00:e0:4c:53:44:58)
+// function to refresh the nics and network database arrays
+function refresh_nics($redis)
+// This function returns an array of nics (and false on error)
+// three arrays are saved in redis:
+//   'network_interfaces' containing the nics (always saved)
+//   'translate_mac_nic' containing a translation table mac-address to nic-name (always saved)
+//   'network_info' containing the network information (not saved when $process and $return = 'nics')
+{
+    // startup - lock the scan system
+    runelog('--------------------------- lock the scan system ---------------------------');
+    $lockWifiscan = $redis->Get('lock_wifiscan');
+    if ($lockWifiscan) {
+        if ($lockWifiscan >= 7) {
+            // its not really a great problem if this routine runs twice at the same time
+            // but spread the attempts, so let it run on the 7th attempt
+        } else {
+            $redis->Set('lock_wifiscan', ++$lockWifiscan);
+            return false;
+        }
+    }
+    // lock it
+    $redis->Set('lock_wifiscan', 1);
+    //
+    // startup - collect system data
+    runelog('--------------------------- set up variables and initialise ---------------------------');
+    // nics to exclude from processing
+    $excluded_nics = array('ifb0', 'ifb1', 'p2p0', 'bridge', 'lo');
+    // this routine will switch on the following technologies (use lower case)
+    $enabled_technology = array('wifi', 'ethernet');
+    // this routine will only process the following technologies (use lower case)
+    $process_technology = array('wifi', 'ethernet');
+    // switch the technology on
+    foreach ($enabled_technology as $technology) {
+        sysCmd('connmanctl enable '.$technology);
+    }
+    // get the default gateway
+    $defaultGateway = sysCmd("ip route | grep -i 'default via'");
+    if (isset($defaultGateway[0])) {
+        $defaultGateway = trim(str_replace(' via', 'via', preg_replace('!\s+!', ' ', $defaultGateway[0])));
+        $defaultGateway = explode(' ', $defaultGateway);
+        if (isset($defaultGateway[1])) {
+            $defaultGateway = $defaultGateway[1];
+        } else {
+            $defaultGateway = '';
+        }
+    } else {
+        $defaultGateway = '';
+    }
+    // get the default dns nameservers, use the same value as the default gateway
+    $primaryDns = $defaultGateway;
+    $secondaryDns = '';
+    //
+    // add MAC addresses to array $networkInterfaces with ip link
+    // also add the nic's per MAC address to the array $translateMacNic
+    $networkInterfaces = array();
+    $translateMacNic = array();
+    $links = sysCmd("ip -o -br link | sed 's,[ ]\+, ,g'");
+    foreach ($links as $link) {
+        $linkArray = explode(' ', $link);
+        $nic = trim($linkArray[0]);
+        if (in_array($nic, $excluded_nics)) {
+            // skip nics in the excluded list
+            continue;
+        }
+        $macAddress = $linkArray[2];
+        if ($macAddress === '00:e0:4c:53:44:58') {
+            // cheap network card, they all have the same MAC address, fix it by spoofing
+            $macAddress = fix_mac($redis, $nic);
+        }
+        $macAddress = str_replace(':', '', $macAddress);
+        $translateMacNic[$macAddress.'_'] = $nic;
+        $networkInterfaces[$nic]['macAddress'] = $macAddress;
+        $networkInterfaces[$nic]['nic'] = $nic;
+        $networkInterfaces[$nic]['ipStatus'] = $linkArray[1];
+        $networkInterfaces[$nic]['ipInfo'] = $linkArray[3];
+        $networkInterfaces[$nic]['nic'] = $nic;
+        if ($nic === 'lo' ) {
+            // set technology to loopback
+            $networkInterfaces[$nic]['technology'] = 'loopback';
+        } else {
+            // set default technology to ethernet, wifi will be determined below
+            $networkInterfaces[$nic]['technology'] = 'ethernet';
+        }
+        // set the connected state to false, the connected ones will be determined below
+        $networkInterfaces[$nic]['connected'] = false;
+        $networkInterfaces[$nic]['ipv4Address'] = '';
+        $networkInterfaces[$nic]['ipv4Mask'] = '';
+        $networkInterfaces[$nic]['ipv4Broadcast'] = '';
+        $networkInterfaces[$nic]['ipv4Rest'] = '';
+        $networkInterfaces[$nic]['ipv6Address'] = '';
+        $networkInterfaces[$nic]['ipv6Rest'] = '';
+        // set the default gateway and DSN Name servers
+        $networkInterfaces[$nic]['defaultGateway'] = '';
+        $networkInterfaces[$nic]['primaryDns'] = '';
+        $networkInterfaces[$nic]['secondaryDns'] = '';
+        // set the speed to speed to unknown, the speed of the connected ones will be determined below
+        $networkInterfaces[$nic]['speed'] ='Unknown';
+        // save the default ssid and type, wifi ssis will be set up below
+        $networkInterfaces[$nic]['ssid'] = 'Wired';
+        $networkInterfaces[$nic]['type'] = '';
+        // enable the nic
+        sysCmd('ip link set '.$nic.' up');
+    }
+    // add ip addresses to array $networkInterfaces with ip address
+    $addrs = sysCmd("ip -o  address | sed 's,[ ]\+, ,g'");
+    foreach ($addrs as $addr) {
+        $addrArray = explode(' ', $addr, 5);
+        $nic = $addrArray[1];
+        if (in_array($nic, $excluded_nics)) {
+            // skip nics in the excluded list
+            continue;
+        }
+        $networkInterfaces[$nic]['nic'] = $nic;
+        if (isset($addrArray[2])) {
+            $networkInterfaces[$nic]['connected'] = true;
+            if ($addrArray[2] === 'inet') {
+                $networkInterfaces[$nic]['ipv4Address'] = substr($addrArray[3],0,strpos($addrArray[3],'/'));
+                $networkInterfaces[$nic]['ipv4Mask'] = net_CidrToNetmask(substr($addrArray[3],strpos($addrArray[3],'/')+1));
+                $ipv4Rest = explode(' ', str_replace('  ', ' ', str_replace("\\", '', $addrArray[4])), 3);
+                if ((isset($ipv4Rest[2])) && $ipv4Rest[0] === 'brd') {
+                    $networkInterfaces[$nic]['ipv4Broadcast'] = $ipv4Rest[1];
+                    $networkInterfaces[$nic]['ipv4Rest'] = $ipv4Rest[2];
+                } else {
+                    $networkInterfaces[$nic]['ipv4Broadcast'] = '';
+                    $networkInterfaces[$nic]['ipv4Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
+                }
+            } else if ($addrArray[2] === 'inet6') {
+                $networkInterfaces[$nic]['ipv6Address'] = $addrArray[3];
+                $networkInterfaces[$nic]['ipv6Rest'] = str_replace('  ', ' ', str_replace("\\", '', $addrArray[4]));
+            }
+            // set the default gateway and DSN name servers
+            $networkInterfaces[$nic]['defaultGateway'] = $defaultGateway;
+            $networkInterfaces[$nic]['primaryDns'] = $primaryDns;
+            $networkInterfaces[$nic]['secondaryDns'] = $secondaryDns;
+        }
+        if ($networkInterfaces[$nic]['speed'] === 'Unknown') {
+            $speed = sysCmd('ethtool '.$nic." | grep -i speed | sed 's,[ ]\+, ,g'");
+            if ((isset($speed[0])) && (strpos(' '.$speed[0], ':'))) {
+                $speed = trim(explode(':', preg_replace('!\s+!', ' ', $speed[0]),2)[1]);
+                if ($speed) {
+                    $networkInterfaces[$nic]['speed'] = str_replace('0Mb', '0 Mb', $speed);
+                }
+            }
+        }
+        // wired nics without an IP address will not be added
+    }
+    // determine the wireless nics with iw
+    // add the wifi technology to array $networkInterfaces with iw
+    // also add the nic's per physical id to array $wirelessNic
+    $wirelessNic = array();
+    $deviceInfoList = sysCmd("iw dev | sed 's,[ ]\+, ,g' | grep -iE 'phy|interface|ssid|type'");
+    foreach ($deviceInfoList as $deviceInfoLine) {
+        $deviceInfoLine = ' '.trim(preg_replace('!\s+!', ' ', $deviceInfoLine));
+        if (strpos($deviceInfoLine, 'phy')) {
+            $phyDev = trim(str_replace('#', '', $deviceInfoLine));
+        } else if (strpos($deviceInfoLine, 'Interface')) {
+            $nic = trim(explode(' ', trim($deviceInfoLine))[1]);
+            if (in_array($nic, $excluded_nics)) {
+                // skip nics in the excluded list
+                continue;
+            }
+            // array for pysical device id to nic name translation
+            $wirelessNic[$phyDev] = $nic;
+            // register the technology as wifi
+            $networkInterfaces[$nic]['technology'] = 'wifi';
+            // save the physical device
+            $networkInterfaces[$nic]['physical'] = $phyDev;
+            // save the default ssid
+            $networkInterfaces[$nic]['ssid'] = '';
+            // save the default type
+            $networkInterfaces[$nic]['type'] = '';
+            // refresh network list for wifi
+            sysCmd('iwctl station '.$nic.' scan');
+            // sleep (1);
+        } else if (strpos($deviceInfoLine, 'ssid ')) {
+            $networkInterfaces[$nic]['ssid'] = trim(explode(' ', trim($deviceInfoLine))[1]);
+        } else if (strpos($deviceInfoLine, 'type ')) {
+            $networkInterfaces[$nic]['type'] = trim(explode(' ', trim($deviceInfoLine))[1]);
+        }
+        if ($networkInterfaces[$nic]['speed'] === 'Unknown') {
+            $speed = sysCmd('iw dev '.$nic." station dump | grep -i 'rx bitrate' | sed 's,[ ]\+, ,g'");
+            if ((isset($speed[0])) && (strpos(' '.$speed[0], ':'))) {
+                $speed = trim(explode(':', preg_replace('!\s+!', ' ', $speed[0]),2)[1]);
+                if ($speed) {
+                    $networkInterfaces[$nic]['speed'] = $speed;
+                }
+            }
+        }
+    }
+    // determine AP capability with iw
+    // add the wifi technology to array $networkInterfaces with iw
+    // uses the array $wirelessNic for device id to nic name translation
+    $deviceInfoList = sysCmd("iw list | sed 's,[ ]\+, ,g' | grep -iE '^Wiphy|Supported interface modes:|* AP$|:$'");
+    // the nic names are not listed, only the physical device id's
+    $phyDev = '';
+    $intMode = false;
+    $nic = '';
+    foreach ($deviceInfoList as $deviceInfoLine) {
+        $deviceInfoLine = ' '.trim($deviceInfoLine);
+        if (strpos($deviceInfoLine, 'Wiphy')) {
+            $phyDev = trim(explode(' ', trim($deviceInfoLine))[1]);
+            if (isset($wirelessNic[$phyDev])) {
+                $nic = $wirelessNic[$phyDev];
+            } else {
+                $nic = '';
+            }
+        } else if (strpos($deviceInfoLine, 'Supported interface modes:')) {
+            // the 'Supported interface modes:' section of the file is terminated with a line containing a colon (:)
+            $intMode = true;
+        } else if (strpos($deviceInfoLine, '* AP')) {
+            if (($nic != '') && ($intMode)) {
+                // access point (AP) is listed as a 'Supported interface mode'
+                $networkInterfaces[$nic]['apSupported'] = true;
+                $phyDev = '';
+                $intMode = false;
+                $nic = '';
+            }
+        } else if (strpos($deviceInfoLine, ':')) {
+            if (($nic != '') && ($intMode)) {
+                // reached the end of the 'Supported interface modes:' section and no access point (AP) listed
+                $networkInterfaces[$nic]['apSupported'] = false;
+            }
+            $intMode = false;
+        }
+    }
+    // determine AP full function is supported
+    foreach ($networkInterfaces as $key => $nic) {
+        if ($nic['technology'] === 'wifi') {
+            $retval = sysCmd("iw phy ".$nic['physical']." info | grep -ci 'interface combinations are not supported'")[0];
+            if (!$retval && $nic['apSupported']) {
+                $networkInterfaces[$key]['apFull'] = true;
+            } else {
+                $networkInterfaces[$key]['apFull'] = false;
+            }
+            unset($retval);
+        }
+    }
+    $redis->set('network_interfaces', json_encode($networkInterfaces));
+    $redis->set('translate_mac_nic', json_encode($translateMacNic));
+    //
+    //
+    // add the available networks to array $networkInfo with connman
+    // uses the array $translateMacNic for mac to nic name translation
+    // uses the array $networkInterfaces for ip address information (and possibly modifies this array)
+    //
+    // add to the existing array if the time since the last run is less than 6 hours
+    // otherwise start with an empty array
+    list($nowMicroseconds, $nowSeconds) = explode(" ", microtime());
+    if (!$redis->Exists('network_info_time')) {
+        $redis->Set('network_info_time', $nowSeconds);
+    }
+    $previousSeconds = $redis->Get('network_info_time');
+    $hoursSince = floor((floatval($nowSeconds) - floatval($previousSeconds))/60/60);
+    if ($hoursSince >= 6) {
+        // clear the array and save the time
+        $networkInfo = array();
+        $redis->Set('network_info_time', $nowSeconds);
+    } else {
+        // use the last array if it exists
+        if ($redis->exists('network_info')) {
+            $networkInfo = json_decode($redis->Get('network_info'), true);
+        } else {
+            $networkInfo = array();
+            $redis->Set('network_info_time', $nowSeconds);
+        }
+    }
+    // subtract 2 from all network strength values and remove values which go negative
+    // all networks which are detected will reset their strength to the actual value
+    // the networks which are successively not detected will be shown as weak and eventually be deleted
+    foreach ($networkInfo as $key => $network) {
+        if (isset($networkInfo[$key]['strength'])) {
+            $networkInfo[$key]['strength'] = $networkInfo[$key]['strength'] - 2;
+            if ($network['strength'] <= 0) {
+                unset($networkInfo[$key]);
+            } else {
+                $networkInfo[$key]['strengthStars'] = str_repeat(' >', max(1, round($networkInfo[$key]['strength']/10)));
+            }
+        }
+    }
+    // always clear the optimise wifi array
+    $optimiseWifi = array();
+    $accessPoint = $redis->hGet('AccessPoint', 'ssid');
+    $accessPointEnabled = $redis->hGet('AccessPoint', 'enabled');
+    $hiddenCount = 0;
+    $networkInterfacesModified = false;
+    // get the services
+    $services = sysCmd('connmanctl services');
+    foreach ($services as $service) {
+        unset($security, $strength, $strengthStars);
+        $status = strtoupper(trim(substr($service, 0, 4)));
+        // in theory ssid should be max 21 characters long, but there are longer ones!
+        if (strpos($service, ' ethernet_')) {
+            $pos = 25;
+        } else if (strpos($service, ' wifi_')) {
+            $pos = strpos($service, ' wifi_', 24);
+        } else {
+            $pos = 25;
+        }
+        $ssid = trim(substr($service, 4, $pos - 4));
+        $connmanString = trim(substr($service, $pos));
+        $connmanStringParts = explode('_', $connmanString);
+        $technology = $connmanStringParts[0];
+        if (!in_array($technology, $process_technology)) {
+            // skip technologies not listed
+            continue;
+        }
+        $macAddress = trim($connmanStringParts[1]);
+        if (isset($translateMacNic[$macAddress.'_'])) {
+            $nic = $translateMacNic[$macAddress.'_'];
+            if (($accessPointEnabled) && ($accessPoint=== $ssid)) {
+                // ssid configured as an AccessPoint, so skip
+                continue;
+            }
+        } else {
+            $nic = '000000';
+        }
+        if ($technology === 'ethernet') {
+            // connect wired interface
+            if ($networkInterfaces[$nic]['connected']) {
+                // do nothing
+            } else {
+                wrk_netconfig($redis, 'autoconnect-on', $connmanString);
+            }
+        } else if ($technology === 'wifi') {
+            // this is for WiFi
+            if ($ssid === '') {
+                // when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one 
+                $ssid = '<Hidden'.++$hiddenCount.'>';
+            }
+        }
+        $ssidHex = implode(unpack("H*", trim($ssid)));
+        // set the deault values for DNS name servers and gateway from 
+        $networkInfo[$macAddress.'_'.$ssidHex]['primaryDns'] = $networkInterfaces[$nic]['primaryDns'];
+        $networkInfo[$macAddress.'_'.$ssidHex]['secondaryDns'] = $networkInterfaces[$nic]['secondaryDns'];
+        $networkInterfaces[$nic]['defaultGateway'] = $networkInterfaces[$nic]['defaultGateway'];
+        // get the signal strength, security, DNS name servers and gateway from connman
+        $connmanLines = sysCmd('connmanctl services '.$connmanString);
+        foreach ($connmanLines as $connmanLine) {
+            if (strpos(' '.$connmanLine, '.Configuration')) {
+                // don't use the configuration lines
+                continue;
+            }
+            $connmanLineParts = explode('=', $connmanLine, 2);
+            if (count($connmanLineParts) !=2) {
+                // skip the line if it has no value (or '=' charecter)
+                continue;
+            }
+            $entry = ' '.strtolower(trim($connmanLineParts[0]));
+            $value = strtolower(trim($connmanLineParts[1], " \t\n\r\0\x0B]["));
+            if (strpos($entry, 'security')) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['security'] = strtoupper($value);
+            } else if (strpos($entry, 'strength')) {
+                if ($value) {
+                    $strength = $value;
+                    $networkInfo[$macAddress.'_'.$ssidHex]['strength'] = $strength;
+                    // strength is a value from 1 to 100, genereate 1 to 10 stars
+                    $networkInfo[$macAddress.'_'.$ssidHex]['strengthStars'] = str_repeat(' >', max(1, round($strength/10)));
+                }
+            } else if (strpos($entry, 'nameservers')) {
+                if ($value) {
+                    $nameservers = explode(',', $value);
+                    if (isset($nameservers[0])) {
+                        $nameservers[0] = trim($nameservers[0]);
+                        if ($nameservers[0]) {
+                            if ($networkInfo[$macAddress.'_'.$ssidHex]['primaryDns'] != $nameservers[0]) {
+                                $networkInfo[$macAddress.'_'.$ssidHex]['primaryDns'] = $nameservers[0];
+                                $networkInfo[$macAddress.'_'.$ssidHex]['secondaryDns'] = '';
+                                $networkInterfaces[$nic]['primaryDns'] = $nameservers[0];
+                                $networkInterfaces[$nic]['secondaryDns'] = '';
+                                $networkInterfacesModified = true;
+                            }
+                        }
+                    }
+                    if (isset($nameservers[1])) {
+                        $nameservers[1] = trim($nameservers[1]);
+                        if ($nameservers[1]) {
+                            if ($networkInfo[$macAddress.'_'.$ssidHex]['secondaryDns'] != $nameservers[1]) {
+                                $networkInfo[$macAddress.'_'.$ssidHex]['secondaryDns'] = $nameservers[1];
+                                $networkInterfaces[$nic]['secondaryDns'] = $nameservers[1];
+                                $networkInterfacesModified = true;
+                            }
+                        }
+                    }
+                }
+            } else if (strpos($entry, 'ipv4')) {
+                // pick up the device gateway
+                if ($value && strpos(' '.$value, 'gateway')) {
+                    $gateway = substr($value, strpos($value, 'gateway'));
+                    $gateway = explode('=', $gateway, 2);
+                    if (isset($gateway[1])) {
+                        $gateway[1] = trim($gateway[1]);
+                        if ($gateway[1]) {
+                            $gateway = $gateway[1];
+                            if (strpos(' '.$gateway, ',')) {
+                                $gateway = substr($gateway, 0, strpos($gateway, ','));
+                            }
+                            if (strpos(' '.$gateway, '=')) {
+                                $gateway = substr($gateway, 0, strpos($gateway, '='));
+                            }
+                            if ($gateway && ($gateway != $networkInterfaces[$nic]['defaultGateway'])) {
+                                $networkInfo[$macAddress.'_'.$ssidHex]['defaultGateway'] = $gateway;
+                                $networkInterfaces[$nic]['defaultGateway'] = $gateway;
+                                $networkInterfacesModified = true;
+                            }
+                        }
+                    }
+                } else {
+                    $networkInfo[$macAddress.'_'.$ssidHex]['defaultGateway'] = $networkInterfaces[$nic]['defaultGateway'];
+                }
+                // pick up the device network mask
+                if ($value && strpos(' '.$value, 'netmask')) {
+                    $netmask = substr($value, strpos($value, 'netmask'));
+                    $netmask = explode('=', $netmask, 2);
+                    if (isset($netmask[1])) {
+                        $netmask[1] = trim($netmask[1]);
+                        if ($netmask[1]) {
+                            $netmask = $netmask[1];
+                            if (strpos(' '.$netmask, ',')) {
+                                $netmask = substr($netmask, 0, strpos($netmask, ','));
+                            }
+                            if (strpos(' '.$netmask, '=')) {
+                                $netmask = substr($netmask, 0, strpos($netmask, '='));
+                            }
+                            if ($netmask && ($netmask != $networkInterfaces[$nic]['ipv4Mask'])) {
+                                $networkInfo[$macAddress.'_'.$ssidHex]['ipv4Mask'] = $netmask;
+                                $networkInterfaces[$nic]['ipv4Mask'] = $netmask;
+                                $networkInterfacesModified = true;
+                            }
+                        }
+                    }
+                } else {
+                    $networkInfo[$macAddress.'_'.$ssidHex]['ipv4Mask'] = $networkInterfaces[$nic]['ipv4Mask'];
+                }
+            }
+        }
+        $networkInfo[$macAddress.'_'.$ssidHex]['ssid'] = $ssid;
+        $networkInfo[$macAddress.'_'.$ssidHex]['ssidHex'] = $ssidHex;
+        $networkInfo[$macAddress.'_'.$ssidHex]['status'] = $status;
+        $networkInfo[$macAddress.'_'.$ssidHex]['connmanString'] = $connmanString;
+        $networkInfo[$macAddress.'_'.$ssidHex]['macAddress'] = $macAddress;
+        $networkInfo[$macAddress.'_'.$ssidHex]['technology'] = $technology;
+        if (isset($security)) {
+            
+        }
+        if ($nic != '000000') {
+            $networkInfo[$macAddress.'_'.$ssidHex]['nic'] = $nic;
+        }
+        //
+        if ($status) {
+            $networkInfo[$macAddress.'_'.$ssidHex]['configured'] = true;
+            if (strpos(' '.$status, 'A')) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['autoconnect'] = true;
+            } else {
+                $networkInfo[$macAddress.'_'.$ssidHex]['autoconnect'] = false;
+            }
+            if (strpos(' '.$status, 'O')) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['online'] = true;
+            } else {
+                $networkInfo[$macAddress.'_'.$ssidHex]['online'] = false;
+            }
+            if (strpos(' '.$status, 'R')) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ready'] = true;
+            } else {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ready'] = false;
+            }
+            if (isset($networkInterfaces[$nic]['ipStatus'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipStatus'] = $networkInterfaces[$nic]['ipStatus'];
+            }
+            if (isset($networkInterfaces[$nic]['ipInfo'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipInfo'] = $networkInterfaces[$nic]['ipInfo'];
+            }
+            if (isset($networkInterfaces[$nic]['ipv4Address'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipv4Address'] = $networkInterfaces[$nic]['ipv4Address'];
+            }
+            if (isset($networkInterfaces[$nic]['ipv6Address'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipv6Address'] = $networkInterfaces[$nic]['ipv6Address'];
+            }
+            if (isset($networkInterfaces[$nic]['ipv4Rest'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipv4Rest'] = $networkInterfaces[$nic]['ipv4Rest'];
+            }
+            if (isset($networkInterfaces[$nic]['ipv6Rest'])) {
+                $networkInfo[$macAddress.'_'.$ssidHex]['ipv6Rest'] = $networkInterfaces[$nic]['ipv6Rest'];
+            }
+        } else {
+            $networkInfo[$macAddress.'_'.$ssidHex]['configured'] = false;
+            $networkInfo[$macAddress.'_'.$ssidHex]['autoconnect'] = false;
+            $networkInfo[$macAddress.'_'.$ssidHex]['online'] = false;
+            $networkInfo[$macAddress.'_'.$ssidHex]['ready'] = false;
+        }
+        if (($networkInfo[$macAddress.'_'.$ssidHex]['technology'] === 'wifi') &&
+                ($networkInfo[$macAddress.'_'.$ssidHex]['configured']) &&
+                ($networkInfo[$macAddress.'_'.$ssidHex]['security'] != 'OPEN')) {
+            // write the configured wifi networks to an array for autoconnect optimisation
+            // autoconnect is never automatically set for OPEN security
+            $optimiseWifi[] = array('connmanString' => $connmanString, 'strength' => $strength, 'macAddress' => $macAddress, 'ssidHex' => $ssidHex);
+        }
+    }
+    //
+    // optimise wifi for the next reboot
+    // this is done by setting autoconnect on for the best network reception (per nic & ssid combination) and off for the rest
+    // most of the time there will only be one network and one wifi nic, so the routine won't do very much other than switch on autoconnect
+    // autoconnect is never automatically set for OPEN security
+    //
+    if ($redis->get('network_autoOptimiseWifi')) {
+        $strengthCol  = array_column($optimiseWifi, 'strength');
+        $ssidHexCol = array_column($optimiseWifi, 'ssidHex');
+        $macAddressCol = array_column($optimiseWifi, 'macAddress');
+        array_multisort($strengthCol, SORT_DESC, $ssidHexCol, SORT_ASC, $macAddressCol, SORT_ASC, $optimiseWifi);
+        while ($optimiseWifi) {
+            // the array has some values, an empty array returns false and ends the loop
+            $first = true;
+            foreach ($optimiseWifi as $key => $network) {
+                if ($first) {
+                    // the first one has the strongest signal so enable autoconnect
+                    // if this nic and ssid are not currently connected connman will connect it immediately after enabling autoconnect
+                    wrk_netconfig($redis, 'autoconnect-on', $network['connmanString']);
+                    $macAddress = $network['macAddress'];
+                    $ssidHex = $network['ssidHex'];
+                    $connmanString = $network['connmanString'];
+                    // delete this line from the array
+                    unset($optimiseWifi[$key]);
+                    $first = false;
+                } else {
+                    if (($macAddress === $network['macAddress']) || ($ssidHex === $network['ssidHex'])) {
+                        // then disable autoconnect on other networks using the same mac address or ssid
+                        wrk_netconfig($redis, 'autoconnect-off', $network['connmanString']);
+                        // order the networks in the connman list, there are circumstances when connman will act on 
+                        // this on-the-fly optimisation, however the information is lost on reboot
+                        sysCmd('connmanctl move-after '.$network['connmanString'].' '. $connmanString);
+                        $connmanString = $network['connmanString'];
+                        // delete this element from the array
+                        unset($optimiseWifi[$key]);
+                    }
+                }
+            }
+        }
+    }
+    //
+    $redis->set('network_info', json_encode($networkInfo));
+    if ($networkInterfacesModified) {
+        $redis->set('network_interfaces', json_encode($networkInterfaces));
+    }
+    //
+    // unlock the scan system
+    $redis->Set('lock_wifiscan', 0);
+    runelog('--------------------------- returning network interface array ---------------------------');
+    return $networkInterfaces;
+}
+
+// function to correct a cheap network card which all seem to have the same MAC address (00:e0:4c:53:44:58)
 function fix_mac($redis, $nic)
 {
-    // first check that the mac address needs to be changed "ip -o -br link | sed 's,[ ]\+, ,g'"
+    // first check that the MAC address needs to be changed "ip -o -br link | sed 's,[ ]\+, ,g'"
     $response = sysCmd('ip -br link show '.$nic." | sed 's,[ ]\+, ,g'");
     $macCurrent = trim(explode(' ', $response[0])[2]);
     if ($macCurrent != '00:e0:4c:53:44:58') {
@@ -4867,7 +5444,7 @@ function fix_mac($redis, $nic)
     if ((!file_exists($file)) || (!sysCmd('grep -ic '.$macNew.' '.$file)[0])) {
         // create the systemd unit file only when it needs to be created
         $fileContent = '# file /etc/systemd/system/macfix_'.$nic.'.service'."\n"
-            .'# some cheap network cards have an identical mac address for all cards (00:e0:4c:53:44:58)'."\n"
+            .'# some cheap network cards have an identical MAC address for all cards (00:e0:4c:53:44:58)'."\n"
             .'# change it to a fixed (previouly ranomised) address'."\n\n"
             .'[Unit]'."\n"
             .'Description=MAC Address Fix for '.$nic."\n"

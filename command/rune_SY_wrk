@@ -42,6 +42,7 @@ $savecpu_inc = 8;
 $savecpu_sps = 43200;
 $savecpu_avd = 86400;
 $savecpu_fixdnssec = 20;
+$savecpu_refresh_nics = 10;
 $allmounted = 0;
 $retriesmounting = 100;
 ini_set('display_errors', '1');
@@ -228,11 +229,14 @@ if ($playerid_db === '') {
     //runelog('NTP sync', $redis->get('ntpserver'));
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
-
+    //
+    // run boot-initialise for Wi-Fi networks
+    wrk_netconfig($redis, 'boot-initialise');
+    //
     // refresh nics, check redis datastore status, check if an active internet connection is available - run this while waiting for chrony (see below)
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
-    sysCmdAsync('nice --adjustment=1 /var/www/command/refresh_nics ; /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh');
-
+    sysCmdAsync('nice --adjustment=1 /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; /var/www/command/refresh_nics');
+    //
     // if chrony is active call chronyc and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
     // normally by this point time has been set, if not there is probably no internet connection
     // the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while they are running
@@ -390,22 +394,19 @@ if ($playerid_db === '') {
         $redis->hSet('spotifyconnect', 'event_time_stamp', 0);
         $redis->hSet('spotifyconnect', 'last_time_stamp', 0);
     }
+    //
     // start udevil
     if ($redis->get('udevil') === '1') {
         runelog("service: UDEVIL start",'');
         sysCmd('pgrep -x udevil || systemctl start udevil');
+        // clean up any invalid mount points
+        sysCmd('udevil clean');
     }
-    // read system network interfaces details
-    // wrk_netconfig($redis,'setnics');
-    // check /etc/network/interfaces integrity
-    // hashCFG('check_net',$redis);
-    // check /etc/mpd.conf integrity
-    // hashCFG('check_mpd',$redis);
-
+    //
     // initialize OrionProfile
     runelog('env: SET KERNEL PROFILE',$redis->get('orionprofile'));
     sysCmd("/var/www/command/orion_optimize.sh ".$redis->get('orionprofile')." ".$redis->get('hwplatformid'));
-
+    //
     // start php-fpm if required
     $retval = sysCmd('systemctl is-active php-fpm');
     if ($retval[0] === 'active') {
@@ -1131,34 +1132,18 @@ while (1) {
                 case 'netcfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    // reset network configuration to default
-                    if ($job->action === 'reset') {
-                        wrk_netconfig($redis,'reset',$job->args);
-                    }
-                    // write network configuration
-                    if ($job->action === 'config') {
-                        // send notfy to UI
-                        ui_notify('Networkconfiguration', 'it takes some time .....');
-                        $retval = wrk_netconfig($redis, 'writecfg', $job->args);
-                        // reboot if needed !!!
-                        if ($retval === 'reboot') {
-                            //$notification = new stdClass();
-                            //$notification->title = 'Network config';
-                            //$notification->text = 'Config changed successfully, reboot reqired';
-                            //wrk_notify($redis, 'kernelswitch', $notification, $jobID);
-                            sysCmd('/var/www/command/rune_shutdown reboot');
-                            sysCmdAsync('systemctl reboot');
+                    // valid netcfg $action values:
+                    //    boot-initialise, refresh, refreshAsync, saveWifi, saveEthernet, reconnect, connect,
+                    //    autoconnect-on, autoconnect-off, disconnect, disconnect-delete, delete & reset
+                    if (isset($job->args)) {
+                        foreach ($job->args as $key => $value) {
+                            $param[$key] = $value;
                         }
-                        unset($retval);
+                        wrk_netconfig($redis, $job->action, '', $param);
+                    } else {
+                        wrk_netconfig($redis, $job->action);
                     }
-                    // refresh network configuration
-                    if ($job->action === 'refresh') {
-                        sysCmd('/var/www/command/refresh_nics');
-                    }
-                    // manual network configuration
-                    if ($job->action === 'manual') {
-                        // wrk_netconfig($redis,'manual',$job->args);
-                    }
+                    unset($key, $value, $param);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'apcfg':
@@ -1167,8 +1152,9 @@ while (1) {
                     // reset accesspoint configuration to default
                     if ($job->action === 'reset') {
                         // Need to test the following
-                        // $redis->Del('AccessPoint');
-                        // sysCmd('/var/www/command/refresh_nics');
+                        $redis->Del('AccessPoint');
+                        sysCmd('/srv/http/db/redis_datastore_setup check');
+                        ui_notify('AccessPoint configuration reset, a reboot is required to activate the settings');
                     }
                     // write network configuration
                     if ($job->action === 'config') {
@@ -1468,54 +1454,6 @@ while (1) {
                 case 'wificfg':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    // add profile
-                    if ($job->action === 'add') {
-                        runelog('wificfg: add profile for SSID: '.$job->args->ssid);
-                        ui_notify_async('Adding WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, $job->action, $job->args);
-                        ui_notify_async('Added WIFI-Profile', $job->args->ssid, $jobID);
-                    }
-                    if ($job->action === 'edit') {
-                        runelog('wificfg: edit profile for SSID: '.$job->args->ssid);
-                        ui_notify_async('Changing WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, $job->action, $job->args);
-                        ui_notify_async('Changed WIFI-Profile', $job->args->ssid, $jobID);
-                    }
-                    if ($job->action === 'delete') {
-                        runelog('wificfg: delete profile for SSID: '.$job->args->ssid);
-                        ui_notify_async('Deleting WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, $job->action, $job->args);
-                        ui_notify_async('Deleted WIFI-Profile', $job->args->ssid, $jobID);
-                    }
-                    if ($job->action === 'disconnect') {
-                        runelog('wificfg: disconnect profile for SSID: '.$job->args->ssid);
-                        ui_notify_async('Disconnecting from WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, $job->action, $job->args);
-                        ui_notify_async('Disconnected from WIFI-Profile', $job->args->ssid, $jobID);
-                    }
-                    if ($job->action === 'connect') {
-                        runelog('wificfg: connect profile for SSID: '.$job->args->ssid);
-                        ui_notify_async('Connecting to WIFI-Profile', $job->args->ssid, $jobID);
-                        wrk_wifiprofile($redis, $job->action, $job->args);
-                        ui_notify_async('Connected to WIFI-Profile', $job->args->ssid, $jobID);
-                    }
-                    // inject random delay to avoid wifi scan overlapping
-                    if ($job->action === 'scan') {
-                        // random delay
-//                        $sleep = rand(1000000, 2000000);
-//                        usleep($sleep);
-//                        $lock = $redis->Get('lock_wifiscan');
-                    }
-                    if ($job->action === 'scan') {
-                        $lock = $redis->Get('lock_wifiscan');
-                        if ($lock !== '1') {
-                            runelog('wificfg: scan ');
-                            // refresh nics status
-                            sysCmdAsync('/var/www/command/refresh_nics');
-                        } else {
-                            runelog('wificfg: scan aborted. System locked, scan in progress.');
-                        }
-                    }
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'wrkrestart':
@@ -1575,6 +1513,18 @@ while (1) {
             sysCmdAsync('nice --adjustment=2 /var/www/command/mount_async.php');
         }
         $savecpu_mnt = 1750 + rand(0, 100);
+    }
+    // Run refresh_nics periodically, run it first after 10 cycles (+/-5 seconds), and increase the repeat cycle time 100%
+    // it should run at least once per hour
+    // connman also works in this exponential way of detecting WiFi networks and nics
+    if ($savecpu_refresh_nics-- <= 0) {
+        wrk_netconfig($redis, 'refreshAsync');
+        // increase the repeat cycle time by 100% with a maximum of 7200 (= 1 hour, 60 x 60 x 2)
+        $savecpu_refresh_nics = min(7200, intval($savecpu_refresh_nics*2));
+        // calculate the randomiser @5% of the repeat cycle, minimum value of 2, maximum value of 100
+        $random = min(100,max(2, intval($savecpu_refresh_nics/20)));
+        $savecpu_refresh_nics = $savecpu_refresh_nics - $random + rand(0, $random*2);
+        unset($random);
     }
     // Random play auto start and stop, run first after 12 cycles (+/-6 seconds), then only on every +/-30th cycle (= every +/-15 seconds)
     // Detect deletion of playlist random file and restart if applicable
