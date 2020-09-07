@@ -520,7 +520,7 @@
                 <div class="form-group">
                     <label for="local_browser" class="control-label col-sm-2">Local browser</label>
                     <div class="col-sm-10">
-                        <span class="help-block"><br>Disabled, the required software not installed on this model<br><br></span>
+                        <span class="help-block"><br>Disabled, not supported on this model<br><br></span>
                     </div>
                 </div>
                 <?php endif ?>
@@ -680,23 +680,23 @@
                 <h3 class="modal-title">System status</h3>
             </div>
             <div class="modal-body">
-                <strong>RuneAudio version / build</strong>
-                <p>Ver. <?=$this->sysstate['release'] ?> build <?=$this->sysstate['buildversion'] ?></p>
+                <strong>HW model</strong>
+                <p><?=$this->sysstate['HWmodel'] ?></p>
                 <strong>Active kernel</strong>
                 <p><?=$this->sysstate['kernel'] ?></p>
                 <strong>System time</strong>
-                <p><?=$this->sysstate['time'] ?><br>
-                <em>refresh page to update</em></p>
+                <p><?=$this->sysstate['time'] ?></p>
                 <strong>System uptime</strong>
-                <p><?=$this->sysstate['uptime'] ?><br>
+                <p><?=$this->sysstate['uptime'] ?></p>
                 <strong>CPU temperature</strong>
                 <p><?=$this->sysstate['cpuTemp'] ?></p>
+                <strong>Rune OS / UI version / build</strong>
+                <p>OS version: <?=$this->sysstate['runeOS']?><br>UI version: <?=$this->sysstate['release'] ?> build: <?=$this->sysstate['buildversion'] ?></p>
                 <strong>HW platform</strong>
                 <p><?=$this->sysstate['HWplatform'] ?></p>
-                <strong>HW model</strong>
-                <p><?=$this->sysstate['HWmodel'] ?></p>
                 <strong>playerID</strong>
-                <p><?=$this->sysstate['playerID'] ?></p>
+                <p><?=$this->sysstate['playerID'] ?><br>
+                <em>refresh page to update</em></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
