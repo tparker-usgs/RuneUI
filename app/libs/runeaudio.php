@@ -3319,11 +3319,33 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 }
                 if ($mp['options'] == '') {
                     // no mount options set by the user or from previous auto mount, so set it to a value
-                    $options2 = 'cache=none,noserverino,ro,sec=ntlmssp,noexec';
+                    $options2 = 'cache=loose,noserverino,ro,sec=ntlmssp,noexec';
                 } else {
                     // mount options provided so use them
                     if (!$quiet) ui_notify($type.' mount', 'Attempting to use saved/predefined mount options');
                     $options2 = $mp['options'];
+                    // clean up the mount options
+                    // remove leading and trailing white-space and commas 
+                    $options2 = trim($options2, ", \t\n\r\0\x0B");
+                    // remove all spaces before or after any comma or equals sign
+                    $options2 = str_replace(', ',',',$options2);
+                    $options2 = str_replace(' ,',',',$options2);
+                    $options2 = str_replace('= ','=',$options2);
+                    $options2 = str_replace(' =','=',$options2);
+                    // if no other cache option is specified and the mount is read-only then use loose caching
+                    // user defined 'cache=strict' or 'cache=none' will always retained
+                    // when loose caching is specified remove it for for read/write mounts
+                    if (strpos(' '.$options2, 'cache')) {
+                        // cache is defined, remove loose cache if not read only
+                        if ((!strpos(' ,'.$options2.',', ',ro,')) && (!strpos(' ,'.$options2.',', ',read-only,'))) {
+                            // is read/write, remove the loose cache (default caching is 'cache=strict')
+                            $options2 = str_replace(',cache=loose','',$options2);
+                            $options2 = str_replace('cache=loose,','',$options2);
+                        }
+                    } else if ((strpos(' ,'.$options2.',', ',ro,')) || (strpos(' ,'.$options2.',', ',read-only,'))) {
+                        // read only is defined and no cache option is specified, add loose cache
+                        $options2 = 'cache=loose,'.$options2;
+                    }
                 }
                 $mountstr = "mount -t cifs -o ".$auth.",soft,uid=".$mpdproc['uid'].",gid=".$mpdproc['gid'].",rsize=".$mp['rsize'].",wsize=".$mp['wsize'].",iocharset=".$mp['charset'].",".$options2." \"//".$mp['address']."/".$mp['remotedir']."\" \"/mnt/MPD/NAS/".$mp['name']."\"";
             }
@@ -3401,31 +3423,31 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                     switch ($i) {
                         case 1:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting automatic negotiation');
-                            $options1 = 'cache=none,noserverino,ro,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,noexec';
                             break;
                         case 2:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.1.1');
-                            $options1 = 'cache=none,noserverino,ro,vers=3.1.1,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=3.1.1,noexec';
                             break;
                         case 3:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.02');
-                            $options1 = 'cache=none,noserverino,ro,vers=3.02,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=3.02,noexec';
                             break;
                         case 4:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=3.0');
-                            $options1 = 'cache=none,noserverino,ro,vers=3.0,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=3.0,noexec';
                             break;
                         case 5:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=2.1');
-                            $options1 = 'cache=none,noserverino,ro,vers=2.1,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=2.1,noexec';
                             break;
                         case 6:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=2.0');
-                            $options1 = 'cache=none,noserverino,ro,vers=2.0,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=2.0,noexec';
                             break;
                         case 7:
                             if (!$quiet) ui_notify($type.' mount', 'Attempting vers=1.0');
-                            $options1 = 'cache=none,noserverino,ro,vers=1.0,noexec';
+                            $options1 = 'cache=loose,noserverino,ro,vers=1.0,noexec';
                             break;
                         default:
                             $i = 10;
