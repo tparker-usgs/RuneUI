@@ -301,5 +301,20 @@ $template->i2smodule_select = $redis->get('i2smodule_select');
 $template->audio_on_off = $redis->get('audio_on_off');
 $template->kernel = $redis->get('kernel');
 $template->pwd_protection = $redis->get('pwd_protection');
-$template->local_browseronoff = file_exists('/usr/bin/xinit');
+// check if a local browser is supported
+$template->local_browseronoff = true;
+if (file_exists('/usr/bin/xinit')) {
+    // the local browser needs a x-windows environment, check the existence of xinit
+    // x-windows is not installed on the archv6 models (e.g. Pi Zero), these are too slow
+    $retval = sysCmd('cat /proc/meminfo | grep -i MemTotal:');
+    $retval = preg_replace('/[^0-9]/', '', $retval[0]);
+    if ($retval < 700000) {
+        // local browser (x-windows) needs +/-1 MB of memory to operate
+        // the Pi 3A model has the cpu power and has x-windows installed, but has not enough memory
+        $template->local_browseronoff = false;
+    }
+    unset($retval);
+} else {
+    $template->local_browseronoff = false;
+}
 $template->restoreact = $redis->get('restoreact');
