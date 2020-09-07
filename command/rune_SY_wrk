@@ -880,64 +880,17 @@ while (1) {
                     wrk_mpdconf($redis, 'restart');
                     $redis->sRem('w_lock', $jobID);
                     break;
-                //case 'ashufflestart':
-                    // runelog('wrk_SY: ', $job->wrkcmd);
-                    //$redis->sAdd('w_lock', $jobID);
-                    // shuffle.service has the line: ExecStart=/usr/bin/ashuffle -f /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
-                    // The hard coded /var/lib/mpd/playlists is set to $redis->hget('mpdconf', 'playlist_directory')
-                    // This will modify the standard shuffle.service to be able to random play from playlists
-                    //$file = '/usr/lib/systemd/system/ashuffle.service';
-                    //$newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -f '.$redis->hGet('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-                    //$fp = fopen($file, 'w');
-                    //$return = fwrite($fp, implode("", $newArray));
-                    //fclose($fp);
-                    //unset($newArray);
-                    // Restart ashuffle if global random ON
-                    //if ('1' === $redis->get('globalrandom')) {
-                        //sysCmd('systemctl daemon-reload');
-                        // ashuffle gets started automatically
-                    //}
-                    //$redis->sRem('w_lock', $jobID);
-                    //break;
                 case 'ashufflereset':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    // If it exists, remove the symbolic link which ashuffle uses as a random playlist. ashuffle uses the whole MPD database in it is not present
-                    sysCmd('rm -f '.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-                    // set the indicator to say NO playlist random file exists
-                    $redis->set('last_pl_randomfile', 'none');
-                    // Stop ashuffle
-                    sysCmd('systemctl stop ashuffle');
-                    // shuffle.service has the line: ExecStart=/usr/bin/ashuffle -f /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
-                    // The hard coded /var/lib/mpd/playlists is set to $redis->hget('mpdconf', 'playlist_directory')
-                    // This will modify the standard shuffle.service to be able to random play from playlists
-                    $file = '/usr/lib/systemd/system/ashuffle.service';
-                    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -f '.$redis->hGet('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-                    $fp = fopen($file, 'w');
-                    $return = fwrite($fp, implode("", $newArray));
-                    fclose($fp);
-                    unset($newArray);
-                    // Restart ashuffle if global random ON
-                    if ('1' === $redis->get('globalrandom')) {
-                        sysCmd('systemctl daemon-reload');
-                        // ashuffle gets started automatically
-                    }
+                    wrk_ashuffle($redis, 'reset');
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'pl_ashuffle':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    // Stop ashuffle
-                    sysCmd('systemctl stop ashuffle');
-                    // delete the existing symbolic link if it exists
-                    sysCmd('rm -f "'.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u"');
-                    // Make a symbolic link to the selected playlist for random play, ashuffle will use it on startup if it is available
-                    sysCmd('ln -sf "'.$redis->hget('mpdconf', 'playlist_directory').'/'.$job->args.'.m3u" "'.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u"');
-                    // set the indicator to say a playlist random file exists
-                    $redis->set('last_pl_randomfile', 'exists');
-                    // Set global random ON
-                    $redis->set('globalrandom', '1');
-                    // ashuffle gets started automatically
+                    // $job>args contains the playlist name
+                    wrk_ashuffle($redis, 'set', $job->args);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'addrandomtracks':
@@ -1530,76 +1483,7 @@ while (1) {
     // Detect deletion of playlist random file and restart if applicable
     // Start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons, this is the only place where it is started
     if ($savecpu_rp-- <= 0) {
-        // Detect deletion of playlist random play file
-        // Stop (and restart) ashuffle if the file RandomPlayPlaylist.m3u has been deleted
-        // To-do: Better if the UI informs /db/index.php that it has deleted a file, then call the ashufflereset function in /db/index.php
-        $retval = sysCmd('systemctl is-active ashuffle');
-        if ($retval[0] == 'active') {
-            if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
-                // file found
-                $redis->set('last_pl_randomfile', 'exists');
-                // clear the cache for the next time round - the function file_exists() uses cached information
-                clearstatcache();
-            } else {
-                // no file found
-                if ($redis->get('last_pl_randomfile') === 'exists') {
-                    // but the file was there the last time, so reset ashuffle
-                    // first delete the symlink, could be the symlink points to a non existing playlist (the function file_exists() will return false for this)
-                    // use unlink in place of rm to automatically clear the cache
-                    unlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-                    // just stop ashuffle, it will start itself automatically (without a playlist random file)
-                    sysCmd('systemctl stop ashuffle');
-                    sleep(2);
-                    sysCmd('systemctl daemon-reload');
-                    sleep(2);
-                }
-                $redis->set('last_pl_randomfile', 'none');
-                // no cache is stored for non-existant files
-            }
-        }
-        unset($retval);
-        // start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
-        // this is the only place where ashuffle it is started
-        // first check that it is enabled, not waiting for auto play to initialise and there are some songs to play
-        if (($redis->get('globalrandom')) && (!$redis->get('ashuffle_wait_for_play'))) {
-            // count the number of NAS Mounts
-            $nasmounts = count(scandir("/mnt/MPD/NAS"))-2;
-            // count the number of USB Mounts
-            $usbmounts = count(scandir("/mnt/MPD/USB"))-2;
-            // count the number of local storage files
-            $localstoragefiles = count(scandir("/mnt/MPD/LocalStorage"))-2;
-            $retval = sysCmd('systemctl is-active ashuffle');
-            if ($retval[0] == 'active') {
-                // ashuffle already started
-                unset($retval);
-                if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD')) {
-                    // nothing to play or active player is not MPD, so stop ashuffle
-                    sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
-                }
-            } else {
-                // ashuffle not started
-                if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($redis->get('activePlayer') != 'MPD'))  {
-                    // nothing to play, MPD not active, do nothing
-                } else {
-                    // seems to be a bug somewhere in MPD
-                    // if ashuffle is started too quickly it loads many many (far TOO many) songs in the queue before MPD gets round to start playing one
-                    // wait until mpd has been running for a while before starting ashuffle
-                    $retval = sysCmd('ps -C mpd -o etimes=');
-                    if (isset($retval[0])) {
-                        // a value has been returned
-                        $mpd_uptime = intval(trim($retval[0]));
-                    } else {
-                        // no value, MPD is probably not running
-                        $mpd_uptime = 0;
-                    }
-                    if ($mpd_uptime > intval($redis->get('ashuffle_start_delay'))) {
-                        sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
-                        sysCmdAsync('/srv/http/command/rune_prio nice');
-                    }
-                    unset($retval);
-                }
-            }
-        }
+        wrk_ashuffle($redis, 'check');
         $savecpu_rp = 25 + rand(0, 10);
     }
     // Test to see if an internet connection is available. Disable the artistinfo & lyrics functions when no internet is available
