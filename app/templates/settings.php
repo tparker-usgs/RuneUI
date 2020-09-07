@@ -689,7 +689,8 @@
                 <em>refresh page to update</em></p>
                 <strong>System uptime</strong>
                 <p><?=$this->sysstate['uptime'] ?><br>
-                <em>refresh page to update</em></p>
+                <strong>CPU temperature</strong>
+                <p><?=$this->sysstate['cpuTemp'] ?></p>
                 <strong>HW platform</strong>
                 <p><?=$this->sysstate['HWplatform'] ?></p>
                 <strong>HW model</strong>

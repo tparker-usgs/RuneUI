@@ -65,6 +65,52 @@ function debug_data($redis)
     $output .= "RuneUI:\t\t".$redis->get('buildversion')."-".$redis->get('patchlevel')."\n";
     $output .= "Git Branch:\t".$redis->hget('git', 'branch')."\n";
     $output .= "PlayerID:\t".$redis->get('playerid')."\n\n\n";
+    $output .= "###### CPU temperature, throttling & power supply voltage status ######\n";
+    $command = sysCmd("/opt/vc/bin/vcgencmd measure_temp");
+    $output .= "CPU Temperature: \t".preg_replace('/[^0-9.]/', '', $command[0])."'C\n";
+    unset($command);
+    $command = sysCmd("/opt/vc/bin/vcgencmd get_throttled");
+    if (strpos(' ' .$command[0],'0x0')) {
+        // $command = str_split(str_repeat("0", 20));
+        $output .= "Status:\t\t\tNo issues to report\n";
+    } else {
+        $command = sysCmd("/opt/vc/bin/vcgencmd get_config int | grep -i temp_limit");
+        $output .= "Temperature limit: \t".preg_replace('/[^0-9.]/', '', $command[0])."'C\n";
+        $command = str_split(base_convert($command[0], 16, 2));
+        $output .= "Temperature status:\t";
+        if ($command[3]) {
+            $output .= "Currently temperature limit reached!!\n";
+        } else if ($command[19]) {
+            $output .= "Temperature limit reached since last reboot\n";
+        } else {
+            $output .= "No temperature limit reached since last reboot\n";
+        }
+        $output .= "Throttling status:\t";
+        if ($command[2]) {
+            $output .= "Currently throttled!!\n";
+        } else if ($command[18]) {
+            $output .= "Throttling has occurred since last reboot!\n";
+        } else {
+            $output .= "No throttling has occurred since last reboot\n";
+        }
+        $output .= "ARM frequency status:\t";
+        if ($command[1]) {
+            $output .= "Currently arm frequency capped!!\n";
+        } else if ($command[17]) {
+            $output .= "Arm frequency capping has occurred since last reboot!\n";
+        } else {
+            $output .= "No arm frequency capping has occurred since last reboot\n";
+        }
+        $output .= "Under-voltage status:\t";
+        if ($command[0]) {
+            $output .= "Currently under-voltage!!\n";
+        } else if ($command[16]) {
+            $output .= "Under-voltage has occurred since last reboot!\n";
+        } else {
+            $output .= "No under-voltage has occurred since last reboot\n";
+        }
+    }
+    $output .= "\n\n";
     unset($command);
     $output .= "###### Boot configuration (cat /boot/config.txt) ######\n";
     $command = sysCmd("grep -v -e '^[[:space:]]*$' /boot/config.txt | grep -v '#.*='");

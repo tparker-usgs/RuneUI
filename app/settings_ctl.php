@@ -264,8 +264,11 @@ $template->sysstate['uptime'] = date('d:H:i:s', strtok(file_get_contents('/proc/
 $template->sysstate['HWplatform'] = $redis->get('hwplatform')." (".$redis->get('hwplatformid').")";
 $template->sysstate['HWmodel'] = implode('\n', sysCmd('cat /proc/device-tree/model'));
 $template->sysstate['playerID'] = $redis->get('playerid');
+$template->sysstate['runeOS'] = trim(sysCmd("cat /etc/motd | grep -i 'RuneOS:' | cut -d ':' -f 2")[0]);
 $template->sysstate['buildversion'] = $redis->get('buildversion')."-".$redis->get('patchlevel');
 $template->sysstate['release'] = $redis->get('release');
+$template->sysstate['cpuTemp'] = preg_replace('/[^0-9.]/', '', sysCmd("/opt/vc/bin/vcgencmd measure_temp")[0])."'C";
+// collect the rest of the UI variables
 $template->hostname = $redis->get('hostname');
 $template->ntpserver = $redis->get('ntpserver');
 $template->timezone = $redis->get('timezone');
