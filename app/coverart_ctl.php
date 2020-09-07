@@ -169,7 +169,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     }
     // 3.0 try to find coverart on Last.FM (Album)
     if ($output === 0) {
-        $cover_url = ui_lastFM_coverart($status['currentartist'], $status['currentalbum'], $lastfm_apikey, $proxy);
+        $cover_url = ui_lastFM_coverart($redis, $status['currentartist'], $status['currentalbum'], $lastfm_apikey, $proxy);
         $bufferinfo = new finfo(FILEINFO_MIME);
         if (!empty($cover_url)) {
             // debug
@@ -178,7 +178,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             $lastfm_img_mime = $bufferinfo->buffer($lastfm_img);
         } else {
             // 3.1 try to find coverart on Last.FM (Artist)
-            $cover_url = ui_lastFM_coverart($status['currentartist'], '', $lastfm_apikey, $proxy);
+            $cover_url = ui_lastFM_coverart($redis, $status['currentartist'], '', $lastfm_apikey, $proxy);
             if (!empty($cover_url)) {
                 // debug
                 runelog("coverart match: lastfm (query 2) coverURL=", $cover_url);

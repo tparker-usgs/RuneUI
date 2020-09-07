@@ -4647,13 +4647,16 @@ function ui_libraryHome($redis, $clientUUID=null)
     ui_render('library', $jsonHome);
 }
 
-function ui_lastFM_coverart($artist, $album, $lastfm_apikey, $proxy)
+function ui_lastFM_coverart($redis, $artist, $album, $lastfm_apikey, $proxy)
 {
+    if (!$redis->hGet('service', 'lastfm')) {
+        return false;
+    }
     if (!empty($album)) {
-        $url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&album=".urlencode($album)."&format=json";
+        $url = "https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&album=".urlencode($album)."&format=json";
         unset($artist);
     } else {
-        $url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&format=json";
+        $url = "https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&format=json";
         $artist = 1;
     }
     // debug
@@ -4678,15 +4681,18 @@ function ui_lastFM_coverart($artist, $album, $lastfm_apikey, $proxy)
 }
 
 // populate queue with similiar tracks suggested by Last.fm
-function ui_lastFM_similar($artist, $track, $lastfm_apikey, $proxy)
+function ui_lastFM_similar($redis, $artist, $track, $lastfm_apikey, $proxy)
 {
+    if (!$redis->hGet('service', 'lastfm')) {
+        return false;
+    }
     runelog('similar lastfm artist', $artist);
     runelog('similar lastfm track', $track);
     runelog('similar lastfm name', $proxy);
     runelog('similar lastfm lastfm_api', $lastfm_api);
     // This makes the call to Last.fm. The limit parameter can be adjusted to the number of tracks you want returned.
     // [TODO] adjustable amount of tracks in settings screen
-    $url = "http://ws.audioscrobbler.com/2.0/?method=track.getsimilar&limit=1000&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&track=".urlencode($track)."&format=json";
+    $url = "https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&limit=1000&api_key=".$lastfm_apikey."&artist=".urlencode($artist)."&track=".urlencode($track)."&format=json";
     runelog('similar lastfm query URL', $url);
     // debug
     //echo $url;
@@ -4694,21 +4700,24 @@ function ui_lastFM_similar($artist, $track, $lastfm_apikey, $proxy)
     //$output = json_decode(curlGet($url, $proxy), true);
     // But these 2 lines do
     $content = file_get_contents($url);
-    $output = json_decode($content,true);
+    $output = json_decode($content, true);
     // debug
     // debug++
     // echo "<pre>";
     // print_r($output);
     // echo "</pre>";
+    $retval = false;
     foreach($output['similartracks']['track'] as $similar) {
         $simtrack = $similar['name'];
         $simartist = $similar['artist']['name'];
-        if (strlen($simtrack)>0 and strlen($simartist)>0) {
+        if ($simtrack && $simartist) {
             // If we have a track and an artist then make a call to mpd to add it. If it doesn't exist then it doesn't
             // matter
             $status = sysCmd("mpc search artist '".$simartist."' title '".$simtrack. "' | head -n1 | mpc add");
+            $retval = true;
         }
     }
+    return $retval;
 }
 
 // push UI update to NGiNX channel

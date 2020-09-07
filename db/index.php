@@ -95,6 +95,14 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
+        case 'addnext':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['path'])) {
+                    sysCmd('mpc insert '."'".'/mnt/MPD/'.$_POST['path']."'");
+                    ui_notify('Inserted next in queue', $_POST['path']);
+                }
+            }
+            break;
         case 'addreplaceplay':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['path'])) {
@@ -102,6 +110,24 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // send MPD response to UI
                     ui_mpd_response($mpd, array('title' => 'Queue cleared<br> Added to queue', 'text' => $_POST['path']));
                 }
+            }
+            break;
+        case 'lastfmadd':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['path'])) {
+                    addToQueue($mpd, $_POST['path']);
+                    // send MPD response to UI
+                    ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
+                    // Get the last track and try to use LastFM to populate a similar playlist
+                    list($artist, $title) = explode(' - ', sysCmd('/bin/mpc playlist | tail -1')[0], 2);
+                    $proxy = $redis->hGetall('proxy');
+                    $lastfm_apikey = $redis->get('lastfm_apikey');
+                    if (ui_lastFM_similar($redis, trim($artist), trim($title), $lastfm_apikey, $proxy)) {
+                        ui_notify('Added similar tracks', 'As listed by last.fm');
+                    } else {
+                        ui_notify('Error', 'last.fm not available to provide similar tracks information');
+                    }
+               }
             }
             break;
         case 'lastfmaddreplaceplay':
@@ -121,7 +147,11 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');
                         $proxy = $redis->hGetall('proxy');
                         $lastfm_apikey = $redis->get('lastfm_apikey');
-                        ui_lastFM_similar($status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy);
+                        if (ui_lastFM_similar($redis, $status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy)) {
+                            ui_notify('Added similar tracks', 'As listed by last.fm');
+                        } else {
+                            ui_notify('Error', 'last.fm not available to provide similar tracks information');
+                        }
                     }
                 }
             }
