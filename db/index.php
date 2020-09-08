@@ -125,7 +125,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     if (ui_lastFM_similar($redis, trim($artist), trim($title), $lastfm_apikey, $proxy)) {
                         ui_notify('Added similar tracks', 'As listed by last.fm');
                     } else {
-                        ui_notify('Error', 'last.fm not available to provide similar tracks information');
+                        ui_notify('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
                     }
                }
             }
@@ -150,7 +150,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         if (ui_lastFM_similar($redis, $status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy)) {
                             ui_notify('Added similar tracks', 'As listed by last.fm');
                         } else {
-                            ui_notify('Error', 'last.fm not available to provide similar tracks information');
+                            ui_notify('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
                         }
                     }
                 }

@@ -13,7 +13,7 @@
                                 <option value="<?=$card->name ?>" <?php if($this->ao === $card->name): ?> selected <?php endif ?>><?php if(isset($card->extlabel)):?><?=$card->extlabel ?><?php else:?><?=$card->name ?><?php endif; ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <span class="help-block">This switches output between audio interfaces (<strong>works on the fly</strong>).</span>
+                        <span class="help-block">This switches output between audio interfaces (<strong>works on the fly</strong>)</span>
                     </div>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                         <strong>disabled</strong> - Volume knob disabled. Use this option to achieve the <strong>best audio quality</strong>.<br>
                         <strong>software</strong> - Volume knob enabled, controlled by <strong>software mixer</strong>. This option <strong>reduces the overall sound quality</strong>.<br>
                         <strong>hardware</strong> - Volume knob enabled, controlled by <strong>hardware mixer</strong>. This option enables the volume control and let you achieve <strong>very good overall sound quality</strong>.<br>
-                        <i>Note: hardware mixer must be supported directly from your sound card hardware.</i>
+                        <i>Note: hardware mixer must be supported directly from your sound card hardware</i>
                     </span>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                 <label class="col-sm-2 control-label" for="start-volume">Start volume</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="start-volume" name="mpdvol[start_volume]" value="<?=$this->mpd['start_volume'] ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
-                    <span class="help-block">Sets a forced playback volume at startup (0-100, -1 disables the feature).</span>
+                    <span class="help-block">Sets a forced playback volume at startup (0-100, -1 disables the feature)</span>
                 </div>
             </div>
             <div class="form-group">
@@ -54,7 +54,7 @@
                     </select>
                     <span class="help-block">This setting specifies the behavior of the UI's volume knob when it's turned.<br>
                     <strong>realtime</strong> - volume changes continuously while the knob is dragged.<br>
-                    <strong>on release</strong> - volume changes when the knob is released.</span>
+                    <strong>on release</strong> - volume changes when the knob is released</span>
                 </div>
             </div>
         </fieldset>
@@ -70,7 +70,7 @@
                 <label class="col-sm-2 control-label" for="port">Port</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="text" id="port" name="conf[port]" value="<?=$this->conf['port'] ?>" data-trigger="change" disabled>
-                    <span class="help-block">This setting is the TCP port that is desired for the daemon to get assigned to.</span>
+                    <span class="help-block">This setting is the TCP port that is desired for the daemon to get assigned to</span>
                 </div>
             </div>
             <div class="form-group">
@@ -80,7 +80,7 @@
                         <option value="mpd" <?php if($this->conf['user'] == 'mpd'): ?> selected <?php endif ?>>mpd : audio (default)</option>
                         <option value="root" <?php if($this->conf['user'] == 'root'): ?> selected <?php endif ?>>root : root</option>
                     </select>
-                    <span class="help-block">This specifies the system user : group that MPD will run as.</span>
+                    <span class="help-block">This specifies the system user : group that MPD will run as</span>
                 </div>
             </div>
             <div class="form-group">
@@ -92,7 +92,7 @@
                         <option value="verbose" <?php if($this->conf['log_level'] == 'verbose'): ?> selected <?php endif ?>>verbose</option>
                     </select>
                     <span class="help-block">This setting controls the type of information which is logged. Available settings are "default", "secure" or "verbose".
-                    The "verbose" setting is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage.</span>
+                    The "verbose" setting is recommended for troubleshooting, though can quickly stretch available resources on limited hardware storage</span>
                 </div>
             </div>
             <div class="form-group">
@@ -102,7 +102,7 @@
                         <option value="yes" <?php if(isset($this->conf['state_file'])): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if(!isset($this->conf['state_file'])): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist).</span>
+                    <span class="help-block">This setting specifies if a state file is used. If the state file is active, the state of mpd will be saved when mpd is terminated by a TERM signal or by the "kill" command. When mpd is restarted, it will read the state file and restore the state of mpd (including the playlist)</span>
                 </div>
             </div>
             <div class="form-group">
@@ -112,7 +112,7 @@
                         <option value="yes" <?php if($this->conf['ffmpeg'] === 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['ffmpeg'] === 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh.</span>
+                    <span class="help-block">FFmpeg decoder plugin. Enable this setting if you need AAC / ALAC support. May slow down MPD database refresh</span>
                 </div>
             </div>
             <?php if(!$this->mpdv21): ?>
@@ -124,7 +124,7 @@
                         <option value="no" <?php if($this->conf['gapless_mp3_playback'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
                     <span class="help-block">If you have a problem with your MP3s ending abruptly it is recommended that you set this argument to "no" to attempt to fix the problem. If this solves the problem,
-                    it is highly recommended to fix the MP3 files with vbrfix (available as vbrfix in the debian archive), at which point gapless MP3 playback can be enabled.</span>
+                    it is highly recommended to fix the MP3 files with vbrfix (available as vbrfix in the debian archive), at which point gapless MP3 playback can be enabled</span>
                 </div>
             </div>
             <?php endif ?>
@@ -137,7 +137,7 @@
                         <option value="DSDDOP" <?php if($this->conf['dsd_usb'] == 'DSDDOP'): ?> selected <?php endif ?>>DSD (DOP)</option>
                         <option value="no" <?php if($this->conf['dsd_usb'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">Enable DSD audio support.</span>
+                    <span class="help-block">Enable DSD audio support</span>
                 </div>
                 <?php else:?>
                 <div class="col-sm-10">
@@ -145,7 +145,7 @@
                         <option value="yes" <?php if($this->conf['dsd_usb'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['dsd_usb'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">Enable DSD audio support.</span>
+                    <span class="help-block">Enable DSD audio support</span>
                 </div>
                 <?php endif;?>
             </div>
@@ -161,7 +161,7 @@
                     <span class="help-block">If specified, mpd will adjust the volume of songs played using ReplayGain tags (see <a href="http://www.replaygain.org/" target="_blank">http://www.replaygain.org/</a>).
                     Setting this to "album" will adjust volume using the album's ReplayGain tags, while setting it to "track" will adjust it using the track ReplayGain tags.
                     "auto" uses the track ReplayGain tags if random play is activated otherwise the album ReplayGain tags.
-                    Currently only FLAC, Ogg Vorbis, Musepack, and MP3 (through ID3v2 ReplayGain tags, not APEv2) are supported.</span>
+                    Currently only FLAC, Ogg Vorbis, Musepack, and MP3 (through ID3v2 ReplayGain tags, not APEv2) are supported</span>
                 </div>
             </div>
             <div class="form-group">
@@ -171,14 +171,14 @@
                         <option value="yes" <?php if($this->conf['volume_normalization'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['volume_normalization'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">If yes, mpd will normalize the volume of songs as they play. The default is no. NOTE: Enabling this feature means your audio will no longer be bit perfect.</span>
+                    <span class="help-block">If yes, mpd will normalize the volume of songs as they play. The default is no. <i>Note: Enabling this feature means your audio will no longer be bit perfect</i></span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Audio buffer size</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="audio-buffer-size" name="conf[audio_buffer_size]" value="<?=$this->conf['audio_buffer_size'] ?>" data-trigger="change" min="512" />
-                    <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio.</span>
+                    <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio</span>
                 </div>
             </div>
             <?php if(!$this->mpdv21): ?>
@@ -202,7 +202,7 @@
                         <option value="yes" <?php if($this->conf['auto_update'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['auto_update'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">This setting enables automatic update of MPD's database when files in music_directory are changed.</span>
+                    <span class="help-block">This setting enables automatic update of MPD's database when files in music_directory are changed</span>
                 </div>
             </div>
         </fieldset>
@@ -220,7 +220,7 @@
                 <label class="col-sm-2 control-label" for="crossfade">Crossfade</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="crossfade" name="mpd[crossfade]" value="<?=$this->mpd['crossfade'] ?>" data-trigger="change" min="0" placeholder="0" />
-                    <span class="help-block">Sets the current amount of crossfading between songs, in seconds (0 disables crossfading).</span>
+                    <span class="help-block">Sets the current amount of crossfading between songs, in seconds (0 disables crossfading)</span>
                 </div>
             </div>
             <div class="form-group">
@@ -242,7 +242,8 @@
                     </label>
                     <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
                     You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
-                    Note: UPnP / DLNA will not work when global random is enabled, it must be switched OFF</span>
+                    <i>Notes:<br>UPnP / DLNA will not work when global random is enabled, it must be switched OFF.<br>
+                    When Crossfade is set, global random will always keep two entries in the queue to ensure that crossfading works correctly</i></span>
                     <div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
                         <input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
                     </div>
@@ -270,7 +271,7 @@
                 </div>
                 <div class="modal-body">
                     <p>You are going to reset the configuration to the default original values.<br>
-                    You will lose any modification.</p>
+                    You will lose any modification</p>
                 </div>
                 <div class="modal-footer">
                     <input type="hidden" name="reset" value="1">
