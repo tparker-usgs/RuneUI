@@ -22,11 +22,10 @@
 </div>
 <!-- loader -->
 <div id="loader"<?php if ($this->section == 'dev') { ?> class="hide"<?php } ?>><div id="loaderbg"></div><div id="loadercontent"><i class="fa fa-refresh fa-spin"></i>connecting...</div></div>
-<script src="<?=$this->asset('/js/vendor/jquery-2.2.4.min.js')?>"></script>
+<script src="<?=$this->asset('/js/vendor/jquery-3.5.1.min.js')?>"></script>
 <script src="<?=$this->asset('/js/vendor/pushstream.min.js')?>"></script>
 <script src="<?=$this->asset('/js/vendor/bootstrap.min.js')?>"></script>
 <?php if ($this->section == 'debug'): ?>
-<script src="<?=$this->asset('/js/vendor/ZeroClipboard.min.js')?>"></script>
 <?php endif ?>
 <?php if ($this->section == 'index'): ?>
 <script src="<?=$this->asset('/js/vendor/jquery.plugin.min.js')?>"></script>
