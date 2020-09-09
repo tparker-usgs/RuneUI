@@ -4341,7 +4341,11 @@ function wrk_changeHostname($redis, $newhostname)
     // change system hostname
     $redis->set('hostname', $newhostname);
     sysCmd('hostnamectl  --static --transient --pretty set-hostname '.strtolower($newhostname));
-    // update AVAHI serice data
+    // 'host-name' is optionally set in /etc/avahi/avahi-daemon.conf
+    // change any line beginning with 'host-name' to 'host-name=<new_host_name>'
+    // if 'host-name' is commented out, no problem, nothing will change
+    sysCmd('sed -i '."'".'s|^[[:space:]]*host-name.*|host-name='.strtolower($newhostname).'|g'."'".' /etc/avahi/avahi-daemon.conf');
+    // update AVAHI service data
     wrk_avahiconfig($redis, strtolower($newhostname));
     // activate when a change has been made
     if ($redis->get('avahiconfchange')) {
