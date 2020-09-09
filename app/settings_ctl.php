@@ -258,7 +258,6 @@ if (strpos($bit, '64')) {
     $bit = '';
 }
 $template->sysstate['kernel'] = trim(file_get_contents('/proc/version')).$bit;
-unset($bit);
 $template->sysstate['time'] = implode('\n', sysCmd('date'));
 $template->sysstate['uptime'] = date('d:H:i:s', strtok(file_get_contents('/proc/uptime'), ' ' ));
 $template->sysstate['HWplatform'] = $redis->get('hwplatform')." (".$redis->get('hwplatformid').")";
@@ -299,7 +298,9 @@ $template->i2smodule_select = $redis->get('i2smodule_select');
     // unset($retval);
 // }
 $template->audio_on_off = $redis->get('audio_on_off');
-$template->kernel = $redis->get('kernel');
+// $template->kernel = $redis->get('kernel');
+$template->kernel = trim(sysCmd('uname --kernel-release')[0].' '.$bit);
+unset($bit);
 $template->pwd_protection = $redis->get('pwd_protection');
 // check if a local browser is supported
 $template->local_browseronoff = true;

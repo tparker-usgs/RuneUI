@@ -90,7 +90,7 @@
                     <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
                         <option value="<?php echo $this->kernel; ?>"><?php echo $this->kernel; ?></option>
                     </select>
-                    <span class="help-block">No other kernels available.</span>
+                    <span class="help-block">No other kernels available</span>
                 </div>
             </div>
             <!--
@@ -239,7 +239,7 @@
                     <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
                         <option value="linux-ARCH"><?php echo $this->kernel; ?></option>
                     </select>
-                    <span class="help-block">There are no other kernels available at the moment!</span>
+                    <span class="help-block">There are no other kernels available</span>
                 </div>
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
@@ -255,7 +255,7 @@
                     <select class="selectpicker" name="kernel" data-style="btn-default btn-lg">
                         <option value="linux-ARCH"><?php echo $this->kernel; ?></option>
                     </select>
-                    <span class="help-block">There are no other kernels available at the moment!</span>
+                    <span class="help-block">There are no other kernels available</span>
                 </div>
                 <label class="control-label col-sm-2" for="i2smodule">I&#178;S kernel modules</label>
                 <div class="col-sm-10">
