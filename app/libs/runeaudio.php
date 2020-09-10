@@ -5683,3 +5683,17 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             }
     }
 }
+// work function to check the MPD logfile size
+function wrk_mpdLog($redis, $logSizeMax = 200000)
+// get the location and name of the MPD logfile from redis
+// check its size, when greater than $filesizeMax delete it and inform MPD to create a new one
+{
+    $logFile = $redis->hGet('mpdconf', 'log_file');
+    $logSize = filesize($logFile);
+    if ($logSize >= $logSizeMax) {
+        // delete the file
+        sysCmd('rm '."'".$logFile."'");
+        // use the SIGHUP signal to tell MPD to recreate/reopen the log file
+        sysCmd('kill -s SIGHUP $(pgrep -x mpd)');
+    }
+}
