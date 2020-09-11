@@ -205,7 +205,7 @@
                     <label class="col-sm-2 control-label" for="profile[reboot]">Reboot</label>
                     <div class="col-sm-10">
                         <label class="switch-light well" onclick="">
-                            <input id="reboot" name="profile[reboot]" type="checkbox" value="1" <?php if ($this->profile['type'] === 'AP') :?> checked <?php endif;?>>
+                            <input id="reboot" name="profile[reboot]" type="checkbox" value="1">
                                 <span><span>NO</span><span>YES</span></span><a class="btn btn-primary"></a>
                         </label>
                         <span class="help-block">If you experience problems, set this to <strong>YES</strong><br>
