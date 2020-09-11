@@ -8,7 +8,7 @@ html {
 
 .disable-scrollbar-0 {
     scrollbar-width: none; /*For Firefox*/
-	overflow: hidden scroll; /*For Firefox*/
+    overflow: hidden scroll; /*For Firefox*/
 }
 
 .disable-scrollbar-1 {
@@ -16,8 +16,8 @@ html {
 }
 
 .disable-scrollbar-2::-webkit-scrollbar {
-		width: 0 !important; /*For Chrome, Safari and Opera*/
-		display: none; /*For Chrome, Safari and Opera*/
+        width: 0 !important; /*For Chrome, Safari and Opera*/
+        display: none; /*For Chrome, Safari and Opera*/
 }
 
 body {
@@ -205,7 +205,7 @@ th {
 }
 html {
     font-size: 10px;
-	/* overflow-y:scroll; */
+    /* overflow-y:scroll; */
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
 }
 body {
@@ -8130,257 +8130,257 @@ ul.parsley-error-list li {
 
 /* Screensaver */
 .leftpanel-ss {
-	float: left;
-	width: 40%;
-	height: 100%;
+    float: left;
+    width: 40%;
+    height: 100%;
 }
 .leftpanel-expandable-ss {
-	float: left;
-	padding: 20px 0px 0px 0px;
-	position: relative;
-	width: 100%;
-	height: 100%;
+    float: left;
+    padding: 20px 0px 0px 0px;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 .rightpanel-ss {
-	float: right;
-	width: 60%;
-	height: 100%;
+    float: right;
+    width: 60%;
+    height: 100%;
 }
 .rightpanel-compactable-ss {
-	float: right;
-	width: 0%;
-	height: 100%;
-	display: none;
+    float: right;
+    width: 0%;
+    height: 100%;
+    display: none;
 }
 #currentartist-ss {
-	font-size: 30px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	line-height: 115%;
-	color: rgb(224, 231, 238);
+    font-size: 30px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 115%;
+    color: rgb(224, 231, 238);
 }
 #currentsong-ss {
-	overflow: hidden;
-	font-size: 40px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	font-weight: bold;
-	color: rgb(0, 149, 216);
-	line-height: 115%;
+    overflow: hidden;
+    font-size: 40px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    color: rgb(0, 149, 216);
+    line-height: 115%;
 }
 #currentalbum-ss {
-	font-size: 30px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	line-height: 115%;
-	color: rgb(224, 231, 238);
+    font-size: 30px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 115%;
+    color: rgb(224, 231, 238);
 }
 div.coverart-ss {
-	height: auto;
-	margin: 10px auto 11px;
-	width: 100%;
+    height: auto;
+    margin: 10px auto 11px;
+    width: 100%;
 }
 #cover-art-ss {
-	width: 100%;
-	height: auto;
-	border: 2px solid rgb(52, 73, 94);
-	border-radius: 6px;
-	background-size: 100% 100%;
+    width: 100%;
+    height: auto;
+    border: 2px solid rgb(52, 73, 94);
+    border-radius: 6px;
+    background-size: 100% 100%;
 }
 #countdown-display-ss {
-	float: left;
-	width: 50%;
-	height: auto;
-	font-size: 20px;
-	font-weight: bold;
-	text-align: center;
+    float: left;
+    width: 50%;
+    height: auto;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
 }
 #total-ss {
-	height: auto;
-	font-size: 20px;
-	font-weight: bold;
-	text-align: center;
+    height: auto;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
 }
 #extrainfo-ss {
-	height: 110px;
+    height: 110px;
 }
 #extrainfo-ss div {
-	font-size: 22px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	font-weight: bold;
-	color: rgb(0, 149, 216);
-	line-height: 34px;
+    font-size: 22px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    color: rgb(0, 149, 216);
+    line-height: 34px;
 }
 #playlist-position-ss {
-	padding-top: 30px;
+    padding-top: 30px;
 }
 .rightpanel-ss .coverart {
-	height: auto;
-	margin: 10px auto 11px;
-	width: 100%;
+    height: auto;
+    margin: 10px auto 11px;
+    width: 100%;
 }
 #artist-ss {
-	font-size: 30px;
-	display: block;
-	box-sizing: border-box;
-	text-align: left;
-	font-weight: bold;
-	color: rgb(0, 149, 216);
-	line-height: 34px;
+    font-size: 30px;
+    display: block;
+    box-sizing: border-box;
+    text-align: left;
+    font-weight: bold;
+    color: rgb(0, 149, 216);
+    line-height: 34px;
 }
 #artist-image-ss {
-	margin-right: 20px;
-	margin-left: 10px;
-	float: left;
-	width: 130px;
-	height: auto;
-	border: 2px solid rgb(52, 73, 94);
-	border-radius: 6px;
-	background-size: 100% 100%;
+    margin-right: 20px;
+    margin-left: 10px;
+    float: left;
+    width: 130px;
+    height: auto;
+    border: 2px solid rgb(52, 73, 94);
+    border-radius: 6px;
+    background-size: 100% 100%;
 }
 #artist-bio-ss {
-	font-size: 20px;
+    font-size: 20px;
 }
 #addinfo-ss {
-	font-size: 24px;
-	display: block;
-	box-sizing: border-box;
-	text-align: left;
-	font-weight: bold;
-	color: rgb(0, 149, 216);
-	line-height: 34px;
+    font-size: 24px;
+    display: block;
+    box-sizing: border-box;
+    text-align: left;
+    font-weight: bold;
+    color: rgb(0, 149, 216);
+    line-height: 34px;
 }
 #addinfo-text-ss {
-	font-size: 20px;
-	box-sizing: border-box;
+    font-size: 20px;
+    box-sizing: border-box;
 }
 @media (min-width: 700px) {
-	.leftpanel-expandable-ss {
-		width: 40%;
-	}
-	.rightpanel-compactable-ss {
-		width: 60%;
-		display: block;
-	}
-	#countdown-display-ss {
-		font-size: 30px;
-	}
-	#total-ss {
-		font-size: 30px;
-	}
+    .leftpanel-expandable-ss {
+        width: 40%;
+    }
+    .rightpanel-compactable-ss {
+        width: 60%;
+        display: block;
+    }
+    #countdown-display-ss {
+        font-size: 30px;
+    }
+    #total-ss {
+        font-size: 30px;
+    }
 }
 
 /* Small Screensaver */
 .leftpanel-sss {
-	float: left;
-	width: 45%;
-	height: 100%;
+    float: left;
+    width: 45%;
+    height: 100%;
 }
 .rightpanel-sss {
-	float: right;
-	width: 55%;
-	height: 100%;
-	display: block;
+    float: right;
+    width: 55%;
+    height: 100%;
+    display: block;
 }
 #currentartist-sss {
-	font-size: 38px;
-	line-height: 115%;
-	height: auto;
-	margin-bottom: 10px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	color: rgb(224, 231, 238);
+    font-size: 38px;
+    line-height: 115%;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    color: rgb(224, 231, 238);
 }
 #currentsong-sss {
-	font-size: 40px;
-	line-height: 115%;
-	height: auto;
-	margin-bottom: 10px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	font-weight: bold;
-	color: rgb(0, 149, 216);
+    font-size: 40px;
+    line-height: 115%;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    color: rgb(0, 149, 216);
 }
 #currentalbum-sss {
-	font-size: 38px;
-	line-height: 115%;
-	height: auto;
-	margin-bottom: 10px;
-	display: block;
-	box-sizing: border-box;
-	text-align: center;
-	color: rgb(224, 231, 238);
+    font-size: 38px;
+    line-height: 115%;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    color: rgb(224, 231, 238);
 }
 div.coverart-sss {
-	height: auto;
-	margin: 10px auto 11px;
-	width: 100%;
+    height: auto;
+    margin: 10px auto 11px;
+    width: 100%;
 }
 #cover-art-sss {
-	width: 100%;
-	height: auto;
-	border: 2px solid rgb(52, 73, 94);
-	border-radius: 6px;
-	background-size: 100% 100%;
+    width: 100%;
+    height: auto;
+    border: 2px solid rgb(52, 73, 94);
+    border-radius: 6px;
+    background-size: 100% 100%;
 }
 #countdown-display-sss {
-	float: left;
-	width: 50%;
-	height: auto;
-	font-size: 38px;
-	font-weight: bold;
-	text-align: center;
+    float: left;
+    width: 50%;
+    height: auto;
+    font-size: 38px;
+    font-weight: bold;
+    text-align: center;
 }
 #total-sss {
-	height: auto;
-	font-size: 38px;
-	font-weight: bold;
-	text-align: center;
+    height: auto;
+    font-size: 38px;
+    font-weight: bold;
+    text-align: center;
 }
 #format-bitrate-sss {
-	height: auto;
-	font-size: 30px;
-	text-align: center;
-	color: rgb(0, 149, 216);
+    height: auto;
+    font-size: 30px;
+    text-align: center;
+    color: rgb(0, 149, 216);
 }
 #playlist-position-sss {
-	height: auto;
-	font-size: 30px;
-	text-align: center;
-	color: rgb(0, 149, 216);
+    height: auto;
+    font-size: 30px;
+    text-align: center;
+    color: rgb(0, 149, 216);
 }
 .rightpanel-sss .coverart {
-	height: auto;
-	margin: 10px auto 11px;
-	width: 100%;
+    height: auto;
+    margin: 10px auto 11px;
+    width: 100%;
 }
 .top-sss {
-	position: relative;
-	text-align: center;
-	top: 10px;
-	height: 58%;
-	width: auto;
+    position: relative;
+    text-align: center;
+    top: 10px;
+    height: 58%;
+    width: auto;
 }
 .bottom-sss {
-	position: fixed;
-	text-align: center;
-	bottom: 0;
-	height: 42%;
-	width: 50%;
+    position: fixed;
+    text-align: center;
+    bottom: 0;
+    height: 42%;
+    width: 50%;
 }
 @media (min-width: 700px) {
-	.leftpanel-expandable-sss {
-		width: 45%;
-	}
-	.rightpanel-compactable-sss {
-		width: 55%;
-		display: block;
-	}
+    .leftpanel-expandable-sss {
+        width: 45%;
+    }
+    .rightpanel-compactable-sss {
+        width: 55%;
+        display: block;
+    }
 }

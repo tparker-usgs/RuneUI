@@ -27,7 +27,7 @@ else
     redis-cli hset service fanarttv 0
     redis-cli hset service jamendo 0
     # just in case something has gone wrong with the local router link, try to reconnect
-    # if an ip-address is assigned, use IP to take the nics down and bring them up to remove the ip address 
+    # if an ip-address is assigned, use IP to take the nics down and bring them up to remove the ip address
     # connman will then reconnect automatically
     # only external ip addresses (192.168.x.x)
     # exclude any nic working as an access point (standard is 192.168.5.1)

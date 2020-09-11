@@ -211,7 +211,7 @@
                         <span class="help-block">Automatic Wi-Fi Optimisation is set <strong>ON</strong> by default. It should be left  <strong>ON</strong> unless you have more than one Wi-Fi
                             adaptor and are having problems with the default network per adaptor</span>
                     </div>
-                </div> 
+                </div>
             </div>
             <legend>MPD - Advanced settings</legend>
             <div class="boxed-group">

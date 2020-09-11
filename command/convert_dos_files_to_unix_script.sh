@@ -11,7 +11,7 @@ pacman -Q dos2unix || pacman -Sy dos2unix --noconfirm
 # Dos2Unix conversion
 # exclude binary files, keep the date, keep the old file name
 #
-# 
+#
 # all files in the directory /var/www/app/config/defaults/ inclusive subdirectories
 # exceptions are /boot/config.txt and /boot/wifi/* these stay in ms-dos format
 cp /var/www/app/config/defaults/boot/config.txt /tmp/config.txt
@@ -43,7 +43,7 @@ dos2unix -k -s -o *
 # all files in /srv/http
 cd /srv/http
 dos2unix -k -s -o *
-# all files named *.conf in /etc and subdirectories 
+# all files named *.conf in /etc and subdirectories
 cd /home
 find /etc -type f -name *.conf -exec dos2unix -k -s -o {} \;
 # the file /srv/http/assets/css/runeui.css

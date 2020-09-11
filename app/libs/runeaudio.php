@@ -1913,7 +1913,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
                 // delete the file
                 sysCmd('rm \''.$directory.DIRECTORY_SEPARATOR.$fileName.'\'');
             }
-            // debug 
+            // debug
             // $redis->set('boot_wifi_filenames', json_encode($fileNames));
             // $redis->set('boot_wifi_filerecords', json_encode($filerecords));
             // $redis->set('boot_wifi_profilearray', json_encode($profilearray));
@@ -2172,7 +2172,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
         case 'reconnect':
             // no break;
         case 'connect':
-            // manual connect 
+            // manual connect
             sysCmd('connmanctl connect '.$args['connmanString']);
             break;
         case 'autoconnect-on':
@@ -3326,7 +3326,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                     if (!$quiet) ui_notify($type.' mount', 'Attempting to use saved/predefined mount options');
                     $options2 = $mp['options'];
                     // clean up the mount options
-                    // remove leading and trailing white-space and commas 
+                    // remove leading and trailing white-space and commas
                     $options2 = trim($options2, ", \t\n\r\0\x0B");
                     // remove all spaces before or after any comma or equals sign
                     $options2 = str_replace(', ',',',$options2);
@@ -5241,12 +5241,12 @@ function refresh_nics($redis)
         } else if ($technology === 'wifi') {
             // this is for WiFi
             if ($ssid === '') {
-                // when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one 
+                // when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one
                 $ssid = '<Hidden'.++$hiddenCount.'>';
             }
         }
         $ssidHex = implode(unpack("H*", trim($ssid)));
-        // set the deault values for DNS name servers and gateway from 
+        // set the deault values for DNS name servers and gateway from
         $networkInfo[$macAddress.'_'.$ssidHex]['primaryDns'] = $networkInterfaces[$nic]['primaryDns'];
         $networkInfo[$macAddress.'_'.$ssidHex]['secondaryDns'] = $networkInterfaces[$nic]['secondaryDns'];
         $networkInterfaces[$nic]['defaultGateway'] = $networkInterfaces[$nic]['defaultGateway'];
@@ -5357,7 +5357,7 @@ function refresh_nics($redis)
         $networkInfo[$macAddress.'_'.$ssidHex]['macAddress'] = $macAddress;
         $networkInfo[$macAddress.'_'.$ssidHex]['technology'] = $technology;
         if (isset($security)) {
-            
+
         }
         if ($nic != '000000') {
             $networkInfo[$macAddress.'_'.$ssidHex]['nic'] = $nic;
@@ -5441,7 +5441,7 @@ function refresh_nics($redis)
                     if (($macAddress === $network['macAddress']) || ($ssidHex === $network['ssidHex'])) {
                         // then disable autoconnect on other networks using the same mac address or ssid
                         wrk_netconfig($redis, 'autoconnect-off', $network['connmanString']);
-                        // order the networks in the connman list, there are circumstances when connman will act on 
+                        // order the networks in the connman list, there are circumstances when connman will act on
                         // this on-the-fly optimisation, however the information is lost on reboot
                         sysCmd('connmanctl move-after '.$network['connmanString'].' '. $connmanString);
                         $connmanString = $network['connmanString'];

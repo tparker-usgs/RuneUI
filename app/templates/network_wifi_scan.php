@@ -28,7 +28,7 @@
             <a href="/network" class="btn btn-lg btn-default">Cancel</a>
             <button class="btn btn-lg btn-primary" name="refresh" value="1" id="refresh"><i class="fa fa-refresh sx"></i>Refresh interfaces</button>
         </form>
-        <span class="help-block">Weak Wi-Fi signals will give problems when streaming music. Signal strength is not the only 
+        <span class="help-block">Weak Wi-Fi signals will give problems when streaming music. Signal strength is not the only
             parameter for signal quality, interference from other Wi-Fi networks can also cause problems.<br>
             If you are using a Wi-Fi dongle and are connected using the built in Access Point it is possible that the dongle
             cannot simultaneously support an Access Point and network search functions. If this is the case no networks will be
