@@ -9,29 +9,45 @@ set +e # continue on errors
 pacman -Q dos2unix || pacman -Sy dos2unix --noconfirm
 #
 # Dos2Unix conversion
+# exclude binary files, keep the date, keep the old file name
 #
-cp /var/www/app/config/defaults/config.txt /tmp/config.txt
+# 
+# all files in the directory /var/www/app/config/defaults/ inclusive subdirectories
+# exceptions are /boot/config.txt and /boot/wifi/* these stay in ms-dos format
+cp /var/www/app/config/defaults/boot/config.txt /tmp/config.txt
+cp -r /var/www/app/config/defaults/boot/wifi /tmp/wifi
 cd /var/www/app/config/defaults
-dos2unix -k -s -o *
-cp /tmp/config.txt /var/www/app/config/defaults/config.txt
+find /var/www/app/config/defaults/ -type f -exec dos2unix -k -s -o {} \;
+cp /tmp/config.txt /var/www/app/config/defaults/boot/config.txt
+cp -r /tmp/wifi /var/www/app/config/defaults/boot/wifi
 rm /tmp/config.txt
+rm -r /tmp/wifi
+# all files in /srv/http/assets/js
 cd /srv/http/assets/js
 dos2unix -k -s -o *
+# all files in /srv/http/db
 cd /srv/http/db
 dos2unix -k -s -o *
+# all files in /srv/http/app
 cd /srv/http/app
 dos2unix -k -s -o *
+# all files in /srv/http/app/templates
 cd /srv/http/app/templates
 dos2unix -k -s -o *
+# all files in /srv/http/app/libs
 cd /srv/http/app/libs
 dos2unix -k -s -o *
+# all files in /srv/http/command
 cd /srv/http/command
 dos2unix -k -s -o *
+# all files in /srv/http
 cd /srv/http
 dos2unix -k -s -o *
-cd /etc
-dos2unix -k -s -o *.conf
+# all files named *.conf in /etc and subdirectories 
 cd /home
+find /etc -type f -name *.conf -exec dos2unix -k -s -o {} \;
+# the file /srv/http/assets/css/runeui.css
+dos2unix -k -s -o /srv/http/assets/css/runeui.css
 #
 # Convert leading tabs to 4 spaces is the files
 #
@@ -43,7 +59,8 @@ FILES="/srv/http/assets/js/*
 /srv/http/app/templates/*
 /srv/http/app/libs/*
 /srv/http/command/*
-/srv/http/*"
+/srv/http/*
+/srv/http/assets/css/runeui.css"
 shopt -s nullglob
 for f in $FILES
 do
