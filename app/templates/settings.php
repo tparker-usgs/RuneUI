@@ -688,8 +688,10 @@
                 <p><?=$this->sysstate['time'] ?></p>
                 <strong>System uptime</strong>
                 <p><?=$this->sysstate['uptime'] ?></p>
-                <strong>CPU temperature</strong>
-                <p><?=$this->sysstate['cpuTemp'] ?></p>
+                <?php if (isset($this->sysstate['cpuTemp']) && $this->sysstate['cpuTemp']) :?>
+                    <strong>CPU temperature</strong>
+                    <p><?=$this->sysstate['cpuTemp'] ?>&degC</p>
+                <?php endif;?>
                 <strong>Rune OS / UI version / build</strong>
                 <p>OS version: <?=$this->sysstate['runeOS']?><br>UI version: <?=$this->sysstate['release'] ?> build: <?=$this->sysstate['buildversion'] ?></p>
                 <strong>HW platform</strong>
