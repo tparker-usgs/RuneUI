@@ -1857,7 +1857,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
     $ssidHexKey = 'ssidHex:'.$args['ssidHex'];
     $macAddressKey = 'macAddress:'.$args['macAddress'];
     // debug
-    $redis->set('wrk_netconfig_'.$action.'_1', json_encode($args));
+    // $redis->set('wrk_netconfig_'.$action.'_1', json_encode($args));
     // get the stored profiles
     if ($redis->exists('network_storedProfiles')) {
         $storedProfiles = json_decode($redis->get('network_storedProfiles'), true);
@@ -1946,13 +1946,13 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
                     }
                 }
                 // create the config file in '/var/lib/connman/', the name is 'wifi_<ssidHex>.config'
-                $profileFileName = '/var/lib/connman/wifi_'.$args['ssidHex'].'.config';
+                $profileFileName = '/var/lib/connman/wifi_'.$ssidHex.'.config';
                 $profileFileContent =
                     '[global]'."\n".
-                    'Description=Boot generated DHCP Wi-Fi network configuration for network (SSID) "'.$profile['name'].'", with SSID hex value "'.$args['ssidHex']."\"\n".
-                    '[service_'.$args['ssidHex'].']'."\n".
+                    'Description=Boot generated DHCP Wi-Fi network configuration for network (SSID) "'.$profile['name'].'", with SSID hex value "'.$ssidHex."\"\n".
+                    '[service_'.$ssidHex.']'."\n".
                     'Type=wifi'."\n".
-                    'SSID='.$args['ssidHex']."\n".
+                    'SSID='.$ssidHex."\n".
                     'Passphrase='.$profile['passphrase']."\n";
                 if (isset($profile['hidden'])) {
                     if ($profile['hidden']) {
@@ -5181,12 +5181,12 @@ function refresh_nics($redis)
             $redis->Set('network_info_time', $nowSeconds);
         }
     }
-    // subtract 2 from all network strength values and remove values which go negative
-    // all networks which are detected will reset their strength to the actual value
+    // subtract 3 from all network strength values and remove values which go negative
+    // all networks which are (re)detected will reset their strength to the actual value
     // the networks which are successively not detected will be shown as weak and eventually be deleted
     foreach ($networkInfo as $key => $network) {
         if (isset($networkInfo[$key]['strength'])) {
-            $networkInfo[$key]['strength'] = $networkInfo[$key]['strength'] - 2;
+            $networkInfo[$key]['strength'] = $networkInfo[$key]['strength'] - 3;
             if ($network['strength'] <= 0) {
                 unset($networkInfo[$key]);
             } else {
