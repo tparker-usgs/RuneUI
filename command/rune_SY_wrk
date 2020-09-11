@@ -1493,11 +1493,11 @@ while (1) {
         $savecpu_rp = 25 + rand(0, 10);
     }
     // MPD logfile size check, run first after 1800 cycles (+/-15 minutes), then repeat on every +/-1800 cycles (+/-15 minutes)
-    // if the mpd log is greater than the parameter value (bytes) a new log will be created
+    // if the mpd log is greater than the parameter value (bytes) a new log will be created and the old one deleted
     // the only reason a log file gets too big is when a very large music library is updated or rebuilt or when rune runs for days on end
     // 200000 bytes is about 1500 log entries
     if ($savecpu_mpd_log-- <= 0) {
-        wrk_mpdLog(200000);
+        wrk_mpdLog($redis, 200000);
         $savecpu_rp = 1750 + rand(0, 100);
     }
     // Test to see if an internet connection is available. Disable the artistinfo & lyrics functions when no internet is available
