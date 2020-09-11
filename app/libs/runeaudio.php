@@ -2347,7 +2347,7 @@ function wrk_audioOutput($redis, $action, $args = null)
                 $subdeviceid = explode(',', trim($subdeviceid[1]));
                 $subdeviceid = explode(' ', trim($subdeviceid[1]));
                 $data['device'] = 'hw:'.$card_index.','.$subdeviceid[1];
-                    if ($i2smodule !== 'none' && $i2smodule_details->sysname === $card) {
+                    if ($i2smodule !== 'none' && isset($i2smodule_details->sysname) && $i2smodule_details->sysname === $card) {
                         $acards_details = $i2smodule_details;
                     } else {
                         unset($acards_details);
