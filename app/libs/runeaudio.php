@@ -1838,8 +1838,9 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
         $args['ssid'] = '';
     }
     if (strlen($args['ssid'])) {
+        // there is a ssid, so wifi
         if (!$args['ssidHex']) {
-            // empty string
+            // empty string, so calculate
             $args['ssidHex'] = trim(implode(unpack("H*", $args['ssid'])));
         }
         if (!$args['security']) {
@@ -2227,7 +2228,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             // delete all connman config files
             sysCmd('rm -r /var/lib/connman/*');
             // restore the default connman configuration file
-            sysCmd('mkdir -p /home/var/lib/connman');
+            sysCmd('mkdir -p /var/lib/connman');
             sysCmd('cp /srv/http/app/config/defaults/var/lib/connman/settings /var/lib/connman/settings');
             sysCmd('chmod 600 /var/lib/connman/settings');
             // restore the default boot-initialise Wi-Fi files
