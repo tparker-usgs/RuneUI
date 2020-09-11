@@ -15,11 +15,11 @@ pacman -Q dos2unix || pacman -Sy dos2unix --noconfirm
 # all files in the directory /var/www/app/config/defaults/ inclusive subdirectories
 # exceptions are /boot/config.txt and /boot/wifi/* these stay in ms-dos format
 cp /var/www/app/config/defaults/boot/config.txt /tmp/config.txt
-cp -r /var/www/app/config/defaults/boot/wifi /tmp/wifi
+cp -r /var/www/app/config/defaults/boot/wifi /tmp
 cd /var/www/app/config/defaults
 find /var/www/app/config/defaults/ -type f -exec dos2unix -k -s -o {} \;
 cp /tmp/config.txt /var/www/app/config/defaults/boot/config.txt
-cp -r /tmp/wifi /var/www/app/config/defaults/boot/wifi
+cp -r /tmp/wifi /var/www/app/config/defaults/boot
 rm /tmp/config.txt
 rm -r /tmp/wifi
 # all files in /srv/http/assets/js

@@ -1975,7 +1975,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             // restore the default boot-initialise Wi-Fi files
             sysCmd('mkdir -p /boot/wifi/examples');
             sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme /boot/wifi/readme');
-            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples /boot/wifi/examples');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples/* /boot/wifi/examples');
             // run refresh_nics to finish off
             wrk_netconfig($redis, 'refreshAsync');
             break;
@@ -2233,7 +2233,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             sysCmd('chmod 600 /var/lib/connman/settings');
             // restore the default boot-initialise Wi-Fi files
             sysCmd('mkdir -p /boot/wifi/examples');
-            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme /boot/wifi/readme');
+            sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme/* /boot/wifi/readme');
             sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples /boot/wifi/examples');
             // start connman
             sysCmd('systemctl start connman');
