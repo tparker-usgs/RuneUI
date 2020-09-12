@@ -196,8 +196,8 @@ function redisDatastore($redis,$action) {
             $redis->hSet('dlna', 'queueowner', 1);
             $redis->hSet('dlna', 'logfile', '/var/log/runeaudio/upmpdcli.log');
             $redis->hSet('dlna', 'loglevel', 2);
-        $redis->hSet('dlna', 'radioname', '');
-        $redis->hSet('dlna', 'file', '');
+            $redis->hSet('dlna', 'radioname', '');
+            $redis->hSet('dlna', 'file', '');
             $redis->set('udevil', 1);
             $redis->hSet('spotify', 'enable', 0);
             $redis->hSet('spotify', 'user', 'user');
@@ -205,8 +205,8 @@ function redisDatastore($redis,$action) {
             $redis->hSet('spotify', 'plversion', 1);
             $redis->hSet('spotify', 'lastcmd', '');
             $redis->set('coverart', 1);
-        $redis->set('artist-info', 1);
-        $redis->set('lyric', 1);
+            $redis->set('artist-info', 1);
+            $redis->set('lyric', 1);
             $redis->set('playmod', 0);
             $redis->set('ramplay', 0);
             $redis->hSet('lastfm', 'enable', 0);
@@ -274,9 +274,9 @@ function redisDatastore($redis,$action) {
             $redis->set('debug', 0);
             $redis->set('debugdata', '');
             $redis->set('opcache', 1);
-            $redis->set('buildversion', 'gearhead-20190322');
+            $redis->set('buildversion', 'janui-20200912');
             $redis->set('patchlevel', 0);
-            $redis->set('release', '0.6');
+            $redis->set('release', '0.6b');
             // HW platform data
             // $redis->set('playerid', '');
             // $redis->set('hwplatform', '');
@@ -291,8 +291,8 @@ function redisDatastore($redis,$action) {
             $redis->set('pl_length', 0);
             $redis->set('nextsongid', 0);
             $redis->set('lastsongid', 0);
-        // Samba parameters
-        $redis->hSet('samba', 'enable', 0);
+            // Samba parameters
+            $redis->hSet('samba', 'enable', 0);
             $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
@@ -313,12 +313,20 @@ function redisDatastore($redis,$action) {
             $redis->set('lock_refresh_ao', 0);
             $redis->set('lock_wifiscan', 0);
             // env settings
+            $mounted = $redis->keys('mount_*');
+            foreach ($mounted as $key) {
+                $redis->del($key);
+            }
             $redis->del('usbmounts');
-            $redis->set('wlans', '');
             $redis->del('acards');
-            $redis->set('mountidx', 1);
+            $redis->del('mountidx', 1);
             $redis->set('allmounted', 0);
             $redis->set('disk_error', 0);
+            // debug variables
+            $mounted = $redis->keys('wrk_*');
+            foreach ($mounted as $key) {
+                $redis->del($key);
+            }
             // pre-installed Rern's add-ons
             $redis->hSet('addons', 'update', '0');
             $redis->hSet('addons', 'font', '20220901');
@@ -528,8 +536,8 @@ function redisDatastore($redis,$action) {
             $redis->hExists('lyrics', 'song') || $redis->hSet('lyrics', 'song', '');
             $redis->exists('udevil') || $redis->set('udevil', 1);
             $redis->exists('coverart') || $redis->set('coverart', 1);
-        $redis->exists('artist-info') || $redis->set('artist-info', 1);
-        $redis->exists('lyric') || $redis->set('lyric', 1);
+            $redis->exists('artist-info') || $redis->set('artist-info', 1);
+            $redis->exists('lyric') || $redis->set('lyric', 1);
             $redis->exists('playmod') || $redis->set('playmod', 0);
             $redis->exists('ramplay') || $redis->set('ramplay', 0);
             $redis->hExists('lastfm', 'enable') || $redis->hSet('lastfm', 'enable', 0);
@@ -584,8 +592,9 @@ function redisDatastore($redis,$action) {
             $redis->exists('debug') || $redis->set('debug', 0);
             $redis->exists('debugdata') || $redis->set('debugdata', '');
             $redis->exists('opcache') || $redis->set('opcache', 1);
-            $redis->exists('buildversion') || $redis->set('buildversion', 'gearhead-20190322');
+            $redis->exists('buildversion') || $redis->set('buildversion', 'janui-20200912');
             $redis->exists('patchlevel') || $redis->set('patchlevel', 0);
+            $redis->exists('release') || $redis->set('release', '0.6b');
             // HW platform data
             $redis->exists('playerid') || $redis->set('playerid', '');
             $redis->exists('hwplatform') || $redis->set('hwplatform', '');

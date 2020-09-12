@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x # echo all commands to cli
 set +e # continue on errors
+cd /home
 #
 # Image reset script
 if [ "$1" == "full" ];
@@ -111,22 +112,22 @@ ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
 # redis reset
 redis-cli del AccessPoint
 redis-cli del airplay
+redis-cli del debugdata
 redis-cli del dirble
 redis-cli del dlna
+redis-cli del fix_mac
 redis-cli del jamendo
+redis-cli del local_browser
 redis-cli del lyrics
 redis-cli del mpdconf
+redis-cli del network_info
+redis-cli del network_interfaces
 redis-cli del nics
 redis-cli del samba
 redis-cli del spotify
 redis-cli del spotifyconnect
-redis-cli del usbmounts
-redis-cli del debugdata
-redis-cli del local_browser
-redis-cli del fix_mac
-redis-cli del network_interfaces
 redis-cli del translate_mac_nic
-redis-cli del network_info
+redis-cli del usbmounts
 php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
@@ -170,11 +171,10 @@ cp -Rv /srv/http/app/config/defaults/boot/* /boot
 # make appropriate links
 ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
-
+#
 # copy a logo for display in BubbleUpnp via upmpdcli
 cp /srv/http/assets/img/favicon-64x64.png /usr/share/upmpdcli/runeaudio.png
 chgmod 644 /usr/share/upmpdcli/runeaudio.png
-
 #
 # modify all standard .service files which specify the wrong PIDFile location
 sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.service
@@ -183,8 +183,7 @@ sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.servi
 # sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
 #
 # some fixes for the ply-image binary location - currently required for 0.5b
-if [ -e /usr/bin/ply-image ];
-then
+if [ -e /usr/bin/ply-image ]; then
     rm /usr/local/bin/ply-image
 else
     cp /usr/local/bin/ply-image /usr/bin/ply-image
@@ -201,8 +200,7 @@ else
 fi
 #
 # for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
-if [ "$1" == "full" ];
-then
+if [ "$1" == "full" ]; then
     pacman -Sc --noconfirm
 fi
 #
@@ -213,6 +211,40 @@ systemctl daemon-reload
 hostnamectl --static --transient --pretty set-icon-name multimedia-player
 hostnamectl --static --transient --pretty set-chassis embedded
 hostnamectl --static --transient --pretty set-hostname runeaudio
+#
+# clean up /etc/motd
+linuxbuilddate=$( uname -v )
+i="0"
+while [ $i -lt 5 ]; do
+    linuxbuilddate=${linuxbuilddate#*[[:space:]]*}
+    osdate=$( date -d "$linuxbuilddate" +%Y%m%d )
+    if [ $? -eq 0 ]; then
+        i="5"
+    else
+        i=$[$i+1]
+    fi
+done
+osver=$( uname -r | xargs )
+buildversion=$( redis-cli get buildversion | xargs )
+patchlevel=$( redis-cli get patchlevel | xargs )
+release=$( redis-cli get release | xargs )
+archarmver=$( uname -msr | xargs )
+cd /srv/http/
+gitbranch=$( git branch | xargs )
+gitbranch=${gitbranch#*[[:space:]]*}
+cd /home
+if [ $gitbranch = $release ]; then
+    experimental="Beta"
+else
+    experimental="Experimental Beta"
+fi
+line1="RuneOs: $experimental V$release-gearhead-$osdate"
+line2="RuneUI: $gitbranch $buildversion V$release-$patchlevel"
+line3="Hw-env: Raspberry Pi ($archarmver)"
+sed -i "s|^RuneOs:.*|$line1|g" /etc/motd
+sed -i "s|^RuneUI:.*|$line2|g" /etc/motd
+sed -i "s|^Hw-env:.*|$line3|g" /etc/motd
+cat /etc/motd
 #
 # set timezone to -11 hours before GMT - any user adjustment will always go forward
 timedatectl set-timezone Pacific/Pago_Pago
@@ -226,8 +258,7 @@ redis-cli save
 #
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
-if [ "$1" == "full" ];
-then
+if [ "$1" == "full" ]; then
     redis-cli save
     echo "Zero filling the file system"
     # zero fill the file system
