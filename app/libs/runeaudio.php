@@ -5690,11 +5690,24 @@ function wrk_mpdLog($redis, $logSizeMax = 200000)
 // check its size, when greater than $filesizeMax delete it and inform MPD to create a new one
 {
     $logFile = $redis->hGet('mpdconf', 'log_file');
-    $logSize = filesize($logFile);
+    if (file_exists($logFile)) {
+        // its there, get the size
+        $logSize = filesize($logFile);
+    } else {
+        // file not found
+        // if the file is not there MPD failed to restart writing to it the last time
+        // set the size so that the SIGHUP signal will be sent again
+        $logSize = $logSizeMax;
+    }
     if ($logSize >= $logSizeMax) {
         // delete the file
         sysCmd('rm '."'".$logFile."'");
+        // commit and purge the buffers
+        sysCmd('sync');
         // use the SIGHUP signal to tell MPD to recreate/reopen the log file
+        sysCmd('kill -s SIGHUP $(pgrep -x mpd)');
+        // seems sometimes to need to be run twice!
+        sysCmd('sync');
         sysCmd('kill -s SIGHUP $(pgrep -x mpd)');
     }
 }
