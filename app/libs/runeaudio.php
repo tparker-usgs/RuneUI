@@ -1812,7 +1812,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
     //    autoconnect-on, autoconnect-off, disconnect, disconnect-delete, delete & reset
     // $arg and $args are optional, $arg contains the connman string, $args contains an array to modify a profile
     // debug
-    $redis->set('wrk_netconfig_'.$action, json_encode($args));
+    // $redis->set('wrk_netconfig_'.$action, json_encode($args));
     $args['action'] = $action;
     if (isset($arg)) {
         $argN = trim($arg);
