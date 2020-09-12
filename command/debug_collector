@@ -286,10 +286,12 @@ function debug_data($redis)
     $command = sysCmd('connmanctl services | grep "*" | cut -b 26-');
     foreach ($command as $interface) {
         $interface = trim($interface);
-        $output .= "# favourite connman profile ".$interface." #\n";
-        $output .= str_repeat('-',strlen($interface)+30)."\n";
-        $command = sysCmd('cat /var/lib/connman/'.$interface.'/settings | sed s/^Passphrase.*/Passphrase=***************/g');
-        $output .= implode("\n", $command)."\n\n";
+        if (file_exists('/var/lib/connman/'.$interface.'/settings')) {
+            $output .= "# favourite connman profile ".$interface." #\n";
+            $output .= str_repeat('-',strlen($interface)+30)."\n";
+            $command = sysCmd('cat /var/lib/connman/'.$interface.'/settings | sed s/^Passphrase.*/Passphrase=***************/g');
+            $output .= implode("\n", $command)."\n\n";
+        }
     }
     $output .= "\n";
     $output .= "###### Network wifi status (iwconfig) ######\n";

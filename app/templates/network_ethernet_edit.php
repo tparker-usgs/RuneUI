@@ -111,7 +111,7 @@
         <table id="nic-details" class="info-table boxed" data-name="<? =this->profile['nic']?>">
             <tbody>
                 <?php foreach ($this->profile as $element => $value):?>
-                    <?php if ((strlen($value) != 0) && (!strpos('|manual|',$element))) :?>
+                    <?php if ((strlen($value) != 0) && (!strpos('|manual|strengthStars|',$element))) :?>
                         <?php if ($value == '0') $value = 'false';?>
                         <?php if ($value == '1') $value = 'true';?>
                         <tr><th><?=$element?>:</th><td><?=htmlspecialchars($value)?></td></tr>

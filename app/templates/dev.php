@@ -114,6 +114,11 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-primary btn-lg" value="1" name="mode[debug][submit]" type="submit">Save settings</button>
+                </div>
+            </div>
             <legend>Background WORKERS control</legend>
             <div class="boxed-group">
                 <p>Just some handy "tools" for Background WORKERS management</p>
