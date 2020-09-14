@@ -11,16 +11,49 @@ else
     echo "Running quick image initialisation"
 fi
 #---
-#Before running the script...
-#Connect via Wired ethernet, remove all WiFi profiles
-#Dismount all NAS and USB sources, clear all NAS information. Unplug all USB decvices
-#Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
+# Before running the script...
+# Connect via Wired ethernet, remove all WiFi profiles
+# Dismount all NAS and USB sources, clear all NAS information. Unplug all USB decvices
+# Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
 #
 # clean up any no longer valid mounts
 udevil clean
 #
 # set up services and stop them
-systemctl unmask systemd-journald
+# systemctl stops after an erroneous entry, use arrays to run through all entries
+declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start systemd-resolved)
+declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-journald systemd-timesyncd bootsplash dbus iwd connman bluetooth bluealsa bluealsa-aplay)
+declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil connman bluetooth bluealsa bluealsa-aplay)
+declare -a mask_arr=(connman-vpn dbus-org.freedesktop.resolve1 systemd-logind systemd-resolved)
+declare -a unmask_arr=(systemd-journald)
+#
+# disable specified services
+for i in "${disable_arr[@]}"
+do
+   systemctl disable "$i"
+done
+#
+# enable specified services
+for i in "${enable_arr[@]}"
+do
+   systemctl enable "$i"
+done
+# unmask masked services
+alreadymasked=$( systemctl list-unit-files --state=masked | grep -i service | cut -f 1 -d " " )
+for i in $alreadymasked
+do
+   systemctl unmask "$i"
+done
+# mask specified services
+for i in "${mask_arr[@]}"
+do
+   systemctl mask "$i"
+done
+# unmask specified services
+for i in "${mask_arr[@]}"
+do
+   systemctl unmask "$i"
+done
 # for a distribution image disable systemd audit to reduce log files. Switch it on for a development image
 if [ "$1" == "full" ];
 then
@@ -28,21 +61,8 @@ then
 else
     systemctl unmask systemd-journald-audit.socket
 fi
-# systemctl stops after an erroneous entry, use an array to run through all entries
-declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start systemd-resolved)
-declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-resolved systemd-journald systemd-timesyncd bootsplash dbus iwd connman)
-declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil)
 #
-for i in "${disable_arr[@]}"
-do
-   systemctl disable "$i"
-done
-#
-for i in "${enable_arr[@]}"
-do
-   systemctl enable "$i"
-done
-#
+# stop specified services
 for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"
@@ -52,12 +72,23 @@ for i in "${stop_arr[@]}"
 do
    systemctl stop "$i"
 done
-# disable resolved
-systemctl mask systemd-resolved
+#
+# make sure xwindows has stopped
+export DISPLAY=:0
+xset dpms force off
+#
+# unmount the local an network devices
+umount -Rf /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/USB/*
+rmdir /mnt/MPD/NAS/*
+rmdir /mnt/MPD/USB/*
+#
+# set up connman
 # delete the file/link at /etc/resolv.conf
 rm -f /etc/resolv.conf
 # link it to connman's dynamically created resolv.conf
 ln -s /run/connman/resolv.conf /etc/resolv.conf
+#
 # install raspi-rotate
 /var/www/command/raspi-rotate-install.sh
 #
@@ -251,10 +282,10 @@ timedatectl set-timezone Pacific/Pago_Pago
 redis-cli set timezone "Pacific/Pago_Pago"
 #
 # shutdown redis and force a write all in-memory keys to disk (purges any cached values)
+sync
 redis-cli save
-# run the shutdown poweroff script (this will also remove network mounts)
-/var/www/command/rune_shutdown poweroff
-
+redis-cli shutdown save
+sync
 #
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
