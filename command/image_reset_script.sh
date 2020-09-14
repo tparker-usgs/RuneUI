@@ -163,7 +163,7 @@ php -f /srv/http/db/redis_datastore_setup reset
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
 #
-# update local git
+# update local git and clean up any stashes
 rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
 git config --global core.editor "nano"
@@ -174,6 +174,13 @@ git add .
 git stash
 git pull --no-edit
 git stash
+if [ "$1" == "full" ]; then
+    stashes=$( git stash list | grep -i stash | cut -f 1 -d ":"  )
+    for i in $stashes
+    do
+       git stash drop "$i"
+    done
+fi
 cd /home
 #
 # remove any git user-names & email
@@ -213,7 +220,7 @@ sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.servi
 # sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/winbind.service
 # sed -i 's|.*User=mpd.*|#User=mpd|g' /usr/lib/systemd/system/mpd.service
 #
-# some fixes for the ply-image binary location - currently required for 0.5b
+# some fixes for the ply-image binary location (required for 0.5b)
 if [ -e /usr/bin/ply-image ]; then
     rm /usr/local/bin/ply-image
 else
@@ -232,7 +239,10 @@ fi
 #
 # for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
 if [ "$1" == "full" ]; then
+    # remove pacman history and no longer installed packages from the package database
     pacman -Sc --noconfirm
+    # remove ALL files from the package cache
+    # pacman -Scc --noconfirm
 fi
 #
 # reset systemd services so that any cached files are replaced by the latest ones
