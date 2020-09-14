@@ -1,2 +1,1 @@
-OPTIONS="-dhw:0,0"
-BT_ADDR="00:00:00:00:00:00" 
+OPTIONS="-Dhw:0,0"
