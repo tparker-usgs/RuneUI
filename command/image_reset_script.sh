@@ -175,11 +175,24 @@ git stash
 git pull --no-edit
 git stash
 if [ "$1" == "full" ]; then
-    stashes=$( git stash list | grep -i stash | cut -f 1 -d ":"  )
-    for i in $stashes
+    y="0"
+    x="0"
+    while [ $y -eq 0 ]
     do
-       git stash drop "$i"
+        # loop to drop the stashes
+        x=$[$x+1]
+        if [ $x -ge 50 ]; then
+            # stop after 50 cycles
+            y="1"
+        fi
+        # drop the latest stash
+        git stash drop
+        if [ $? -ne 0 ]; then
+            y="1"
+        fi
     done
+    git reset HEAD -- .
+    git clean -f
 fi
 cd /home
 #
