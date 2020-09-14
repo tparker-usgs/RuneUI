@@ -5704,10 +5704,10 @@ function wrk_mpdLog($redis, $logSizeMax = 200000)
         sysCmd('rm '."'".$logFile."'");
         // commit and purge the buffers
         sysCmd('sync');
-        // use the SIGHUP signal to tell MPD to recreate/reopen the log file
-        sysCmd('kill -s SIGHUP $(pgrep -x mpd)');
+        // use systemctl to send the SIGHUP signal to tell MPD to recreate/reopen the log file
+        sysCmd('systemctl kill -s HUP mpd');
         // seems sometimes to need to be run twice!
         sysCmd('sync');
-        sysCmd('kill -s SIGHUP $(pgrep -x mpd)');
+        sysCmd('systemctl kill -s HUP mpd');
     }
 }
