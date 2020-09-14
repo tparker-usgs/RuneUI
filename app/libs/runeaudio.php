@@ -1658,8 +1658,8 @@ function wrk_backup($redis, $bktype = null)
 
 function wrk_opcache($action, $redis)
 {
-// debug
-runelog('wrk_opcache ', $action);
+    // debug
+    runelog('wrk_opcache ', $action);
     switch ($action) {
         case 'prime':
             opcache_reset();
@@ -1914,9 +1914,9 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
                 sysCmd('rm \''.$directory.DIRECTORY_SEPARATOR.$fileName.'\'');
             }
             // debug
-            // $redis->set('boot_wifi_filenames', json_encode($fileNames));
-            // $redis->set('boot_wifi_filerecords', json_encode($filerecords));
-            // $redis->set('boot_wifi_profilearray', json_encode($profilearray));
+            // $redis->set('wrk_boot_wifi_filenames', json_encode($fileNames));
+            // $redis->set('wrk_boot_wifi_filerecords', json_encode($filerecords));
+            // $redis->set('wrk_boot_wifi_profilearray', json_encode($profilearray));
             // create the profiles
             foreach ($profilearray as $profile) {
                 if (!isset($profile['name']) || !isset($profile['passphrase'])) {
@@ -3919,10 +3919,10 @@ function wrk_setHwPlatform($redis)
 // this can be removed in next version, because it's replaced by wrk_startAirplay($redis) and wrk_stopAirplay($redis)
 function wrk_togglePlayback($redis, $activePlayer)
 {
-$stoppedPlayer = $redis->get('stoppedPlayer');
-// debug
-runelog('stoppedPlayer = ', $stoppedPlayer);
-runelog('activePlayer = ', $activePlayer);
+    $stoppedPlayer = $redis->get('stoppedPlayer');
+    // debug
+    runelog('stoppedPlayer = ', $stoppedPlayer);
+    runelog('activePlayer = ', $activePlayer);
     if ($stoppedPlayer !== '') {
         if ($stoppedPlayer === 'MPD') {
             // connect to MPD daemon
@@ -5493,7 +5493,7 @@ function fix_mac($redis, $nic)
     $file = '/etc/systemd/system/macfix_'.$nic.'.service';
     if ((!file_exists($file)) || (!sysCmd('grep -ic '.$macNew.' '.$file)[0])) {
         // create the systemd unit file only when it needs to be created
-        $fileContent = '# file /etc/systemd/system/macfix_'.$nic.'.service'."\n"
+        $fileContent = '# file '.$file."\n"
             .'# some cheap network cards have an identical MAC address for all cards (00:e0:4c:53:44:58)'."\n"
             .'# change it to a fixed (previouly ranomised) address'."\n\n"
             .'[Unit]'."\n"
