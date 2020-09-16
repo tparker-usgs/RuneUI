@@ -57,6 +57,8 @@ sysCmd('chmod 777 /run');
 $redis = new Redis();
 $redis->connect('/run/redis/socket');
 
+// clear the cache otherwise file_exists() returns incorrect values
+clearstatcache();
 // if os updates are needed
 if (file_exists('/srv/http/command/update_os.php')) {
     include '/srv/http/command/update_os.php';
@@ -436,6 +438,8 @@ if ($playerid_db === '') {
     ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
     //
     // start the local browser
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
     if (($redis->hGet('local_browser', 'enable')) && (file_exists('/usr/bin/xinit'))) {
         sysCmdAsync('systemctl start local-browser');
     } else {

@@ -94,6 +94,8 @@ function updateOS($redis) {
         if ($redis->get('patchlevel') == 2) {
             // 3rd update - copy a new version of avahi-daemon.conf to /etc/avahi/ after it is delivered by git pull
             // check that the file exists in /var/www/app/config/defaults/
+            // clear the cache otherwise file_exists() returns incorrect values
+            clearstatcache();
             if (file_exists('/var/www/app/config/defaults/avahi-daemon.conf')) {
                 // the file is there, copy it and set the correct protection
                 sysCmd("cp /var/www/app/config/defaults/avahi-daemon.conf /etc/avahi/avahi-daemon.conf");
@@ -102,6 +104,8 @@ function updateOS($redis) {
                 sysCmd("systemctl daemon-reload");
                 sysCmd("systemctl restart avahi-daemon");
                 // clean up the pacnew version of the config file is it exists
+                // clear the cache otherwise file_exists() returns incorrect values
+                clearstatcache();
                 if (file_exists('/etc/avahi/avahi-daemon.conf.pacnew')) {
                     sysCmd("rm -f /etc/avahi/avahi-daemon.conf.pacnew");
                 }
@@ -141,6 +145,8 @@ function updateOS($redis) {
                 $local_browser = $redis->get('local_browser');
                 $redis->del('local_browser');
                 $redis->hSet('local_browser', 'enable', $local_browser);
+                // clear the cache otherwise file_exists() returns incorrect values
+                clearstatcache();
                 if (file_exists('/usr/bin/xinit')) {
                     $zoomfactor = sysCmd("grep -i 'force-device-scale-factor=' /etc/X11/xinit/start_chromium.sh | cut -d'=' -f3");
                     $redis->hSet('local_browser', 'zoomfactor', $zoomfactor[0]);
@@ -159,6 +165,8 @@ function updateOS($redis) {
         }
         if ($redis->get('patchlevel') == 6) {
             // 7th update - set a value to the redis variable i2smodule_select
+            // clear the cache otherwise file_exists() returns incorrect values
+            clearstatcache();
             if (file_exists('/var/www/app/config/defaults/i2s_table.txt')) {
                 $retval = $redis->get('i2smodule');
                 $retval = sysCmd("grep -i '".$retval."' /var/www/app/config/defaults/i2s_table.txt");
@@ -215,12 +223,16 @@ function updateOS($redis) {
         // if ($redis->get('patchlevel') == x) {
             // // xth update - install runeaudio.cron in /etc/cron.d/ after it is delivered by git pull
             // // check that the file exists in /var/www/app/config/defaults/
+            // // clear the cache otherwise file_exists() returns incorrect values
+            // clearstatcache();
             // if (file_exists('/var/www/app/config/defaults/runeaudio.cron')) {
                 // // the file is there, copy it and set the correct protection
                 // sysCmd("cp /var/www/app/config/defaults/runeaudio.cron /etc/cron.d/runeaudio.cron");
                 // sysCmd("chown root.root /etc/avahi/runeaudio.cron");
                 // sysCmd("chmod 644 /etc/avahi/runeaudio.cron");
                 // // clean up any cron avahi jobs owned by root
+                // // clear the cache otherwise file_exists() returns incorrect values
+                // clearstatcache();
                 // if (file_exists('/var/spool/cron/crontabs/root')) {
                     // sysCmd("sed -i '/systemctl restart avahi-daemon/d' /var/spool/cron/crontabs/root");
                 // }

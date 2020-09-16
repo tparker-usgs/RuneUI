@@ -163,6 +163,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Pragma: no-cache'); // HTTP 1.0.
             header('Expires: 0'); // Proxies.
             header('Content-Type: ' .mime_content_type($local_cover_path));
+            // clear the cache otherwise filesize() returns incorrect values
+            clearstatcache();
             header('Content-Length: '.filesize($local_cover_path));
             readfile($local_cover_path);
         }
@@ -204,6 +206,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
         header('Pragma: no-cache'); // HTTP 1.0.
         header('Expires: 0'); // Proxies.
         header('Content-Type: ' .mime_content_type($serverHome.'/assets/img/cover-default.png'));
+        // clear the cache otherwise filesize() returns incorrect values
+        clearstatcache();
         header('Content-Length: '.filesize($serverHome.'/assets/img/cover-default.png'));
         readfile($serverHome.'/assets/img/cover-default.png');
         $output = 1;
@@ -248,6 +252,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     header('Pragma: no-cache'); // HTTP 1.0.
     header('Expires: 0'); // Proxies, pre-expired content
     header('Content-Type: '.mime_content_type($imgfilename));
+    // clear the cache otherwise filesize() returns incorrect values
+    clearstatcache();
     header('Content-Length: '.filesize($imgfilename));
     readfile($imgfilename);
     $output = 1;
@@ -268,6 +274,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     header('Pragma: no-cache'); // HTTP 1.0.
     header('Expires: 0'); // Proxies, pre-expired content
     header('Content-Type: '.mime_content_type($imgfilename));
+    // clear the cache otherwise filesize() returns incorrect values
+    clearstatcache();
     header('Content-Length: '.filesize($imgfilename));
     readfile($imgfilename);
     $output = 1;

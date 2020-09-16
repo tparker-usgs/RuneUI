@@ -4,6 +4,8 @@ $file = $_FILES["filebackup"];
 $filename = $file["name"];
 $filetmp = $file["tmp_name"];
 $filedest = "/srv/http/tmp/$filename";
+// clear the cache otherwise filesize() returns incorrect values
+clearstatcache();
 $filesize = filesize($filetmp);
 
 if ($filesize === 0) die("File upload error !");

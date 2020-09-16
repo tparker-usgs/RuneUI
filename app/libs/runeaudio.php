@@ -1052,6 +1052,8 @@ function _parseStatusResponse($redis, $resp)
         // ignore any line returned by mpd status containing 'updating'
         $status = sysCmd('mpc status | grep -vi updating');
         // bit rate
+        // clear the cache otherwise file_exists() returns incorrect values
+        clearstatcache();
         if ((($plistArray['bitrate'] == '0') || ($plistArray['bitrate'] == '')) && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
             $retval = sysCmd('mpc -f "[%file%]"');
             $retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'" | grep "Overall bit rate  "');
@@ -1189,6 +1191,8 @@ function OpCacheCtl($action, $basepath, $redis = null)
         }
     }
     if ($action === 'primeall' OR $action === 'reset') {
+        // clear the cache otherwise is_file() and is_dir() return incorrect values
+        clearstatcache();
         if (is_file($basepath)) {
             if (parseFileStr($basepath,'.') === 'php' && $basepath !== '/srv/http/command/cachectl.php' ) $cmd ($basepath);
         }
@@ -1332,6 +1336,8 @@ function rp_clean()
 
 function recursiveDelete($str)
 {
+    // clear the cache otherwise is_file() and is_dir() return incorrect values
+    clearstatcache();
     if(is_file($str)) {
         return @unlink($str);
         // TODO: add search path in playlist and remove from playlist
@@ -1355,6 +1361,8 @@ runelog('pushFile(): filepath', $filepath);
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
+        // clear the cache otherwise filesize() returns incorrect values
+        clearstatcache();
         header('Content-Length: '.filesize($filepath));
         ob_clean();
         flush();
@@ -1439,6 +1447,8 @@ function waitSyWrk($redis, $jobID)
 
 function getmac($nicname)
 {
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
     if (file_exists('/sys/class/net/'.$nicname.'/address')) {
         // get the nic address if it exists
         $mac = file_get_contents('/sys/class/net/'.$nicname.'/address');
@@ -1501,6 +1511,8 @@ function wrk_xorgconfig($redis, $action, $args)
 
 function wrk_avahiconfig($redis, $hostname)
 {
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
     if (!file_exists('/etc/avahi/services/runeaudio.service')) {
         runelog('avahi service descriptor not present, initializing...');
         sysCmd('/usr/bin/cp /var/www/app/config/defaults/avahi_runeaudio.service /etc/avahi/services/runeaudio.service');
@@ -1629,6 +1641,8 @@ function wrk_backup($redis, $bktype = null)
             " /etc/spop".
             " /boot/config.txt".
             "";
+        // clear the cache otherwise file_exists() returns incorrect values
+        clearstatcache();
         if (file_exists('/etc/shairport-sync.conf')) {
             $cmdstring .= " /etc/shairport-sync.conf";
         }
@@ -1881,6 +1895,8 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             $directory = '/boot/wifi';
             $fileNames = array_diff(scandir($directory), array('..', '.', 'readme', 'examples'));
             foreach ($fileNames as $fileName) {
+                // clear the cache otherwise is_dir() returns incorrect values
+                clearstatcache();
                 if (is_dir($directory.DIRECTORY_SEPARATOR.$fileName)) {
                     // remove unknown directories
                     sysCmd('rmdir --ignore-fail-on-non-empty \''.$directory.DIRECTORY_SEPARATOR.$fileName.'\'');
@@ -2818,6 +2834,8 @@ if ($action === 'reset') {
             // many users need to add an extra output device to MPD
             // this can be specified in the file /home/your-extra-mpd.conf
             // see the example file: /var/www/app/config/defaults/your-extra-mpd.conf
+            // clear the cache otherwise file_exists() returns incorrect values
+            clearstatcache();
             if (file_exists('/home/your-extra-mpd.conf')) {
                 $output .= file_get_contents('/home/your-extra-mpd.conf');
             }
@@ -5491,6 +5509,8 @@ function fix_mac($redis, $nic)
     sysCmd('ip link set dev '.$nic.' address '.$macNew);
     // construct a systemd unit file to automatically change the MAC address on boot
     $file = '/etc/systemd/system/macfix_'.$nic.'.service';
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
     if ((!file_exists($file)) || (!sysCmd('grep -ic '.$macNew.' '.$file)[0])) {
         // create the systemd unit file only when it needs to be created
         $fileContent = '# file '.$file."\n"
@@ -5614,12 +5634,12 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // stop (and restart) ashuffle if the file RandomPlayPlaylist.m3u has been deleted
             $retval = sysCmd('systemctl is-active ashuffle');
             if ($retval[0] == 'active') {
+                // clear the cache otherwise is_link() returns incorrect values
+                clearstatcache();
                 if (is_link($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u') && (linkinfo($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u'))) {
                     // link file found and it is valid (pointing to a file which exists), we assume that the playlist has some songs in it
                     // set the indicator to say a playlist random file exists/true
                     $redis->set('last_pl_randomfile', 1);
-                    // clear the cache for the next time round - the function is_link() uses cached information
-                    clearstatcache();
                 } else {
                     // no symlink file found or it is invalid
                     if ($redis->get('last_pl_randomfile')) {

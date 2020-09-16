@@ -248,6 +248,8 @@ if ($track_id == $last_track_id) {
         $command = 'wget -nv -F -T 10 -t 2 -O /srv/http/tmp/spotify-connect/spotify-connect-cover '.$albumart_url;
         runelog('spotify_connect_metadata_async album art:', $command);
         $retval = sysCmd($command);
+        // clear the cache otherwise filesize() returns incorrect values
+        clearstatcache();
         if (filesize('/srv/http/tmp/spotify-connect/spotify-connect-cover') <= 100) {
             runelog('spotify_connect_metadata_async ALBUMART FILE:', 'Empty');
             $redis->hSet('lyrics', 'art', '/srv/http/tmp/spotify-connect/spotify-connect-default.png');
