@@ -1352,7 +1352,10 @@ function recursiveDelete($str)
 
 function pushFile($filepath)
 {
-runelog('pushFile(): filepath', $filepath);
+    // debug
+    runelog('pushFile(): filepath', $filepath);
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
     if (file_exists($filepath)) {
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
