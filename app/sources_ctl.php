@@ -57,10 +57,12 @@ if (isset($_POST)) {
     // ----- FEATURES -----
     if (isset($_POST['sources']['db_autorebuild'])) {
         if ($_POST['sources']['db_autorebuild']) {
-            $redis->get('usb_db_autorebuild') == 1 || $redis->set('usb_db_autorebuild', 1);
+            $redis->get('usb_db_autorebuild') === 1 || $redis->set('usb_db_autorebuild', 1);
         } else {
-            $redis->get('usb_db_autorebuild') == 0 || $redis->set('usb_db_autorebuild', 0);
+            $redis->get('usb_db_autorebuild') === 0 || $redis->set('usb_db_autorebuild', 0);
         }
+    } else {
+        $redis->get('usb_db_autorebuild') === 0 || $redis->set('usb_db_autorebuild', 0);
     }
 }
 if (isset($jobID)) {
