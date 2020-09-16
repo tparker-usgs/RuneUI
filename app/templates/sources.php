@@ -1,5 +1,5 @@
 <div class="container">
-    <h1>Local sources</h1>
+    <h1>Local Sources</h1>
     <div class="boxed">
         <p>Your <a href="/#panel-sx">music library</a> is composed by two main content types: <strong>local sources</strong> and streaming sources.<br>
         This section lets you configure your local sources, telling <a href="http://www.musicpd.org/" title="Music Player Daemon" rel="nofollow" target="_blank">MPD</a> to scan the contents of <strong>network mounts</strong> and <strong>USB mounts</strong>.</p>
@@ -8,8 +8,7 @@
             <button class="btn btn-lg btn-primary" type="submit" name="rescanmpd" value="1" id="rescanmpddb"><i class="fa fa-refresh sx"></i>Rebuild MPD Library</button>
         </form>
     </div>
-
-    <h2>Network mounts</h2>
+    <legend>Network Mounts</legend>
     <p>List of configured network mounts. Click an existing entry to edit it, or add a new one.</p>
     <form id="mount-list" class="button-list" action="" method="post">
         <?php if( !empty($this->mounts) ): ?>
@@ -22,8 +21,7 @@
         <!-- <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="umountall" value="1" id="umountall"><i class="fa fa-refresh sx"></i> Unmount all sources</button></p>
         <p><button class="btn btn-lg btn-primary btn-block" type="submit" name="reset" value="1" id="reset"><i class="fa fa-refresh sx"></i> Remove all sources</button></p> -->
     </form>
-
-    <h2>USB mounts</h2>
+    <legend>USB Mounts</legend>
     <p>List of mounted USB drives. To safe unmount a drive, click on it and confirm at the dialog prompt.<br>
     If a drive is connected but not shown in the list, please check if <a href="/settings/#features-management">USB automount</a> is enabled.</p>
     <div id="usb-mount-list" class="button-list">
@@ -53,21 +51,22 @@
             </div>
         </form>
     <?php else: ?>
-        <p><button class="btn btn-lg btn-disabled btn-block" disabled="disabled">no USB mounts present</button></p>
+        <p><button class="btn btn-lg btn-disabled btn-block" disabled="disabled">No USB mounts present</button></p>
     <?php endif; ?>
     </div>
-
     <form class="form-horizontal" action="" method="post" data-parsley-validate>
-        <legend>Library auto rebuild</legend>
+        <legend>Library Auto Rebuild</legend>
         <fieldset>
             <div class="form-group">
-                <label for="db_autorebuild" class="control-label col-sm-2">auto rebuild</label>
+                <label for="db_autorebuild" class="control-label col-sm-2">Auto Rebuild</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
                         <input id="db_autorebuild" name="sources[db_autorebuild]" type="checkbox" value="1"<?php if ((isset($this->db_autorebuild)) && ($this->db_autorebuild)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Autorebuild MPD library when a USB device is plugged in</span>
+                    <span class="help-block">Autorebuild MPD library for USB devices on startup and when a USB device is plugged in.<br>
+                        <i>Note: The MPD library for network mounts is automatically (re)built on mounting, but never on startup.
+                        Automatic updates can be set in the <a href="/mpd">MPD</a> settings (see: General Music Daemon Options > Auto Update)</i></span>
                 </div>
             </div>
         </fieldset>

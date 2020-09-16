@@ -6,14 +6,14 @@
             <legend>Audio Output</legend>
             <div class="boxed-group">
                 <div class="form-group">
-                    <label class="col-sm-2 control-label" for="audio-output-interface">Audio output interface</label>
+                    <label class="col-sm-2 control-label" for="audio-output-interface">Audio Output Interface</label>
                     <div class="col-sm-10">
                         <select id="audio-output-interface" name="conf[audio_output_interface]" class="selectpicker" data-style="btn-default btn-lg">
                             <?php foreach($this->acards as $card): ?>
                                 <option value="<?=$card->name ?>" <?php if($this->ao === $card->name): ?> selected <?php endif ?>><?php if(isset($card->extlabel)):?><?=$card->extlabel ?><?php else:?><?=$card->name ?><?php endif; ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <span class="help-block">This switches output between audio interfaces (<strong>works on the fly</strong>)</span>
+                        <span class="help-block">This switches output between audio interfaces</span>
                     </div>
                 </div>
             </div>
@@ -21,7 +21,7 @@
     </form>
     <form class="form-horizontal" action="" method="post" data-parsley-validate>
         <fieldset>
-            <legend>Volume control</legend>
+            <legend>Volume Control</legend>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="mixer-type">Volume control</label>
                 <div class="col-sm-10">
@@ -39,14 +39,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="start-volume">Start volume</label>
+                <label class="col-sm-2 control-label" for="start-volume">Start Volume</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="start-volume" name="mpdvol[start_volume]" value="<?=$this->mpd['start_volume'] ?>" data-trigger="change" min="-1" max="100" placeholder="-1" />
                     <span class="help-block">Sets a forced playback volume at startup (0-100, -1 disables the feature)</span>
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="realtime-volume">Volume knob</label>
+                <label class="col-sm-2 control-label" for="realtime-volume">Volume Knob</label>
                 <div class="col-sm-10">
                     <select id="realtime-volume" name="mpdvol[realtime_volume]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->realtime_volume == '1'): ?> selected <?php endif ?>>realtime</option>
@@ -65,7 +65,7 @@
             </div>
         </div>
         <fieldset>
-            <legend>General music daemon options</legend>
+            <legend>General Music Daemon Options</legend>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="port">Port</label>
                 <div class="col-sm-10">
@@ -74,7 +74,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="daemon-user">Daemon user : group</label>
+                <label class="col-sm-2 control-label" for="daemon-user">Daemon User : group</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[user]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="mpd" <?php if($this->conf['user'] == 'mpd'): ?> selected <?php endif ?>>mpd : audio (default)</option>
@@ -84,7 +84,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="log-level">Log level</label>
+                <label class="col-sm-2 control-label" for="log-level">Log Level</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[log_level]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="default" <?php if($this->conf['log_level'] == 'default'): ?> selected <?php endif ?>>default</option>
@@ -96,7 +96,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="state-file">State file</label>
+                <label class="col-sm-2 control-label" for="state-file">State File</label>
                 <div class="col-sm-10">
                     <select id="log-level" name="conf[state_file]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if(isset($this->conf['state_file'])): ?> selected <?php endif ?>>enabled</option>
@@ -106,7 +106,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="ffmpeg">FFmpeg decoder plugin</label>
+                <label class="col-sm-2 control-label" for="ffmpeg">FFmpeg Decoder Plugin</label>
                 <div class="col-sm-10">
                     <select id="ffmpeg" name="conf[ffmpeg]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['ffmpeg'] === 'yes'): ?> selected <?php endif ?>>enabled</option>
@@ -117,7 +117,7 @@
             </div>
             <?php if(!$this->mpdv21): ?>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 playback</label>
+                <label class="col-sm-2 control-label" for="gapless-mp3-playback">Gapless mp3 Playback</label>
                 <div class="col-sm-10">
                     <select id="gapless-mp3-playback" name="conf[gapless_mp3_playback]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['gapless_mp3_playback'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
@@ -129,7 +129,7 @@
             </div>
             <?php endif ?>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="dsd-usb">DSD support</label>
+                <label class="col-sm-2 control-label" for="dsd-usb">DSD Support</label>
                 <?php if($this->hwplatformid === '08' || $this->hwplatformid === '10'): ?>
                 <div class="col-sm-10">
                     <select id="dsd-usb" name="conf[dsd_usb]" class="selectpicker" data-style="btn-default btn-lg">
@@ -150,7 +150,7 @@
                 <?php endif;?>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="replaygain">ReplayGain</label>
+                <label class="col-sm-2 control-label" for="replaygain">Replay Gain</label>
                 <div class="col-sm-10">
                     <select id="replaygain" name="conf[replaygain]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="off" <?php if($this->conf['replaygain'] == 'off'): ?> selected <?php endif ?>>off</option>
@@ -165,7 +165,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="volume-normalization">Volume normalization</label>
+                <label class="col-sm-2 control-label" for="volume-normalization">Volume Normalization</label>
                 <div class="col-sm-10">
                     <select id="volume-normalization" name="conf[volume_normalization]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['volume_normalization'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
@@ -175,7 +175,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="port">Audio buffer size</label>
+                <label class="col-sm-2 control-label" for="port">Audio Buffer Size</label>
                 <div class="col-sm-10">
                     <input class="form-control osk-trigger input-lg" type="number" id="audio-buffer-size" name="conf[audio_buffer_size]" value="<?=$this->conf['audio_buffer_size'] ?>" data-trigger="change" min="512" />
                     <span class="help-block">This specifies the size of the audio buffer in kibibytes. The default is 4096, large enough for nearly 24 seconds of CD-quality audio</span>
@@ -183,7 +183,7 @@
             </div>
             <?php if(!$this->mpdv21): ?>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="dsd-usb">Buffer before play</label>
+                <label class="col-sm-2 control-label" for="dsd-usb">Buffer Before Play</label>
                 <div class="col-sm-10">
                     <select id="buffer-before-play" name="conf[buffer_before_play]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="0%" <?php if($this->conf['buffer_before_play'] == '0%'): ?> selected <?php endif ?>>disabled</option>\n";
@@ -196,13 +196,13 @@
             </div>
             <?php endif ?>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="auto-update">Auto update</label>
+                <label class="col-sm-2 control-label" for="auto-update">Auto Update</label>
                 <div class="col-sm-10">
                     <select id="auto-update" name="conf[auto_update]" class="selectpicker" data-style="btn-default btn-lg">
                         <option value="yes" <?php if($this->conf['auto_update'] == 'yes'): ?> selected <?php endif ?>>enabled</option>
                         <option value="no" <?php if($this->conf['auto_update'] == 'no'): ?> selected <?php endif ?>>disabled</option>
                     </select>
-                    <span class="help-block">This setting enables automatic update of MPD's database when files in music_directory are changed</span>
+                    <span class="help-block">This setting enables automatic update of MPD's database when files in music directory are changed</span>
                 </div>
             </div>
         </fieldset>
@@ -234,7 +234,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-2" for="globalrandom">Global random</label>
+                <label class="control-label col-sm-2" for="globalrandom">Global Random</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
                         <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if((isset($this->mpd['globalrandom'])) && ($this->mpd['globalrandom'])): ?> checked="checked" <?php endif ?>>
