@@ -35,15 +35,15 @@
 // common include
 require_once('/srv/http/app/libs/runeaudio.php');
 $start = microtime(true);
-$savecpu_rp = 12;
-$savecpu_mnt = 1;
-$savecpu_smt = 480;
-$savecpu_inc = 8;
-$savecpu_sps = 43200;
-$savecpu_avd = 86400;
-$savecpu_fixdnssec = 20;
-$savecpu_refresh_nics = 10;
-$savecpu_mpd_log = 1800;
+$savecpuRp = 12;
+$savecpuMnt = 1;
+$savecpuSmt = 480;
+$savecpuInc = 8;
+$savecpuSps = 43200;
+$savecpuAvd = 86400;
+$savecpuFixdnssec = 20;
+$savecpuRefreshNics = 10;
+$savecpuMpdLog = 600;
 $allmounted = 0;
 $retriesmounting = 100;
 ini_set('display_errors', '1');
@@ -1469,34 +1469,34 @@ while (1) {
     }
     $allmounted = $redis->get('allmounted');
     // If mounting is unsuccessful retry mounting the first time on the 1st cycle, then every +/-1800th cycle (= every +/-15 minutes), first time it is set to zero
-    if ((!$allmounted) && ($savecpu_mnt-- <= 0)) {
+    if ((!$allmounted) && ($savecpuMnt-- <= 0)) {
         if ($retriesmounting-- > 0) {
             runelog('wrk_SY: error mounting shares, try it again! Count: '.$retriesmounting);
             // run asynchronous mount script
             sysCmdAsync('nice --adjustment=2 /var/www/command/mount_async.php');
         }
-        $savecpu_mnt = 1750 + rand(0, 100);
+        $savecpuMnt = 1750 + rand(0, 100);
     }
     // Run refresh_nics periodically, run it first after 10 cycles (+/-5 seconds), and increase the repeat cycle time 100%
     // it should run at least once per hour
     // connman also works in this exponential way of detecting WiFi networks and nics
-    if ($savecpu_refresh_nics-- <= 0) {
+    if ($savecpuRefreshNics-- <= 0) {
         wrk_netconfig($redis, 'refreshAsync');
         // increase the repeat cycle time by 100% with a maximum of 7200 (= 1 hour, 60 x 60 x 2)
-        $savecpu_refresh_nics = min(7200, intval($savecpu_refresh_nics*2));
+        $savecpuRefreshNics = min(7200, intval($savecpuRefreshNics*2));
         // calculate the randomiser @5% of the repeat cycle, minimum value of 2, maximum value of 100
-        $random = min(100,max(2, intval($savecpu_refresh_nics/20)));
-        $savecpu_refresh_nics = $savecpu_refresh_nics - $random + rand(0, $random*2);
+        $random = min(100,max(2, intval($savecpuRefreshNics/20)));
+        $savecpuRefreshNics = $savecpuRefreshNics - $random + rand(0, $random*2);
         unset($random);
     }
     // Random play auto start and stop, run first after 12 cycles (+/-6 seconds), then only on every +/-30th cycle (= every +/-15 seconds)
     // Detect deletion of playlist random file and restart if applicable
     // Start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons, this is the only place where it is started
-    if ($savecpu_rp-- <= 0) {
+    if ($savecpuRp-- <= 0) {
         wrk_ashuffle($redis, 'check');
-        $savecpu_rp = 25 + rand(0, 10);
+        $savecpuRp = 25 + rand(0, 10);
     }
-    // MPD logfile size check, run first after 1800 cycles (+/-15 minutes), then repeat on every +/-1800 cycles (+/-15 minutes)
+    // MPD logfile size check, run first after 600 cycles (+/-5 minutes), then repeat on every +/-1200 cycles (+/-10 minutes)
     // if the mpd log is greater than the parameter value (bytes) a new log will be created and the old one deleted
     // the only reason a log file gets too big is when a very large music library is updated or rebuilt or when rune runs for days on end
     // 200000 bytes is about 1500 log entries
@@ -1507,10 +1507,10 @@ while (1) {
     // Test to see if an internet connection is available. Disable the artistinfo & lyrics functions when no internet is available
     // This will resolve freezing problems
     // Test first after 8 cycles (+/-4 seconds), then every +/-1800 cycles (= every +/-15 minutes)
-    if ($savecpu_inc-- <= 0) {
+    if ($savecpuInc-- <= 0) {
         // run the tests and disable/enable the artistinfo & lyrics asynchronously
         sysCmdAsync('nice --adjustment=2 /srv/http/command/internet_available_async.sh');
-        $savecpu_inc = 1750 + rand(0, 100);
+        $savecpuInc = 1750 + rand(0, 100);
     }
     // S.M.A.R.T. monitoring tools
     // will test each attached hard disk and tape unit
@@ -1520,10 +1520,12 @@ while (1) {
     // Why test only when something is playing?
     //	a) someone needs see the error messages and
     //  b) most hard disks will be usb drives which go to sleep when not in use, let them sleep
-    if ($savecpu_smt-- <= 0) {
+    if ($savecpuSmt-- <= 0) {
         $retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed');
         if (!empty(trim($retval[0]))) {
             // something is playing
+            // clear the cache otherwise file_exists() returns incorrect values
+            clearstatcache();
             if (file_exists("/usr/bin/smartctl")) {
                 // monitoring tools software is installed
                 // scan for hard disks
@@ -1587,22 +1589,22 @@ while (1) {
         unset($retval);
         if ($redis->get('disk_error')) {
             // set the disk check frequency to +/-180 cycles (= +/-1.5 minutes)
-            $savecpu_smt = 170 + rand(0, 20);
+            $savecpuSmt = 170 + rand(0, 20);
         } else {
             // set the disk check frequency to +/-2400 cycles (= +/20 minutes)
-            $savecpu_smt = 2350 + rand(0, 100);
+            $savecpuSmt = 2350 + rand(0, 100);
         }
     }
     // Restart shairport-sync every 6 hours, but only when it is inactive
     // There is an unresolved problem with shairport-sync which stops broadcasting its name after a number of hours
     // It will normally run correctly for at least 24 hours
     // Restart every +/-43200 cycles (= every +/-6 hours)
-    if ($savecpu_sps-- <= 0) {
-        $savecpu_sps = 43100 + rand(0, 200);
+    if ($savecpuSps-- <= 0) {
+        $savecpuSps = 43100 + rand(0, 200);
         // see which player is active
         if ($redis->get('activePlayer') === 'Airplay') {
             // Airplay is active so try again in after +/-7200 cycles (= +/-1 hour)
-            $savecpu_sps = 7100 + rand(0, 200);
+            $savecpuSps = 7100 + rand(0, 200);
         } else {
             // Airplay is not running so stop and restart it
             sysCmd('systemctl stop shairport-sync');
@@ -1614,8 +1616,8 @@ while (1) {
     // There is an unresolved problem with avahi which stops broadcasting the player name after a number of hours
     // It will normally run correctly for at least 24 hours
     // Restart every +/-86400 cycles (= every +/-12 hours)
-    if ($savecpu_avd-- <= 0) {
-        $savecpu_avd = 86300 + rand(0, 200);
+    if ($savecpuAvd-- <= 0) {
+        $savecpuAvd = 86300 + rand(0, 200);
         // restart avahi-daemon
         sysCmd('systemctl restart avahi-daemon');
     }
@@ -1623,8 +1625,8 @@ while (1) {
     // There is an unresolved problem with systemd resolve in combination with systemd timesync. Systemd resolve
     // will not resolve URL's with DNSSEC switched on when time has not been syncronised. This causes systemd timesync
     // to fail becuse the timeserver URL's can not be resolved. This effectivly locks both timesync and resolve out.
-    if ($savecpu_fixdnssec-- <= 0) {
-        $savecpu_fixdnssec = 1750 + rand(0, 100);
+    if ($savecpuFixdnssec-- <= 0) {
+        $savecpuFixdnssec = 1750 + rand(0, 100);
         $timesync_OK = sysCmd('timedatectl show -a | grep NTPSynchronized | grep -ci yes')[0];
         $dnssec_OK = sysCmd('resolvectl status | grep -i "dnssec setting" | grep -ci yes')[0];
         if (($timesync_OK && !$dnssec_OK) || (!$timesync_OK && $dnssec_OK)) {
