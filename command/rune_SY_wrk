@@ -1498,11 +1498,12 @@ while (1) {
     }
     // MPD logfile size check, run first after 600 cycles (+/-5 minutes), then repeat on every +/-1200 cycles (+/-10 minutes)
     // if the mpd log is greater than the parameter value (bytes) a new log will be created and the old one deleted
-    // the only reason a log file gets too big is when a very large music library is updated or rebuilt or when rune runs for days on end
-    // 200000 bytes is about 1500 log entries
-    if ($savecpu_mpd_log-- <= 0) {
-        wrk_mpdLog($redis, 200000);
-        $savecpu_rp = 1750 + rand(0, 100);
+    // the only reason a log file gets too big is when a very large music library is updated or rebuilt (it then tends to grow very quickly)
+    // or when rune runs for days on end without reboot
+    // 200000 bytes is enough for about 1500 normal log entries (@ 3mins per song = 3+ days playing time)
+    if ($savecpuMpdLog-- <= 0) {
+        wrk_mpdLog($redis, $redis->get('mpd_max_logsize'));
+        $savecpuMpdLog = 1150 + rand(0, 100);
     }
     // Test to see if an internet connection is available. Disable the artistinfo & lyrics functions when no internet is available
     // This will resolve freezing problems

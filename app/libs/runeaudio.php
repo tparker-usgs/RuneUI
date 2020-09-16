@@ -5708,29 +5708,42 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
     }
 }
 // work function to check the MPD logfile size
-function wrk_mpdLog($redis, $logSizeMax = 200000)
+function wrk_mpdLog($redis, $logMax = null)
 // get the location and name of the MPD logfile from redis
 // check its size, when greater than $filesizeMax delete it and inform MPD to create a new one
 {
+    if (is_null($logMax)) {
+        return;
+    } else {
+        $logSizeMax = floatval($logMax);
+    }
     $logFile = $redis->hGet('mpdconf', 'log_file');
+    // clear the static cache otherwise the file_exists() and filesize() return incorrect values
+    clearstatcache();
+    // debug
+    // $redis->hset('wrk_mpdLog', 'logSizeMax', $logSizeMax);
+    // $redis->hset('wrk_mpdLog', 'logFile', $logFile);
     if (file_exists($logFile)) {
         // its there, get the size
-        $logSize = filesize($logFile);
+        $logSize = floatval(filesize($logFile));
+        // debug
+        // $redis->hset('wrk_mpdLog', 'logSize', $logSize);
+        if ($logSize >= $logSizeMax) {
+            // delete the file
+            sysCmd('rm '."'".$logFile."'");
+            // commit and purge the buffers
+            sysCmd('sync');
+            // use systemctl/pkill to send the SIGHUP signal to tell MPD to recreate/reopen the log file
+            // sysCmd('systemctl kill -s HUP mpd');
+            sysCmd('pkill -HUP mpd');
+        }
     } else {
         // file not found
         // if the file is not there MPD failed to restart writing to it the last time
-        // set the size so that the SIGHUP signal will be sent again
-        $logSize = $logSizeMax;
-    }
-    if ($logSize >= $logSizeMax) {
-        // delete the file
-        sysCmd('rm '."'".$logFile."'");
         // commit and purge the buffers
         sysCmd('sync');
-        // use systemctl to send the SIGHUP signal to tell MPD to recreate/reopen the log file
+        // use systemctl or pkill to send the SIGHUP signal to tell MPD to recreate/reopen the log file
         sysCmd('systemctl kill -s HUP mpd');
-        // seems sometimes to need to be run twice!
-        sysCmd('sync');
-        sysCmd('systemctl kill -s HUP mpd');
+        // sysCmd('pkill -HUP mpd');
     }
 }

@@ -224,6 +224,7 @@ function redisDatastore($redis,$action) {
             $redis->set('sssconfchange', 0);
             $redis->set('libaoconfchange', 0);
             $redis->set('avahiconfchange', 0);
+            $redis->set('mpd_max_logsize', 200000);
             // default lyrics and info
             $redis->hSet('lyrics', 'currentartist', '');
             $redis->hSet('lyrics', 'currentsong', '');
@@ -570,6 +571,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('sssconfchange') || $redis->set('sssconfchange', 0);
             $redis->exists('libaoconfchange') || $redis->set('libaoconfchange', 0);
             $redis->exists('avahiconfchange') || $redis->set('avahiconfchange', 0);
+            $redis->exists('mpd_max_logsize') || $redis->set('mpd_max_logsize', 200000);
             // plugins api-keys
             $redis->exists('lastfm_apikey') || $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
             $redis->hExists('lastfm', 'apikey') || $redis->hSet('lastfm', 'apikey', 'ba8ad00468a50732a3860832eaed0882');
