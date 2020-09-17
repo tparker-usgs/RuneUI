@@ -174,6 +174,7 @@ git add .
 git stash
 git pull --no-edit
 git stash
+git pull --no-edit
 if [ "$1" == "full" ]; then
     y="0"
     x="0"
