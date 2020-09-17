@@ -5558,6 +5558,34 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
 // /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 {
     switch ($action) {
+        case 'checkcrossfade':
+            // $action = 'checkcrossfade'
+            //
+            $file = '/etc/systemd/system/ashuffle.service';
+            $retval = sysCmd('mpc crossfade');
+            $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
+            if ($retval == 0) {
+                // crossfade = 0 so the number of extra queued songs should be 0
+                if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$file."'")[0]) {
+                    // incorrect value in the ashuffle service file
+                    sysCmd("sed -i 's|-q 1|-q 0|' ".$file);
+                    // reload the service file
+                    sysCmd('systemctl daemon-reload');
+                    // stop ashuffle if it is running
+                    sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+                }
+            } else {
+                // crossfade != 0 so the number of extra queued songs should be 1
+                if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$file."'")[0]) {
+                    // incorrect value in the ashuffle service file
+                    sysCmd("sed -i 's|-q 0|-q 1|' ".$file);
+                    // reload the service file
+                    sysCmd('systemctl daemon-reload');
+                    // stop ashuffle if it is running
+                    sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+                }
+            }
+            break;
         case 'set':
             // $action = 'set'
             //

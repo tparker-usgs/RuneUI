@@ -67,11 +67,17 @@
             if ($redis->get('globalrandom') != 1) {
                 $redis->set('globalrandom', 1);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            } else {
+                // check that crossfade is set up correctly
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         } else {
             if ($redis->get('globalrandom') != 0) {
                 $redis->set('globalrandom', 0);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            } else {
+                // check that crossfade is set up correctly
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         }
         if ((isset($_POST['mpd']['addrandom'])) && (is_numeric($_POST['mpd']['addrandom']))) {
