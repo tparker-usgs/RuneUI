@@ -55,18 +55,6 @@ if (isset($_POST)) {
         }
         $redis->get('hostname') == $_POST['hostname'] || $jobID[] = wrk_control($redis, 'newjob', $data = array( 'wrkcmd' => 'hostname', 'args' => $args ));
     }
-    // ----- KERNEL -----
-    if (isset($_POST['kernel'])) {
-        // submit worker job
-        if ($redis->get('kernel') !== $_POST['kernel']) {
-            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'kernelswitch', 'args' => $_POST['kernel']));
-            $notification = new stdClass();
-            $notification->title = 'Kernel switch';
-            $notification->text = 'Kernel switch started...';
-            wrk_notify($redis, 'startjob', $notification, $job);
-            $jobID[] = $job;
-        }
-    }
     if (isset($_POST['orionprofile'])) {
         // submit worker job
         $redis->get('orionprofile') == $_POST['orionprofile'] || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'orionprofile', 'args' => $_POST['orionprofile']));
@@ -110,7 +98,18 @@ if (isset($_POST)) {
             }
         }
     }
-
+    // ----- KERNEL -----
+    if (isset($_POST['kernel'])) {
+        // submit worker job
+        if ($redis->get('kernel') !== $_POST['kernel']) {
+            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'kernelswitch', 'args' => $_POST['kernel']));
+            $notification = new stdClass();
+            $notification->title = 'Kernel switch';
+            $notification->text = 'Kernel switch started...';
+            wrk_notify($redis, 'startjob', $notification, $job);
+            $jobID[] = $job;
+        }
+    }
     // ----- FEATURES -----
     if (isset($_POST['features'])) {
         if ((isset($_POST['features']['airplay']['enable'])) && ($_POST['features']['airplay']['enable'])) {
@@ -287,12 +286,14 @@ $template->samba = $redis->hGetAll('samba');
 $template->hwplatformid = $redis->get('hwplatformid');
 $template->i2smodule = $redis->get('i2smodule');
 $template->i2smodule_select = $redis->get('i2smodule_select');
+// maybe implement the following code to for a manually edited /boot/config.txt
 // if ($template->i2smodule == 'none') {
     // $retval = sysCmd("grep -v '#.*=' /boot/config.txt | sed -n '/## RuneAudio I2S-Settings/,/#/p' | grep dtoverlay | cut -d '=' -f2");
     // if (isset($retval[0])) {
         // $retval[0] = trim($retval[0]);
         // if (($retval[0] != 'none') && (!empty(retval[0]))) {
             // $redis->set('i2smodule', $retval[0]);
+            // also need to add code to determine a valid value of $redis->get('i2smodule_select')!!!
             // $template->i2smodule = $retval[0];
         // }
     // }
@@ -300,7 +301,9 @@ $template->i2smodule_select = $redis->get('i2smodule_select');
 // }
 $template->audio_on_off = $redis->get('audio_on_off');
 // $template->kernel = $redis->get('kernel');
-$template->kernel = trim(sysCmd('uname --kernel-release')[0].' '.$bit);
+$template->kernel = trim(sysCmd('uname --kernel-release')[0]).$bit;
+// the next line prevents the kernel change routine from running
+$redis->set('kernel', $template->kernel);
 unset($bit);
 $template->pwd_protection = $redis->get('pwd_protection');
 // check if a local browser is supported

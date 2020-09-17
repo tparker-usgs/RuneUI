@@ -777,8 +777,8 @@ while (1) {
                 case 'kernelswitch':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    runelog('env: SWITCH KERNEL',$job->args);
-                    if (wrk_kernelswitch($redis,$job->args)) {
+                    runelog('env: SWITCH KERNEL', $job->args);
+                    if (wrk_kernelswitch($redis, $job->args)) {
                         if ($job->args === 'linux-rune-rpi_3.12.13-rt21_wosa') {
                             $redis->set('ao', 'snd_rpi_wsp_1');
                             $redis->set('i2smodule', 'none');

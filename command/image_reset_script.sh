@@ -313,7 +313,6 @@ sync
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
 if [ "$1" == "full" ]; then
-    redis-cli save
     echo "Zero filling the file system"
     # zero fill the file system
     cd /boot

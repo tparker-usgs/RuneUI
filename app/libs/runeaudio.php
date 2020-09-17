@@ -2562,7 +2562,6 @@ function wrk_audio_on_off($redis, $args)
 
 function wrk_kernelswitch($redis, $args)
 {
-    $redis->set('i2smodule', 'none');
     $file = '/boot/config.txt';
     $newArray = wrk_replaceTextLine($file, '', 'kernel=', 'kernel='.$args.'.img');
     // Commit changes to /boot/config.txt
