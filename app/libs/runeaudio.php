@@ -5543,6 +5543,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
 // Parameter $redis is compulsory
 // Parameter $action can have then the values: 'set', 'reset' or 'check' (default)
 // Parameter $playlistName is only used when $action = set - it contains  the name of the playlist, not the filename
+// when $action = 'checkcrossfade' the number of songs to be mainland in the queue is checked and if required corrected
 // when $action = 'set' the specified playlist is used as the source for ashuffle
 // when $action = 'reset' the complete MPD library is used as the source for ashuffle
 // when $action = 'check' conditions will be controlled and on the basis of these conditions ashuffle will be:
@@ -5562,13 +5563,15 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // $action = 'checkcrossfade'
             //
             $file = '/etc/systemd/system/ashuffle.service';
+            // get the current crossfade value
             $retval = sysCmd('mpc crossfade');
             $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
             if ($retval == 0) {
                 // crossfade = 0 so the number of extra queued songs should be 0
                 if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$file."'")[0]) {
                     // incorrect value in the ashuffle service file
-                    sysCmd("sed -i 's|-q 1|-q 0|' ".$file);
+                    // find the line beginning with 'ExecStart' and in that line replace '-q 1'' with -q 0'
+                    sysCmd("sed -i '/^ExecStart/s/-q 1/-q 0/' ".$file);
                     // reload the service file
                     sysCmd('systemctl daemon-reload');
                     // stop ashuffle if it is running
@@ -5578,7 +5581,8 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 // crossfade != 0 so the number of extra queued songs should be 1
                 if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$file."'")[0]) {
                     // incorrect value in the ashuffle service file
-                    sysCmd("sed -i 's|-q 0|-q 1|' ".$file);
+                    // find the line beginning with 'ExecStart' and in that line replace '-q 0'' with -q 1'
+                    sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$file);
                     // reload the service file
                     sysCmd('systemctl daemon-reload');
                     // stop ashuffle if it is running
