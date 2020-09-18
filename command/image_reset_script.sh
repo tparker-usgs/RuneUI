@@ -164,6 +164,7 @@ redis-cli set playerid ""
 redis-cli set hwplatformid ""
 #
 # update local git and clean up any stashes
+md5before=$( md5sum $0 | xargs | cut -f 1 -d " " )
 rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
 git config --global core.editor "nano"
@@ -196,6 +197,16 @@ if [ "$1" == "full" ]; then
     git clean -f
 fi
 cd /home
+md5after=$( md5sum $0 | xargs | cut -f 1 -d " " )
+if [ "$md5before" != "$md5after" ] ; then
+    set +x
+    echo "#############################################################"
+    echo "## This script has been changed during the git pull update ##"
+    echo "##    Exiting! - You need to run this script again!!       ##"
+    echo "##               -----------------------------------       ##"
+    echo "#############################################################"
+    exit
+fi
 #
 # remove any git user-names & email
 cd /srv/http/
@@ -257,6 +268,8 @@ if [ "$1" == "full" ]; then
     pacman -Sc --noconfirm
     # remove ALL files from the package cache
     # pacman -Scc --noconfirm
+    # rank mirrors and refresh repo's
+    /srv/http/command/rank_mirrors.sh
 fi
 #
 # reset systemd services so that any cached files are replaced by the latest ones
@@ -310,6 +323,22 @@ sync
 redis-cli save
 redis-cli shutdown save
 sync
+#
+# unmount rune tmpfs filesystems and empty their mount points (to avoid errors in startup sequence)
+# http-tmp > /srv/http/tmp
+rm -r /srv/http/tmp/*
+umount /srv/http/tmp
+rm -r /srv/http/tmp
+mkdir /srv/http/tmp
+chown http.http /srv/http/tmp
+chmod 777 /srv/http/tmp
+# rune-logs > /var/log/runeaudio (after shutting down redis!)
+rm -r /var/log/runeaudio/*
+umount /var/log/runeaudio
+rm -r /var/log/runeaudio
+mkdir /var/log/runeaudio
+chown root.root /var/log/runeaudio
+chmod 777 /var/log/runeaudio
 #
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
