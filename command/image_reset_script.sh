@@ -327,7 +327,8 @@ mkdir /srv/http/tmp
 chown http.http /srv/http/tmp
 chmod 777 /srv/http/tmp
 mount http-tmp
-# rune-logs > /var/log/runeaudio (after shutting down redis!)
+# most of the remaining lines in this section fail! this is not a problem
+# rune-logs > /var/log/runeaudio (after shutting down redis! without remount)
 rm -r /var/log/runeaudio/*
 umount /var/log/runeaudio
 rm -r /var/log/runeaudio
@@ -342,7 +343,13 @@ mkdir /var/log
 chown root.root /var/log
 chmod 777 /var/log
 mount logs
-# remount rune-logs after logs!
+# rune-logs > /var/log/runeaudio (again after logs, with remount)
+rm -r /var/log/runeaudio/*
+umount /var/log/runeaudio
+rm -r /var/log/runeaudio
+mkdir /var/log/runeaudio
+chown root.root /var/log/runeaudio
+chmod 777 /var/log/runeaudio
 mount rune-logs
 #
 # zero fill the file system if parameter 'full' is selected
