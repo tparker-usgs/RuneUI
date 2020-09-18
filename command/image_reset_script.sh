@@ -109,21 +109,15 @@ rm -f /usr/local/bin/uninstall_enha.sh
 redis-cli del addons
 redis-cli del addo
 #
-# remove user files and logs
-rm -rf /var/log/runeaudio/*
-umount /srv/http/tmp
-umount /var/log/runeaudio
-umount /var/log
+# remove user files
 rm -f /var/lib/mpd/mpd.db
 rm -f /var/lib/mpd/mpdstate
-rm -rf /var/log/*
 rm -rf /root/.*
 rm -rf /var/www/test
 rm -rf /mnt/MPD/LocalStorage/*
 rm -rf /mnt/MPD/Webradio/*
 rm -rf /var/lib/mpd/playlists/*
 rm -rf /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
-rm -rf /srv/http/tmp
 rm -f /etc/sudoers.d/*
 rm -rf /home/*
 rm -rf /var/lib/bluetooth/*
@@ -307,7 +301,7 @@ else
     experimental="Experimental Beta"
 fi
 line1="RuneOs: $experimental V$release-gearhead-$osdate"
-line2="RuneUI: $gitbranch $buildversion V$release-$patchlevel"
+line2="RuneUI: $gitbranch V$release-$buildversion-$patchlevel"
 line3="Hw-env: Raspberry Pi ($archarmver)"
 sed -i "s|^RuneOs:.*|$line1|g" /etc/motd
 sed -i "s|^RuneUI:.*|$line2|g" /etc/motd
@@ -324,7 +318,7 @@ redis-cli save
 redis-cli shutdown save
 sync
 #
-# unmount rune tmpfs filesystems and empty their mount points (to avoid errors in startup sequence)
+# unmount rune tmpfs filesystems, empty their mount points and remount (to avoid errors in the startup sequence)
 # http-tmp > /srv/http/tmp
 rm -r /srv/http/tmp/*
 umount /srv/http/tmp
@@ -332,6 +326,7 @@ rm -r /srv/http/tmp
 mkdir /srv/http/tmp
 chown http.http /srv/http/tmp
 chmod 777 /srv/http/tmp
+mount http-tmp
 # rune-logs > /var/log/runeaudio (after shutting down redis!)
 rm -r /var/log/runeaudio/*
 umount /var/log/runeaudio
@@ -339,6 +334,16 @@ rm -r /var/log/runeaudio
 mkdir /var/log/runeaudio
 chown root.root /var/log/runeaudio
 chmod 777 /var/log/runeaudio
+# logs > /var/log
+rm -r /var/log/*
+umount /var/log
+rm -r /var/log
+mkdir /var/log
+chown root.root /var/log
+chmod 777 /var/log
+mount logs
+# remount rune-logs after logs!
+mount rune-logs
 #
 # zero fill the file system if parameter 'full' is selected
 # this takes ages to run, but the zipped distribution image will then be very small
