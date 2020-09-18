@@ -321,23 +321,23 @@ sync
 # unmount rune tmpfs filesystems, empty their mount points and remount (to avoid errors in the startup sequence)
 # http-tmp > /srv/http/tmp
 rm -r /srv/http/tmp/*
-umount /srv/http/tmp
+umount http-tmp
 rm -r /srv/http/tmp
 mkdir /srv/http/tmp
 chown http.http /srv/http/tmp
 chmod 777 /srv/http/tmp
 mount http-tmp
-# most of the remaining lines in this section fail! this is not a problem
+# many of the remaining lines in this section fail! this is not a problem
 # rune-logs > /var/log/runeaudio (after shutting down redis! without remount)
 rm -r /var/log/runeaudio/*
-umount /var/log/runeaudio
+umount rune-logs
 rm -r /var/log/runeaudio
 mkdir /var/log/runeaudio
 chown root.root /var/log/runeaudio
 chmod 777 /var/log/runeaudio
 # logs > /var/log
 rm -r /var/log/*
-umount /var/log
+umount logs
 rm -r /var/log
 mkdir /var/log
 chown root.root /var/log
@@ -345,7 +345,7 @@ chmod 777 /var/log
 mount logs
 # rune-logs > /var/log/runeaudio (again after logs, with remount)
 rm -r /var/log/runeaudio/*
-umount /var/log/runeaudio
+umount rune-logs
 rm -r /var/log/runeaudio
 mkdir /var/log/runeaudio
 chown root.root /var/log/runeaudio
