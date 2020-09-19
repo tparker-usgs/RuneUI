@@ -22,6 +22,8 @@ matchbox-window-manager -use_titlebar no -use_cursor no &
 # install multimedia keyboard shortcuts
 xbindkeys &
 
-# start midori in privat mode with fullscreen display
-midori -p -e Fullscreen http://localhost
+# start midori in private mode with fullscreen display
+# midori -p -e Fullscreen http://localhost
+# use chromium instead because it scales whereas Midori no longer does
+sudo -u http /usr/bin/chromium --kiosk --incognito --force-device-scale-factor=0.6 -e http://localhost/
 
