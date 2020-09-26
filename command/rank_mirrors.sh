@@ -79,7 +79,7 @@ rm -rf $tmpdir
 echo -e "\n$bar Update package database ..."
 
 rm -f /var/lib/pacman/db.lck
-pacman -Sy
+pacman -Syy
 
 (( $# == 0 )) && exit
 
