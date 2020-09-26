@@ -26,35 +26,37 @@ else
     redis-cli hset service discogs 0
     redis-cli hset service fanarttv 0
     redis-cli hset service jamendo 0
-    # just in case something has gone wrong with the local router link, try to reconnect
-    # if an ip-address is assigned, use IP to take the nics down and bring them up to remove the ip address
-    # connman will then reconnect automatically
-    # only external ip addresses (192.168.x.x)
-    # exclude any nic working as an access point (standard is 192.168.5.1)
-    ACCESSPOINT=$( redis-cli hget AccessPoint ip-address )
-    NICS=$(ip -o -br  address | grep '192.168' | grep -v '$ACCESSPOINT' | cut -d ' ' -f1)
-    for NIC in $NICS
-    do
-        # first use ifconfig to remove the IPv4 address - documentation says it is the best way to do it for a primary address
-        ifconfig $NIC 0.0.0.0
-        # the preferred way to do it is with ip, first for IPv6
-        ip -6 address flush $NIC
-        # and for IPv4
-        ip -4 address flush $NIC
-        # take the nic down
-        ip link set dev $NIC down
-    done
-    # remove the cached connman configuration files
-    rm /var/lib/connman/wifi_*/settings
-    rm /var/lib/connman/ethernet_*/settings
-    for NIC in $NICS
-    do
-        # bring the nic up
-        ip link set dev $NIC up
-        # connman now detects a new nic with no IP-address and will now attempt to reconnect
-    done
-    # finally run refresh nics
-    /srv/http/command/refresh_nics
+    # # just in case something has gone wrong with the local router link, try to reconnect
+    # # if an ip-address is assigned, use IP to take the nics down and bring them up to remove the ip address
+    # # connman will then reconnect automatically
+    # # only external ip addresses (192.168.x.x)
+    # # exclude any nic working as an access point (standard is 192.168.5.1)
+    # ACCESSPOINT=$( redis-cli hget AccessPoint ip-address )
+    # NICS=$(ip -o -br  address | grep '192.168' | grep -v '$ACCESSPOINT' | cut -d ' ' -f1)
+    # for NIC in $NICS
+    # do
+        # # first use ifconfig to remove the IPv4 address - documentation says it is the best way to do it for a primary address
+        # ifconfig $NIC 0.0.0.0
+        # # the preferred way to do it is with ip, first for IPv6
+        # ip -6 address flush $NIC
+        # # and for IPv4
+        # ip -4 address flush $NIC
+        # # take the nic down
+        # ip link set dev $NIC down
+    # done
+    # # remove the cached connman configuration files
+    # rm /var/lib/connman/wifi_*/settings
+    # rm /var/lib/connman/ethernet_*/settings
+    # rm /var/lib/connman/wifi_*/data
+    # rm /var/lib/connman/ethernet_*/data
+    # for NIC in $NICS
+    # do
+        # # bring the nic up
+        # ip link set dev $NIC up
+        # # connman now detects a new nic with no IP-address and will now attempt to reconnect
+    # done
+    # # finally run refresh nics
+    # /srv/http/command/refresh_nics
     exit
 fi
 # dirble
