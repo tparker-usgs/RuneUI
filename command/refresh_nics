@@ -52,18 +52,27 @@ if ($networkInterfaces) {
     $networkInterfaces = json_decode($redis->Get('network_interfaces'), true);
 }
 //
-// start AP if configured and there is a free AP capable wifi nic with no IP is assigned
+// wait 20 seconds to allow connman to (re)start any interfaces
+sleep(20);
+//
+// start AP if configured and there is a AP capable Wi-Fi nic with no IP-address assigned
 // it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now
-if ($redis->hGet('AccessPoint', 'enabled') && !$redis->Get('lock_wifiscan')) {
+if ($redis->hGet('AccessPoint', 'enabled')) {
     runelog('------------------ try to start AP if no IP is assigned ---------------------');
     $apWifiNicFound = false;
     $ethNicConnected = false;
     // walk through the array $ipAddress, this contains all wireless nics plus the connected wired nics
     foreach($networkInterfaces as $nic) {
         // check if the nic technology is 'wifi' and it has no allocated IP address
-        if (($nic['technology'] === 'wifi') && (!$nic['connected'])) {
+        // double check to see if the nic is still not connected! connman may not have started a reconnection process when the nics array was created
+        //     use this 'ip -o  address | sed 's,[ ]\+, ,g' | grep -i 'inet ' | grep -ic wlan0'
+        if (($nic['technology'] === 'wifi') &&
+                // its Wi-Fi
+                (!$nic['connected']) &&
+                // it was not connecte when the nics array was created
+                (!sysCmd('ip -o  address | sed '."'".'s,[ ]\+, ,g'."'".' | grep -i '."'".'inet '."'".' | grep -ic '.$nic['nic'])[0])) {
+                // it is still not connected
             // start AP only if a supported nic is available
-            // netctl-auto@wlan0 should is running, don't switch it off
             if ((!$apWifiNicFound) && ($nic['apSupported'])) {
                 // allways use the first one found, skip the rest
                 runelog('########### got a nic for AP: '.$nic['nic']);
@@ -73,14 +82,14 @@ if ($redis->hGet('AccessPoint', 'enabled') && !$redis->Get('lock_wifiscan')) {
         }
         // check if the nic technology is 'ehernet' and it has an allocated IP address
         if ((!$ethNicConnected) && ($nic['technology'] === 'ethernet') && ($nic['connected'])) {
-            // allways use the first one found, skip the rest
+            // allways use the first one found for NAT, skip the rest
             runelog('########### got a nic for AP NAT: '.$nic['nic']);
             $ethNic = $nic['nic'];
             $ethNicConnected = true;
         }
     }
     //
-    if ($apWifiNicFound ) {
+    if ($apWifiNicFound) {
         runelog('########### no IP => start AP on '.$wlanNic);
         $file = '/etc/hostapd/hostapd.conf';
         // change AP name

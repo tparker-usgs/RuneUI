@@ -2005,13 +2005,15 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
                 if ($lockWifiscan >= 7) {
                     // its not really a great problem if this routine runs twice at the same time
                     // but spread the attempts, so let it run on the 7th attempt
+                    $redis->Set('lock_wifiscan', ++$lockWifiscan);
                 } else {
                     $redis->Set('lock_wifiscan', ++$lockWifiscan);
                     break;
                 }
             }
             // run the refresh nics routine and wait until it finishes
-            sysCmd('/srv/http/command/refresh_nics');
+            refresh_nics($redis);
+            // sysCmd('/srv/http/command/refresh_nics');
             break;
         case 'refreshAsync':
             // check the lock status
@@ -2020,6 +2022,7 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
                 if ($lockWifiscan >= 7) {
                     // its not really a great problem if this routine runs twice at the same time
                     // but spread the attempts, so let it run on the 7th attempt
+                    $redis->Set('lock_wifiscan', ++$lockWifiscan);
                 } else {
                     $redis->Set('lock_wifiscan', ++$lockWifiscan);
                     break;
@@ -5183,11 +5186,12 @@ function refresh_nics($redis)
     // add to the existing array if the time since the last run is less than 6 hours
     // otherwise start with an empty array
     list($nowMicroseconds, $nowSeconds) = explode(" ", microtime());
+    $nowSeconds = floatval($nowSeconds);
     if (!$redis->Exists('network_info_time')) {
         $redis->Set('network_info_time', $nowSeconds);
     }
-    $previousSeconds = $redis->Get('network_info_time');
-    $hoursSince = floor((floatval($nowSeconds) - floatval($previousSeconds))/60/60);
+    $previousSeconds = floatval($redis->Get('network_info_time'));
+    $hoursSince = floor(($nowSeconds - $previousSeconds)/60/60);
     if ($hoursSince >= 6) {
         // clear the array and save the time
         $networkInfo = array();
