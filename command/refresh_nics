@@ -43,6 +43,15 @@ $redis = new Redis();
 $redis->connect('/run/redis/socket');
 require_once('/var/www/app/libs/runeaudio.php');
 //
+// check that internet is available, if not run the internet available routine and wait for 20 seconds to allow connman to reconnect
+if (!$redis->hGet('service', 'internet')) {
+    // double check that the current status correct is
+    sysCmd('/srv/http/command/internet_available_async.sh');
+    sleep(20);
+    // run it twice, the first time will try to initiate a recovery, the second time will detect the status
+    sysCmd('/srv/http/command/internet_available_async.sh');
+}
+//
 // refresh the network arrays and save them in redis
 $networkInterfaces = refresh_nics($redis);
 if ($networkInterfaces) {
@@ -52,29 +61,43 @@ if ($networkInterfaces) {
     $networkInterfaces = json_decode($redis->Get('network_interfaces'), true);
 }
 //
-// wait 20 seconds to allow connman to (re)start any interfaces
-sleep(20);
-//
 // start AP if configured and there is a AP capable Wi-Fi nic with no IP-address assigned
-// it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now
+//     only start AP if it is the first time that this routine runs or later when no internet connection is available
+//     AP will start on boot if no Wi-Fi network is connected
+//     AP will not start when a Wi-Fi connection is lost and the wired ethernet is still connected
+//     only after a full loss of internet (and after some delays) will the AP start as an emergency connection
+// (it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now)
 if ($redis->hGet('AccessPoint', 'enabled')) {
     runelog('------------------ try to start AP if no IP is assigned ---------------------');
     $apWifiNicFound = false;
     $ethNicConnected = false;
-    // walk through the array $ipAddress, this contains all wireless nics plus the connected wired nics
+    // walk through the array $networkInterfaces, this contains all wireless nics plus the connected wired nics
     foreach($networkInterfaces as $nic) {
-        // check if the nic technology is 'wifi' and it has no allocated IP address
-        // double check to see if the nic is still not connected! connman may not have started a reconnection process when the nics array was created
-        //     use this 'ip -o  address | sed 's,[ ]\+, ,g' | grep -i 'inet ' | grep -ic wlan0'
-        if (($nic['technology'] === 'wifi') &&
-                // its Wi-Fi
+        // check if it is the first time this code is executed since reboot/boot (this must be done first, the order of the tests is important)
+        //         or there is no internet available
+        //     and the nic  it is not connected, no suitable nic has been found, technology is 'wifi' and it supports AP
+        //     then wait for 20 seconds to allow connman to complete any reconnection activities
+        //     finally double check to see if the nic is still not connected!
+        //     (connman may not have initiated a reconnection process when the nics array was created)
+        //         use this to check the actual connection status: 'ip -o  address | sed 's,[ ]\+, ,g' | grep -i 'inet ' | grep -ic wlan0'
+        if (
+                ((is_firstTime($redis, 'AP-start')) || (!$redis->hGet('service', 'internet'))) &&
+                // it is the first time this point in the code has been processed since reboot/boot or there is no internet available
                 (!$nic['connected']) &&
-                // it was not connecte when the nics array was created
-                (!sysCmd('ip -o  address | sed '."'".'s,[ ]\+, ,g'."'".' | grep -i '."'".'inet '."'".' | grep -ic '.$nic['nic'])[0])) {
-                // it is still not connected
-            // start AP only if a supported nic is available
-            if ((!$apWifiNicFound) && ($nic['apSupported'])) {
-                // allways use the first one found, skip the rest
+                // the nic was not connected when the nics array was created
+                (!$apWifiNicFound) &&
+                // still haven't found a suitable nic in the array
+                ($nic['technology'] === 'wifi') &&
+                // its a Wi-Fi nic
+                ($nic['apSupported'])
+                // the nic supports AP
+                )
+        {
+            // sleep for 20 seconds to ensure that connman has time to connect/reconnect
+            sleep(20);
+            // double-check that the nic is still not connected
+            if (!sysCmd('ip -o  address | sed '."'".'s,[ ]\+, ,g'."'".' | grep -i '."'".'inet '."'".' | grep -ic '.$nic['nic'])[0]) {
+                // the nic is still not connected
                 runelog('########### got a nic for AP: '.$nic['nic']);
                 $wlanNic = $nic['nic'];
                 $apWifiNicFound = true;

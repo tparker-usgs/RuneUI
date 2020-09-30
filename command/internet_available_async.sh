@@ -5,6 +5,20 @@
 # Test to determine if an internet connection is available and check all the other services.
 # This will allow graceful disabling of Rune service functionality in the UI.
 #
+# setup
+set +e # continue on errors
+#
+# if connman has lost a Wi-Fi connection it should reconnect automatically, but the current version does not do it
+# running 'iwctl station <nic> scan' for the Wi-Fi nics will initiate a reconnect
+# no real issue in running this every time this routine runs
+# get a list of the Wi-Fi nics
+NICS=$(iw dev | grep -i interface | cut -d ' ' -f2 | xargs)
+for NIC in $NICS
+do
+    # scan for wireless networks
+    iwctl station $NIC scan
+done
+#
 # internet
 # determine if we can see google.com, this command will give up after +/-20 seconds (= timeout x retries)
 wget --force-html --spider --connect-timeout=1 --timeout=10 --tries=2 https://www.google.com/ > /dev/null 2>&1
@@ -26,37 +40,6 @@ else
     redis-cli hset service discogs 0
     redis-cli hset service fanarttv 0
     redis-cli hset service jamendo 0
-    # # just in case something has gone wrong with the local router link, try to reconnect
-    # # if an ip-address is assigned, use IP to take the nics down and bring them up to remove the ip address
-    # # connman will then reconnect automatically
-    # # only external ip addresses (192.168.x.x)
-    # # exclude any nic working as an access point (standard is 192.168.5.1)
-    # ACCESSPOINT=$( redis-cli hget AccessPoint ip-address )
-    # NICS=$(ip -o -br  address | grep '192.168' | grep -v '$ACCESSPOINT' | cut -d ' ' -f1)
-    # for NIC in $NICS
-    # do
-        # # first use ifconfig to remove the IPv4 address - documentation says it is the best way to do it for a primary address
-        # ifconfig $NIC 0.0.0.0
-        # # the preferred way to do it is with ip, first for IPv6
-        # ip -6 address flush $NIC
-        # # and for IPv4
-        # ip -4 address flush $NIC
-        # # take the nic down
-        # ip link set dev $NIC down
-    # done
-    # # remove the cached connman configuration files
-    # rm /var/lib/connman/wifi_*/settings
-    # rm /var/lib/connman/ethernet_*/settings
-    # rm /var/lib/connman/wifi_*/data
-    # rm /var/lib/connman/ethernet_*/data
-    # for NIC in $NICS
-    # do
-        # # bring the nic up
-        # ip link set dev $NIC up
-        # # connman now detects a new nic with no IP-address and will now attempt to reconnect
-    # done
-    # # finally run refresh nics
-    # /srv/http/command/refresh_nics
     exit
 fi
 # dirble

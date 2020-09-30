@@ -1193,7 +1193,9 @@ while (1) {
                     $redis->save();
                     // send notfy to UI
                     ui_notify_async('Shutdown', 'system shutdown in progress...', $jobID);
+                    ui_notify('Shutdown', 'system shutdown in progress...');
                     sysCmd('/var/www/command/rune_shutdown poweroff');
+                    sleep(2);
                     sysCmdAsync('poweroff');
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -1205,7 +1207,9 @@ while (1) {
                     $redis->save();
                     // send notfy to UI
                     ui_notify_async('Reboot', 'system reboot in progress...', $jobID);
+                    ui_notify('Reboot', 'system reboot in progress...');
                     sysCmd('/var/www/command/rune_shutdown reboot');
+                    sleep(2);
                     sysCmdAsync('reboot');
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -1488,8 +1492,8 @@ while (1) {
     // connman works (should work) in this exponential way of detecting WiFi networks and nics
     if ($savecpuRefreshNics-- <= 0) {
         wrk_netconfig($redis, 'refreshAsync');
-        // increase the repeat cycle time by 100% with a maximum of 1800 (= 15 mins, 15 x 60 x 2)
-        $savecpuRefreshNics = min(1800, intval($savecpuRefreshNics*1.5));
+        // increase the repeat cycle time by 100% with a maximum of 7200 (= 1 hour, 60 x 60 x 2)
+        $savecpuRefreshNics = min(7200, intval($savecpuRefreshNics*2));
         // calculate the randomiser @5% of the repeat cycle, minimum value of 2, maximum value of 100
         $random = min(100,max(2, intval($savecpuRefreshNics/20)));
         $savecpuRefreshNics = $savecpuRefreshNics - $random + rand(0, $random*2);

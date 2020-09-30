@@ -2263,11 +2263,16 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             $redis->set('network_autoOptimiseWifi', 1);
             // run refresh_nics
             wrk_netconfig($redis, 'refresh');
-            // set reboot to true
-            $args['reboot'] = true;
+            // set poweroff to true
+            $args['poweroff'] = true;
+            // set dev mode off (setting it on is required to reset the networt configuration)
+            $redis->set('dev', 0);
             break;
     }
-    if (isset($args['reboot']) && $args['reboot']) {
+    if (isset($args['poweroff']) && $args['poweroff']) {
+        // poweroff requested
+        wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'poweroff'));
+    } else if (isset($args['reboot']) && $args['reboot']) {
         // reboot requested
         wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
     }
@@ -5433,11 +5438,15 @@ function refresh_nics($redis)
                 ($networkInfo[$macAddress.'_'.$ssidHex]['security'] != 'OPEN')) {
             // write the configured wifi networks to an array for autoconnect optimisation
             // autoconnect is never automatically set for OPEN security
-            $optimiseWifi[] = array('connmanString' => $connmanString, 'strength' => $strength, 'macAddress' => $macAddress, 'ssidHex' => $ssidHex);
+            $optimiseWifi[] = array('connmanString' => $connmanString
+                , 'strength' => $strength
+                , 'macAddress' => $macAddress
+                , 'ssidHex' => $ssidHex
+                );
         }
     }
     //
-    // optimise wifi for the next reboot
+    // optimise wifi for the next reboot and the first time after setting up a Wi-Fi network
     // this is done by setting autoconnect on for the best network reception (per nic & ssid combination) and off for the rest
     // most of the time there will only be one network and one wifi nic, so the routine won't do very much other than switch on autoconnect
     // autoconnect is never automatically set for OPEN security
@@ -5464,9 +5473,11 @@ function refresh_nics($redis)
                 } else {
                     if (($macAddress === $network['macAddress']) || ($ssidHex === $network['ssidHex'])) {
                         // then disable autoconnect on other networks using the same mac address or ssid
+                        // most of the time connman retains the existing connections, but in some circumstances
+                        // (when 2 Wi-Fi nics are present) it will disconnect and reconnect on-the-fly
                         wrk_netconfig($redis, 'autoconnect-off', $network['connmanString']);
-                        // order the networks in the connman list, there are circumstances when connman will act on
-                        // this on-the-fly optimisation, however the information is lost on reboot
+                        // order the networks in the connman list, there are circumstances (when 2 Wi-Fi nics are present)
+                        // where connman will act on this on-the-fly optimisation, however the information is lost on reboot
                         sysCmd('connmanctl move-after '.$network['connmanString'].' '. $connmanString);
                         $connmanString = $network['connmanString'];
                         // delete this element from the array
@@ -5781,4 +5792,39 @@ function wrk_mpdLog($redis, $logMax = null)
         sysCmd('systemctl kill -s HUP mpd');
         // sysCmd('pkill -HUP mpd');
     }
+}
+// function to check if a request about a subject is the first one since reboot
+function is_firstTime($redis, $subject)
+// returns true or false
+// true when this is the first time this routing has been called with this subject since a reboot/boot
+// false when this routine has previously been called with this subject since a reboot/boot
+{
+    $firstTime = array();
+    $returnVal = false;
+    $subject = trim($subject);
+    $bootTimeStamp = trim(sysCmd('uptime -s | xargs')[0]);
+    if (!$redis->Exists('first_time')) {
+        // the redis variable does not exist so always first time true
+        $returnVal = true;
+        // set up a true array element for the boot timestamp and subject 
+        $firstTime[$bootTimeStamp][$subject] = true;
+    } else {
+        // read the redis variable into an array
+        $firstTime = json_decode($redis->Get('first_time'), true);
+        if (!isset($firstTime[$bootTimeStamp])) {
+            // the boot timestamp does not exist in the array, so always first time
+            $returnVal = true;
+            // delete the array content, the current timestamp not present, any existing entries are irrelevant
+            $firstTime = array();
+            // set up a true array element for the boot timestamp and subject 
+            $firstTime[$bootTimeStamp][$subject] = true;
+        } else if (!isset($firstTime[$bootTimeStamp][$subject])) {
+            // the boot timestamp and subject has not been found, so first time for this subject
+            $returnVal = true;
+            // set up a true array element for the boot timestamp and subject 
+            $firstTime[$bootTimeStamp][$subject] = true;
+        }
+    }
+    $redis->set('first_time', json_encode($firstTime));
+    return $returnVal;
 }
