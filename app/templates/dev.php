@@ -314,7 +314,7 @@
                             </label>
                         <span class="help-block">With this option you can add your player name (hostname) before the word '<strong>Menu</strong>' at the top right of your UI.
                         It is useful when you are using several players.<br>
-                        Default value is OFF, which results in the word 'Menu' being displayed. You can can override the default setting here</span>
+                        Default value is ON. You can can override the default setting here</span>
                     </div>
                 </div>
             </div>
