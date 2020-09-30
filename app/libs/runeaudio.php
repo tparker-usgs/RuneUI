@@ -2558,13 +2558,20 @@ function wrk_i2smodule($redis, $args)
 function wrk_audio_on_off($redis, $args)
 {
     if($redis->get('hwplatformid') === '08') {
-        ## RuneAudio enable HDMI & analog output
-        $file = '/boot/config.txt';
-        $newArray = wrk_replaceTextLine($file, '', 'dtparam=audio=', 'dtparam=audio='.($args == 1 ? 'on' : 'off'), '## RuneAudio HDMI & 3,5mm jack', 1);
-        // Commit changes to /boot/config.txt
-        $fp = fopen($file, 'w');
-        $return = fwrite($fp, implode("", $newArray));
-        fclose($fp);
+        if ($args == 1) {
+            sysCmd('sed -i '."'".'s/dtparam=audio=.*/dtparam=audio=on/'."'".' /boot/config.txt');
+            sysCmd('sed -i '."'".'s/.*dtoverlay=upstream/dtoverlay=upstream/g'."'".' /boot/config.txt');
+        } else {
+            sysCmd('sed -i '."'".'s/dtparam=audio=.*/dtparam=audio=off/'."'".' /boot/config.txt');
+            sysCmd('sed -i '."'".'s/.*dtoverlay=upstream/# dtoverlay=upstream/g'."'".' /boot/config.txt');
+        }
+        // ## RuneAudio enable HDMI & analog output
+        // $file = '/boot/config.txt';
+        // $newArray = wrk_replaceTextLine($file, '', 'dtparam=audio=', 'dtparam=audio='.($args == 1 ? 'on' : 'off'), '## RuneAudio HDMI & 3,5mm jack', 1);
+        // // Commit changes to /boot/config.txt
+        // $fp = fopen($file, 'w');
+        // $return = fwrite($fp, implode("", $newArray));
+        // fclose($fp);
     }
 }
 

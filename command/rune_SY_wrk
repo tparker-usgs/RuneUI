@@ -236,6 +236,21 @@ if ($playerid_db === '') {
     // run boot-initialise for Wi-Fi networks
     wrk_netconfig($redis, 'boot-initialise');
     //
+    // check that the file /boot/config.txt contains the hdmi overlay line
+    if (!sysCmd('grep -i dtoverlay /boot/config.txt | grep -ic upstream')[0]) {
+        // not found, add the hdmi dtoverlay entry
+        sysCmd('sed -i '."'".'/dtparam=audio/a dtoverlay=upstream'."'".' /boot/config.txt');
+    }
+    //
+    // check that the file /boot/config.txt has the correct hdmi overlay for the this model
+    if (sysCmd('grep -ic '."'".'Pi 4'."'".' /proc/device-tree/model')[0]) {
+        // its a Pi 4
+        sysCmd('sed -i '."'".'/dtoverlay/ s/upstream.*/upstream-pi4/g'."'".' /boot/config.txt');
+    } else {
+        // its another type
+        sysCmd('sed -i '."'".'/dtoverlay/ s/upstream.*/upstream/g'."'".' /boot/config.txt');
+    }
+    //
     // refresh nics, check redis datastore status, check if an active internet connection is available - run this while waiting for chrony (see below)
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
     sysCmdAsync('nice --adjustment=1 /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; /var/www/command/refresh_nics');
