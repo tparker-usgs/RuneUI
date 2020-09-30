@@ -5806,7 +5806,7 @@ function is_firstTime($redis, $subject)
     if (!$redis->Exists('first_time')) {
         // the redis variable does not exist so always first time true
         $returnVal = true;
-        // set up a true array element for the boot timestamp and subject 
+        // set up a true array element for the boot timestamp and subject
         $firstTime[$bootTimeStamp][$subject] = true;
     } else {
         // read the redis variable into an array
@@ -5816,12 +5816,12 @@ function is_firstTime($redis, $subject)
             $returnVal = true;
             // delete the array content, the current timestamp not present, any existing entries are irrelevant
             $firstTime = array();
-            // set up a true array element for the boot timestamp and subject 
+            // set up a true array element for the boot timestamp and subject
             $firstTime[$bootTimeStamp][$subject] = true;
         } else if (!isset($firstTime[$bootTimeStamp][$subject])) {
             // the boot timestamp and subject has not been found, so first time for this subject
             $returnVal = true;
-            // set up a true array element for the boot timestamp and subject 
+            // set up a true array element for the boot timestamp and subject
             $firstTime[$bootTimeStamp][$subject] = true;
         }
     }
