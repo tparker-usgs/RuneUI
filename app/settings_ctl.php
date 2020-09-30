@@ -105,7 +105,7 @@ if (isset($_POST)) {
                 $jobID[] = $job;
             }
         }
-            
+
     }
     // ----- KERNEL -----
     if (isset($_POST['kernel'])) {
