@@ -179,14 +179,15 @@
                     <label class="col-sm-2 control-label">Reset NET config</label>
                     <div class="col-sm-10">
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="netconfreset" id="syscmd-netconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
-                        <span class="help-block">&nbsp;</span>
+                        <span class="help-block">This will reset the network configuration back to default values, an <strong>automatic shutdown and poweroff</strong> will follow.
+                            You will need to disconnect and reconnect power to restart. <i>Dev mode will be switched off automatically</i></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Reset MPD config</label>
                     <div class="col-sm-10">
                         <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="mpdconfreset" id="syscmd-mpdconfreset" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
-                        <span class="help-block">&nbsp;</span>
+                        <span class="help-block">This will reset the mpd.conf file back to defaults and reinitialise MPD</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -327,7 +328,7 @@
     </form>
     <form class="form-horizontal" method="post">
         <fieldset>
-            <legend>Rern's Addons</legend>
+            <!-- <legend>Rern's Addons</legend>
             <div class="boxed-group">
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Install Rern's Addons Menu</label>
@@ -351,7 +352,7 @@
                         <span class="help-block">If Rern's Addons Menu stops working, or the install command fails, or you cannot de-install it; this may fix it</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <legend>System utilities</legend>
             <div class="boxed-group">
                 <div class="form-group">
@@ -400,7 +401,7 @@
                     <div class="col-sm-10">
                         <span class="help-block">Only applicable when you have a hard-disk drive attached to RuneAudio:<br>
                         Hard disk health-check monitoring will automatically be carried out using 'smartmontools'.<br>
-                        Normally you will not notice that this is taking place. In the debug listing there is a status display.<br>
+                        Normally you will not notice that this is taking place. In the debug listing there is a status report.<br>
                         Real-time monitoring is carried out when the player is active. If something starts to go amiss with your hard-disk drive you will alerted every 1,5 minutes via the UI</span>
                     </div>
                 </div>
