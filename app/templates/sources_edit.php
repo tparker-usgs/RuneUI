@@ -134,10 +134,12 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="options">Mount flags</label>
                 <div class="col-sm-10">
-                    <input class="form-control osk-trigger input-lg" type="text" id="options" name="mount[options]" value="<?php if($this->action == 'edit'): ?><?=$this->mount['options']?><?php endif ?>" data-trigger="change" autocomplete="off" placeholder="cache=none,noserverino,ro,sec=ntlmssp">
+                    <input class="form-control osk-trigger input-lg" type="text" id="options" name="mount[options]" value="<?php if($this->action == 'edit'): ?><?=$this->mount['options']?><?php endif ?>" data-trigger="change" autocomplete="off">
                     <input type="hidden" name="mount[error]" value="<?=$this->mount['error']?>">
                     <span class="help-block">Advanced mount flags. Don't use this field if you don't know what you are doing.<br>
-                    Empty this field if you are experiencing mount problems</span>
+                    <i>Empty this field if you are experiencing mount problems to allow the automatic mount flag selection to take place.<br>
+                    Automatic default for NFS: ro,nocto,noexec<br>
+                    Automatic default for SMB/CIFS: cache=loose,noserverino,ro,sec=ntlmssp,noexec (automatic mount flag selection will be used when this fails)</i></span>
                 </div>
             </div>
         </fieldset>
