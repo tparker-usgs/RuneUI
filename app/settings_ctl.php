@@ -84,19 +84,28 @@ if (isset($_POST)) {
         }
 
     // audio-on-off
-        if ((isset($_POST['audio_on_off'])) && ($redis->get('audio_on_off') !== $_POST['audio_on_off'])) {
-            // submit worker job
-            $notification = new stdClass();
-            $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'audio_on_off', 'args' => $_POST['audio_on_off']));
-            $notification->text = 'Please wait';
-            wrk_notify($redis, 'startjob', $notification, $job);
-            $jobID[] = $job;
-            if ($_POST['audio_on_off']) {
-                $redis->get('audio_on_off') == 1 || $redis->set('audio_on_off', 1);
-            } else {
-                $redis->get('audio_on_off') == 0 || $redis->set('audio_on_off', 0);
+        if (isset($_POST['audio_on_off']) && $_POST['audio_on_off']) {
+            if (!$redis->get('audio_on_off')) {
+                $redis->set('audio_on_off', 1);
+                // submit worker job
+                $notification = new stdClass();
+                $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'audio_on_off', 'args' => $_POST['audio_on_off']));
+                $notification->text = 'Please wait';
+                wrk_notify($redis, 'startjob', $notification, $job);
+                $jobID[] = $job;
+            }
+        } else {
+            if ($redis->get('audio_on_off')) {
+                $redis->set('audio_on_off', 0);
+                // submit worker job
+                $notification = new stdClass();
+                $job = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'audio_on_off', 'args' => $_POST['audio_on_off']));
+                $notification->text = 'Please wait';
+                wrk_notify($redis, 'startjob', $notification, $job);
+                $jobID[] = $job;
             }
         }
+            
     }
     // ----- KERNEL -----
     if (isset($_POST['kernel'])) {
