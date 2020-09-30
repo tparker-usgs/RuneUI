@@ -1,8 +1,9 @@
 #!/bin/bash
-set -x
+set -x # echo commands
+set +e # continue on errors
 
 redis-cli shutdown save
-systemctl stop mpd redis rune_PL_wrk rune_SSM_wrk ashuffle spopd shairport-sync upmpdcli mpdscribble local-browser udevil
+systemctl stop redis udevil ashuffle upmpdcli mpdscribble mpd nginx local-browser spotifyd shairport-sync spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
 bsdtar -xpf $1 -C /
 systemctl daemon-reload
 systemctl start redis mpd
@@ -41,6 +42,9 @@ sleep 5
 redis-cli shutdown save
 sleep 5
 mpd --kill
-umount -aft nfs
-umount -aft cifs
+sleep 5
+umount -Rf /mnt/MPD/NAS/*
+umount -Rf /mnt/MPD/USB/*
+rmdir /mnt/MPD/NAS/*
+rmdir /mnt/MPD/USB/*
 reboot
