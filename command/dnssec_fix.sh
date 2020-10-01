@@ -38,7 +38,7 @@ else
         sed -i '/DNSSEC=/c\DNSSEC=yes' /etc/systemd/resolved.conf
         # restart systemd resolve
         systemctl restart systemd-resolved.service
-        # switch it off in the configurartion file for the next reboot
+        # switch it off in the configuration file for the next reboot
         sed -i '/DNSSEC=/c\DNSSEC=no' /etc/systemd/resolved.conf
     fi
 fi

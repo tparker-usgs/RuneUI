@@ -44,6 +44,7 @@ $savecpuAvd = 86400;
 $savecpuFixdnssec = 20;
 $savecpuRefreshNics = 10;
 $savecpuMpdLog = 600;
+$savecpuIwdConnman = 360;
 $allmounted = 0;
 $retriesmounting = 100;
 ini_set('display_errors', '1');
@@ -1647,17 +1648,32 @@ while (1) {
         // restart avahi-daemon
         sysCmd('systemctl restart avahi-daemon');
     }
+    // Restart iwd and connman once after 3 minutes (3 x 60 x 2 = 360 cycles)
+    // Connman sometimes has unpredictable behaviour after start-up when it is not started after iwd
+    // Making connman dependant of iwd in the systemd start-up sequence (using 'After') causes a very long boot time
+    // By restarting iwd then connman the unpredictable behaviour is resolved with a short boot time
+    if ($savecpuIwdConnman-- <= 0) {
+        // the next line is not really necessary, but this way is more efficient than calling is_firstTime() on every cycle
+        // restart every +/-86400 cycles (= every +/-12 hours)
+        $savecpuIwdConnman = 86300 + rand(0, 200);
+        if (is_firstTime($redis, 'iwd&connman_restart')) {
+            // is_firstTime() returns true only on the first call after a reboot/boot, thereafter false
+            // restart iwd
+            sysCmd('systemctl restart iwd');
+            // restart connman after iwd
+            sysCmd('systemctl restart connman');
+            // run refresh_nics asynchronously
+            wrk_netconfig($redis, 'refreshAsync');
+        }
+    }
     // Check DNSSEC initially after 20 cycles (+/-10 seconds), then every +/-1800 cycles (= every +/-15 minutes)
     // There is an unresolved problem with systemd resolve in combination with systemd timesync. Systemd resolve
     // will not resolve URL's with DNSSEC switched on when time has not been syncronised. This causes systemd timesync
     // to fail becuse the timeserver URL's can not be resolved. This effectivly locks both timesync and resolve out.
     if ($savecpuFixdnssec-- <= 0) {
         $savecpuFixdnssec = 1750 + rand(0, 100);
-        $timesync_OK = sysCmd('timedatectl show -a | grep NTPSynchronized | grep -ci yes')[0];
-        $dnssec_OK = sysCmd('resolvectl status | grep -i "dnssec setting" | grep -ci yes')[0];
-        if (($timesync_OK && !$dnssec_OK) || (!$timesync_OK && $dnssec_OK)) {
-            // dont do anything if they are both OK
-            // if both are not OK there is probably no internet connection
+        if (!sysCmd('systemctl is-active systemd-resolved.service | grep -ic inactive')[0]) {
+            // not inactive - systemd-resolved.service is running
             sysCmdAsync('nice --adjustment=2 /srv/http/command/dnssec_fix.sh');
         }
     }
