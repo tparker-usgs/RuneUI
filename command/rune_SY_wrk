@@ -1475,7 +1475,7 @@ while (1) {
         } // end foreach loop
     } // end if loop
     // mount all sources
-    if ((!$allmounted) && ($retriesmounting == 100)) {
+    if ((!$allmounted) && is_firstTime($redis, 'mount_all_shares')) {
         runelog('wrk_SY: try to mount all shares! - First time');
         // first time, so call directly
         // parameters: wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = false)
@@ -1489,15 +1489,16 @@ while (1) {
                 wrk_mpdRestorePlayerStatus($redis);
             }
         }
-        // this sets the number of times mounting is to be retried, 99 @ 4 times per hour is +/-25 hours
-        // you can change the number of retries here, maximum 99
-        $retriesmounting = 99;
+        // this routine will not detect disconnected/unmounted shares which had previously been mounted
+        // $retriesmounting sets the number of times mounting is to be retried, 100 @ 4 times per hour = +/-25 hours
+        // you can change the number of retries here
+        $retriesmounting = 100;
     }
     $allmounted = $redis->get('allmounted');
     // If mounting is unsuccessful retry mounting the first time on the 1st cycle, then every +/-1800th cycle (= every +/-15 minutes), first time it is set to zero
     if ((!$allmounted) && ($savecpuMnt-- <= 0)) {
-        if ($retriesmounting-- > 0) {
-            runelog('wrk_SY: error mounting shares, try it again! Count: '.$retriesmounting);
+        if ($retriesmounting-- >= 0) {
+            runelog('wrk_SY: error mounting shares, trying it again! Count: '.$retriesmounting);
             // run asynchronous mount script
             sysCmdAsync('nice --adjustment=2 /var/www/command/mount_async.php');
         }
@@ -1648,24 +1649,24 @@ while (1) {
         // restart avahi-daemon
         sysCmd('systemctl restart avahi-daemon');
     }
-    // Restart iwd and connman once after 3 minutes (3 x 60 x 2 = 360 cycles)
-    // Connman sometimes has unpredictable behaviour after start-up when it is not started after iwd
-    // Making connman dependant of iwd in the systemd start-up sequence (using 'After') causes a very long boot time
-    // By restarting iwd then connman the unpredictable behaviour is resolved with a short boot time
-    if ($savecpuIwdConnman-- <= 0) {
-        // the next line is not really necessary, but this way is more efficient than calling is_firstTime() on every cycle
-        // restart every +/-86400 cycles (= every +/-12 hours)
-        $savecpuIwdConnman = 86300 + rand(0, 200);
-        if (is_firstTime($redis, 'iwd&connman_restart')) {
-            // is_firstTime() returns true only on the first call after a reboot/boot, thereafter false
-            // restart iwd
-            sysCmd('systemctl restart iwd');
-            // restart connman after iwd
-            sysCmd('systemctl restart connman');
-            // run refresh_nics asynchronously
-            wrk_netconfig($redis, 'refreshAsync');
-        }
-    }
+    // // Restart iwd and connman once after 3 minutes (3 x 60 x 2 = 360 cycles)
+    // // Connman sometimes has unpredictable behaviour after start-up when it is not started after iwd
+    // // Making connman dependant of iwd in the systemd start-up sequence (using 'After') causes a very long boot time
+    // // By restarting iwd then connman the unpredictable behaviour is resolved with a short boot time
+    // if ($savecpuIwdConnman-- <= 0) {
+        // // the next line is not really necessary, but this way is more efficient than calling is_firstTime() on every cycle
+        // // restart every +/-86400 cycles (= every +/-12 hours)
+        // $savecpuIwdConnman = 86300 + rand(0, 200);
+        // if (is_firstTime($redis, 'iwd&connman_restart')) {
+            // // is_firstTime() returns true only on the first call after a reboot/boot, thereafter false
+            // // restart iwd
+            // sysCmd('systemctl restart iwd');
+            // // restart connman after iwd
+            // sysCmd('systemctl restart connman');
+            // // run refresh_nics asynchronously
+            // wrk_netconfig($redis, 'refreshAsync');
+        // }
+    // }
     // Check DNSSEC initially after 20 cycles (+/-10 seconds), then every +/-1800 cycles (= every +/-15 minutes)
     // There is an unresolved problem with systemd resolve in combination with systemd timesync. Systemd resolve
     // will not resolve URL's with DNSSEC switched on when time has not been syncronised. This causes systemd timesync

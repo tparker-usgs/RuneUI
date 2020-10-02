@@ -5006,6 +5006,13 @@ function refresh_nics($redis)
     // also add the nic's per MAC address to the array $translateMacNic
     $networkInterfaces = array();
     $translateMacNic = array();
+    // get the array containing any mac addresses which need to be spoofed
+    if ($redis->Exists('network_mac_spoof')) {
+        $networkSpoofArray = json_decode($redis->Get('network_mac_spoof'), true);
+    } else {
+        $networkSpoofArray = array();
+    }
+    // get the nics
     $links = sysCmd("ip -o -br link | sed 's,[ ]\+, ,g'");
     foreach ($links as $link) {
         $linkArray = explode(' ', $link);
@@ -5015,8 +5022,8 @@ function refresh_nics($redis)
             continue;
         }
         $macAddress = $linkArray[2];
-        if ($macAddress === '00:e0:4c:53:44:58') {
-            // cheap network card, they all have the same MAC address, fix it by spoofing
+        if (in_array($macAddress , $networkSpoofArray)) {
+            // cheap network card, they all have the same MAC address (e.g. '00:e0:4c:53:44:58'), make it unique by spoofing
             $macAddress = fix_mac($redis, $nic);
         }
         $macAddress = str_replace(':', '', $macAddress);
@@ -5260,7 +5267,7 @@ function refresh_nics($redis)
         $macAddress = trim($connmanStringParts[1]);
         if (isset($translateMacNic[$macAddress.'_'])) {
             $nic = $translateMacNic[$macAddress.'_'];
-            if (($accessPointEnabled) && ($accessPoint=== $ssid)) {
+            if (($accessPointEnabled) && ($accessPoint === $ssid)) {
                 // ssid configured as an AccessPoint, so skip
                 continue;
             }
@@ -5280,6 +5287,9 @@ function refresh_nics($redis)
                 // when the ssid is empty it is a hidden ssid, so make it unique, there may be more than one
                 $ssid = '<Hidden'.++$hiddenCount.'>';
             }
+        } else {
+            // not Wi-Fi or Wired Ethernet, so skip it (could be Bluetooth, etc.)
+            continue;
         }
         $ssidHex = implode(unpack("H*", trim($ssid)));
         // set the deault values for DNS name servers and gateway from
@@ -5806,15 +5816,17 @@ function is_firstTime($redis, $subject)
 // true when this is the first time this routing has been called with this subject since a reboot/boot
 // false when this routine has previously been called with this subject since a reboot/boot
 {
-    $firstTime = array();
     $returnVal = false;
     $subject = trim($subject);
     $bootTimeStamp = trim(sysCmd('uptime -s | xargs')[0]);
     if (!$redis->Exists('first_time')) {
         // the redis variable does not exist so always first time true
         $returnVal = true;
+        // create an empty array
+        $firstTime = array();
         // set up a true array element for the boot timestamp and subject
         $firstTime[$bootTimeStamp][$subject] = true;
+        $redis->Set('first_time', json_encode($firstTime));
     } else {
         // read the redis variable into an array
         $firstTime = json_decode($redis->Get('first_time'), true);
@@ -5825,13 +5837,14 @@ function is_firstTime($redis, $subject)
             $firstTime = array();
             // set up a true array element for the boot timestamp and subject
             $firstTime[$bootTimeStamp][$subject] = true;
+            $redis->Set('first_time', json_encode($firstTime));
         } else if (!isset($firstTime[$bootTimeStamp][$subject])) {
             // the boot timestamp and subject has not been found, so first time for this subject
             $returnVal = true;
             // set up a true array element for the boot timestamp and subject
             $firstTime[$bootTimeStamp][$subject] = true;
+            $redis->Set('first_time', json_encode($firstTime));
         }
     }
-    $redis->set('first_time', json_encode($firstTime));
     return $returnVal;
 }

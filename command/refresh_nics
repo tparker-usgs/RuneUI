@@ -67,22 +67,20 @@ if ($networkInterfaces) {
 //     AP will not start when a Wi-Fi connection is lost and the wired ethernet is still connected
 //     only after a full loss of internet (and after some delays) will the AP start as an emergency connection
 // (it appears that AP mode can be done with iwctl instead of hostapd, but we leave it as hostapd for now)
-if ($redis->hGet('AccessPoint', 'enabled')) {
+if ($redis->hGet('AccessPoint', 'enabled') && ((is_firstTime($redis, 'AP-start')) || (!$redis->hGet('service', 'internet')))) {
+    // access point enabled and it is the first time this point in the code has been processed since reboot/boot or there is no internet available
     runelog('------------------ try to start AP if no IP is assigned ---------------------');
     $apWifiNicFound = false;
     $ethNicConnected = false;
     // walk through the array $networkInterfaces, this contains all wireless nics plus the connected wired nics
     foreach($networkInterfaces as $nic) {
-        // check if it is the first time this code is executed since reboot/boot (this must be done first, the order of the tests is important)
-        //         or there is no internet available
-        //     and the nic  it is not connected, no suitable nic has been found, technology is 'wifi' and it supports AP
+        // check if it is the first time this code is executed since reboot/boot or there is no internet available
+        //     and the nic is not connected, no suitable nic has been found previously, technology is 'wifi' and it supports AP
         //     then wait for 20 seconds to allow connman to complete any reconnection activities
         //     finally double check to see if the nic is still not connected!
         //     (connman may not have initiated a reconnection process when the nics array was created)
         //         use this to check the actual connection status: 'ip -o  address | sed 's,[ ]\+, ,g' | grep -i 'inet ' | grep -ic wlan0'
         if (
-                ((is_firstTime($redis, 'AP-start')) || (!$redis->hGet('service', 'internet'))) &&
-                // it is the first time this point in the code has been processed since reboot/boot or there is no internet available
                 (!$nic['connected']) &&
                 // the nic was not connected when the nics array was created
                 (!$apWifiNicFound) &&
