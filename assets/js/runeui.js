@@ -150,7 +150,7 @@ $(document).ready(function () {
             //Increment the idle time counter every second.
             var idleInterval = setInterval(timerIncrement, 1000); // 1 second
         }
-        
+
         //Zero the idle timer on mouse movement and keypress.
         $(this).on( "mousemove click keypress", function (e) {
             idleTime = 0;
@@ -343,7 +343,7 @@ function volumeStepCalc(direction) {
     };
     volumeStep();
     // console.log('GUI.volume = ', GUI.volume);
-    
+
     GUI.stepVolumeInt = window.setInterval(function() {
         volumeStep();
     }, 200);
@@ -566,7 +566,7 @@ function renderLibraryHome() {
     } else {
         content = '<div class="col-sm-12"><h1 class="txtmid">Browse your library</h1></div>';
     }
-    
+
     // Set active player
     setPlaybackSource();
     if (notMPD) {
@@ -1014,7 +1014,7 @@ function updateGUI() {
     }
 }
 
-// render the playing queue from the data response 
+// render the playing queue from the data response
 function getPlaylistPlain(data) {
     var current = parseInt(GUI.json.song) + 1;
     var state = GUI.json.state;
@@ -1091,7 +1091,7 @@ function getPlaylistCmd(){
                 // console.time('getPlaylistPlain timer');
                 getPlaylistPlain(data);
                 // console.timeEnd('getPlaylistPlain timer');
-                
+
                 var current = parseInt(GUI.json.song);
                 if ($('#panel-dx').hasClass('active') && GUI.currentsong !== GUI.json.currentsong) {
                     customScroll('pl', current, 200); // highlight current song in playlist
@@ -1118,7 +1118,7 @@ function getPlaylist(text) {
         // console.time('getPlaylistPlain timer');
         getPlaylistPlain(data);
         // console.timeEnd('getPlaylistPlain timer');
-        
+
         var current = parseInt(GUI.json.song);
         if ($('#panel-dx').hasClass('active') && GUI.currentsong !== GUI.json.currentsong) {
             customScroll('pl', current, 200); // center the scroll and highlight current song in playlist
@@ -1234,16 +1234,16 @@ function parseResponse(options) {
         inpath = options.inpath || '',
         querytype = options.querytype || '',
         content = '';
-        
+
     // DEBUG
     // console.log('parseResponse OPTIONS: inputArr = ' + inputArr + ', respType = ' + respType + ', i = ' + i + ', inpath = ' + inpath +', querytype = ' + querytype);
     // console.log(inputArr);
-    
+
     switch (respType) {
         case 'playlist':
             // code placeholder
         break;
-        
+
         case 'db':
         // normal MPD browsing by file
             if (GUI.browsemode === 'file') {
@@ -1379,7 +1379,7 @@ function parseResponse(options) {
                 }
             }
         break;
-        
+
         case 'Spotify':
         // Spotify plugin
             if (querytype === '') {
@@ -1406,7 +1406,7 @@ function parseResponse(options) {
                 content += '</span></li>';
             }
         break;
-        
+
         case 'Dirble':
         // Dirble plugin
             if (querytype === '' || querytype === 'childs') {
@@ -1431,7 +1431,7 @@ function parseResponse(options) {
                 content += '</span></li>';
             }
         break;
-        
+
         case 'Jamendo':
         // Jamendo plugin
             // if (querytype === 'radio') {
@@ -1441,7 +1441,7 @@ function parseResponse(options) {
                 content += inputArr.dispname + '</div></li>';
             // }
         break;
-        
+
     }
     return content;
 } // end parseResponse()
@@ -1459,7 +1459,7 @@ function populateDB(options){
         content = '',
         i = 0,
         row = [];
-        
+
     // DEBUG
     // console.log('populateDB OPTIONS: data = ' + data + ', path = ' + path + ', uplevel = ' + uplevel + ', keyword = ' + keyword +', querytype = ' + querytype);
     console.log(JSON.stringify(data));
@@ -1518,7 +1518,7 @@ function populateDB(options){
                 document.getElementById('database-entries').innerHTML = '';
             }
             // console.log(data);
-            
+
             data.sort(function(a, b){
                 if (querytype === '' || querytype === 'childs' || querytype === 'categories') {
                     nameA = a.hasOwnProperty('title')?a.title.toLowerCase():'';
@@ -1684,13 +1684,13 @@ function getDB(options){
         plugin = options.plugin || '',
         querytype = options.querytype || '',
         args = options.args || '';
-        
+
     // DEBUG
     // console.log('OPTIONS: cmd = ' + cmd + ', path = ' + path + ', browsemode = ' + browsemode + ', uplevel = ' + uplevel + ', plugin = ' + plugin);
-    
+
     loadingSpinner('db');
     GUI.browsemode = browsemode;
-    
+
     if (plugin !== '') {
     // plugins
         if (plugin === 'Spotify') {
@@ -1726,7 +1726,7 @@ function getDB(options){
                         querytype: 'childs-stations',
                         uplevel: uplevel
                     });
-                }, 'json');            
+                }, 'json');
             } else {
                 $.post('/db/?cmd=dirble', { 'querytype': (querytype === '') ? 'categories' : querytype, 'args': args }, function(data){
                     populateDB({
@@ -1993,7 +1993,7 @@ function libraryHome(text) {
                 // content += '<tr><th>Status:</th><td><i class="fa fa-check green sx"></i>connected</td></tr>';
                 // content += '<tr><th>Associated SSID:</th><td><strong>' + nics[i].currentssid + '</strong></td></tr>';
             // }
-            
+
             // content += '<tr><th>Assigned IP:</th><td>' + ((nics[i].ip !== null) ? ('<strong>' + nics[i].ip + '</strong>') : 'none') + '</td></tr>';
             // content += '<tr><th>Speed:</th><td>' + ((nics[i].speed !== null) ? nics[i].speed : 'unknown') + '</td></tr>';
             // if (nics[i].currentssid !== null) {
@@ -2207,21 +2207,21 @@ if ($('#section-index').length) {
 
         // INITIALIZATION
         // ----------------------------------------------------------------------------------------------------
-        
+
         // check WebSocket support
         GUI.mode = checkWebSocket();
-        
+
         // first connection with MPD daemon
         // open UI rendering channel;
         playbackChannel();
-        
+
         // open library channel
         libraryChannel();
         // startChannel(queueChannel());
-        
+
         // first GUI update
         // updateGUI();
-        
+
         // PNotify init options
         PNotify.prototype.options.styling = 'fontawesome';
         PNotify.prototype.options.stack.dir1 = 'up';
@@ -2232,7 +2232,7 @@ if ($('#section-index').length) {
         PNotify.prototype.options.stack.spacing2 = 10;
         // open notify channel
         notifyChannel();
-        
+
         // use the property name to generate the prefixed event name
         var visProp = getHiddenProp();
         if (visProp) {
@@ -2242,7 +2242,7 @@ if ($('#section-index').length) {
 
         // BUTTONS
         // ----------------------------------------------------------------------------------------------------
-        
+
         // playback buttons
         $('.btn-cmd').click(function(){
             var el = $(this);
@@ -2308,7 +2308,7 @@ if ($('#section-index').length) {
                 $('#volume').val(vol, false).trigger('update');
             }
         }
-        
+
         // play/pause when clicking on the counter or total time inside the progress knob
         $('#countdown-display').click(function(){
             sendCmd('pause');
@@ -2330,15 +2330,15 @@ if ($('#section-index').length) {
         $('#panel-sx').click(function(){
             addPlayerScrollbars();
         });
-        
+
         $('#panel-dx').click(function(){
             addPlayerScrollbars();
         });
-        
+
         $('button#songinfo-open').click(function(){
             addPlayerScrollbars();
         });
-        
+
         $('#playback').click(function(){
             removePlayerScrollbars();
         });
@@ -2354,7 +2354,7 @@ if ($('#section-index').length) {
 
         // KNOBS
         // ----------------------------------------------------------------------------------------------------
-        
+
         // playback knob
         $('#time').knob({
             inline: false,
@@ -2432,7 +2432,7 @@ if ($('#section-index').length) {
         // ----------------------------------------------------------------------------------------------------
 
         var playlist = $('#playlist-entries');
-        
+
         // click on queue entry
         playlist.on('click', 'li', function(e) {
             var cmd = '';
@@ -2498,7 +2498,7 @@ if ($('#section-index').length) {
                 $('#pl-filter-results').addClass('hide').html('');
             }
         });
-        
+
         // close filter results
         $('#pl-filter-results').click(function(){
             $(this).addClass('hide');
@@ -2518,25 +2518,25 @@ if ($('#section-index').length) {
             }
             customScroll('pl', parseInt(GUI.json.song), 500);
         });
-        
+
         // playlists management
         $('#pl-manage-list').click(function(){
             getPlaylists();
         });
-        
+
         // save current Queue to playlist
         $('#modal-pl-save-btn').click(function(){
             var playlistname = $('#pl-save-name').val();
             sendCmd('save "' + playlistname + '"');
         });
-        
+
         // playlists management - actions context menu
         $('#pl-editor').on('click', '.pl-action', function(e) {
             e.preventDefault();
             var path = $(this).parent().attr('data-path');
             GUI.DBentry[0] = path;
         });
-        
+
         // playlist rename action
         $('#pl-rename-button').click(function(){
             var oldname = $('#pl-rename-oldname').text();
@@ -2558,11 +2558,11 @@ if ($('#section-index').length) {
                 sortOrder(evt.item.getAttribute('id'));
             }
         });
-        
-        
+
+
         // LIBRARY
         // ----------------------------------------------------------------------------------------------------
-        
+
         // on ready Library tab
         $('a', '#open-panel-sx').click(function(){
             if ($('#open-panel-sx').hasClass('active')) {
@@ -2572,7 +2572,7 @@ if ($('#section-index').length) {
         .on('shown.bs.tab', function (e) {
             customScroll('db', GUI.currentDBpos[GUI.currentDBpos[10]], 0);
         });
-        
+
         // click on Library home block
         $('#home-blocks').on('click', '.home-block', function(e) {
             if (!$(this).hasClass('inactive')) {
@@ -2596,7 +2596,7 @@ if ($('#section-index').length) {
                 $('#overlay-playsource-open').trigger('click');
             }
         });
-        
+
         // setup Library home
         $('#db-homeSetup').click(function(){
             var editbtn = $(this);
@@ -2608,9 +2608,9 @@ if ($('#section-index').length) {
                 $('.home-block.home-bookmark').append('<div class="home-block-remove" title="Remove this bookmark"><span class="block-remove">&times;</span></div>');
             }
         });
-        
+
         var db = $('#database-entries');
-        
+
         // click on Library list entry
         db.on('click', 'li', function(e) {
             var path = '',
@@ -2818,7 +2818,7 @@ if ($('#section-index').length) {
                 case 'pl-add':
                     sendCmd('load "' + path + '"');
                     break;
-                    
+
                 case 'pl-replace':
                     sendCmd('clear');
                     sendCmd('load "' + path + '"');
@@ -2834,7 +2834,7 @@ if ($('#section-index').length) {
                     $('#modal-pl-rename').modal();
                     $('#pl-rename-oldname').text(path);
                     break;
-                    
+
                 case 'pl-rm':
                     $.ajax({
                         url: '/command/?cmd=rm%20%22' + path + '%22',
@@ -2859,7 +2859,7 @@ if ($('#section-index').length) {
                         path: path
                     });
                     break;
-                    
+
                 case 'wraddplay':
                     path = path.split(' | ')[1];
                     getDB({
@@ -2867,7 +2867,7 @@ if ($('#section-index').length) {
                         path: path
                     });
                     break;
-                    
+
                 case 'wraddreplaceplay':
                     path = path.split(' | ')[1];
                     getDB({
@@ -2875,7 +2875,7 @@ if ($('#section-index').length) {
                         path: path
                     });
                     break;
-                    
+
                 case 'wredit':
                     $('#modal-webradio-edit').modal();
                     $.post('/db/?cmd=readradio', {
@@ -2888,17 +2888,17 @@ if ($('#section-index').length) {
                         $('#webradio-edit-url').val(data.url);
                     }, 'json');
                     break;
-                    
+
                 case 'wrdelete':
                     $('#modal-webradio-delete').modal();
                     $('#webradio-delete-name').text(path.replace('Webradio/', ''));
                     break;
-                    
+
                 case 'wrsave':
                     var parameters = path.split(' | ');
                     $.post('/db/?cmd=addradio', { 'radio[label]' : parameters[0], 'radio[url]' : parameters[1] });
                     break;
-                    
+
                 default:
                     getDB({
                         cmd: dataCmd,
@@ -2925,7 +2925,7 @@ if ($('#section-index').length) {
                 $('#webradio-add-url').val('');
             }
         });
-        
+
         // edit webradio
         $('#webradio-edit-button').click(function(){
             var name = $('#webradio-edit-name');
@@ -2937,7 +2937,7 @@ if ($('#section-index').length) {
                 // console.log('editedradio', data);
             }, 'json');
         });
-        
+
         // delete webradio
         $('#webradio-delete-button').click(function(){
         // console.log( $('#webradio-delete-name').text() );
@@ -2946,11 +2946,11 @@ if ($('#section-index').length) {
                 // console.log('SENT');
             }, 'json');
         });
-        
-        
+
+
         // GENERAL
         // ----------------------------------------------------------------------------------------------------
-        
+
         // scroll buttons
         $('#db-firstPage').click(function(){
             $.scrollTo(0 , 500);
@@ -2983,7 +2983,7 @@ if ($('#section-index').length) {
         $('#pl-lastPage').click(function(){
             $.scrollTo('100%', 500);
         });
-        
+
         // open tab from external link
         var url = document.location.toString();
         // console.log('url = ', url);
@@ -3002,15 +3002,15 @@ if ($('#section-index').length) {
                 $('.overlay-close').trigger('click');
             }
         });
-        
+
         // tooltips
         if ($('.ttip').length) {
             $('.ttip').tooltip();
         }
-        
+
         // remove the 300ms click delay on mobile browsers
         FastClick.attach(document.body);
-        
+
         // system poweroff
         $('#syscmd-poweroff').click(function(){
             $.post('/settings/', { 'syscmd' : 'poweroff' });
@@ -3066,9 +3066,9 @@ if ($('#section-index').length) {
         if (document.location.hostname == "localhost")
             $('.osk-trigger').onScreenKeyboard({
                 'draggable': true
-        }); 
+        });
     });
-    
+
 } else {
 
 // ====================================================================================================
@@ -3076,20 +3076,20 @@ if ($('#section-index').length) {
 // ====================================================================================================
 
     jQuery(document).ready(function($){ 'use strict';
-        
+
         // INITIALIZATION
         // ----------------------------------------------------------------------------------------------------
-         
+
         // check WebSocket support
         GUI.mode = checkWebSocket();
-        
+
         // first connection with MPD daemon
         // open UI rendering channel;
         playbackChannel();
-        
+
         // first GUI update
         // updateGUI();
-        
+
         // PNotify init options
         PNotify.prototype.options.styling = 'fontawesome';
         PNotify.prototype.options.stack.dir1 = 'up';
@@ -3100,17 +3100,17 @@ if ($('#section-index').length) {
         PNotify.prototype.options.stack.spacing2 = 10;
         // open notify channel
         notifyChannel();
-        
-        
+
+
         // BUTTONS
         // ----------------------------------------------------------------------------------------------------
-        
+
         // playback buttons
         $('.btn-cmd').click(function(){
             var el = $(this);
             commandButton(el);
         });
-        
+
         // system poweroff
         $('#syscmd-poweroff').click(function(){
             $.post('/settings/', { 'syscmd' : 'poweroff' });
@@ -3125,19 +3125,19 @@ if ($('#section-index').length) {
         $('#syscmd-display_off').click(function(){
             $.post('/settings/', { 'syscmd' : 'display_off' });
         });
-        
+
         // COMMON
         // ----------------------------------------------------------------------------------------------------
-        
+
         // Bootstrap-select
         $('.selectpicker').selectpicker();
-        
+
 
         // SOURCES
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-sources').length) {
-        
+
             // enable/disable CIFS auth section
             if ($('#mount-type').val() === 'nfs') {
                 $('#mount-cifs').addClass('disabled').children('.disabler').removeClass('hide');
@@ -3150,7 +3150,7 @@ if ($('#section-index').length) {
                     $('#mount-cifs').addClass('disabled').children('.disabler').removeClass('hide');
                 }
             });
-            
+
             // enable/disable CIFS user and password fields
             $('#nas-guest').change(function(){
                 if ($(this).prop('checked')) {
@@ -3161,7 +3161,7 @@ if ($('#section-index').length) {
                     $('#mount-auth').removeClass('disabled').children('.disabler').addClass('hide');
                 }
             });
-            
+
             // show advanced options
             $('#nas-advanced').change(function(){
                 if ($(this).prop('checked')) {
@@ -3170,7 +3170,7 @@ if ($('#section-index').length) {
                     $('#mount-advanced-config').addClass('hide');
                 }
             });
-            
+
             $('#show-mount-advanced-config').click(function(e){
                 e.preventDefault();
                 if ($(this).hasClass('active')) {
@@ -3185,20 +3185,20 @@ if ($('#section-index').length) {
                     $(this).find('span').html('hide advanced options');
                 }
             });
-            
+
             $('#usb-mount-list a').click(function(){
                 var mountName = $(this).data('mount');
                 $('#usb-umount-name').html(mountName);
                 $('#usb-umount').val(mountName);
             });
         }
-        
-            
+
+
         // SETTINGS
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-settings').length) {
-            
+
             // show/hide AirPlay name form
             $('#airplay').change(function(){
                 if ($(this).prop('checked')) {
@@ -3209,8 +3209,8 @@ if ($('#section-index').length) {
                     $('#airplayBox').removeClass('boxed-group');
                 }
             });
-            
-            // show/hide Last.fm auth form  
+
+            // show/hide Last.fm auth form
             $('#scrobbling-lastfm').change(function(){
                 if ($(this).prop('checked')) {
                     $('#lastfmAuth').removeClass('hide');
@@ -3220,8 +3220,8 @@ if ($('#section-index').length) {
                     $('#lastfmBox').removeClass('boxed-group');
                 }
             });
-            
-            // show/hide proxy settings form  
+
+            // show/hide proxy settings form
             $('#proxy').change(function(){
                 if ($(this).prop('checked')) {
                     $('#proxyAuth').removeClass('hide');
@@ -3231,7 +3231,7 @@ if ($('#section-index').length) {
                     $('#proxyBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide UPnP/dlna name form
             $('#dlna').change(function(){
                 if ($(this).prop('checked')) {
@@ -3242,7 +3242,7 @@ if ($('#section-index').length) {
                     $('#dlnaBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide local browser name form
             $('#local_browser').change(function(){
                 if ($(this).prop('checked')) {
@@ -3253,7 +3253,7 @@ if ($('#section-index').length) {
                     $('#local_browserBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide UPnP/dlna Tidal name form
             $('#dlnaTidal').change(function(){
                 if ($(this).prop('checked')) {
@@ -3264,7 +3264,7 @@ if ($('#section-index').length) {
                     $('#dlnaTidalBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide UPnP/dlna Google Music name form
             $('#dlnaGoogle').change(function(){
                 if ($(this).prop('checked')) {
@@ -3275,7 +3275,7 @@ if ($('#section-index').length) {
                     $('#dlnaGoogleBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide UPnP/dlna Qobuz streaming service name form
             $('#dlnaQobuz').change(function(){
                 if ($(this).prop('checked')) {
@@ -3286,7 +3286,7 @@ if ($('#section-index').length) {
                     $('#dlnaQobuzBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide Spotify auth form
             $('#spotify').change(function(){
                 if ($(this).prop('checked')) {
@@ -3297,7 +3297,7 @@ if ($('#section-index').length) {
                     $('#spotifyBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide Spotify Connect auth form
             $('#spotifyconnect').change(function(){
                 if ($(this).prop('checked')) {
@@ -3308,7 +3308,7 @@ if ($('#section-index').length) {
                     $('#spotifyconnectBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide Samba on/off form
             $('#samba').change(function(){
                 if ($(this).prop('checked')) {
@@ -3319,7 +3319,7 @@ if ($('#section-index').length) {
                     $('#sambaBox').removeClass('boxed-group');
                 }
             });
-            
+
             // show/hide Bluetooth on/off form
             $('#bluetooth').change(function(){
                 if ($(this).prop('checked')) {
@@ -3330,7 +3330,7 @@ if ($('#section-index').length) {
                     $('#bluetoothBox').removeClass('boxed-group');
                 }
             });
-            
+
             // file upload
             $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
                 var input = $(this).parents('.input-group').find(':text');
@@ -3351,13 +3351,13 @@ if ($('#section-index').length) {
             });
 
         }
-        
-        
+
+
         // NETWORK
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-network').length) {
-            
+
             // show/hide static network configuration based on select value
             var netManualConf = $('#network-manual-config');
             if ($('#dhcp').val() === 'Static') {
@@ -3371,7 +3371,7 @@ if ($('#section-index').length) {
                     netManualConf.addClass('hide');
                 }
             });
-            
+
             // show/hide WiFi security configuration based on select value
             // var WiFiKey = $('#wifi-security-key');
             // if ($('#wifi-security').val() !== 'open') {
@@ -3385,16 +3385,16 @@ if ($('#section-index').length) {
                     // WiFiKey.addClass('hide');
                 // }
             // });
-            
+
             // refresh in range Wi-Fi networks list
             // if ($('#wifiNetworks').length) {
                 // // open wlans channel
                 // wlansChannel();
-                
+
                 // // open nics channel
                 // nicsChannel();
             // }
-            
+
             // show/hide WiFi stored profile box
             $('#wifiProfiles').change(function(){
                 if ($(this).prop('checked')) {
@@ -3421,9 +3421,9 @@ if ($('#section-index').length) {
 
         // ACCESSPOINT
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-accesspoint').length) {
-            
+
             // show/hide AP settings form
             $('#accesspoint').change(function(){
                 if ($(this).prop('checked')) {
@@ -3445,12 +3445,12 @@ if ($('#section-index').length) {
                 $('#dhcp-option-router').val($('#ip-address').val());
             });
         }
-        
+
         // MPD
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-mpd').length) {
-            
+
             // output interface select
             $('#audio-output-interface').change(function(){
                 renderMSG([{'title': 'Switching audio output', 'text': 'Please wait for the config update...', 'icon': 'fa fa-cog fa-spin', 'delay': 5000 }]);
@@ -3464,18 +3464,18 @@ if ($('#section-index').length) {
                     cache: false
                 });
             });
-            
+
             // MPD config manual edit
             $('.manual-edit-confirm').find('.btn-primary').click(function(){
                 $('#mpdconf_editor').removeClass('hide');
                 $('#manual-edit-warning').addClass('hide');
             });
         }
-        
-        
+
+
         // DEBUG
         // ----------------------------------------------------------------------------------------------------
-        
+
         if ($('#section-debug').length) {
 
             // this code was removed because ZeroClipboard uses Adobe Flash Player.
@@ -3509,7 +3509,7 @@ if ($('#section-index').length) {
             });
 
         }
-        
+
 
         // on screen keyboard
         // ----------------------------------------------------------------------------------------------------
@@ -3519,8 +3519,8 @@ if ($('#section-index').length) {
                 'draggable': true
         });
     });
-    
-    
+
+
     // FILE UPLOAD
     // ----------------------------------------------------------------------------------------------------
     $(document).on('change', '.btn-file :file', function() {

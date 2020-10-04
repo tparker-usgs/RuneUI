@@ -168,12 +168,6 @@ function debug_data($redis)
     $output .= $command;
     unset($command);
     $output .= "\n\n\n";
-    $output .= "MPD statistics: (mpc stats)\n";
-    $output .= "--------------------------------------------------\n";
-    $command = implode("\n", sysCmd('mpc stats'));
-    $output .= $command;
-    unset($command);
-    $output .= "\n\n\n";
     // TODO: better collect stream info
     // $output .= "ALSA interface #0: (/proc/asound/card0/pcm0p/info)\n";
     // $output .= "--------------------------------------------------\n";
@@ -200,8 +194,13 @@ function debug_data($redis)
     // } else {
     // $output .= $streaminfo;
     // }
+    $output .= "###### MPD statistics: (mpc stats) ######\n";
+    $command = implode("\n", sysCmd('mpc stats'));
+    $output .= $command;
+    unset($command);
+    $output .= "\n\n\n";
     $command = implode("\n", sysCmd('mpd --version'));
-    $output .= "###### mpd version ######\n";
+    $output .= "###### mpd version (mpd --version) ######\n";
     $output .= $command;
     $output .= "\n\n\n";
     $output .= "###### mpd.conf ######\n";
