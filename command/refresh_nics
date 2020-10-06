@@ -47,9 +47,9 @@ require_once('/var/www/app/libs/runeaudio.php');
 if (!$redis->hGet('service', 'internet')) {
     // double check that the current status correct is
     sysCmd('/srv/http/command/internet_available_async.sh');
-    sleep(20);
-    // run it twice, the first time will try to initiate a recovery, the second time will detect the status
-    sysCmd('/srv/http/command/internet_available_async.sh');
+    // sleep(20);
+    // // run it twice, the first time will try to initiate a recovery, the second time will detect the status
+    // sysCmd('/srv/http/command/internet_available_async.sh');
 }
 //
 // refresh the network arrays and save them in redis
@@ -91,8 +91,8 @@ if ($redis->hGet('AccessPoint', 'enabled') && ((is_firstTime($redis, 'AP-start')
                 // the nic supports AP
                 )
         {
-            // sleep for 20 seconds to ensure that connman has time to connect/reconnect
-            sleep(20);
+            // // sleep for 20 seconds to ensure that connman has time to connect/reconnect
+            // sleep(20);
             // double-check that the nic is still not connected
             if (!sysCmd('ip -o  address | sed '."'".'s,[ ]\+, ,g'."'".' | grep -i '."'".'inet '."'".' | grep -ic '.$nic['nic'])[0]) {
                 // the nic is still not connected
