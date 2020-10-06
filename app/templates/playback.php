@@ -203,7 +203,8 @@
             <div id="pl-manage">
                 <button id="pl-manage-list" class="btn btn-default" type="button" title="Manage playlists"><i class="fa fa-file-text-o"></i></button>
                 <button id="pl-manage-save" class="btn btn-default" type="button" title="Save current queue as playlist" data-toggle="modal" data-target="#modal-pl-save"><i class="fa fa-save"></i></button>
-                <button id="pl-manage-clear" class="btn btn-default" type="button" title="Clear the playing queue" data-toggle="modal" data-target="#modal-pl-clear"><i class="fa fa-trash-o"></i></button>
+                <button id="pl-manage-shuffle" class="btn btn-default" type="button" title="Randomise the order of the queue" data-toggle="modal" data-target="#modal-pl-shuffle"><i class="fa fa-random"></i></button>
+                <button id="pl-manage-clear" class="btn btn-default" type="button" title="Clear the queue" data-toggle="modal" data-target="#modal-pl-clear"><i class="fa fa-trash-o"></i></button>
             </div>
             <div id="pl-currentpath" class="hide">
                 <i class="fa fa-folder-open"></i>
@@ -319,8 +320,8 @@
                 </input>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button type="button" id="modal-pl-save-btn" class="btn btn-primary btn-lg" data-dismiss="modal">Save playlist</button>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button type="button" id="modal-pl-save-btn" title="Save the playlist" class="btn btn-primary btn-lg" data-dismiss="modal">Save playlist</button>
             </div>
         </div>
     </div>
@@ -337,8 +338,28 @@
                 Are you sure?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-lg btn-cmd" data-cmd="clear" data-dismiss="modal">Clear</button>
+                <button id="pl-clear-played-button" type="button" class="btn btn-primary btn-lg btn-cmd" title="Clear the songs before the current song" data-dismiss="modal">Clear Played</button><br><br>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="pl-crop-button"type="button" class="btn btn-primary btn-lg btn-cmd" title="Clear the queue except the current song" data-dismiss="modal">Crop</button>
+                <button type="button" class="btn btn-primary btn-lg btn-cmd" title="Clear all songs from queue" data-cmd="clear" data-dismiss="modal">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal-pl-shuffle" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-pl-clear-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="modal-pl-clear-label">Shuffle current queue</h3>
+            </div>
+            <div class="modal-body">
+                This will place the currently playing song in the first position and randomise the order of the rest of the songs. <strong>There is no undo!</strong><br>
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-lg btn-cmd" title="Randomise the order of songs in the queue" data-cmd="shuffle" data-dismiss="modal">Shuffle</button>
             </div>
         </div>
     </div>
@@ -351,12 +372,13 @@
                 <h3 class="modal-title" id="modal-pl-rename-label">Rename the playlist</h3>
             </div>
             <div class="modal-body">
+                Rename will replace an exiting playlist with the same name!<br>
                 <label for="pl-rename-name">Rename "<strong id="pl-rename-oldname"></strong>" playlist to:</label>
                 <input id="pl-rename-name" class="form-control osk-trigger" type="text" placeholder="Enter playlist name">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button id="pl-rename-button" type="button" class="btn btn-primary btn-lg" data-dismiss="modal">Rename</button>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="pl-rename-button" type="button" class="btn btn-primary btn-lg" title="Rename the playlist" data-dismiss="modal">Rename</button>
             </div>
         </div>
     </div>
@@ -376,8 +398,8 @@
                 <input id="webradio-add-url" name="radio[label]" class="form-control osk-trigger" type="text" placeholder="Enter webradio url">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button id="webradio-add-button" type="button" class="btn btn-primary btn-lg">Add to Library</button>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="webradio-add-button" type="button" class="btn btn-primary btn-lg" title="Add the webradio to the library" data-dismiss="modal" >Add to Library</button>
             </div>
         </div>
     </div>
@@ -398,8 +420,8 @@
                 <input id="webradio-edit-url" name="radio[label]" class="form-control osk-trigger" type="text" placeholder="Enter webradio url">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button id="webradio-edit-button" type="button" class="btn btn-primary btn-lg" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="webradio-edit-button" type="button" class="btn btn-primary btn-lg" title="Save the webradio" data-dismiss="modal">Save</button>
             </div>
         </div>
     </div>
@@ -416,8 +438,8 @@
                 Delete this entry from your Library?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Close</button>
-                <button id="webradio-delete-button" type="button" class="btn btn-primary btn-lg" data-dismiss="modal">Delete</button>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="webradio-delete-button" type="button" class="btn btn-primary btn-lg" title="Delete the webradio" data-dismiss="modal">Delete</button>
             </div>
         </div>
     </div>
@@ -445,7 +467,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="songinfo-close-cancel" class="btn btn-default btn-lg" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                <button id="songinfo-close-cancel" class="btn btn-default btn-lg" title="Close this layer" data-dismiss="modal" aria-hidden="true">Close</button>
             </div>
         </div>
     </div>

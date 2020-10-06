@@ -596,6 +596,19 @@ function getMpdOutputs($mpd)
     return $outputs;
 }
 
+function getMpdCurrentsongInfo($mpd, $raw=false)
+// returns the current song information unaltered (as returned by MPD) or as an array of information elements
+// by default an array is returned, by specifying a non-false value for $raw the the data from MPD is returned unaltered
+{
+    sendMpdCommand($mpd, 'currentsong');
+    $songinfo= readMpdResponse($mpd);
+    if ($raw) {
+        return $songinfo;
+    } else {
+        return _parseMpdresponse($songinfo);
+    }
+}
+
 function getLastFMauth($redis)
 {
     $lastfmauth = $redis->hGetAll('lastfm');
@@ -1130,40 +1143,78 @@ if (is_null($resp)) {
         return $status;
     }
 }
-
-function _parseOutputsResponse($input, $active)
+// function to structure an MPD response into an array indexed by the information elements
+function _parseMpdresponse($input)
+// $input is the output from MPD
+// expected input format is "element1: value1<new_line>element2: value2
+// returns false if no 'OK' detected in the input string from MPD
 {
+    if (isset($input)) {
+        $resp = trim($input);
+    } else {
+        return null;
+    }
     if (is_null($input)) {
         return null;
+    } else if (empty($input)) {
+        return null;
     } else {
-        $response = preg_split("/\r?\n/", $input);
-        $outputs = array();
-        $linenum = 0;
-        $i = -1;
-        foreach($response as $line) {
-            if ($linenum % 3 == 0) {
-                $i++;
+        $plistArray = array();
+        $isOk = false;
+        $plistLine = strtok($input, "\n\t\r\0");
+        while ($plistLine) {
+            // runelog('_parseMpdResponse plistLine', $plistLine);
+            if (strpos(' '.$plistLine,'OK')) {
+                $isOk = true;
             }
-        if (!empty($line)) {
-        $value = explode(':', $line);
-        $outputs[$i][$value[0]] = trim($value[1]);
-            if (isset($active)) {
-                if ($value[0] === 'outputenabled' && $outputs[$i][$value[0]]) {
-                    $active = $i;
-                }
+            if (strpos(' '.$plistLine,': ')) {
+                list ($element, $value) = explode(': ', $plistLine, 2);
+                $plistArray[trim($element)] = trim($value);
             }
-        } else {
-            unset($outputs[$i]);
-        }
-            $linenum++;
+            $plistLine = strtok("\n\t\r");
         }
     }
-    if (isset($active)) {
-        return $active;
+    if ($isOk) {
+        return $plistArray;
     } else {
-        return $outputs;
+        return false;
     }
 }
+//
+// no longer used
+// function _parseOutputsResponse($input, $active)
+// {
+    // if (is_null($input)) {
+        // return null;
+    // } else {
+        // $response = preg_split("/\r?\n/", $input);
+        // $outputs = array();
+        // $linenum = 0;
+        // $i = -1;
+        // foreach($response as $line) {
+            // if ($linenum % 3 == 0) {
+                // $i++;
+            // }
+            // if (!empty($line)) {
+            // $value = explode(':', $line);
+            // $outputs[$i][$value[0]] = trim($value[1]);
+                // if (isset($active)) {
+                    // if ($value[0] === 'outputenabled' && $outputs[$i][$value[0]]) {
+                        // $active = $i;
+                    // }
+                // }
+            // } else {
+                // unset($outputs[$i]);
+            // }
+            // $linenum++;
+        // }
+    // }
+    // if (isset($active)) {
+        // return $active;
+    // } else {
+        // return $outputs;
+    // }
+// }
 
 // get file extension
 function parseFileStr($strFile, $delimiter, $negative = null)
@@ -5573,8 +5624,8 @@ function fix_mac($redis, $nic)
 // work function to set, reset of check (including start and stop) ashuffle
 function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
 // Parameter $redis is compulsory
-// Parameter $action can have then the values: 'set', 'reset' or 'check' (default)
-// Parameter $playlistName is only used when $action = set - it contains  the name of the playlist, not the filename
+// Parameter $action can have then the values: 'checkcrossfade', 'set', 'reset' or 'check' (default)
+// Parameter $playlistName is only used when $action = set - it contains  the name of the playlist (not the filename)
 // when $action = 'checkcrossfade' the number of songs to be mainland in the queue is checked and if required corrected
 // when $action = 'set' the specified playlist is used as the source for ashuffle
 // when $action = 'reset' the complete MPD library is used as the source for ashuffle
@@ -5590,6 +5641,8 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
 // The latest version of ashuffle needs an ExecStart line which takes into account the existence of
 // /var/lib/mpd/playlists/RandomPlayPlaylist.m3u
 {
+    // get the playlist directory
+    $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
     switch ($action) {
         case 'checkcrossfade':
             // $action = 'checkcrossfade'
@@ -5633,9 +5686,12 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             $redis->set('globalrandom', '0');
             sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
             // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
-            unlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+            unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
+            // delete all broken symbolic links in the playlist directory
+            // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
+            sysCmd('find '.$playlistDirectory.' -xtype l -delete');
             // create a symbolic link to the selected playlist for random play, ashuffle will bet set up to use it on startup
-            sysCmd('ln -sf "'.$redis->hget('mpdconf', 'playlist_directory').'/'.$playlistName.'.m3u" "'.$redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u"');
+            sysCmd('ln -sf "'.$playlistDirectory.'/'.$playlistName.'.m3u" "'.$playlistDirectory.'/RandomPlayPlaylist.m3u"');
             // set the indicator to say a playlist random file exists/true
             $redis->set('last_pl_randomfile', 1);
             // to allow crossfade to work with ashuffle: when crossfade is set the queue needs to always have one extra song in the queue
@@ -5648,7 +5704,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             }
             // the ashuffle systemd service file needs to explicitly reference the playlist symlink
             $file = '/etc/systemd/system/ashuffle.service';
-            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '.$redis->hGet('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '.$playlistDirectory.'/RandomPlayPlaylist.m3u');
             $fp = fopen($file, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);
@@ -5667,8 +5723,11 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             $redis->set('globalrandom', '0');
             // Stop ashuffle
             sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+            // delete all broken symbolic links in the playlist directory
+            // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
+            sysCmd('find '.$playlistDirectory.' -xtype l -delete');
             // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
-            unlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
+            unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // set the indicator to say NO playlist random file exists/false
             $redis->set('last_pl_randomfile', 0);
             // to allow crossfade to work with ashuffle, when crossfade is set the queue needs to always have one extra song in the queue
@@ -5702,7 +5761,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             if ($retval[0] == 'active') {
                 // clear the cache otherwise is_link() returns incorrect values
                 clearstatcache();
-                if (is_link($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u') && (linkinfo($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u'))) {
+                if (is_link($playlistDirectory.'/RandomPlayPlaylist.m3u') && (linkinfo($playlistDirectory.'/RandomPlayPlaylist.m3u'))) {
                     // link file found and it is valid (pointing to a file which exists), we assume that the playlist has some songs in it
                     // set the indicator to say a playlist random file exists/true
                     $redis->set('last_pl_randomfile', 1);

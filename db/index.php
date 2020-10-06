@@ -127,7 +127,8 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     } else {
                         ui_notify('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
                     }
-               }
+                }
+                unset($artist, $title, $proxy, $lastfm_apikey);
             }
             break;
         case 'lastfmaddreplaceplay':
@@ -154,6 +155,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         }
                     }
                 }
+                unset($curTrack, $status, $proxy, $lastfm_apikey);
             }
             break;
         case 'update':
@@ -250,6 +252,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     //    echo curlPost($dirblecfg['baseurl'].'station/apikey/'.$dirblecfg['apikey'], $_POST['args'], $proxy);
                     //}
                 }
+                unset($proxy, $dirblecfg, $token);
             }
             break;
         case 'jamendo':
@@ -270,6 +273,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 if ($_POST['querytype'] === 'radio' && !empty($_POST['args'])) {
                     echo curlGet('http://api.jamendo.com/v3.0/radios/stream?client_id='.$apikey.'&format=json&name='.$_POST['args'], $proxy);
                 }
+                unset($apikey, $proxy, $jam_channels, $channel, $station);
             }
             break;
         case 'spotify':
@@ -291,6 +295,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
                 $redis->hSet('spotify', 'lastcmd', 'add');
                 $redis->hIncrBy('spotify', 'plversion', 1);
+                unset($path);
             }
             break;
         case 'spaddplay':
@@ -307,6 +312,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 $redis->hIncrBy('spotify', 'plversion', 1);
                 usleep(300000);
                 sendSpopCommand($spop, 'goto '.$trackid);
+                unset($path);
             }
             break;
         case 'spaddreplaceplay':
@@ -322,6 +328,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 $redis->hIncrBy('spotify', 'plversion', 1);
                 usleep(300000);
                 sendSpopCommand($spop, 'play');
+                unset($path);
             }
             break;
         case 'addradio':
@@ -370,6 +377,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // send MPD response to UI
                     ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
                 }
+                unset($status, $pos);
             }
             break;
         case 'albumaddreplaceplay':
@@ -399,6 +407,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // send MPD response to UI
                     ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
                 }
+                unset($status, $pos);
             }
             break;
         case 'artistaddreplaceplay':
@@ -428,6 +437,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // send MPD response to UI
                     ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
                 }
+                unset($status, $pos);
             }
             break;
         case 'genreaddreplaceplay':
@@ -457,6 +467,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // send MPD response to UI
                     ui_mpd_response($mpd, array('title' => 'Added to queue', 'text' => $_POST['path']));
                 }
+                unset($status, $pos);
             }
             break;
         case 'composeraddreplaceplay':
@@ -468,22 +479,42 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
+        case 'pl-crop':
+            if ($activePlayer === 'MPD') {
+                sysCmd('mpc crop');
+            }
+            break;
+        case 'pl-clear-played':
+            if ($activePlayer === 'MPD') {
+                $currSongInfo = getMpdCurrentsongInfo($mpd);
+                if ($currSongInfo && isset($currSongInfo[Pos])) {
+                    // $currSongInfo[Pos] contains currently playing song position in the queue, 0 is the first position
+                    // MPD delete format is: delete <from position>:<number to delete>
+                    // 'delete 0:0' deletes nothing
+                    // 'delete 0:1' deletes the first entry in the queue
+                    // 'delete 0:5' deletes the first 5 entries in the queue
+                    sendMpdCommand($mpd, 'delete 0:'.$currSongInfo[Pos]);
+                    readMpdResponse($mpd);
+                }
+                unset($currSongInfo);
+            }
+            break;
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
                     $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
+                    ui_notify('Started Random Play from the Playlist:', $_POST['playlist']);
                     waitSyWrk($redis, $jobID);
-                    ui_notify('Started Random Play from the playlist', $_POST['playlist']);
-                    sleep(3);
-                    ui_notify('', 'To enable Global Random Play, delete the playlist: RandomPlayPlaylist');
+                    ui_notify('To switch to Global Random Play, delete the playlist:', 'RandomPlayPlaylist');
                 }
+                unset($jobID);
             }
             break;
-        case 'pl-ashuffle-stop':
-            if ($activePlayer === 'MPD') {
-                // sysCmdAsync('/usr/bin/killall ashuffle &');
-                ui_notify('Use the MPD menu to switch Random Play off', '');
-            }
+        // case 'pl-ashuffle-stop':
+            // if ($activePlayer === 'MPD') {
+                // // sysCmdAsync('/usr/bin/killall ashuffle &');
+                // ui_notify('Use the MPD menu to switch Random Play off', '');
+            // }
             break;
     }
 } else {

@@ -2318,12 +2318,9 @@ if ($('#section-index').length) {
         });
 
         $('#random').click(function(){
-            if ($('#random').attr('data-cmd') === 'pl-ashuffle-stop') {
-                $.post('/db/?cmd=pl-ashuffle-stop', '');
-                $('#random').attr('data-cmd', 'random');
-                $('#random').attr('title', 'Random');
-                $('#random').removeClass('btn-primary');
-            }
+            $('#random').attr('data-cmd', 'random');
+            $('#random').attr('title', 'Random');
+            $('#random').removeClass('btn-primary');
         });
 
         // switch between scrollable an non-scrollable features of the playback screen
@@ -2543,6 +2540,16 @@ if ($('#section-index').length) {
             var newname = $('#pl-rename-name').val();
             sendCmd('rename "' + oldname + '" "' + newname + '"');
             getPlaylists();
+        });
+
+        // playlist delete played songs action
+        $('#pl-clear-played-button').click(function(){
+            $.post('/db/?cmd=pl-clear-played', '');
+        });
+
+        // playlist crop action
+        $('#pl-crop-button').click(function(){
+            $.post('/db/?cmd=pl-crop', '');
         });
 
         // playlist save action
@@ -2846,10 +2853,14 @@ if ($('#section-index').length) {
                     break;
 
                 case 'pl-ashuffle':
-                    $.post('/db/?cmd=pl-ashuffle', { 'playlist' : path });
-                    $('#random').attr('data-cmd', 'pl-ashuffle-stop');
-                    $('#random').attr('title', 'Stop randomly adding songs');
-                    $('#random').addClass('btn-primary');
+                    $.post('/db/?cmd=pl-ashuffle',
+                        {
+                            'playlist' : path
+                        },
+                        function(){
+                            getPlaylists();
+                        });
+                    // $('#pl-filter-results').click();
                     break;
 
                 case 'wradd':
