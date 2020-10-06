@@ -120,7 +120,7 @@ fi
 #
 if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
     echo "Removing trailing whitespace from /srv/http/app/templates/* files"
-    FILES="/srv/http/app/templates/*"
+    FILES="/srv/http/assets/css/* /srv/http/assets/js/* /srv/http/app/templates/*"
     for f in $FILES
     do
         if [ -d "$f" ] ; then
@@ -130,7 +130,7 @@ if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
         if [ "$numstrpace" == "0" ] ; then
             continue # no trailing whitespace in the file
         fi
-        echo "Trailing whitespace php: $f"
+        echo "Trailing whitespace rest: $f"
         sed -i 's/[ \t]*$//' "$f"
     done
 fi
