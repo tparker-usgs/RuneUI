@@ -2308,7 +2308,13 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
             sysCmd('mkdir -p /boot/wifi/examples');
             sysCmd('cp /srv/http/app/config/defaults/boot/wifi/readme/* /boot/wifi/readme');
             sysCmd('cp /srv/http/app/config/defaults/boot/wifi/examples /boot/wifi/examples');
+            // restore the standard service and config files
+            sysCmd('mkdir /etc/systemd/system/');
+            sysCmd('cp /srv/http/app/config/defaults/etc/systemd/system/connman.service /etc/systemd/system/connman.service');
+            sysCmd('mkdir /etc/connman/');
+            sysCmd('cp /srv/http/app/config/defaults/etc/connman/* /etc/connman/');
             // start connman
+            sysCmd('systemctl daemon-reload');
             sysCmd('systemctl start connman');
             // set automatic Wi-Fi optimisation
             $redis->set('network_autoOptimiseWifi', 1);
