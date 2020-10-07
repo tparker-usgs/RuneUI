@@ -1,8 +1,9 @@
 #!/bin/bash
-set -x # echo all commands to cli
+# set -x # echo all commands to cli
 set +e # continue on errors
 #
-# Remove duplicate entries from a playlist
+# File command/remove_playlist_duplicates.sh
+# Remove duplicate entries from a MPD playlist
 # Parameter contains the playlist name (not the filename)
 #
 # check the parameter

@@ -4619,6 +4619,9 @@ button.close {
 .fa-arrows-alt:before {
     content: "\f0b2"
 }
+.fa-expand-arrows-alt:before {
+    content: "\f31e"
+}
 .fa-group:before,
 .fa-users:before {
     content: "\f0c0"

@@ -906,6 +906,15 @@ while (1) {
                     wrk_mpdconf($redis, 'restart');
                     $redis->sRem('w_lock', $jobID);
                     break;
+                case 'pl_rem_dup':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    // $job>args contains the playlist name
+                    // run the job async with a lower priority
+                    sysCmdAsync('nice --adjustment=2 /var/www/command/remove_playlist_duplicates.sh '."'".$job->args."'");
+                    ui_notify('Remove duplicates started for playlist:', $job->args);
+                    $redis->sRem('w_lock', $jobID);
+                    break;
                 case 'ashufflecheckCF':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);

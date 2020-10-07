@@ -2852,6 +2852,13 @@ if ($('#section-index').length) {
                     });
                     break;
 
+                case 'pl-rem-dup':
+                    $.post('/db/?cmd=pl-rem-dup',
+                        {
+                            'playlist' : path
+                        });
+                    break;
+
                 case 'pl-ashuffle':
                     $.post('/db/?cmd=pl-ashuffle',
                         {
@@ -2860,7 +2867,6 @@ if ($('#section-index').length) {
                         function(){
                             getPlaylists();
                         });
-                    // $('#pl-filter-results').click();
                     break;
 
                 case 'wradd':

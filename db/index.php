@@ -499,6 +499,13 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 unset($currSongInfo);
             }
             break;
+        case 'pl-rem-dup':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['playlist'])) {
+                    wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_rem_dup', 'args' => $_POST['playlist']));
+                }
+            }
+            break;
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {

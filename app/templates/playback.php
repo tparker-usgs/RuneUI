@@ -268,12 +268,13 @@
     </div>
     <div id="context-menu-playlist" class="context-menu">
         <ul class="dropdown-menu" role="menu">
-            <li><a href="javascript:;" data-cmd="pl-add"><i class="fa fa-plus-circle sx"></i> Add to queue</a></li>
-            <li><a href="javascript:;" data-cmd="pl-replace"><i class="fa fa-undo sx"></i> Replace the queue</a></li>
-            <li><a href="javascript:;" data-cmd="pl-addreplaceplay"><i class="fa fa-share-square-o sx"></i> Replace and play the queue</a></li>
-            <li><a href="javascript:;" data-cmd="pl-ashuffle"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
-            <li><a href="javascript:;" data-cmd="pl-rename"><i class="fa fa-edit sx"></i> Rename</a></li>
-            <li><a href="javascript:;" data-cmd="pl-rm"><i class="fa fa-trash-o sx"></i> Delete</a></li>
+            <li><a href="javascript:;" data-cmd="pl-add" title="Add this playlist to the queue"><i class="fa fa-plus-circle sx"></i> Add to queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-replace" title="Replace the queue with this playlist"><i class="fa fa-undo sx"></i> Replace the queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-addreplaceplay" title="Replace the queue with this playlist and play"><i class="fa fa-share-square-o sx"></i> Replace and play the queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-ashuffle" title="Randomly add songs from this playlist to the queue when it is empty"><i class="fa fa-random sx"></i> Randomly add songs to queue</a></li>
+            <li><a href="javascript:;" data-cmd="pl-rem-dup" title="Remove duplicate songs from this playlist"><i class="fa fa-tasks sx"></i> Remove duplicates</a></li>
+            <li><a href="javascript:;" data-cmd="pl-rename" title="Rename this playlist"><i class="fa fa-edit sx"></i> Rename</a></li>
+            <li><a href="javascript:;" data-cmd="pl-rm" title="Delete this playlist"><i class="fa fa-trash-o sx"></i> Delete</a></li>
         </ul>
     </div>
     <div id="context-menu-album" class="context-menu">
@@ -321,7 +322,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
-                <button type="button" id="modal-pl-save-btn" title="Save the playlist" class="btn btn-primary btn-lg" data-dismiss="modal">Save playlist</button>
+                <button type="button" id="modal-pl-save-btn" title="Save the queue as a playlist" class="btn btn-primary btn-lg" data-dismiss="modal">Save as playlist</button>
             </div>
         </div>
     </div>
