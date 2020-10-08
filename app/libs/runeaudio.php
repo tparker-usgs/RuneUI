@@ -5709,7 +5709,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // delete all broken symbolic links in the playlist directory
             // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
-            sysCmd('find '.$playlistDirectory.' -xtype l -delete');
+            sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
             // create a symbolic link to the selected playlist for random play, ashuffle will bet set up to use it on startup
             sysCmd('ln -sf "'.$playlistDirectory.'/'.$playlistName.'.m3u" "'.$playlistDirectory.'/RandomPlayPlaylist.m3u"');
             // set the indicator to say a playlist random file exists/true
@@ -5745,7 +5745,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
             // delete all broken symbolic links in the playlist directory
             // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
-            sysCmd('find '.$playlistDirectory.' -xtype l -delete');
+            sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
             // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
             unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // set the indicator to say NO playlist random file exists/false
