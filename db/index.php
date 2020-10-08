@@ -543,7 +543,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         // delete all broken symbolic links in the playlist directory
                         sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
                         if ($oldname == 'RandomPlayPlaylist') {
-                            ui_notifyError('Error', 'This playlist is used for random play and cannot be renamed (can be deleted): '.$oldname);
+                            ui_notifyError('Error', 'This playlist is used for random play and cannot be renamed (it can be safely deleted): '.$oldname);
                         } else if (file_exists($playlistDirectory.'/'.$newname.'.m3u')) {
                             // Note: file_exists() will not detect a broken symlink
                             // file exists
