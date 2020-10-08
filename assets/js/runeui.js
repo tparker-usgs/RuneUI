@@ -2528,7 +2528,11 @@ if ($('#section-index').length) {
         // save current Queue to playlist
         $('#modal-pl-save-btn').click(function(){
             var playlistname = $('#pl-save-name').val();
-            sendCmd('save "' + playlistname + '"');
+            // sendCmd('save "' + playlistname + '"');
+            $.post('/db/?cmd=pl-save',
+                {
+                    'playlist' : playlistname
+                });
         });
 
         // playlists management - actions context menu
@@ -2542,8 +2546,15 @@ if ($('#section-index').length) {
         $('#pl-rename-button').click(function(){
             var oldname = $('#pl-rename-oldname').text();
             var newname = $('#pl-rename-name').val();
-            sendCmd('rename "' + oldname + '" "' + newname + '"');
-            getPlaylists();
+            // sendCmd('rename "' + oldname + '" "' + newname + '"');
+            $.post('/db/?cmd=pl-rename',
+                {
+                    'oldname' : oldname,
+                    'newname' : newname
+                },
+                function(){
+                    getPlaylists();
+                });
         });
 
         // playlist delete played songs action

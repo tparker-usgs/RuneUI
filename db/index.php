@@ -493,10 +493,76 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     // 'delete 0:0' deletes nothing
                     // 'delete 0:1' deletes the first entry in the queue
                     // 'delete 0:5' deletes the first 5 entries in the queue
+                    // 'delete 2:5' deletes the third to 8th entries in the queue
                     sendMpdCommand($mpd, 'delete 0:'.$currSongInfo[Pos]);
                     readMpdResponse($mpd);
                 }
                 unset($currSongInfo);
+            }
+            break;
+        case 'pl-save':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['playlist'])) {
+                    $playlist = trim($_POST['playlist']);
+                    if (strlen($playlist)) {
+                        // check existence of playlist with the given name
+                        // get the playlist directory
+                        $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
+                        // delete all broken symbolic links in the playlist directory
+                        sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+                        if (file_exists($playlistDirectory.'/'.$playlist.'.m3u')) {
+                            // Note: file_exists() will not detect a broken symlink
+                            // file exists
+                            ui_notifyError('Error', 'Playlist name already in use: '.$playlist);
+                        } else {
+                            sendMpdCommand($mpd, 'save "'.$playlist.'"');
+                            $response = readMpdResponse($mpd);
+                            if (strpos(' '.$response, 'OK')) {
+                                ui_notify('Saved', $playlist);
+                            } else {
+                                ui_notifyError('Error', $response);
+                            }
+                        }
+                    } else {
+                        ui_notifyError('Error', 'No playlist name given');
+                    }
+                } else {
+                    ui_notifyError('Error', 'No playlist name given');
+                }
+            }
+            break;
+        case 'pl-rename':
+            if ($activePlayer === 'MPD') {
+                if (isset($_POST['oldname']) && isset($_POST['newname'])) {
+                    $oldname = trim($_POST['oldname']);
+                    $newname = trim($_POST['newname']);
+                    if (strlen($oldname) && strlen($newname)) {
+                        // check existence of new playlist with the given name
+                        // get the playlist directory
+                        $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
+                        // delete all broken symbolic links in the playlist directory
+                        sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+                        if ($oldname == 'RandomPlayPlaylist') {
+                            ui_notifyError('Error', 'This playlist is used for random play and cannot be renamed (can be deleted): '.$oldname);
+                        } else if (file_exists($playlistDirectory.'/'.$newname.'.m3u')) {
+                            // Note: file_exists() will not detect a broken symlink
+                            // file exists
+                            ui_notifyError('Error', 'New playlist name already in use: '.$newname);
+                        } else {
+                            sendMpdCommand($mpd, 'rename "'.$oldname.'" "'.$newname.'"');
+                            $response = readMpdResponse($mpd);
+                            if (strpos(' '.$response, 'OK')) {
+                                ui_notify('Renamed', 'From: '.$oldname.', to: '.$newname);
+                            } else {
+                                ui_notifyError('Error', $response);
+                            }
+                        }
+                    } else {
+                        ui_notifyError('Error', 'No new playlist name given');
+                    }
+                } else {
+                    ui_notifyError('Error', 'No new playlist name given');
+                }
             }
             break;
         case 'pl-rem-dup':
@@ -509,10 +575,17 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
-                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $_POST['playlist']));
-                    ui_notify('Started Random Play from the Playlist:', $_POST['playlist']);
-                    waitSyWrk($redis, $jobID);
-                    ui_notify('To switch to Global Random Play, delete the playlist:', 'RandomPlayPlaylist');
+                    $playlist = trim($_POST['playlist']);
+                    // delete all broken symbolic links in the playlist directory
+                    sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+                    if ($playlist == 'RandomPlayPlaylist') {
+                        ui_notifyError('Error', 'This playlist is already being used for random play and cannot be used as a source: '.$playlist);
+                    } else {
+                        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $playlist));
+                        ui_notify('Started Playlist Random Play from:', $playlist);
+                        waitSyWrk($redis, $jobID);
+                        ui_notify('To switch to Global Random Play, delete the playlist:', 'RandomPlayPlaylist');
+                    }
                 }
                 unset($jobID);
             }
