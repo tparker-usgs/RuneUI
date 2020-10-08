@@ -63,7 +63,7 @@ function openMpdSocket($path, $type = null)
             // the header should contain a 'OK', if not something went wrong
             if (!strpos(' '.$header, 'OK')) {
                 runelog("[error][".$sock['resource']."]\t>>>>>> MPD OPEN SOCKET ERROR REPORTED - Greeting response: ".$header."<<<<<<",'');
-                // ui_notify('MPD open error: '.$sock.'','Greeting response = '.$header);
+                // ui_notifyError('MPD open error: '.$sock.'','Greeting response = '.$header);
                 closeMpdSocket($sock);
                 return false;
             }
@@ -71,7 +71,7 @@ function openMpdSocket($path, $type = null)
             return $sock;
         } else {
             runelog("[error][".$sock['resource']."]\t>>>>>> MPD SOCKET ERROR: ".socket_last_error($sock['resource'])." <<<<<<",'');
-            // ui_notify('MPD sock: '.$sock.'','socket error = '.socket_last_error($sock));
+            // ui_notifyError('MPD sock: '.$sock.'','socket error = '.socket_last_error($sock));
             return false;
         }
     // create blocking socket connection
@@ -84,7 +84,7 @@ function openMpdSocket($path, $type = null)
             // the header should contain a 'OK', if not something went wrong
             if (!strpos(' '.$header, 'OK')) {
                 runelog("[error][".$sock['resource']."]\t>>>>>> MPD OPEN SOCKET ERROR REPORTED - Greeting response: ".$header."<<<<<<",'');
-                // ui_notify('MPD open error: '.$sock.'','Greeting response = '.$header);
+                // ui_notifyError('MPD open error: '.$sock.'','Greeting response = '.$header);
                 closeMpdSocket($sock);
                 return false;
             }
@@ -92,7 +92,7 @@ function openMpdSocket($path, $type = null)
             return $sock;
         } else {
             runelog("[error][".$sock."]\t<<<<<<<<<<<< MPD SOCKET ERROR: ".socket_strerror(socket_last_error($sock))." >>>>>>>>>>>>",'');
-            // ui_notify('MPD sock: '.$sock.'','socket error = '.socket_last_error($sock));
+            // ui_notifyError('MPD sock: '.$sock.'','socket error = '.socket_last_error($sock));
             return false;
         }
     }
@@ -332,7 +332,7 @@ function openSpopSocket($host, $port, $type = null)
             return $sock;
         } else {
             runelog("[error][".$sock['resource']."]\t>>>>>> SPOP SOCKET ERROR: ".socket_last_error($sock['resource'])." <<<<<<",'');
-            // ui_notify('SPOP sock: '.$sock.'','socket error = '.socket_last_error($sock));
+            // ui_notifyError('SPOP sock: '.$sock.'','socket error = '.socket_last_error($sock));
             return false;
         }
     // create blocking socket connection
@@ -346,7 +346,7 @@ function openSpopSocket($host, $port, $type = null)
             return $sock;
         } else {
             runelog("[error][".$sock."]\t<<<<<<<<<<<< SPOP SOCKET ERROR: ".socket_strerror(socket_last_error($sock))." >>>>>>>>>>>>",'');
-            // ui_notify('SPOP sock: '.$sock.'','socket error = '.socket_last_error($sock));
+            // ui_notifyError('SPOP sock: '.$sock.'','socket error = '.socket_last_error($sock));
             return false;
         }
     }
@@ -3338,7 +3338,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 // no special characters allowed in the mount name
                 $mp['error'] = '"'.$mp['name'].'" Invalid Mount Name - no special characters allowed';
                 if (!$quiet) {
-                    ui_notify($type.' mount', $mp['error']);
+                    ui_notifyError($type.' mount', $mp['error']);
                     sleep(3);
                 }
                 $redis->hMSet('mount_'.$id, $mp);
@@ -3353,7 +3353,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 // spaces or special characters are not normally valid in an IP Address
                 $mp['error'] = 'Warning "'.$mp['address'].'" IP Address seems incorrect - contains space(s) and/or special character(s) - continuing';
                 if (!$quiet) {
-                    ui_notify($type.' mount', $mp['error']);
+                    ui_notifyError($type.' mount', $mp['error']);
                     sleep(3);
                 }
             }
@@ -3361,7 +3361,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 // special characters are not normally valid as a remote directory name
                 $mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - contains special character(s) - continuing';
                 if (!$quiet) {
-                    ui_notify($type.' mount', $mp['error']);
+                    ui_notifyError($type.' mount', $mp['error']);
                     sleep(3);
                 }
             }
@@ -3369,7 +3369,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 // normally valid as a remote directory name should be specified
                 $mp['error'] = 'Warning "'.$mp['remotedir'].'" Remote Directory seems incorrect - empty - continuing';
                 if (!$quiet) {
-                    ui_notify($type.' mount', $mp['error']);
+                    ui_notifyError($type.' mount', $mp['error']);
                     sleep(3);
                 }
             }
@@ -3500,9 +3500,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
             unset($retval);
             if ($unresolved OR $noaddress OR $quick) {
                 if (!$quiet) {
-                    ui_notify($type.' mount', $mp['error']);
+                    ui_notifyError($type.' mount', $mp['error']);
                     sleep(3);
-                    ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+                    ui_notifyError($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
                     sleep(3);
                 }
                 if(!empty($mp['name'])) sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
@@ -3627,9 +3627,9 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
             // mount failed
             if(!empty($mp['name'])) sysCmd("rmdir '/mnt/MPD/NAS/".$mp['name']."'");
             if (!$quiet) {
-                ui_notify($type.' mount', $mp['error']);
+                ui_notifyError($type.' mount', $mp['error']);
                 sleep(3);
-                ui_notify($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
+                ui_notifyError($type.' mount', '//'.$mp['address'].'/'.$mp['remotedir'].' Failed');
                 sleep(3);
             }
             return 0;
@@ -4586,6 +4586,20 @@ function ui_notify($title = null, $text, $type = null, $permanotice = null)
             $output = array('title' => $title, 'text' => $text, 'permanotice' => '');
         } else {
             $output = array('title' => $title, 'text' => $text);
+        }
+    }
+    ui_render('notify', json_encode($output));
+}
+
+function ui_notifyError($title = null, $text, $type = null, $permanotice = null)
+{
+    if (is_object($permanotice)) {
+        $output = array('title' => $title, 'permanotice' => '', 'permaremove' => '', 'icon' => 'fa fa-exclamation');
+    } else {
+        if ($permanotice === 1) {
+            $output = array('title' => $title, 'text' => $text, 'permanotice' => '', 'icon' => 'fa fa-exclamation');
+        } else {
+            $output = array('title' => $title, 'text' => $text, 'icon' => 'fa fa-exclamation');
         }
     }
     ui_render('notify', json_encode($output));

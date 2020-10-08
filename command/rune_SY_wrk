@@ -609,7 +609,7 @@ while (1) {
                                 sysCmd('/srv/http/command/rune_prio nice');
                             }
                         } else {
-                            ui_notify('Local browser', 'Display zoom factor invalid: '.$job->args.' Enter a value between 0.1 and 10');
+                            ui_notifyError('Local browser', 'Display zoom factor invalid: '.$job->args.' Enter a value between 0.1 and 10');
                             sleep(3);
                         }
                     } else {
@@ -1610,7 +1610,7 @@ while (1) {
                                 if ($smart_avalable && $smart_enabled && $smart_result && !$smart_good) {
                                     // SMART is available, enabled, there is a result and it is not good
                                     // display the information
-                                    ui_notify('Disk errors - Action required', implode("\n", $self_check));
+                                    ui_notifyError('Disk errors - Action required', implode("\n", $self_check));
                                     // set the disk_error flag to true
                                     $redis->set('disk_error', 1);								}
                             }

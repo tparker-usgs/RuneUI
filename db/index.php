@@ -125,7 +125,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     if (ui_lastFM_similar($redis, trim($artist), trim($title), $lastfm_apikey, $proxy)) {
                         ui_notify('Added similar tracks', 'As listed by last.fm');
                     } else {
-                        ui_notify('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
+                        ui_notifyError('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
                     }
                 }
                 unset($artist, $title, $proxy, $lastfm_apikey);
@@ -151,7 +151,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         if (ui_lastFM_similar($redis, $status['currentartist'], $status['currentsong'], $lastfm_apikey, $proxy)) {
                             ui_notify('Added similar tracks', 'As listed by last.fm');
                         } else {
-                            ui_notify('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
+                            ui_notifyError('Error', 'No similar tracks, or last.fm not available to provide similar tracks information');
                         }
                     }
                 }
@@ -189,7 +189,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     ui_notify('Bookmark saved', $_POST['path'].' added to bookmarks');
                     ui_libraryHome($redis);
                 } else {
-                    ui_notify('Error saving bookmark', 'please try again later');
+                    ui_notifyError('Error saving bookmark', 'please try again later');
                 }
             }
             if (isset($_POST['id'])) {
@@ -197,7 +197,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                     ui_notify('Bookmark deleted', '"' . $_POST['name'] . '" successfully removed');
                     ui_libraryHome($redis);
                 } else {
-                    ui_notify('Error deleting bookmark', 'Please try again later');
+                    ui_notifyError('Error deleting bookmark', 'Please try again later');
                 }
             }
             break;
