@@ -1168,8 +1168,12 @@ function renderUI(text){
 function renderPlaylists(data){
     var content = '', playlistname = '';
     var i, line, lines=data.split('\n'), infos=[];
-    for (i = 0; (line = lines[i]); i += 1 ) {
-        infos = line.split(': ');
+    // case insensitive sort of the playlist names
+    lines.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+    for (i = 0; i < lines.length; i++) {
+        infos = lines[i].split(': ');
         if( 'playlist' === infos[0] ) {
             playlistname = infos[1];
             content += '<li class="pl-folder" data-path="' + playlistname + '"><i class="fa fa-bars pl-action" data-target="#context-menu-playlist" data-toggle="context" title="Actions"></i><span><i class="fa fa-list-ol"></i>' + playlistname + '</span></li>';
