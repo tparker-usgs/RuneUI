@@ -375,7 +375,7 @@
             <div class="modal-body">
                 Rename will replace an exiting playlist with the same name!<br>
                 <label for="pl-rename-name">Rename "<strong id="pl-rename-oldname"></strong>" playlist to:</label>
-                <input id="pl-rename-name" class="form-control osk-trigger" type="text" placeholder="Enter playlist name">
+                <input id="pl-rename-name" class="form-control osk-trigger" type="text" placeholder="Enter new playlist name">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
