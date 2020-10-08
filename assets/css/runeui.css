@@ -16,8 +16,8 @@ html {
 }
 
 .disable-scrollbar-2::-webkit-scrollbar {
-        width: 0 !important; /*For Chrome, Safari and Opera*/
-        display: none; /*For Chrome, Safari and Opera*/
+    width: 0 !important; /*For Chrome, Safari and Opera*/
+    display: none; /*For Chrome, Safari and Opera*/
 }
 
 body {
