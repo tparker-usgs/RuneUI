@@ -1553,7 +1553,7 @@ while (1) {
     // first test after 480 cycles (= +/- 4 minutes) and then at a maximum rate of once per +/-2400 cycles (= +/20 minutes)
     // when a disk error is detected reduce the test every +/-180 cycles (= +/-1.5 minutes)
     // Why test only when something is playing?
-    //	a) someone needs see the error messages and
+    //  a) someone needs see the error messages and
     //  b) most hard disks will be usb drives which go to sleep when not in use, let them sleep
     if ($savecpuSmt-- <= 0) {
         $retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed');
@@ -1610,7 +1610,8 @@ while (1) {
                                     // display the information
                                     ui_notifyError('Disk errors - Action required', implode("\n", $self_check));
                                     // set the disk_error flag to true
-                                    $redis->set('disk_error', 1);								}
+                                    $redis->set('disk_error', 1);
+                                }
                             }
                         }
                         unset($self_check);
