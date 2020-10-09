@@ -1674,63 +1674,49 @@ function wrk_backup($redis, $bktype = null)
         $cmdstring = "rm -f /srv/http/tmp/totalbackup_* &> /dev/null;".
             " redis-cli save;".
             " bsdtar -czpf ".$filepath.
-            " /etc".
             " /mnt/MPD/Webradio".
             " /var/lib/redis/rune.rdb".
             " /var/lib/mpd".
-            " ".$redis->hGet('mpdconf', 'db_file').
-            " ".$redis->hGet('mpdconf', 'sticker_file').
-            " ".$redis->hGet('mpdconf', 'playlist_directory').
-            " ".$redis->hGet('mpdconf', 'state_file').
-            " /boot/config.txt".
-            " /boot/cmdline.txt".
+            " '".$redis->hGet('mpdconf', 'db_file')."'".
+            " '".$redis->hGet('mpdconf', 'sticker_file')."'".
+            " '".$redis->hGet('mpdconf', 'playlist_directory')."'".
+            " '".$redis->hGet('mpdconf', 'state_file')."'".
+            " /var/lib/connman".
+            " /etc/mpd.conf".
             " /var/www".
+            " /etc".
             "";
     } else {
         $filepath = "/srv/http/tmp/backup_".date("Y-m-d").".tar.gz";
         $cmdstring = "rm -f /srv/http/tmp/backup_* &> /dev/null;".
             " redis-cli save;".
             " bsdtar -czpf ".$filepath.
-            " /var/lib/connman".
             " /mnt/MPD/Webradio".
             " /var/lib/redis/rune.rdb".
-            " ".$redis->hGet('mpdconf', 'db_file').
-            " ".$redis->hGet('mpdconf', 'sticker_file').
-            " ".$redis->hGet('mpdconf', 'playlist_directory').
-            " ".$redis->hGet('mpdconf', 'state_file').
+            " /var/lib/mpd".
+            " '".$redis->hGet('mpdconf', 'db_file')."'".
+            " '".$redis->hGet('mpdconf', 'sticker_file')."'".
+            " '".$redis->hGet('mpdconf', 'playlist_directory')."'".
+            " '".$redis->hGet('mpdconf', 'state_file')."'".
+            " /var/lib/connman".
             " /etc/mpd.conf".
-            " /etc/mpdscribble.conf".
-            " /etc/spop".
-            " /boot/config.txt".
             "";
-        // clear the cache otherwise file_exists() returns incorrect values
-        clearstatcache();
-        if (file_exists('/etc/shairport-sync.conf')) {
-            $cmdstring .= " /etc/shairport-sync.conf";
-        }
-        if (file_exists('/etc/chrony.conf')) {
-            $cmdstring .= " /etc/chrony.conf";
-        }
-        if (file_exists('/etc/nsswitch.conf')) {
-            $cmdstring .= " /etc/nsswitch.conf";
-        }
-        if (file_exists('/etc/samba/smb-dev.conf')) {
-            $cmdstring .= " /etc/samba/smb-dev.conf";
-        }
-        if (file_exists('/etc/samba/smb-prod.conf')) {
-            $cmdstring .= " /etc/samba/smb-prod.conf";
-        }
-        if (file_exists('/etc/hostapd/hostapd.conf')) {
-            $cmdstring .= " /etc/hostapd/hostapd.conf";
-        }
-        if (file_exists('/etc/upmpdcli.conf')) {
-            $cmdstring .= " /etc/upmpdcli.conf";
+    }
+    // add the names of the distribution files
+    $extraFiles = sysCmd('find /var/www/app/config/defaults/ -type f');
+    // clear the cache otherwise file_exists() returns incorrect values
+    clearstatcache();
+    foreach ($extraFiles as $extraFile) {
+        // convert the names of the distribution files to production files
+        $fileName = str_replace('/var/www/app/config/defaults', '', $extraFile);
+        if (file_exists($fileName)) {
+            // add the files to the backup command if they exist
+            $cmdstring .= " '".$fileName."'";
         }
     }
     sysCmd($cmdstring);
     return $filepath;
 }
-
 
 function wrk_opcache($action, $redis)
 {
