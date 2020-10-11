@@ -3502,6 +3502,15 @@ if ($('#section-index').length) {
                 $('#mpdconf_editor').removeClass('hide');
                 $('#manual-edit-warning').addClass('hide');
             });
+            
+            // MPD random play show/hide
+            $('#mpd-gr-cb').change(function(){
+                if ($(this).prop('checked')) {
+                    $('#mpd-gr-fields').removeClass('hide');
+                } else {
+                    $('#mpd-gr-fields').addClass('hide');
+                }
+            });
         }
 
 

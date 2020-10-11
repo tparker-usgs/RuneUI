@@ -213,11 +213,13 @@ function redisDatastore($redis,$action) {
             $redis->hSet('lastfm', 'user', 'user');
             $redis->hSet('lastfm', 'pass', 'pass');
             $redis->set('globalrandom', 0);
+            $redis->set('addrandom', 0);
+            $redis->set('random_album', 0);
+            $redis->set('random_exclude', '');
             $redis->set('stoppedPlayer', '');
             $redis->set('mpd_start_volume', -1);
             $redis->set('lastmpdvolume', 100);
             $redis->set('mpd_autoplay', 0);
-            $redis->set('addrandom', 0);
             $redis->set('dynVolumeKnob', '0');
             $redis->set('cmediafix', 0);
             $redis->set('mpdconfchange', 0);
@@ -548,6 +550,9 @@ function redisDatastore($redis,$action) {
             $redis->hExists('lastfm', 'password') || $redis->hSet('lastfm', 'password', '');
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
             $redis->exists('globalrandom') || $redis->set('globalrandom', 0);
+            $redis->exists('addrandom') || $redis->set('addrandom', 0);
+            $redis->exists('random_album') || $redis->set('random_album', 0);
+            $redis->exists('random_exclude') || $redis->set('random_exclude', '');
             $redis->exists('stoppedPlayer') || $redis->set('stoppedPlayer', '');
             $redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
             $redis->exists('audio_on_off') || $redis->set('audio_on_off', '1');
@@ -589,8 +594,6 @@ function redisDatastore($redis,$action) {
             $redis->exists('mpd_start_volume') || $redis->set('mpd_start_volume', -1);
             $redis->exists('lastmpdvolume') || $redis->set('lastmpdvolume', 100);
             $redis->exists('mpd_autoplay') || $redis->set('mpd_autoplay', 0);
-            $redis->exists('globalrandom') || $redis->set('globalrandom', 0);
-            $redis->exists('addrandom') || $redis->set('addrandom', 0);
             // developer parameters
             $redis->exists('dev') || $redis->set('dev', 0);
             $redis->exists('debug') || $redis->set('debug', 0);

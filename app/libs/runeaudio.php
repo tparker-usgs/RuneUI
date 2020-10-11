@@ -6041,6 +6041,27 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // set the indicator to say NO playlist random file exists/false
             $redis->set('last_pl_randomfile', 0);
+            // get the excluded songs
+            if ($redis->exists(random_exclude)) {
+                $randomExclude = trim($redis->get(random_exclude));
+            } else {
+                $randomExclude = '';
+            }
+            if ($randomExclude) {
+                if (!strpos(' '.$randomExclude, '--exclude') && !strpos(' '.$randomExclude, '-e')) {
+                    $randomExclude = ' --exclude '.$randomExclude;
+                } else {
+                    $randomExclude = ' '.$randomExclude;
+                }
+            }
+            // get the variable defining random play by album
+            if ($redis->exists(random_album)) {
+                if ($redis->get(random_album)) {
+                    $ashuffleAlbum = ' --by-album';
+                } else {
+                    $ashuffleAlbum = '';
+                }
+            }
             // to allow crossfade to work with ashuffle, when crossfade is set the queue needs to always have one extra song in the queue
             unset($retval);
             $retval = sysCmd('mpc crossfade');
@@ -6052,7 +6073,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             }
             // the ashuffle systemd service file needs to explicitly exclude the reference the deleted playlist symlink
             $file = '/etc/systemd/system/ashuffle.service';
-            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs);
+            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$randomExclude.$ashuffleAlbum);
             $fp = fopen($file, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);

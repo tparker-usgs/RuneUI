@@ -237,14 +237,23 @@
                 <label class="control-label col-sm-2" for="globalrandom">Global Random</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input name="mpd[globalrandom]" type="checkbox" value="1"<?php if((isset($this->mpd['globalrandom'])) && ($this->mpd['globalrandom'])): ?> checked="checked" <?php endif ?>>
+                        <input id="mpd-gr-cb" name="mpd[globalrandom]" type="checkbox" value="1"<?php if((isset($this->mpd['globalrandom'])) && ($this->mpd['globalrandom'])): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Toggles the global random, when ON it adds a random song from your MPD library to the queue when it reaches the end.<br>
+                    <span class="help-block">Toggles Global Random Play, when ON it adds a random song from your MPD library to the queue when the queue becomes empty.<br>
                     You can also select a playlist as source for random play, this option will then be switched on automatically.<br>
                     <i>Notes:<br>UPnP / DLNA will not work when global random is enabled, it must be switched OFF.<br>
                     When Crossfade is set, global random will always keep two entries in the queue to ensure that crossfading works correctly</i></span>
-                    <div class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
+                </div>
+                <div id="mpd-gr-fields" class="<?php if($this->mpd['globalrandom'] != 1): ?>hide<?php endif ?>">
+                    <label class="control-label col-sm-2" for="globalrandom">Random Album/Song</label>
+                    <div class="col-sm-10">
+                        <label class="switch-light well" onclick="">
+                            <input name="mpd[random_album]" type="checkbox" value="1"<?php if((isset($this->mpd['random_album'])) && ($this->mpd['random_album'])): ?> checked="checked" <?php endif ?>>
+                            <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                        </label>
+                        <span class="help-block">Toggles Album of Song based Global Random Play, when ON it adds a random Album, when OFF it adds a random Song.<br>
+                            <i>This setting has no effect when a playlist is selected as the source of the random songs</i></span>
                         <input class="form-control input-lg" type="text" id="ramdomsource" name="ramdomsource" value="<?php echo $this->ramdomsource; ?>" disabled autocomplete="off">
                     </div>
                 </div>

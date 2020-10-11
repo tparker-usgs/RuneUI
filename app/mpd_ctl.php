@@ -80,6 +80,23 @@
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         }
+        if ((isset($_POST['mpd']['random_album'])) && ($_POST['mpd']['random_album'])) {
+            if ($redis->get('random_album') != 1) {
+                $redis->set('random_album', 1);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            } else {
+                // check that crossfade is set up correctly
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
+            }
+        } else {
+            if ($redis->get('random_album') != 0) {
+                $redis->set('random_album', 0);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
+            } else {
+                // check that crossfade is set up correctly
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
+            }
+        }
         if ((isset($_POST['mpd']['addrandom'])) && (is_numeric($_POST['mpd']['addrandom']))) {
             $redis->get('addrandom') == $_POST['mpd']['addrandom'] || $redis->set('addrandom', $_POST['mpd']['addrandom']);
         }
@@ -101,6 +118,7 @@ $template->realtime_volume = $redis->get('dynVolumeKnob');
 $template->mpd['start_volume'] = $redis->get('mpd_start_volume');
 $template->mpd['mpd_autoplay'] = $redis->get('mpd_autoplay');
 $template->mpd['globalrandom'] = $redis->get('globalrandom');
+$template->mpd['random_album'] = $redis->get('random_album');
 $template->mpd['addrandom'] = $redis->get('addrandom');
 $template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
