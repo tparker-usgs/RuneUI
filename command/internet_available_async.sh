@@ -9,12 +9,10 @@
 set +e # continue on errors
 #
 # just in case something has gone wrong with the local router link, try to reconnect
-# if a Wi-Fi nic is down, use IP to take the nic down manually and bring it up
-# connman will then reconnect automatically
+# if a Wi-Fi nic is down, use IP to take the nic down manually and bring it up, connman will then reconnect automatically
 #
 # if connman has lost a Wi-Fi connection it should reconnect automatically, but the current version does not do it
-# running 'iwctl station <nic> scan' for the Wi-Fi nics should initiate a reconnect
-# no real issue in running this every time this routine runs
+# running 'iwctl station <nic> scan' for the Wi-Fi nics should initiate a reconnect, no real issue in running this every time this routine runs
 # get a list of the nics which are down
 DOWN=$(ip -o -br  address | grep -i 'down' | cut -d ' ' -f1 | xargs)
 # get a list of all Wi-Fi nics

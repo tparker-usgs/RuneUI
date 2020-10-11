@@ -165,28 +165,15 @@ git config --global core.editor "nano"
 git config user.email "any@body.com"
 git config user.name "anybody"
 git stash
-git add .
 git stash
 git pull --no-edit
+# the following three lines should not be required
+git stash
 git stash
 git pull --no-edit
 if [ "$1" == "full" ]; then
-    y="0"
-    x="0"
-    while [ $y -eq 0 ]
-    do
-        # loop to drop the stashes
-        x=$[$x+1]
-        if [ $x -ge 50 ]; then
-            # stop after 50 cycles
-            y="1"
-        fi
-        # drop the latest stash
-        git stash drop
-        if [ $? -ne 0 ]; then
-            y="1"
-        fi
-    done
+    # clear the stash stack
+    git stash clear
     git reset HEAD -- .
     git clean -f
 fi

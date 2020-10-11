@@ -11,7 +11,6 @@ pacman -Q dos2unix || pacman -Sy dos2unix --noconfirm
 # Dos2Unix conversion
 # exclude binary files, keep the date, keep the old file name
 #
-#
 # all files in the directory /var/www/app/config/defaults/ inclusive subdirectories
 # exceptions are /boot/config.txt and /boot/wifi/* these stay in ms-dos format
 cp /var/www/app/config/defaults/boot/config.txt /tmp/config.txt
@@ -116,7 +115,7 @@ if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
     done
 fi
 #
-# When requested, remove trailing whitespace from php files, but exclude vendor files
+# When requested, remove trailing whitespace from specific directory's and files
 #
 if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ]; then
     echo "Removing trailing whitespace from /srv/http/app/templates/* files"
