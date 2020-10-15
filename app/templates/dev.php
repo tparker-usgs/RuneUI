@@ -243,9 +243,10 @@
                                 <input id="soxrairplayonoff" name="mode[soxrairplayonoff][enable]" type="checkbox" value="1"<?php if((isset($this->soxrairplayonoff)) && ($this->soxrairplayonoff)): ?> checked="checked" <?php endif ?>>
                                 <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                             </label>
-                        <span class="help-block">SoXr for Airplay is set OFF by default. Your system <strong>will crash</strong> if it is switched ON, please leave it switched OFF.<br>
-                        <i>In theory it should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for details.
-                        Unfortunately it imposes a too high CPU overhead for the processors used by RuneAudio</i></span>
+                        <span class="help-block">SoXr for Airplay is set ON by default for most processors and OFF for the older slower devices.<br>
+                        <i>It should improve the quality of the 'synchronisation' of Airplay streams, read the shairport-sync documentation for details.
+                        	It imposes a CPU overhead which may be just too high for some of the processors used by RuneAudio (for example the Pi B+ or Pi Zero).
+                            But this is also dependant on the set of features which have been enabled.</i></span>
                     </div>
                 </div>
                 <div class="form-group">
