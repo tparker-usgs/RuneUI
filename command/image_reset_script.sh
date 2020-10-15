@@ -145,15 +145,19 @@ redis-cli del jamendo
 redis-cli del local_browser
 redis-cli del lyrics
 redis-cli del mpdconf
-redis-cli del network_info
-redis-cli del network_interfaces
-redis-cli del nics
 redis-cli del samba
 redis-cli del spotify
 redis-cli del spotifyconnect
-redis-cli del translate_mac_nic
-redis-cli del usbmounts
+redis-cli del first_time
+# remove the redis variables used for debug (wrk), network configuration (net, mac & nic), usb mounts (usb) & disk mounts (mou)
+redisvars=$( redis-cli --scan | grep -iE 'wrk|net|mac|nic|usb|mou' | xargs )
+for redisvar in $redisvars
+do
+    redis-cli del $redisvar
+done
+# run the setup script with parameter reset
 php -f /srv/http/db/redis_datastore_setup reset
+# always clear player ID and hardware platform ID
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
 #
