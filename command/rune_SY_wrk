@@ -701,35 +701,34 @@ while (1) {
                     $redis->sAdd('w_lock', $jobID);
                     // Update RuneUI
                     runelog('Update RuneUI');
-                    // preparation: delete the MPD watchdog, set up git user-name and email (set to player ID)
-                    sysCmd('rm -f /var/www/command/mpd-watchdog');
+                    // preparation: set up git user-name and email (set to player ID)
                     sysCmd('cd /srv/http/ && git config user.name "'.$redis->get('playerid').'"');
                     sysCmd('cd /srv/http/ && git config user.email "'.$redis->get('playerid').'@runeaudio.com"');
-                    // git stash, git add then git pull
-                    $retval = sysCmd('cd /srv/http/ && git stash ; git add . ; git stash ; git pull --no-edit');
+                    // git stash x2 then git pull
+                    $retval = sysCmd('cd /srv/http/ && git stash ; git stash ; git pull --no-edit');
                     //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
                     ui_notify('Update RuneUI', 'RuneUI update message<br>'.implode('<br>', $retval));
-                    sysCmd('cd /srv/http/ && git stash');
+                    sysCmd('cd /srv/http/ && git stash; git stash');
                     $gitupdated = 1;
                     foreach($retval as $line) {
                         if (strpos(' '.strtolower($line),'already up to date')) {
                             $gitupdated = 0;
                         }
                     }
-                    ui_notify('Update RuneUI', 'Wait for the screen to refresh...');
-                    wrk_sysAcl();
-                    $playernamemenu = $redis->get('playernamemenu');
-                    wrk_playernamemenu($playernamemenu);
                     if ($gitupdated) {
                         ui_notify('Update RuneUI', 'Rebooting');
+                        wrk_sysAcl();
+                        $playernamemenu = $redis->get('playernamemenu');
+                        wrk_playernamemenu($playernamemenu);
                         $redis->set('dev', 0);
-                        sleep(3);
+                        sysCmd('systemctl daemon-reload');
                         sysCmd('systemctl reload-or-restart php-fpm || systemctl start php-fpm');
-                        sysCmd('/var/www/command/rune_shutdown reboot');
-                        sysCmd('systemctl reboot');
+                        wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
+                    } else {
+                        ui_notify('Update RuneUI', 'Wait for the screen to refresh...');
                     }
-                    unset($retval);
+                    unset($retval, $gitupdated, $playernamemenu);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'hostname':

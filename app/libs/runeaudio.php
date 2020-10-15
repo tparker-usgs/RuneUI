@@ -4537,22 +4537,7 @@ function wrk_playerID($arch)
 
 function wrk_sysAcl()
 {
-    sysCmd('chown -R http.http /srv/http/');
-    sysCmd('find /srv/http/ -type f -exec chmod 644 {} \;');
-    sysCmd('find /srv/http/ -type d -exec chmod 755 {} \;');
-    sysCmd('find /etc -name *.conf -exec chmod 644 {} \;');
-    sysCmd('find /usr/lib/systemd/system -name *.service -exec chmod 644 {} \;');
-    sysCmd('chmod 644 /etc/nginx/html/50x.html');
-    sysCmd('chmod 777 /run');
-    sysCmd('chmod 755 /srv/http/command/*');
-    sysCmd('chmod 755 /srv/http/db/redis_datastore_setup');
-    sysCmd('chmod 755 /srv/http/db/redis_acards_details');
-    sysCmd('chmod 755 /etc/X11/xinit/start_chromium.sh');
-    sysCmd('chown mpd.audio /mnt/MPD/*');
-    sysCmd('chown mpd.audio /mnt/MPD/USB/*');
-    sysCmd('chmod 777 /mnt/MPD/USB');
-    sysCmd('chmod 777 /mnt/MPD/USB/*');
-    sysCmd('chown -R mpd.audio /var/lib/mpd');
+    sysCmd('/srv/http/command/convert_dos_files_to_unix_script.sh final');
 }
 
 function wrk_NTPsync($ntpserver)
