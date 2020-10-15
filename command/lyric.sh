@@ -1,5 +1,11 @@
 #!/bin/bash
 
+available=$( redis-cli hget service makeitpersonal )
+if [ "$available" != 1 ] ; then
+    echo "No lyrics server available"
+    exit
+fi
+
 artist_name=$( redis-cli hget lyrics currentartist )
 title=$( redis-cli hget lyrics currentsong )
 
@@ -11,12 +17,10 @@ echo $title
 
 lyric=$( curl -s -f --connect-timeout 1 -m 10 --retry 2 "https://makeitpersonal.co/lyrics?artist=$artist&title=$title" | sed ':a;N;$!ba;s/\n/<\/br>/g' | xargs -0 )
 
-if [[ $lyric == *"something went wrong"* ]];
-then
-  echo "No lyrics server available"
-elif [ "$lyric" == "" ];
-then
-  echo "No lyrics available"
+if [[ $lyric == *"something went wrong"* ]]; then
+    echo "No lyrics server available"
+elif [ "$lyric" == "" ]; then
+    echo "No lyrics available"
 else
-  echo $lyric
+    echo $lyric
 fi
