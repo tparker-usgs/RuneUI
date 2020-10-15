@@ -21,27 +21,27 @@ function usage
 
 # Parse argument and set variables
 if [ "$#" -gt 0 ]; then
-        case "$1" in
+    case "$1" in
         normal|NORMAL)
-                ROTATE="NORMAL"
-        MATRIX="1 0 0 0 1 0 0 0 1"
-                ;;
-        cw|clockwise|CW|CLOCKWISE)
-                ROTATE="CW"
-        MATRIX="0 1 0 -1 0 1 0 0 1"
-                ;;
-        ccw|counter-clockwise|CCW|COUNTER-CLOCKWISE)
-                ROTATE="CCW"
-        MATRIX="0 -1 1 1 0 0 0 0 1"
-                ;;
-        ud|upside-down|UD|UPSIDE-DOWN)
-                ROTATE="UD"
-        MATRIX="-1 0 1 0 -1 1 0 0 1"
-                ;;
-        *)
-        usage
+            ROTATE="NORMAL"
+            MATRIX="1 0 0 0 1 0 0 0 1"
         ;;
-        esac
+        cw|clockwise|CW|CLOCKWISE)
+            ROTATE="CW"
+            MATRIX="0 1 0 -1 0 1 0 0 1"
+        ;;
+        ccw|counter-clockwise|CCW|COUNTER-CLOCKWISE)
+            ROTATE="CCW"
+            MATRIX="0 -1 1 1 0 0 0 0 1"
+        ;;
+        ud|upside-down|UD|UPSIDE-DOWN)
+            ROTATE="UD"
+            MATRIX="-1 0 1 0 -1 1 0 0 1"
+        ;;
+        *)
+            usage
+        ;;
+    esac
 else
     usage
 fi
