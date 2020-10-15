@@ -6225,35 +6225,23 @@ function is_firstTime($redis, $subject)
 // true when this is the first time this routing has been called with this subject since a reboot/boot
 // false when this routine has previously been called with this subject since a reboot/boot
 {
-    $returnVal = false;
-    $subject = trim($subject);
-    $bootTimeStamp = trim(sysCmd('uptime -s | xargs')[0]);
-    if (!$redis->Exists('first_time')) {
-        // the redis variable does not exist so always first time true
-        $returnVal = true;
-        // create an empty array
-        $firstTime = array();
-        // set up a true array element for the boot timestamp and subject
-        $firstTime[$bootTimeStamp][$subject] = true;
-        $redis->Set('first_time', json_encode($firstTime));
+    // the first version of this function used a redis variable 'first_time' to store the
+    // subject together with a boot timestamp based on 'uptime -s'
+    // this will not work consistently because the boot timestamp gets moved after a nts timesync
+    // the new method uses a file called '/tmp/<subject>.firsttime'
+    // the /tmp directory is a tmpfs memory disk which is recreated at each reboot/boot
+    // the existence of the file '/tmp/<subject>.firsttime' determines the result
+    $fileName = '/tmp/'.trim($subject).'firsttime';
+    // clear the static cache otherwise the file_exists() returns an incorrect value
+    clearstatcache();
+    if (file_exists($fileName)) {
+        // the file exists so not the first time
+        $returnVal = false;
     } else {
-        // read the redis variable into an array
-        $firstTime = json_decode($redis->Get('first_time'), true);
-        if (!isset($firstTime[$bootTimeStamp])) {
-            // the boot timestamp does not exist in the array, so always first time
-            $returnVal = true;
-            // delete the array content, the current timestamp not present, any existing entries are irrelevant
-            $firstTime = array();
-            // set up a true array element for the boot timestamp and subject
-            $firstTime[$bootTimeStamp][$subject] = true;
-            $redis->Set('first_time', json_encode($firstTime));
-        } else if (!isset($firstTime[$bootTimeStamp][$subject])) {
-            // the boot timestamp and subject has not been found, so first time for this subject
-            $returnVal = true;
-            // set up a true array element for the boot timestamp and subject
-            $firstTime[$bootTimeStamp][$subject] = true;
-            $redis->Set('first_time', json_encode($firstTime));
-        }
+        // the file does not exist so always first time true
+        $returnVal = true;
+        // create the file
+        touch($fileName);
     }
     return $returnVal;
 }

@@ -93,7 +93,6 @@ if ($redis->hGet('AccessPoint', 'enabled') && ((is_firstTime($redis, 'AP-start')
         {
             // sleep for 20 seconds to ensure that connman has time to connect/reconnect
             sleep(20);
-            is_firstTime($redis, 'AP-start');
             // double-check that the nic is still not connected
             if (!sysCmd('ip -o  address | sed '."'".'s,[ ]\+, ,g'."'".' | grep -i '."'".'inet '."'".' | grep -ic '.$nic['nic'])[0]) {
                 // the nic is still not connected
