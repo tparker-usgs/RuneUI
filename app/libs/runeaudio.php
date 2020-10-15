@@ -5996,11 +5996,11 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // stop ashuffle and set redis globalrandom to false/off, otherwise it may be restarted automatically
             $redis->set('globalrandom', '0');
             sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
-            // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
-            unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // delete all broken symbolic links in the playlist directory
             // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
             sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+            // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
+            unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // create a symbolic link to the selected playlist for random play, ashuffle will bet set up to use it on startup
             sysCmd('ln -sf "'.$playlistDirectory.'/'.$playlistName.'.m3u" "'.$playlistDirectory.'/RandomPlayPlaylist.m3u"');
             // set the indicator to say a playlist random file exists/true
@@ -6089,18 +6089,36 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             //
             // detect deletion of playlist random play symlink file or the file which it was linked to
             // stop (and restart) ashuffle if the file RandomPlayPlaylist.m3u has been deleted
+            //
+            // first check that shuffle is running in the correct mode
+            // get the current status of ashuffle
             $retval = sysCmd('systemctl is-active ashuffle');
             if ($retval[0] == 'active') {
-                // clear the cache otherwise is_link() returns incorrect values
+                // possible that someone has renamed /RandomPlayPlaylist.m3u or its target file and it is therefore no longer valid
+                // remove any invalid symlinks
+                sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+                // clear the cache otherwise is_link() & linkinfo() return incorrect values
                 clearstatcache();
                 if (is_link($playlistDirectory.'/RandomPlayPlaylist.m3u') && (linkinfo($playlistDirectory.'/RandomPlayPlaylist.m3u'))) {
                     // link file found and it is valid (pointing to a file which exists), we assume that the playlist has some songs in it
                     // set the indicator to say a playlist random file exists/true
                     $redis->set('last_pl_randomfile', 1);
+                    if (!sysCmd('grep -c RandomPlayPlaylist /etc/systemd/system/ashuffle.service')) {
+                        // ashuffle.service not using the link
+                        $playlist = readlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
+                        $first_pl = strripos($playlist, '/') + 1;
+                        $length_pl = stripos($playlist, '.m3u') - $first_pl;
+                        $playlist = trim(substr($playlist, $first_pl, $length_pl));
+                        wrk_ashuffle($redis, 'set', $playlist);
+                    }
                 } else {
                     // no symlink file found or it is invalid
                     if ($redis->get('last_pl_randomfile')) {
                         // but the file was there and valid the last time, so reset ashuffle
+                        wrk_ashuffle($redis, 'reset');
+                    }
+                    if (sysCmd('grep -c RandomPlayPlaylist /etc/systemd/system/ashuffle.service')) {
+                        // ashuffle.service set up to use a link, so reset ashuffle
                         wrk_ashuffle($redis, 'reset');
                     }
                 }
