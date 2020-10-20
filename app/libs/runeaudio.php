@@ -3106,11 +3106,24 @@ function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
 
 function wrk_mpdPlaybackStatus($redis = null, $action = null)
 {
-    $retval = sysCmd("mpc status | grep '^\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
-    $status = trim($retval[0]);
-    unset($retval);
-    $retval = sysCmd("mpc status | grep '^\[' | cut -d '#' -f 2 | cut -d '/' -f 1");
-    $number = trim($retval[0]);
+    // sometimes MPD is still starting up
+    // loop 5 times or until mpc returns a value
+    $cnt = 5;
+    do {
+        $retval = sysCmd("mpc status | grep '^\[' | cut -d '[' -f 2 | cut -d ']' -f 1");
+        if (isset($retval[0])) {
+            $status = trim($retval[0]);
+            unset($retval);
+            $retval = sysCmd("mpc status | grep '^\[' | cut -d '#' -f 2 | cut -d '/' -f 1");
+            $number = trim($retval[0]);
+            unset($retval);
+        } else {
+            $status = '';
+            $number = '';
+            sleep(1);
+            $cnt--;
+        }
+    } while (!$status && ($cnt >= 0));
     unset($retval);
     if (isset($action)) {
         switch ($action) {
