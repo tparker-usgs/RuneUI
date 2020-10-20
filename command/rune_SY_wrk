@@ -372,7 +372,7 @@ if ($playerid_db === '') {
                     }
                 }
             }
-                
+
         }
     }
     unset($retval, $outputs, $countMpdOutput, $countMpdEnabled, $output, $outputParts, $lastOutput);
