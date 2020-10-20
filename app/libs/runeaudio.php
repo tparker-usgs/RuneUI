@@ -6297,7 +6297,7 @@ function is_firstTime($redis, $subject)
     // the new method uses a file called '/tmp/<subject>.firsttime'
     // the /tmp directory is a tmpfs memory disk which is recreated at each reboot/boot
     // the existence of the file '/tmp/<subject>.firsttime' determines the result
-    $fileName = '/tmp/'.trim($subject).'firsttime';
+    $fileName = '/tmp/'.trim($subject).'.firsttime';
     // clear the static cache otherwise the file_exists() returns an incorrect value
     clearstatcache();
     if (file_exists($fileName)) {
