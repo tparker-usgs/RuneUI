@@ -2818,7 +2818,31 @@ function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
                             }
                         }
                     $output .="}\n";
-                continue;
+                    continue;
+                }
+                if ($param === 'webstreaming') {
+                    // --- websteaming output ---
+                    if ($value) {
+                        // save the indicator, add the output after the normal output interfaces
+                        $websteaming = $value;
+                    }
+                    continue;
+                }
+                if ($param === 'brutefir') {
+                    // --- brutefir pipe output ---
+                    if ($value) {
+                        // save the indicator, add the output after the normal output interfaces
+                        $brutefirCommand = $value;
+                    }
+                    continue;
+                }
+                if ($param === 'snapcast') {
+                    // --- snapcast fifo output ---
+                    if ($value) {
+                        // save the indicator, add the output after the normal output interfaces
+                        $snapcastPath = $value;
+                    }
+                    continue;
                 }
                 $output .= $param." \t\"".$value."\"\n";
             }
@@ -2892,17 +2916,63 @@ function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
             // debug
             // runelog('conf output (in loop)', $output, __FUNCTION__);
             }
-            $output .="\n";
+            // add the snapcast fifo output if requested
+            if (isset($snapcastPath) && $snapcastPath) {
+                $output .="audio_output {\n";
+                $output .="\tname \t\t\"snapcast_fifo\"\n";
+                $output .="\ttype \t\t\"fifo\"\n";
+                $output .="\tpath \t\t\"".$snapcastPath."\"\n";
+                $output .="\tformat \t\t\"48000:16:2\"\n";
+                $output .="\tmixer_type \t\t\"software\"\n";
+                $output .="\tenabled \t\t\"no\"\n";
+                $output .="}\n";
+            }
+            // add the brutefir pipe output if requested
+            if (isset($brutefirCommand) && $brutefirCommand) {
+                $output .="audio_output {\n";
+                $output .="\tname \t\t\"".$redis->get('hostname')."_pipe\"\n";
+                $output .="\ttype \t\t\"pipe\"\n";
+                // Command format examples:
+                //   command     "aplay -f cd 2>/dev/null"
+                // Or if you want to use AudioCompress
+                //  command     "AudioCompress -m | aplay -f cd 2>/dev/null"
+                // Or to send raw PCM stream through PCM:
+                //  command     "nc example.org 8765"
+                // Or if you want to use brutefir:
+                //  command     "/usr/local/bin/brutefir -nodefault /home/brutefir/.brutefir_config"
+                $output .="\tcommand \t\t\"".$brutefirCommand."\"\n";
+                $output .="\tformat \t\t\"96000:24:2\"\n";
+                $output .="\tenabled \t\t\"no\"\n";
+                $output .="}\n";
+            }
+            // add the webstreaming output if requested
+            if (isset($websteaming) && $websteaming) {
+                $output .="audio_output {\n";
+                $output .="\tname \t\t\"".$redis->get('hostname')."_stream\"\n";
+                $output .="\ttype \t\t\"httpd\"\n";
+                $output .="\tencoder \t\t\"flac\"\n";
+                $output .="\tport \t\t\"8000\"\n";
+                $output .="\tquality \t\t\"6\"\n";
+                $output .="\tformat \t\t\"44100:16:2\"\n";
+                $output .="\talways_on \t\t\"yes\"\n";
+                $output .="\ttags \t\t\"yes\"\n";
+                $output .="}\n";
+            }
             // debug
             // runelog('raw mpd.conf', $output, __FUNCTION__);
             // check if mpd.conf was modified outside RuneUI (advanced mode)
             runelog('mpd.conf advanced state', $mpdconf_advanced);
-            // many users need to add an extra output device to MPD
+            // many users need to add an extra parameters to the MPD configuration file
             // this can be specified in the file /home/your-extra-mpd.conf
             // see the example file: /var/www/app/config/defaults/your-extra-mpd.conf
             // clear the cache otherwise file_exists() returns incorrect values
             clearstatcache();
             if (file_exists('/home/your-extra-mpd.conf')) {
+                $output .= "\n";
+                $output .= "###############################################\n";
+                $output .= "# Contents of /home/your-extra-mpd.conf added #\n";
+                $output .= "###############################################\n";
+                $output .= "\n";
                 $output .= file_get_contents('/home/your-extra-mpd.conf');
             }
             // write mpd.conf file to /tmp location
