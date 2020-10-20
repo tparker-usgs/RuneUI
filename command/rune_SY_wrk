@@ -167,9 +167,9 @@ if ($playerid_db === '') {
     // set HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
     // check that MPD only has one output enabled
     $count = sysCmd('mpc outputs | grep -c -i enabled');
-    $countmpdenabled = $count[0];
+    $countMpdEnabled = $count[0];
     unset($count);
-    if ($countmpdenabled != 1) {
+    if ($countMpdEnabled != 1) {
         sysCmd("mpc enable only 1");
     }
     // ensure that systemd-time is on
@@ -212,9 +212,9 @@ if ($playerid_db === '') {
     sleep(1);
     // check that MPD only has one output enabled
     $count = sysCmd('mpc outputs | grep -c -i enabled');
-    $countmpdenabled = $count[0];
+    $countMpdEnabled = $count[0];
     unset($count);
-    if ($countmpdenabled != 1) {
+    if ($countMpdEnabled != 1) {
         sysCmd("mpc enable only 1");
     }
     runelog('--- MPD VERSION HAS CHANGED PROCESS');

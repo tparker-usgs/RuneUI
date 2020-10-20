@@ -2455,9 +2455,9 @@ function wrk_audioOutput($redis, $action, $args = null)
                         if ($details->type === 'integrated_sub') {
                             $sub_interfaces = $redis->sMembers($card);
                             // debug
-                            runelog('line 1400: (sub_interfaces loop) card: '.$card, $sub_interfaces);
+                            runelog('line 2458: (sub_interfaces loop) card: '.$card, $sub_interfaces);
                             foreach ($sub_interfaces as $sub_interface) {
-                                runelog('line 1402: (sub_interfaces foreach) card: '.$card, $sub_interface);
+                                runelog('line 2460: (sub_interfaces foreach) card: '.$card, $sub_interface);
                                 $sub_int_details = new stdClass();
                                 $sub_int_details = json_decode($sub_interface);
                                 runelog('line 1405: (sub_interfaces foreach json_decode) card: '.$card, $sub_int_details);
@@ -2493,12 +2493,12 @@ function wrk_audioOutput($redis, $action, $args = null)
                     }
                 }
                 if (!isset($sub_interfaces)) {
-                $data['name'] = $card;
-                $data['type'] = 'alsa';
-                $data['system'] = trim($description[0]);
-                // debug
-                runelog('::::::acard record array::::::', $data);
-                $redis->hSet('acards', $card, json_encode($data));
+                    $data['name'] = $card;
+                    $data['type'] = 'alsa';
+                    $data['system'] = trim($description[0]);
+                    // debug
+                    runelog('::::::acard record array::::::', $data);
+                    $redis->hSet('acards', $card, json_encode($data));
                 }
                 // acards loop
                 runelog('<<--------------------------- card: '.$card.' index: '.$card_index.' (finish) ---------------------------<<');
@@ -2648,20 +2648,20 @@ function wrk_kernelswitch($redis, $args)
 
 function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
 {
-// check if we are in "advanced mode" (manual edit mode)
-if ($action === 'reset') {
-    $redis->set('mpdconf_advanced', 0);
-    $mpdconf_advanced = 0;
-} else {
-    $mpdconf_advanced = $redis->get('mpdconf_advanced');
-}
+    // check if we are in "advanced mode" (manual edit mode)
+    if ($action === 'reset') {
+        $redis->set('mpdconf_advanced', 0);
+        $mpdconf_advanced = 0;
+    } else {
+        $mpdconf_advanced = $redis->get('mpdconf_advanced');
+    }
     // set mpd.conf file header
-    $header = "###################################\n";
-    $header .= "# Auto generated mpd.conf file\n";
-    $header .= "# please DO NOT edit it manually!\n";
-    $header .= "# Use RuneUI MPD config section\n";
+    $header =  "###################################\n";
+    $header .= "#  Auto generated mpd.conf file   #\n";
+    $header .= "# please DO NOT edit it manually! #\n";
+    $header .= "#  Use RuneUI MPD config section  #\n";
     $header .= "###################################\n";
-    $header .= "\n";
+    $header .= "#\n";
     switch ($action) {
         case 'reset':
             // default MPD config
@@ -2741,7 +2741,7 @@ if ($action === 'reset') {
             foreach ($mpdcfg as $param => $value) {
                 if ($param === 'version') {
                     // --- MPD version number ---
-                    $output .="# MPD version number: ".$value."\n\n";
+                    $output .="# MPD version number: ".$value."\n";
                     continue;
                 }
                 if ($param === 'audio_output_interface' OR $param === 'dsd_usb') {
@@ -2761,13 +2761,17 @@ if ($action === 'reset') {
                 if ($param === 'user' && $value === 'mpd') {
                     $output .= $param." \t\"".$value."\"\n";
                     // group is not valid in MPD v0.21.00 or higher
-                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"audio\"\n";
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') {
+                        $output .= "group \t\"audio\"\n";
+                    }
                     continue;
                 }
                 if ($param === 'user' && $value === 'root') {
                     $output .= $param." \t\"".$value."\"\n";
                     // group is not valid in MPD v0.21.00 or higher
-                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') $output .= "group \t\"root\"\n";
+                    if ($redis->hGet('mpdconf', 'version') < '0.21.00') {
+                        $output .= "group \t\"root\"\n";
+                    }
                     continue;
                 }
                 if ($param === 'bind_to_address') {
@@ -2775,7 +2779,6 @@ if ($action === 'reset') {
                 }
                 if ($param === 'ffmpeg') {
                     // --- decoder plugin ---
-                    $output .="\n";
                     $output .="decoder {\n";
                     $output .="\tplugin \t\"ffmpeg\"\n";
                     $output .="\tenabled \"".$value."\"\n";
@@ -2787,7 +2790,6 @@ if ($action === 'reset') {
                         // --- soxr samplerate converter - resampler ---
                         if ($redis->hGet('mpdconf', 'version') >= '0.20.00') {
                             // MPD version is higher than 0.20
-                            $output .="\n";
                             $output .="resampler {\n";
                             $output .="\tplugin \t\"".$param."\"\n";
                             $output .="\tquality \"".$value."\"\n";
@@ -2806,7 +2808,6 @@ if ($action === 'reset') {
                 }
                 if ($param === 'curl') {
                     // --- input plugin ---
-                    $output .="\n";
                     $output .="input {\n";
                     $output .="\tplugin \t\"curl\"\n";
                         if ($redis->hget('proxy','enable') === '1') {
@@ -2854,7 +2855,6 @@ if ($action === 'reset') {
                     $sub_count++;
                     runelog('sub_count', $sub_count, __FUNCTION__);
                 }
-                $output .="\n";
                 $output .="audio_output {\n";
                 // $output .="name \t\t\"".$card_decoded->name."\"\n";
                 if (isset($sub_interface)) {
