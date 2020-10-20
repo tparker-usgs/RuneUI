@@ -107,7 +107,15 @@ function redisDatastore($redis,$action) {
             break;
         case 'reset':
             // kernel
-            $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
+            $bit = ' '.sysCmd('uname -m')[0];
+            if (strpos($bit, '64')) {
+                $bit = ' (64 bit)';
+            } else if (strpos($bit, '7')) {
+                $bit = ' (32 bit)';
+            } else {
+                $bit = '';
+            }
+            $redis->set('kernel', trim(sysCmd('uname -sr')[0]).$bit);
             $redis->set('i2smodule', 'none');
             $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->set('audio_on_off', '1');
@@ -436,7 +444,15 @@ function redisDatastore($redis,$action) {
             break;
         case 'check':
             // kernel
-            $redis->exists('kernel') || $redis->set('kernel', 'Linux RuneAudio 4.19.29-1-ARCH');
+            $bit = ' '.sysCmd('uname -m')[0];
+            if (strpos($bit, '64')) {
+                $bit = ' (64 bit)';
+            } else if (strpos($bit, '7')) {
+                $bit = ' (32 bit)';
+            } else {
+                $bit = '';
+            }
+            $redis->exists('kernel') || $redis->set('kernel', trim(sysCmd('uname -sr')[0]).$bit);
             $redis->exists('i2smodule') || $redis->set('i2smodule', 'none');
             $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');

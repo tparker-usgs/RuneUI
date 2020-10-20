@@ -310,7 +310,7 @@ $template->i2smodule_select = $redis->get('i2smodule_select');
 // }
 $template->audio_on_off = $redis->get('audio_on_off');
 // $template->kernel = $redis->get('kernel');
-$template->kernel = trim(sysCmd('uname --kernel-release')[0]).$bit;
+$template->kernel = trim(sysCmd('uname -sr')[0]).$bit;
 // the next line prevents the kernel change routine from running
 $redis->set('kernel', $template->kernel);
 unset($bit);
