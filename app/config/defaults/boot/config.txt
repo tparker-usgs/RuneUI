@@ -47,7 +47,6 @@
 
 ## RuneAudio HDMI & 3,5mm jack
 dtparam=audio=on
-dtoverlay=upstream
 
 ## RuneAudio I2S-Settings
 #dtoverlay=none

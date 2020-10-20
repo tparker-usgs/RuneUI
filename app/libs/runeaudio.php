@@ -2611,10 +2611,8 @@ function wrk_audio_on_off($redis, $args)
     if($redis->get('hwplatformid') === '08') {
         if ($args == 1) {
             sysCmd('sed -i '."'".'s/dtparam=audio=.*/dtparam=audio=on/'."'".' /boot/config.txt');
-            sysCmd('sed -i '."'".'s/.*dtoverlay=upstream/dtoverlay=upstream/g'."'".' /boot/config.txt');
         } else {
             sysCmd('sed -i '."'".'s/dtparam=audio=.*/dtparam=audio=off/'."'".' /boot/config.txt');
-            sysCmd('sed -i '."'".'s/.*dtoverlay=upstream/# dtoverlay=upstream/g'."'".' /boot/config.txt');
         }
         // ## RuneAudio enable HDMI & analog output
         // $file = '/boot/config.txt';
