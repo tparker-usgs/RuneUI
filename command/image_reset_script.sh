@@ -22,8 +22,8 @@ udevil clean
 # set up services and stop them
 # systemctl stops after an erroneous entry, use arrays to run through all entries
 declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start systemd-resolved)
-declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-journald systemd-timesyncd bootsplash dbus iwd connman bluetooth bluealsa bluealsa-aplay)
-declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil bluetooth bluealsa bluealsa-aplay)
+declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-journald systemd-timesyncd bootsplash dbus iwd connman bluetooth bluealsa bluealsa-aplay amixer-webui)
+declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil bluetooth bluealsa bluealsa-aplay amixer-webui)
 declare -a mask_arr=(connman-vpn dbus-org.freedesktop.resolve1 systemd-logind systemd-resolved)
 declare -a unmask_arr=(systemd-journald)
 #
