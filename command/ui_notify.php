@@ -42,9 +42,9 @@ $redis->connect('/run/redis/socket');
 require_once('/var/www/app/libs/runeaudio.php');
 // ---- end functions -----
 if ((isset($argv[2])) && (!isset($argv[3]))) {
-// Connect to Redis backend
-//$redis = new Redis();
-//$redis->connect('/run/redis/socket');
+    // Connect to Redis backend
+    //$redis = new Redis();
+    //$redis->connect('/run/redis/socket');
     if (!($redis->sIsMember('w_lock', $argv[2]))) {
             usleep(800000);
     } else {

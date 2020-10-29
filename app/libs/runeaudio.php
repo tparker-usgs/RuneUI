@@ -6103,7 +6103,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // delete all broken symbolic links in the playlist directory
             // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
             sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-            // delete the existing symbolic link if it exists (use unlink to automatically refresh the file cache)
+            // delete the existing symbolic link if it exists
             unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
             // set the indicator to say NO playlist random file exists/false
             $redis->set('last_pl_randomfile', 0);

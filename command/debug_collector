@@ -203,7 +203,7 @@ function debug_data($redis)
     $output .= "###### mpd version (mpd --version) ######\n";
     $output .= $command;
     $output .= "\n\n\n";
-    $output .= "###### mpd.conf ######\n";
+    $output .= "###### MPD configuration (cat /etc/mpd.conf) ######\n";
     $output .= file_get_contents('/etc/mpd.conf');
     $output .= "##################################################\n\n\n";
     $output .= "###### Kernel optimization parameters ######\n";
@@ -225,26 +225,30 @@ function debug_data($redis)
     $command = sysCmd('systool -v -m snd_usb_audio | grep -vi error');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### Systemd active startup scripts (ls -lah /etc/systemd/system/multi-user.target.wants/) ######\n";
-    $command = sysCmd('ls -lah /etc/systemd/system/multi-user.target.wants/');
+    $output .= "###### Systemd active startup scripts (ls -l /etc/systemd/system/multi-user.target.wants/) ######\n";
+    $command = sysCmd('ls -l /etc/systemd/system/multi-user.target.wants/ | grep -vi total');
     $output .= implode("\n", $command)."\n\n\n";
-    $output .= "###### Filesystem mounts ######\n";
+    $output .= "###### Systemd enabled services (systemctl list-unit-files | grep enabled) ######\n";
+    $command = sysCmd("systemctl list-unit-files | grep -E '.service|STATE' | grep -E 'enabled[ ]{7}|enabled-|STATE'");
+    $output .= implode("\n", $command)."\n\n\n";
+    unset($command);
+    $output .= "###### Filesystem mounts (cat /proc/mounts) ######\n";
     $output .=  file_get_contents('/proc/mounts')."\n\n";
     $output .= "###### Filesystem mounts - free space (df -h) ######\n";
     $command = sysCmd('df -h');
     $output .= implode("\n", $command)."\n\n\n";
     unset($command);
     // clear the cache otherwise file_exists() returns incorrect values
-    clearstatcache();
-    if (file_exists("/usr/bin/parted")) {
+    clearstatcache(true, '/usr/bin/parted');
+    if (file_exists('/usr/bin/parted')) {
         $output .= "###### Filesystem mounts - partitions (parted -ls) ######\n";
         $command = sysCmd('parted -ls');
         $output .= implode("\n", $command)."\n";
         unset($command);
     }
     // clear the cache otherwise file_exists() returns incorrect values
-    clearstatcache();
-    if (file_exists("/usr/bin/smartctl")) {
+    clearstatcache(true, '/usr/bin/smartctl');
+    if (file_exists('/usr/bin/smartctl')) {
         $drive_list = sysCmd('smartctl --scan-open -- -H -i | grep -v aborted');
         if (!empty($drive_list)) {
             foreach($drive_list as $drive) {

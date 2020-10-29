@@ -633,7 +633,7 @@
                 <label class="control-label col-sm-2">Backup player config</label>
                 <div class="col-sm-10">
                     <input class="btn btn-primary btn-lg" type="submit" name="syscmd" value="backup" id="syscmd-backup">
-                    <span class="help-block">Export a compressed archive containing all the settings of this player.</span>
+                    <span class="help-block">Export a compressed archive containing all the settings of this player</span>
                 </div>
             </div>
         </fieldset>

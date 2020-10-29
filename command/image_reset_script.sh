@@ -1,4 +1,37 @@
 #!/bin/bash
+
+#
+#  Copyright (C) 2013-2014 RuneAudio Team
+#  http://www.runeaudio.com
+#
+#  RuneUI
+#  copyright (C) 2013-2014 – Andrea Coiutti (aka ACX) & Simone De Gregori (aka Orion)
+#
+#  RuneOS
+#  copyright (C) 2013-2014 – Simone De Gregori (aka Orion) & Carmelo San Giovanni (aka Um3ggh1U)
+#
+#  RuneAudio website and logo
+#  copyright (C) 2013-2014 – ACX webdesign (Andrea Coiutti)
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with RuneAudio; see the file COPYING. If not, see
+#  <http://www.gnu.org/licenses/gpl-3.0.txt>.
+#
+#  file: command/image_reset_script.sh
+#  version: 1.3
+#  coder: janui
+#  date: October 2020
+#
 set -x # echo all commands to cli
 set +e # continue on errors
 cd /home
@@ -20,7 +53,7 @@ fi
 udevil clean
 #
 # set up services and stop them
-# systemctl stops after an erroneous entry, use arrays to run through all entries
+# systemctl stops after an erroneous entry, use arrays to run through all entries individually
 declare -a disable_arr=(ashuffle mpd mpdscribble nmb smb smbd nmbd winbindd winbind udevil upmpdcli hostapd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk dhcpcd php-fpm ntpd bluetooth chronyd cronie plymouth-lite-halt plymouth-lite-reboot plymouth-lite-poweroff plymouth-lite-start systemd-resolved)
 declare -a enable_arr=(avahi-daemon haveged nginx redis rune_SY_wrk sshd systemd-journald systemd-timesyncd bootsplash dbus iwd connman bluetooth bluealsa bluealsa-aplay amixer-webui)
 declare -a stop_arr=(ashuffle mpd spopd nmbd nmb smbd smb winbind winbindd shairport-sync local-browser rune_SSM_wrk rune_PL_wrk rune_SY_wrk upmpdcli bluetooth chronyd systemd-timesyncd cronie udevil bluetooth bluealsa bluealsa-aplay amixer-webui)
@@ -168,6 +201,9 @@ cd /srv/http/
 git config --global core.editor "nano"
 git config user.email "any@body.com"
 git config user.name "anybody"
+git stash
+git stash
+git add .
 git stash
 git stash
 git pull --no-edit

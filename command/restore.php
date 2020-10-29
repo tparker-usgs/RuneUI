@@ -1,18 +1,40 @@
 #!/usr/bin/php
 <?php
 $file = $_FILES["filebackup"];
-$filename = $file["name"];
-$filetmp = $file["tmp_name"];
-$filedest = "/srv/http/tmp/$filename";
-// clear the cache otherwise filesize() returns incorrect values
-clearstatcache();
-$filesize = filesize($filetmp);
-
-if ($filesize === 0) die("File upload error !");
-
-exec("rm -f /srv/http/tmp/backup_*");
-if (! move_uploaded_file($filetmp, $filedest)) {
-    die("File move error !");
+/*
+ * Copyright (C) 2013-2014 RuneAudio Team
+ * http://www.runeaudio.com
+ *
+ * RuneUI
+ * copyright (C) 2013-2014 - Andrea Coiutti (aka ACX) & Simone De Gregori (aka Orion)
+ *
+ * RuneOS
+ * copyright (C) 2013-2014 - Simone De Gregori (aka Orion) & Carmelo San Giovanni (aka Um3ggh1U)
+ *
+ * RuneAudio website and logo
+ * copyright (C) 2013-2014 - ACX webdesign (Andrea Coiutti)
+ *
+ * This Program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ *
+ * This Program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with RuneAudio; see the file COPYING. If not, see
+ * <http://www.gnu.org/licenses/gpl-3.0.txt>.
+ *
+ *  file: /command/restore.php
+ *  version: 1.3
+ *  coder: janui
+ *  date: October 2020
+ *
+ */
+// common include
 } else {
     echo "Restore starting - automatic reboot will follow";
 }
