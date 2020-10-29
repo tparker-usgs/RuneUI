@@ -270,23 +270,23 @@ function debug_data($redis)
     $command = sysCmd('lsmod');
     $output .= implode("\n", $command)."\n\n\n";
     unset($command);
-    $output .= "###### Network listening sockets (netstat -lnp) ######\n";
+    $output .= "###### Network, listening sockets (netstat -lnp) ######\n";
     $command = sysCmd('netstat -lnp');
     $output .= implode("\n", $command)."\n\n\n";
     unset($command);
-    $output .= "###### Network established sockets (netstat -np) ######\n";
+    $output .= "###### Network, established sockets (netstat -np) ######\n";
     $command = sysCmd('netstat -np');
     $output .= implode("\n", $command)."\n\n\n";
     unset($command);
-    $output .= "###### Network interfaces (ip addr) ######\n";
-    $command = sysCmd('ip addr');
-    $output .= implode("\n", $command)."\n\n\n";
-    unset($command);
-    $output .= "###### Network interfaces (ifconfig) ######\n";
-    $command = sysCmd('ifconfig');
+    $output .= "###### Network, all interfaces (ip -h link) ######\n";
+    $command = sysCmd('ip -h link');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### Network network profiles (connmanctl services) ######\n";
+    $output .= "###### Network, connected interfaces (ip -s -h -d addr) ######\n";
+    $command = sysCmd('ip -s -h -d addr');
+    $output .= implode("\n", $command)."\n\n\n";
+    unset($command);
+    $output .= "###### Network, network profiles (connmanctl services) ######\n";
     $command = sysCmd('connmanctl services | grep "*"');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
@@ -303,11 +303,11 @@ function debug_data($redis)
         }
     }
     $output .= "\n";
-    $output .= "###### Network wifi status (iwconfig) ######\n";
+    $output .= "###### Network, wifi status (iwconfig) ######\n";
     $command = sysCmd('iwconfig');
     $output .= implode("\n", $command)."\n\n";
     unset($command);
-    $output .= "###### Network WiFi Access Point (redis-cli hgetall AccessPoint) ######\n";
+    $output .= "###### Network, WiFi Access Point (redis-cli hgetall AccessPoint) ######\n";
     $command = $redis->hgetall('AccessPoint');
     foreach ($command as $key => $value) {
         $output .= $key.': '.$value."\n";
@@ -322,10 +322,6 @@ function debug_data($redis)
     $output .= "\n\n";
     unset($command, $key, $value);
     unset($command);
-    // $output .= "###### Network wifi site-scan (iwlist scan) ######\n";
-    // $command = sysCmd('iwlist scan');
-    // $output .= implode("\n",$command)."\n\n";
-    // unset($command);
     $output .= "###### List all USB devices (lsusb) ######\n";
     $command = sysCmd('lsusb');
     $output .= implode("\n", $command)."\n\n";
