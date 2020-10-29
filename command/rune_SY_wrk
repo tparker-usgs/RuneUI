@@ -255,7 +255,7 @@ if ($playerid_db === '') {
     }
     $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
     if (!strpos($fileDestDir, 'backup') && !strpos($fileDestDir, 'tmp')) {
-        // backup_dir must contain 'tmp' or 'backup', it should then never interfere with the Linux or RuneAudio 
+        // backup_dir must contain 'tmp' or 'backup', it should then never interfere with the Linux or RuneAudio
         $redis->set('backup_dir', '/home/backup');
         $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
     }
