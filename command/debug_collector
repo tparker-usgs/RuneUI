@@ -294,7 +294,7 @@ function debug_data($redis)
     foreach ($command as $interface) {
         $interface = trim($interface);
         // clear the cache otherwise file_exists() returns incorrect values
-        clearstatcache();
+        clearstatcache(true, '/var/lib/connman/'.$interface.'/settings');
         if (file_exists('/var/lib/connman/'.$interface.'/settings')) {
             $output .= "# favourite connman profile ".$interface." #\n";
             $output .= str_repeat('-',strlen($interface)+30)."\n";

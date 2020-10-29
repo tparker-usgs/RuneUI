@@ -59,7 +59,7 @@ $redis = new Redis();
 $redis->connect('/run/redis/socket');
 
 // clear the cache otherwise file_exists() returns incorrect values
-clearstatcache();
+clearstatcache(true, '/srv/http/command/update_os.php');
 // if os updates are needed
 if (file_exists('/srv/http/command/update_os.php')) {
     include '/srv/http/command/update_os.php';
@@ -472,7 +472,7 @@ if ($playerid_db === '') {
     //
     // start the local browser
     // clear the cache otherwise file_exists() returns incorrect values
-    clearstatcache();
+    clearstatcache(true, '/usr/bin/xinit');
     if (($redis->hGet('local_browser', 'enable')) && (file_exists('/usr/bin/xinit'))) {
         sysCmdAsync('systemctl start local-browser');
     } else {
@@ -1576,8 +1576,8 @@ while (1) {
         if (!empty(trim($retval[0]))) {
             // something is playing
             // clear the cache otherwise file_exists() returns incorrect values
-            clearstatcache();
-            if (file_exists("/usr/bin/smartctl")) {
+            clearstatcache(true, '/usr/bin/smartctl');
+            if (file_exists('/usr/bin/smartctl')) {
                 // monitoring tools software is installed
                 // scan for hard disks
                 $drive_list = sysCmd('smartctl --scan-open -- -H -i -s on | grep -v aborted');

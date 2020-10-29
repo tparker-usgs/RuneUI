@@ -164,7 +164,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
             header('Expires: 0'); // Proxies.
             header('Content-Type: ' .mime_content_type($local_cover_path));
             // clear the cache otherwise filesize() returns incorrect values
-            clearstatcache();
+            clearstatcache(true, $local_cover_path);
             header('Content-Length: '.filesize($local_cover_path));
             readfile($local_cover_path);
         }
@@ -207,7 +207,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
         header('Expires: 0'); // Proxies.
         header('Content-Type: ' .mime_content_type($serverHome.'/assets/img/cover-default.png'));
         // clear the cache otherwise filesize() returns incorrect values
-        clearstatcache();
+        clearstatcache(true, $serverHome.'/assets/img/cover-default.png');
         header('Content-Length: '.filesize($serverHome.'/assets/img/cover-default.png'));
         readfile($serverHome.'/assets/img/cover-default.png');
         $output = 1;
@@ -237,7 +237,8 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     echo $spotify_cover;
 } else if ($activePlayer === 'Airplay') {
     // clear the cache before testing for the existence of a file
-    clearstatcache();
+    clearstatcache(true, $serverHome.'/tmp/airplay/airplay-cover.jpg');
+    clearstatcache(true, $serverHome.'/tmp/airplay/airplay-cover.png');
     // determine the file name and path
     if (file_exists($serverHome.'/tmp/airplay/airplay-cover.jpg')) {
         $imgfilename = $serverHome.'/tmp/airplay/airplay-cover.jpg';
@@ -253,13 +254,14 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     header('Expires: 0'); // Proxies, pre-expired content
     header('Content-Type: '.mime_content_type($imgfilename));
     // clear the cache otherwise filesize() returns incorrect values
-    clearstatcache();
+    clearstatcache(true, $imgfilename);
     header('Content-Length: '.filesize($imgfilename));
     readfile($imgfilename);
     $output = 1;
 } else if ($activePlayer === 'SpotifyConnect') {
     // clear the cache before testing for the existence of a file
-    clearstatcache();
+    clearstatcache(true, $serverHome.'/tmp/spotify-connect/spotify-connect-cover.jpg');
+    clearstatcache(true, $serverHome.'/tmp/spotify-connect/spotify-connect-cover.png');
     // determine the file name and path
     if (file_exists($serverHome.'/tmp/spotify-connect/spotify-connect-cover.jpg')) {
         $imgfilename = $serverHome.'/tmp/spotify-connect/spotify-connect-cover.jpg';
@@ -275,7 +277,7 @@ if ($activePlayer === 'MPD' && $redis->hGet('lyrics', 'radio')) {
     header('Expires: 0'); // Proxies, pre-expired content
     header('Content-Type: '.mime_content_type($imgfilename));
     // clear the cache otherwise filesize() returns incorrect values
-    clearstatcache();
+    clearstatcache(true, $imgfilename);
     header('Content-Length: '.filesize($imgfilename));
     readfile($imgfilename);
     $output = 1;

@@ -124,8 +124,9 @@ $template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
 $template->mpd['crossfade'] = $crossfade[1];
 // clear the cache otherwise file_exists() returns incorrect values
-clearstatcache();
-if (file_exists($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u')) {
+$playlistSymlink = $redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u';
+clearstatcache(true, $playlistSymlink);
+if (file_exists($playlistSymlink)) {
     // random source is a playlist
     $playlist = readlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
     $first_pl = strripos($playlist, '/') + 1;

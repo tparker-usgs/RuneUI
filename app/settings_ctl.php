@@ -317,8 +317,9 @@ unset($bit);
 $template->pwd_protection = $redis->get('pwd_protection');
 // check if a local browser is supported
 $template->local_browseronoff = true;
-// clear the cache otherwise file_exists() returns incorrect values
-clearstatcache();
+// (normally) clear the cache otherwise file_exists() returns incorrect values
+// not required here because the (non-)existance of '/usr/bin/xinit' never changes
+// clearstatcache(true, '/usr/bin/xinit');
 if (file_exists('/usr/bin/xinit')) {
     // the local browser needs a x-windows environment, check the existence of xinit
     // x-windows is not installed on the archv6 models (e.g. Pi Zero), these are too slow
