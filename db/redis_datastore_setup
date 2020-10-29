@@ -266,8 +266,6 @@ function redisDatastore($redis,$action) {
             $redis->hSet('local_browser', 'disable-splash', 1);
             $redis->hSet('local_browser', 'smallScreenSaver', 0);
             $redis->hSet('local_browser', 'localSStime', -1);
-            $redis->set('restoreact', 0);
-            $redis->set('restoreact', 0);
             $redis->set('playernamemenu', 1);
             // plugins api-keys
             $redis->set('lastfm_apikey', 'ba8ad00468a50732a3860832eaed0882');
@@ -341,6 +339,8 @@ function redisDatastore($redis,$action) {
             $redis->del('mountidx', 1);
             $redis->set('allmounted', 0);
             $redis->set('disk_error', 0);
+            // the 'backup_dir' path must contain a directory called 'tmp' or 'backup', otherwise it will be set to '/home/backup'
+            $redis->set('backup_dir', '/home/backup');
             // debug variables
             $dbg = $redis->keys('wrk_*');
             foreach ($dbg as $key) {
@@ -591,7 +591,6 @@ function redisDatastore($redis,$action) {
             $redis->hExists('local_browser', 'disable-splash') || $redis->hSet('local_browser', 'disable-splash', 1);
             $redis->hExists('local_browser', 'smallScreenSaver') || $redis->hSet('local_browser', 'smallScreenSaver', 0);
             $redis->hExists('local_browser', 'localSStime') || $redis->hSet('local_browser', 'localSStime', -1);
-            $redis->exists('restoreact') || $redis->set('restoreact', 0);
             $redis->exists('playernamemenu') || $redis->set('playernamemenu', 1);
             $redis->exists('dynVolumeKnob') || $redis->set('dynVolumeKnob', 0);
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
@@ -655,6 +654,8 @@ function redisDatastore($redis,$action) {
             $redis->exists('mountidx') || $redis->set('mountidx', 1);
             $redis->exists('allmounted') || $redis->set('allmounted', 0);
             $redis->exists('disk_error') || $redis->set('disk_error', 0);
+            // the 'backup_dir' path must contain a directory called 'tmp' or 'backup', otherwise it will be set to '/home/backup'
+            $redis->exists('backup_dir') || $redis->set('backup_dir', '/home/backup');
             // pre-installed Rern's add-ons
             $redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', '0');
             $redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20220901');

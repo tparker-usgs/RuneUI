@@ -3371,11 +3371,11 @@ if ($('#section-index').length) {
                 } else {
                     if (label) {
                         console.log('Selected file: ', label);
-                        if (label.indexOf('backup_') > -1 && label.indexOf('.tar.gz') > -1) {
+                        if (label.indexOf('.tar.gz') > -1) {
                             $('#backup-file').html(' <i class="fa fa-check dx green"></i> ' + label + '');
                             $('#btn-backup-upload').prop('disabled', false);
                         } else {
-                            $('#backup-file').html(' <i class="fa fa-times dx red"></i> not a valid backup file');
+                            $('#backup-file').html(' <i class="fa fa-times dx red"></i> not a valid backup file, must be: .tar.gx');
                             $('#btn-backup-upload').prop('disabled', true);
                         }
                     }

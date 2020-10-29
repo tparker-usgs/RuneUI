@@ -638,35 +638,24 @@
             </div>
         </fieldset>
     </form>
-    <form class="form-horizontal" method="post">
+    <form class="form-horizontal" id="restore" method="post">
         <fieldset>
             <div class="form-group">
-                <label class="control-label col-sm-2">Activate Restore</label>
+                <label class="control-label col-sm-2">Restore player config</label>
                 <div class="col-sm-10">
-                    <input class="btn btn-primary btn-lg" type="submit" name="syscmd" value="activate" id="syscmd-activate">
-                    <span class="help-block">For security reasons restore must be activated before use</span>
-                </div>
-            </div>
-        </fieldset>
-    </form>
-    <form class="form-horizontal" id="restore">
-        <fieldset>
-            <div <?php if($this->restoreact != 1): ?>hidden<?php endif ?>>
-                <div class="form-group">
-                    <label class="control-label col-sm-2">Restore player config</label>
-                    <div class="col-sm-10">
-                        <p>
-                            <span id="btn-backup-browse" class="btn btn-default btn-lg btn-file">
-                                Browse... <input type="file" name="filebackup">
-                            </span>
-                            <span id="backup-file"></span>
-                            <span class="help-block">Restore a previously exported backup.<br>
-                            <strong>The system will reboot</strong> after restoring the backup.<br>
-                            <strong>Tip:</strong> Make a new backup after checking and correcting each restore.
-                            Otherwise information concerning any new feature will be missing and the feature will be automatically switched off</span>
-                        </p>
-                        <button id="btn-backup-upload" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
-                    </div>
+                    <p>
+                        <!-- hidden input, MAX_FILE_SIZE in byes must precede file field, 0 = no limit -->
+                        <input type="hidden" name="MAX_FILE_SIZE" value="3000000">
+                        <span id="btn-backup-browse" class="btn btn-default btn-lg btn-file">
+                            Browse... <input type="file" name="filebackup" value="">
+                        </span>
+                        <span id="backup-file"></span>
+                        <span class="help-block">Restore a previously exported backup.<br>
+                        <strong>The system will reboot</strong> after restoring the backup.<br>
+                        <i><strong>Tip:</strong> Make a new backup after checking and correcting each restore and after updating/upgrading to a new version.
+                        Otherwise information concerning new features may be missing in the backup</i></span>
+                    </p>
+                    <button id="btn-backup-upload" type="submit" name="syscmd" value="restore" class="btn btn-primary btn-lg" disabled>Restore</button>
                 </div>
             </div>
         </fieldset>

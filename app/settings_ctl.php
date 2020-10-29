@@ -244,8 +244,13 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'poweroff') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'poweroff'));
         if ($_POST['syscmd'] === 'display_off') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'display_off'));
         if ($_POST['syscmd'] === 'mpdrestart') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'mpdrestart'));
-        if ($_POST['syscmd'] === 'backup') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'backup'));
-        if ($_POST['syscmd'] === 'activate') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'restoreact'));
+        if ($_POST['syscmd'] === 'backup') {
+            $backupJobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'backup'));
+            $jobID[] = $backupJobID;
+        }
+        if ($_POST['syscmd'] === 'restore') {
+            sysCmd('/srv/http/command/restore.php');
+        }
     }
 }
 if (isset($jobID)) {
@@ -253,8 +258,12 @@ if (isset($jobID)) {
 }
 // push backup file
 if (isset($_POST['syscmd']) && ($_POST['syscmd'] === 'backup')) {
-    pushFile($redis->hGet('w_msg', $jobID[0]));
-    $redis->hDel('w_msg', $jobID[0]);
+    $fileName = $redis->hGet('w_msg', $backupJobID);
+    // push the file to via the browser
+    pushFile($fileName);
+    // queue a job to delete the file, don't wait for completion
+    wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'delbackup', 'args' => $fileName));
+    $redis->hDel('w_msg', $backupJobID);
 }
 // collect system status
 $bit = ' '.sysCmd('uname -m')[0];
@@ -334,4 +343,3 @@ if (file_exists('/usr/bin/xinit')) {
 } else {
     $template->local_browseronoff = false;
 }
-$template->restoreact = $redis->get('restoreact');

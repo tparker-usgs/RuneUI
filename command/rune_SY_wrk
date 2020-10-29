@@ -77,10 +77,6 @@ if ($redis->hGet('addons', 'addo') != '') {
     // not set or is empty so delete the sudo enable-all file for user http - used for addons menu
     sysCmd('rm -f /etc/sudoers.d/http');
 }
-// Rern's restore (as in backup) enable
-// always delete the sudo enable-all file for user http ans disable the redis 'restore activate' entry - used for backup restore
-sysCmd('rm -f /etc/sudoers.d/http-backup');
-$redis->set('restoreact', 0);
 
 // determine the actual mpd player version
 $retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4 -d' '");
@@ -251,6 +247,19 @@ if ($playerid_db === '') {
         sysCmd('chronyc waitsync 12');
     }
     unset($retval);
+    //
+    // create the directory used to hold the configuration backup work file, set the correct privileges and delete any content
+    if (!$redis->Exists('backup_dir')) {
+        // normally the redis variable exists
+        $redis->set('backup_dir', '/home/backup');
+    }
+    $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
+    if (!strpos($fileDestDir, 'backup') && !strpos($fileDestDir, 'tmp')) {
+        // backup_dir must contain 'tmp' or 'backup', it should then never interfere with the Linux or RuneAudio 
+        $redis->set('backup_dir', '/home/backup');
+        $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
+    }
+    sysCmd('mkdir -p '."'".$fileDestDir."'".' ; chown -R http.http '."'".$fileDestDir."'".' ; chmod -R 755 '."'".$fileDestDir."'".' ; rm -fR '."'".$fileDestDir.'/*'."'");
     //
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
     $retval = sysCmd('hostname');
@@ -648,26 +657,35 @@ while (1) {
                 case 'backup':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    $backup = wrk_backup($redis);
-                    $redis->hSet('w_msg', $jobID, $backup);
+                    $redis->hSet('w_msg', $jobID, wrk_backup($redis));
                     $redis->sRem('w_lock', $jobID);
                     break;
-                case 'restoreact':
+                case 'delbackup':
                     runelog('wrk_SY: ', $job->wrkcmd);
-                    // Activate the Restore function
                     $redis->sAdd('w_lock', $jobID);
-                    $redis->set('restoreact', ' 1');
-                    sysCmd("echo 'http ALL=NOPASSWD: ALL' > /etc/sudoers.d/http-backup");
+                    $fileName = trim($job->args);
+                    if (substr($fileName, 0, 6) === '/home/') {
+                        // only allow deleting files in the directory '/home/'
+                        sysCmd('rm -f '."'".$fileName."'");
+                    }
                     $redis->sRem('w_lock', $jobID);
                     break;
-                // case 'restore':
+                // case 'restoreact':
                     // runelog('wrk_SY: ', $job->wrkcmd);
+                    // // Activate the Restore function
                     // $redis->sAdd('w_lock', $jobID);
-                    // ui_notify_async('Restore backup', 'please wait for a restart...', $jobID);
-                    // wrk_restore($redis, "/run/".$job->args);
-                    // this function never returns, it will stop most jobs restart redis and finally respawn rune_SY_wrk (this file)
+                    // $redis->set('restoreact', ' 1');
+                    // sysCmd("echo 'http ALL=NOPASSWD: ALL' > /etc/sudoers.d/http-backup");
                     // $redis->sRem('w_lock', $jobID);
                     // break;
+                 case 'restore':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    ui_notify_async('Working', 'It takes some time....', $jobID);
+                    wrk_restore($redis, $job->args);
+                     // a reboot will take place after a successful restore, if it comes back here something has gone wrong
+                    $redis->sRem('w_lock', $jobID);
+                    break;
                 case 'clearimg':
                     $redis->sAdd('w_lock', $jobID);
                     // Clean IMG

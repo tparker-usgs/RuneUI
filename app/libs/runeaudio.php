@@ -1667,31 +1667,29 @@ function wrk_replaceTextLine($file, $inputArray, $strfind, $strrepl, $linelabel 
 
 function wrk_backup($redis, $bktype = null)
 {
+    // get the directory which is used for the backup
+    $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B").'/';
+    // build up the backup command string
     if ($bktype === 'dev') {
-        $filepath = "/srv/http/tmp/totalbackup_".date("Y-m-d").".tar.gz";
-        $cmdstring = "rm -f /srv/http/tmp/totalbackup_* &> /dev/null;".
-            " redis-cli save;".
-            " bsdtar -czpf ".$filepath.
+        $filepath = $fileDestDir.'backup-total-'.date("Y-m-d").'.tar.gz';
+        $cmdstring = "rm -f '".$fileDestDir."backup-total-*' &> /dev/null;".
+            " bsdtar -czpf '".$filepath."'".
             " /mnt/MPD/Webradio".
             " /var/lib/redis/rune.rdb".
-            " /var/lib/mpd".
             " '".$redis->hGet('mpdconf', 'db_file')."'".
             " '".$redis->hGet('mpdconf', 'sticker_file')."'".
             " '".$redis->hGet('mpdconf', 'playlist_directory')."'".
             " '".$redis->hGet('mpdconf', 'state_file')."'".
             " /var/lib/connman".
-            " /etc/mpd.conf".
             " /var/www".
             " /etc".
             "";
     } else {
-        $filepath = "/srv/http/tmp/backup_".date("Y-m-d").".tar.gz";
-        $cmdstring = "rm -f /srv/http/tmp/backup_* &> /dev/null;".
-            " redis-cli save;".
-            " bsdtar -czpf ".$filepath.
+        $filepath = $fileDestDir.'backup-'.date("Y-m-d").'.tar.gz';
+        $cmdstring = "rm -f '".$fileDestDir."backup-*' &> /dev/null;".
+            " bsdtar -czpf '".$filepath."'".
             " /mnt/MPD/Webradio".
             " /var/lib/redis/rune.rdb".
-            " /var/lib/mpd".
             " '".$redis->hGet('mpdconf', 'db_file')."'".
             " '".$redis->hGet('mpdconf', 'sticker_file')."'".
             " '".$redis->hGet('mpdconf', 'playlist_directory')."'".
@@ -1702,18 +1700,49 @@ function wrk_backup($redis, $bktype = null)
     }
     // add the names of the distribution files
     $extraFiles = sysCmd('find /var/www/app/config/defaults/ -type f');
-    // clear the cache otherwise file_exists() returns incorrect values
-    clearstatcache();
     foreach ($extraFiles as $extraFile) {
-        // convert the names of the distribution files to production files
+        // convert the names of the distribution files to the location of production version (the one being used)
         $fileName = str_replace('/var/www/app/config/defaults', '', $extraFile);
+        if (($bktype === 'dev') && ((substr($fileName, 0, 9) === '/var/www/') || (substr($fileName, 0, 5) === '/etc/'))) {
+            // skip any files in /var/www/ and /etc/ for a dev backup, they are already included
+            continue;
+        }
+        // clear the cache otherwise file_exists() returns incorrect values
+        clearstatcache(true, $fileName);
         if (file_exists($fileName)) {
             // add the files to the backup command if they exist
             $cmdstring .= " '".$fileName."'";
         }
     }
+    ui_notify('Diagnosics', $cmdstring);
+    // remove debug data from redis
+    $redis->set('debugdata', '');
+    // save the redis database
+    $redis->save();
+    // run the backup
     sysCmd($cmdstring);
+    // change the file privileges
+    sysCmd('chown http.http '."'".$filepath."'".' ; chmod 644 '."'".$filepath."'");
+    // regenerate the debug data for redis
+    sysCmdAsync('nice --adjustment=2 /srv/http/command/debug_collector');
     return $filepath;
+}
+
+function wrk_restore($redis, $backupfile)
+{
+    $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B").'/';
+    $lenDestDir = strlen($fileDestDir);
+    if (substr($backupfile, 0, $lenDestDir) === $fileDestDir) {
+        // only allow a restore from the backup directory
+        ui_notify('Restore backup starting', 'please wait for a restart...');
+        sysCmd('/srv/http/command/restore.sh '.$backupfile);
+        // a reboot will be initiated in restore.sh, it will never come back here
+    } else {
+        ui_notifyError('Error', 'Attempted to restore from the incorrect directory: '.$backupfile);
+        // delete the backup file, OK if this fails
+        unlink($backupfile);
+    }
+    return;
 }
 
 function wrk_opcache($action, $redis)
@@ -2325,16 +2354,6 @@ function wrk_netconfig($redis, $action, $arg = '', $args = array())
         // reboot requested
         wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
     }
-}
-
-function wrk_restore($redis, $backupfile)
-{
-    //$path = "/run/".$backupfile;
-    //$cmdstring = "tar xzf ".$path." --overwrite --directory /";
-    //if (sysCmd($cmdstring)) {
-    //    recursiveDelete($path);
-    //}
-    return true;
 }
 
 function wrk_jobID()
@@ -6102,12 +6121,16 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // possible that someone has renamed /RandomPlayPlaylist.m3u and it is no longer valid
             sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
             // delete the existing symbolic link if it exists
-            unlink($playlistDirectory.'/RandomPlayPlaylist.m3u');
+            $RandomPlaySymlink = trim($playlistDirectory).'/RandomPlayPlaylist.m3u';
+            clearstatcache(true, $RandomPlaySymlink);
+            if (file_exists($RandomPlaySymlink)) {
+                unlink($RandomPlaySymlink);
+            }
             // set the indicator to say NO playlist random file exists/false
             $redis->set('last_pl_randomfile', 0);
             // get the excluded songs
-            if ($redis->exists(random_exclude)) {
-                $randomExclude = trim($redis->get(random_exclude));
+            if ($redis->exists('random_exclude')) {
+                $randomExclude = trim($redis->get('random_exclude'));
             } else {
                 $randomExclude = '';
             }
@@ -6119,8 +6142,8 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 }
             }
             // get the variable defining random play by album
-            if ($redis->exists(random_album)) {
-                if ($redis->get(random_album)) {
+            if ($redis->exists('random_album')) {
+                if ($redis->get('random_album')) {
                     $ashuffleAlbum = ' --by-album';
                 } else {
                     $ashuffleAlbum = '';

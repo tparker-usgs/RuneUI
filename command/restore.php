@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-$file = $_FILES["filebackup"];
+@ob_end_clean(); if (ini_get('output_buffering')) ob_start();
 /*
  * Copyright (C) 2013-2014 RuneAudio Team
  * http://www.runeaudio.com
@@ -35,17 +35,78 @@ $file = $_FILES["filebackup"];
  *
  */
 // common include
-} else {
-    echo "Restore starting - automatic reboot will follow";
+require_once('/srv/http/app/config/config.php');
+// ini_set('display_errors',1);
+// error_reporting('E_ALL');
+$errorMessages = array(
+    0 => 'There is no error, the file uploaded with success.',
+    1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
+    2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
+    3 => 'The uploaded file was only partially uploaded.',
+    4 => 'No file was uploaded.',
+    6 => 'Missing a temporary folder.',
+    7 => 'Failed to write file to disk.',
+    8 => 'A PHP extension stopped the file upload.',
+);
+// get the file target directory and clean it up
+if (!$redis->exists('backup_dir')) {
+    sysCmd('srv/http/db/redis_datastore_setup check');
 }
-
-$restore = exec("sudo /srv/http/command/restore.sh $filedest; echo $?");
-
-if ($restore == 0) {
-    // this will never be displayed reboot initiated from restore.sh
-    echo "Restored successfully. Reboot recommended";
+// get the file upload information
+$file = $_FILES['filebackup'];
+$fileName = trim($file['name']);
+$fileTmp = $file['tmp_name'];
+$fileSize = $file['size'];
+$fileError = $file['error'];
+$fileType = ' '.strtolower($file['type']);
+// set up the destination file name and delete it if it exists
+$fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B").'/';
+$fileDest = $fileDestDir.$fileName;
+unlink($fileDest);
+// remove any other backup files in the destination directory
+sysCmd('rm -f '.$fileDestDir.'backup*');
+// check for errors and security issues
+$isError = false;
+if ($fileError) {
+    if (isset($errorMessages[$fileError])) {
+        ui_notifyError('Error', $errorMessages[$fileError]);
+    } else {
+        ui_notifyError('Error', 'Unknown error, error number: '.$fileError);
+    }
+    $isError = true;
+} else if ($fileSize === 0) {
+    ui_notifyError('Error', 'Empty file.');
+    $isError = true;
+} else if (strpos($fileType, 'image')) {
+    ui_notifyError('Error', 'Invalid file contents.');
+    $isError = true;
+} else if (preg_match('/[^a-zA-Z0-9\-_ .]/', $fileName)) {
+    ui_notifyError('Error', 'Invalid characters in the file name: '.$fileName);
+    ui_notifyError('Error', 'Invalid characters : '.preg_replace('/[a-zA-Z0-9\-_ .]/', '' ,$fileName));
+    $isError = true;
+} else if (mb_strlen($fileName,"UTF-8") > 225) {
+    ui_notifyError('Error', 'File name too long.');
+    $isError = true;
+} else if (substr($fileName, -7) != '.tar.gz') {
+    ui_notifyError('Error', 'File extension incorrect, expected: .tar.gz');
+    $isError = true;
+} else if (!move_uploaded_file($fileTmp, $fileDest)) {
+    ui_notifyError('Error', 'Invalid upload, cannot process file.');
+    $isError = true;
+} else if (strpos(' '.sysCmd('bsdtar -tf')[0], 'bsdtar: Error')) {
+    ui_notifyError('Error', 'File content is not a valid archive format.');
+    $isError = true;
 } else {
-    // this will be displayed if an error occurs
-    echo "Restore failed !";
+    ui_notify('Success', 'File is valid and was successfully uploaded, restore and restart will follow...');
+    // start a job in the back-end (as root) to process the backup file
+    $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'restore', 'args' => $fileDest));
+}
+// clean up if there was an error
+if ($isError) {
+    unlink($fileDest);
+} else {
+    if (isset($jobID)) {
+        waitSyWrk($redis, $jobID);
+    }
 }
 

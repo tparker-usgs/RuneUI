@@ -163,6 +163,10 @@ rm -rf /var/lib/connman/bluetooth_*
 rm /etc/systemd/system/macfix_*.service
 rm /etc/systemd/system/multi-user.target.wants/macfix_*.service
 #
+# remove backup work directory and any contents
+dirName=$( redis-cli get backup_dir | xargs )
+rm -R "$dirName"
+#
 # keep the old nic name format (e.g. eth0, eth1, wlan0, wlan1, etc.)
 # remove this symlink to enable the new 'predictable' format
 ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
