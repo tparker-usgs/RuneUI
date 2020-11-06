@@ -299,7 +299,7 @@ if ($playerid_db === '') {
         // ashuffle gets started automatically
     }
     //
-    // check that MPD only has one output enabled and if not correct 
+    // check that MPD only has one output enabled and if not correct
     wrk_check_MPD_outputs($redis);
     //
     $kernel = $redis->get('kernel');
