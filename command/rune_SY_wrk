@@ -233,20 +233,9 @@ if ($playerid_db === '') {
     // run boot-initialise for Wi-Fi networks
     wrk_netconfig($redis, 'boot-initialise');
     //
-    // refresh nics, check redis datastore status, check if an active internet connection is available - run this while waiting for chrony (see below)
+    // refresh nics, check redis datastore status, check if an active internet connection is available
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
-    sysCmdAsync('nice --adjustment=1 /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; /var/www/command/refresh_nics');
-    //
-    // if chrony is active call chronyc and wait for time to be set. 12 tries x 10 second between attempts is maximum 2 minutes
-    // normally by this point time has been set, if not there is probably no internet connection
-    // the problem is that several jobs (incl. php-fpm) will crash and core dump if a large time change takes place while they are running
-    // beter to wait for chrony to do its initial synchronisation as the core dumps take cpu resources and time
-    $retval = sysCmd('systemctl is-active chronyd');
-    if ($retval[0] === 'active') {
-        // chrony is running
-        sysCmd('chronyc waitsync 12');
-    }
-    unset($retval);
+    sysCmdAsync('nice --adjustment=2 /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; /var/www/command/refresh_nics');
     //
     // create the directory used to hold the configuration backup work file, set the correct privileges and delete any content
     if (!$redis->Exists('backup_dir')) {

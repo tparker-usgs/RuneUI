@@ -158,10 +158,6 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'airplayconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayconfreset'));
         // ----- RESET SAMBA CONFIG -----
         if ($_POST['syscmd'] === 'sambaconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaconfreset'));
-        // ----- RESET / SWITCH ON CHRONYD-TIME -----
-        if ($_POST['syscmd'] === 'chronydon') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'NTPswitch', 'action' => 'chronyd'));
-        // ----- RESET / SWITCH ON SYSTEMD-TIME -----
-        if ($_POST['syscmd'] === 'systemdon') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'NTPswitch', 'action' => 'systemd'));
     }
 }
 if (isset($jobID)) {
@@ -181,8 +177,6 @@ $template->soxrairplayonoff = $redis->hGet('airplay', 'soxronoff');
 $template->metadataairplayonoff = $redis->hGet('airplay', 'metadataonoff');
 $template->artworkairplayonoff = $redis->hGet('airplay', 'artworkonoff');
 $template->hostname = $redis->get('hostname');
-$template->chronydstatus = $redis->hGet('NTPtime', 'chronyd');
-$template->systemdstatus = $redis->hGet('NTPtime', 'systemd');
 $template->airplayof = $redis->hGet('airplay', 'alsa_output_format');
 $template->airplayor = $redis->hGet('airplay', 'alsa_output_rate');
 $template->optwifionof = $redis->get('network_autoOptimiseWifi');

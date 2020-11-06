@@ -71,13 +71,6 @@ function updateOS($redis) {
     if ($redis->get('buildversion') === 'janui-20180903') {
         // only applicable for a specific build
         if ($redis->get('patchlevel') == 0) {
-            // 1st update - modify /etc/chrony.conf, a new version of chrony.conf is delivered via git pull, don't wait for it, just do the update
-            // disable initstepslew, this is already done due to the iburst parameter on the servers and pool in combination with makestep
-            sysCmd("sed -i 's/^initstepslew.*/! initstepslew 30 0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org/' /etc/chrony.conf");
-            // enable logging of time changes of over 20 seconds
-            sysCmd("sed -i 's/^! logchange.*/logchange 20/' /etc/chrony.conf");
-            // set the patch level
-            $redis->set('patchlevel', 1);
         }
         if ($redis->get('patchlevel') == 1) {
             // 2nd update - settings for the justboom dac - run the new version of /srv/http/db/redis_acards_details after it has been delivered by git pull
