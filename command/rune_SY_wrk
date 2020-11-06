@@ -980,12 +980,6 @@ while (1) {
                     unset($retval);
                     $redis->sRem('w_lock', $jobID);
                     break;
-                case 'NTPswitch':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-                    sysCmd('/srv/http/command/switch_'.$job->action.'_time_on.sh');
-                    $redis->sRem('w_lock', $jobID);
-                    break;
                 case 'airplayconfreset':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
