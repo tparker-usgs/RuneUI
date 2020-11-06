@@ -6300,3 +6300,81 @@ function is_firstTime($redis, $subject)
     }
     return $returnVal;
 }
+// function to check and correct the number of active MPD outputs
+function wrk_check_MPD_outputs($redis)
+// check that MPD only has one output enabled
+// it is possible that stream output has been defined which is always active, so be careful
+// exclude the stream output when counting the enabled output's, there should then only be one enabled output
+{
+    // get the number of enabled outputs
+    $retval = sysCmd('mpc outputs | grep -vi _stream | grep -ci enabled');
+    $countMpdEnabled = $retval[0];
+    if ($countMpdEnabled != 1) {
+        // none or more than one outputs enabled
+        $outputs = sysCmd('mpc outputs | grep -i output');
+        $countMpdOutput = count($outputs);
+        if ($countMpdOutput == 1) {
+            // only one output device so enable it
+            sysCmd("mpc enable only 1");
+        } else {
+            // more than one output device available
+            // set the enabled counter to zero
+            $countMpdEnabled = 0;
+            // walk through the outputs
+            foreach ( $outputs as $output) {
+                $outputParts = explode(' ', $output, 3);
+                // $outputParts[0] = 'Output' (can be disregarded), $outputParts[1] = <the output number> & $outputParts[2] = <the rest of the information>
+                $outputParts[2] = strtolower($outputParts[2]);
+                if (strpos($outputParts[2], 'bcm2835') || strpos($outputParts[2], 'hdmi')) {
+                    // its a 3,5mm jack or hdmi output, so disable it, don't count it
+                    sysCmd('mpc disable '.$outputParts[1]);
+                    // save the number of the last one
+                    $lastOutput = $outputParts[1];
+                } else if (strpos($outputParts[2], 'stream')) {
+                    // its a streamed output, so enable it, don't count it
+                    sysCmd('mpc enable '.$outputParts[1]);
+                } else {
+                    // its an audio card, USB DAC, fifo or pipe output
+                    if ($countMpdEnabled == 0) {
+                        // its the first one, enable it and count it
+                        sysCmd('mpc enable '.$outputParts[1]);
+                        $countMpdEnabled++;
+                    } else {
+                        // its not the first one, disable it, don't count it
+                        sysCmd('mpc disable '.$outputParts[1]);
+                    }
+                }
+            }
+            // the first audio card, USB DAC, fifo or pipe output should now have been enabled
+            // if applicable the streaming output is also enabled
+            // the rest are disabled
+            if ($countMpdEnabled == 0) {
+                // no output enabled, there is more than one (or no) outputs available, no audio cards, USB DACs, fifo or pipe output detected
+                // so enable the 3,5mm output (this may not exist, that's OK)
+                // old style name for older Linux versions
+                sysCmd("mpc enable 'bcm2835 ALSA_1'");
+                // new style name for current Linux versions
+                sysCmd("mpc enable 'bcm2835 Headphones'");
+                // check that we have one connected, if not, enable the saved disabled output if that exists
+                // exclude any stream output when counting the enabled output's
+                $retval = sysCmd('mpc outputs | grep -vi _stream | grep -ci enabled');
+                $countMpdEnabled = $retval[0];
+                if (($countMpdEnabled == 0) && isset($lastOutput)) {
+                    sysCmd('mpc enable '.$lastOutput);
+                }
+            }
+            // get the name of the enabled interface for the UI
+            $retval = sysCmd('mpc outputs | grep -vi _stream | grep -i enabled');
+            if (isset($retval[0])) {
+                $retval = explode('(', $retval[0]);
+                if (isset($retval[1])) {
+                    $retval = explode(')', $retval[1]);
+                    $enabled = trim($retval[0]);
+                    if ($enabled) {
+                        $redis->set('ao', $enabled);
+                    }
+                }
+            }
+        }
+    }
+}
