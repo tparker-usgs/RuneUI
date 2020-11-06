@@ -171,33 +171,6 @@ rm -R "$dirName"
 # remove this symlink to enable the new 'predictable' format
 ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
 #
-# redis reset
-redis-cli del AccessPoint
-redis-cli del airplay
-redis-cli del debugdata
-redis-cli del dirble
-redis-cli del dlna
-redis-cli del fix_mac
-redis-cli del jamendo
-redis-cli del local_browser
-redis-cli del lyrics
-redis-cli del mpdconf
-redis-cli del samba
-redis-cli del spotify
-redis-cli del spotifyconnect
-redis-cli del first_time
-# remove the redis variables used for debug (wrk), network configuration (net, mac & nic), usb mounts (usb) & disk mounts (mou)
-redisvars=$( redis-cli --scan | grep -iE 'wrk|net|mac|nic|usb|mou' | xargs )
-for redisvar in $redisvars
-do
-    redis-cli del $redisvar
-done
-# run the setup script with parameter reset
-php -f /srv/http/db/redis_datastore_setup reset
-# always clear player ID and hardware platform ID
-redis-cli set playerid ""
-redis-cli set hwplatformid ""
-#
 # update local git and clean up any stashes
 md5before=$( md5sum $0 | xargs | cut -f 1 -d " " )
 rm -f /var/www/command/mpd-watchdog
@@ -238,6 +211,35 @@ cd /srv/http/
 git config user.name ""
 git config user.email ""
 cd /home
+#
+# redis reset
+redis-cli del AccessPoint
+redis-cli del airplay
+redis-cli del debugdata
+redis-cli del dirble
+redis-cli del dlna
+redis-cli del fix_mac
+redis-cli del jamendo
+redis-cli del local_browser
+redis-cli del lyrics
+redis-cli del mpdconf
+redis-cli del samba
+redis-cli del spotify
+redis-cli del spotifyconnect
+redis-cli del first_time
+# remove the redis variables used for debug (wrk), network configuration (net, mac & nic), usb mounts (usb) & disk mounts (mou)
+redisvars=$( redis-cli --scan | grep -iE 'wrk|net|mac|nic|usb|mou' | xargs )
+for redisvar in $redisvars
+do
+    redis-cli del $redisvar
+done
+# run the setup script with parameter reset
+php -f /srv/http/db/redis_datastore_setup reset
+# refresh the audio card database
+php -f /srv/http/db/redis_acards_details
+# always clear player ID and hardware platform ID
+redis-cli set playerid ""
+redis-cli set hwplatformid ""
 #
 # remove any samba passwords
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
