@@ -166,6 +166,11 @@ if (isset($_POST)) {
         } else {
             $redis->hGet('local_browser', 'enable') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'stop', 'args' => 0));
         }
+        if ((isset($_POST['features']['local_browser']['enable-splash'])) && ($_POST['features']['local_browser']['enable-splash'])) {
+            $redis->hGet('local_browser', 'enable-splash') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'enable-splash', 'args' => 1));
+        } else {
+            $redis->hGet('local_browser', 'enable-splash') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'xorgserver', 'action' => 'enable-splash', 'args' => 0));
+        }
         if ((isset($_POST['features']['pwd_protection'])) && ($_POST['features']['pwd_protection'])) {
             $redis->get('pwd_protection') == 1 || $redis->set('pwd_protection', 1);
         } else {

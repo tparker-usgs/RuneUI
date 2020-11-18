@@ -515,20 +515,16 @@ while (1) {
                     if ($job->action === 'start') {
                         // save the local browser values
                         $redis->hSet('local_browser', 'enable', $job->args);
-                        // set bootsplash-disable OFF for the next reboot
-                        $redis->hSet('local_browser', 'disable-splash', 0);
-                        wrk_xorgconfig($redis, $job->action, 0);
-                        sysCmd('systemctl enable bootsplash');
+                        // enable the boot splash
+                        wrk_xorgconfig($redis, $job->action, $job->args);
                         // start the local browser
                         sysCmd('systemctl start local-browser');
-                        sysCmdAsync('nice --adjustment=1 /srv/http/command/rune_prio nice');
+                        sysCmdAsync('nice --adjustment=2 /srv/http/command/rune_prio nice');
                     } else if ($job->action === 'stop') {
                         // save the local browser values
                         $redis->hSet('local_browser', 'enable', $job->args);
-                        // set bootsplash-disable ON for the next reboot
-                        $redis->hSet('local_browser', 'disable-splash', 1);
-                        wrk_xorgconfig($redis, $job->action, 1);
-                        sysCmd('systemctl disable bootsplash');
+                        // disable the boot splash
+                        wrk_xorgconfig($redis, $job->action, $job->args);
                         // stop the local browser
                         sysCmd('systemctl stop local-browser');
                     } else if ($job->action === 'zoomfactor') {
@@ -555,13 +551,13 @@ while (1) {
                             sleep(3);
                         }
                     } else {
-                        // localSStime, rotate, mouse_cursor or smallScreenSaver
-                        // save the local browser rotate or mouse_cursor values
+                        // localSStime, rotate, mouse_cursor, enable-splash or smallScreenSaver
+                        // save the local browser rotate, enable-splash or mouse_cursor values
                         $redis->hSet('local_browser', $job->action, $job->args);
                         // set the parameter file
                         wrk_xorgconfig($redis, $job->action, $job->args);
-                        // retart local browser if enabled
-                        if ($redis->hGet('local_browser', 'enable')) {
+                        // retart local browser if enabled and action is not not enable-splash
+                        if ($redis->hGet('local_browser', 'enable') && ($job->action != 'enable-splash')) {
                             sysCmd('systemctl stop local-browser');
                             sysCmd('systemctl daemon-reload');
                             sysCmd('systemctl start local-browser');

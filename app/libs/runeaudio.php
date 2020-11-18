@@ -1519,30 +1519,29 @@ function wrk_xorgconfig($redis, $action, $args)
 {
     switch ($action) {
         case 'start':
-            // spash on
-            // modify the console tty in /boot/cmdline.txt (normal console=tty1, with boot splash console=tty3)
-            // otherwise the console messages interfere with the splash image presentation
-            $command = 'sed -i '."'".'s|console=tty1|console=tty3|g'."'".' /boot/cmdline.txt';
-            syscmd($command);
-            // modify bootsplash on/off setting in /boot/config.txt
-            $command = 'sed -i '."'".'s|.*disable_splash=.*|disable_splash=0|g'."'".' /boot/config.txt';
-            syscmd($command);
-            break;
+            // no break
         case 'stop':
-            // spash off
-            // modify the console tty in /boot/cmdline.txt (normal console=tty1, with boot splash console=tty3)
-            // otherwise the console messages interfere with the splash image presentation
-            $command = 'sed -i '."'".'s|console=tty3|console=tty1|g'."'".' /boot/cmdline.txt';
-            syscmd($command);
-            // modify bootsplash on/off setting in /boot/config.txt
-            $command = 'sed -i '."'".'s|.*disable_splash=.*|disable_splash=1|g'."'".' /boot/config.txt';
-            syscmd($command);
+            // no break
+        case 'enable-splash':
+            if ($args) {
+                // spash on
+                // enable the systemd boot splash unit
+                sysCmd('systemctl enable bootsplash');
+                // set the redis variable enable-splash to true
+                $redis->hSet('local_browser', 'enable-splash', 1);
+            } else {
+                // spash off
+                // enable the systemd boot splash unit
+                sysCmd('systemctl disable bootsplash');
+                // set the redis variable enable-splash to false
+                $redis->hSet('local_browser', 'enable-splash', 0);
+            }
             break;
         case 'zoomfactor':
             // modify the zoom factor in /etc/X11/xinit/start_chromium.sh
-            $file = '/etc/X11/xinit/start_chromium.sh';
+            $file = '/etc/X11/xinit/xinitrc';
             // replace the line with 'force-device-scale-factor='
-            $newArray = wrk_replaceTextLine($file, '', 'force-device-scale-factor', 'chromium --app=http://localhost --start-fullscreen --force-device-scale-factor='.$args);
+            $newArray = wrk_replaceTextLine($file, '', 'force-device-scale-factor', 'sudo -u http /usr/bin/chromium --kiosk --incognito -e http://localhost/ --force-device-scale-factor='.$args);
             // Commit changes to /etc/X11/xinit/start_chromium.sh
             $fp = fopen($file, 'w');
             $return = fwrite($fp, implode("", $newArray));

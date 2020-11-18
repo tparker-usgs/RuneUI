@@ -48,8 +48,8 @@ systemctl stop ashuffle upmpdcli mpdscribble mpd
 systemctl stop ashuffle upmpdcli mpdscribble mpd
 systemctl stop nginx
 systemctl stop local-browser
-disablesplash=$( redis-cli hget local_browser disable-splash )
-if [[ $disablesplash == 0 ]] ; then
+enablesplash=$( redis-cli hget local_browser enable-splash )
+if [[ "$enablesplash" != "0" ]] ; then
     ply-image "$splash"
 fi
 sleep 1

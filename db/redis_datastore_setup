@@ -261,7 +261,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('local_browser', 'zoomfactor', '1.8');
             $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hSet('local_browser', 'mouse_cursor', 0);
-            $redis->hSet('local_browser', 'disable-splash', 1);
+            $redis->hSet('local_browser', 'enable-splash', 0);
             $redis->hSet('local_browser', 'smallScreenSaver', 0);
             $redis->hSet('local_browser', 'localSStime', -1);
             $redis->set('playernamemenu', 1);
@@ -584,7 +584,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', '1.8');
             $redis->hExists('local_browser', 'rotate') || $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hExists('local_browser', 'mouse_cursor') || $redis->hSet('local_browser', 'mouse_cursor', 0);
-            $redis->hExists('local_browser', 'disable-splash') || $redis->hSet('local_browser', 'disable-splash', 1);
+            $redis->hExists('local_browser', 'enable-splash') || $redis->hSet('local_browser', 'enable-splash', 0);
             $redis->hExists('local_browser', 'smallScreenSaver') || $redis->hSet('local_browser', 'smallScreenSaver', 0);
             $redis->hExists('local_browser', 'localSStime') || $redis->hSet('local_browser', 'localSStime', -1);
             $redis->exists('playernamemenu') || $redis->set('playernamemenu', 1);
