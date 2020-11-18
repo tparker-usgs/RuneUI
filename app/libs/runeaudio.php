@@ -2430,6 +2430,11 @@ function wrk_audioOutput($redis, $action, $args = null)
                 unset($data);
                 $card_index = explode(' : ', $card, 2);
                 $card_index = trim($card_index[0]);
+                // ignore the card if  no Simple mixer controls are returned by amixer scontents -c 2 | grep -ic "Simple mixer control"
+                if (!sysCmd('amixer scontents -c 2 | grep -ic "Simple mixer control"')[0]) {
+                    // a zero value is returned so skip the card
+                    continue;
+                }
                 // acards loop
                 runelog('>>--------------------------- card: '.$card.' index: '.$card_index.' (start) --------------------------->>');
                 $card = explode(' - ', $card, 2);
