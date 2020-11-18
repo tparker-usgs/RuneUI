@@ -533,8 +533,8 @@ while (1) {
                         $zoomfactor = floatval(preg_replace("/[^0-9.]/", "", $job->args));
                         // check range of zoomfactor
                         if (($zoomfactor >= 0.1) && ($zoomfactor <= 10)) {
-                            // strip any leading & trailing zero's, spaces, etc.
-                            $zoomfactor = trim(trim($zoomfactor, '0'));
+                            // strip any leading & trailing zero's
+                            $zoomfactor = trim($zoomfactor, '0');
                             // save the localbrowser zoomfactor value
                             $redis->hSet('local_browser', $job->action, $zoomfactor);
                             // set the parameter file
