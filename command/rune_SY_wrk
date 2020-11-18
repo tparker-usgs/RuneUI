@@ -544,7 +544,7 @@ while (1) {
                                 sysCmd('systemctl stop local-browser');
                                 sysCmd('systemctl daemon-reload');
                                 sysCmd('systemctl start local-browser');
-                                sysCmd('/srv/http/command/rune_prio nice');
+                                sysCmdAsync('nice --adjustment=2 /srv/http/command/rune_prio nice');
                             }
                         } else {
                             ui_notifyError('Local browser', 'Display zoom factor invalid: '.$job->args.' Enter a value between 0.1 and 10');

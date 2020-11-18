@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #
 #  Copyright (C) 2013-2014 RuneAudio Team
 #  http://www.runeaudio.com
@@ -247,17 +246,29 @@ pdbedit -L | grep -o ^[^:]* | smbpasswd -x
 # reset root password
 echo -e "rune\nrune" | passwd root
 #
+# make sure that specific users are member of the audio group
+declare -a audiousers=(http mpd spotifyd snapserver snapclient shairport-sync upmpdcli)
+for i in "${audiousers[@]}" ; do
+    audiocnt=$( groups $i | grep -ic audio )
+    if [ "$audiocnt" == "0" ] ; then
+        usermod -a -G audio $i
+    fi
+done
+
+#
 # reset the service and configuration files to the distribution standard
 # the following commands should also be run after a system update or any package updates
 rm -f /etc/nginx/nginx.conf
 rm -f /etc/samba/*.conf
 #rm -f /etc/netctl/*
 # copy default settings and services
-cp -Rv /srv/http/app/config/defaults/etc/* /etc
-cp -Rv /srv/http/app/config/defaults/usr/* /usr
-cp -Rv /srv/http/app/config/defaults/var/* /var
-# copy a standard config.txt
-cp -Rv /srv/http/app/config/defaults/boot/* /boot
+cp -RTv /srv/http/app/config/defaults/etc/. /etc
+cp -RTv /srv/http/app/config/defaults/usr/. /usr
+cp -RTv /srv/http/app/config/defaults/var/. /var
+# copy config files for xbindkeys (& midori)
+cp -RTv /srv/http/app/config/defaults/srv/. /srv
+# copy a standard config.txt & cmdline.txt
+cp -RTv /srv/http/app/config/defaults/boot/. /boot
 # make appropriate links
 ln -s /etc/nginx/nginx-prod.conf /etc/nginx/nginx.conf
 ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
@@ -280,6 +291,13 @@ else
     rm /usr/local/bin/ply-image
     chmod 755 /usr/bin/ply-image
 fi
+#
+# it is possible that the following line is required to correct a bug in the chromium singelton set up
+# the problem seems to occur after changing the hostname
+# singleton processing is used to control multiple windows within a session, we always use a single window
+# in full screen mode
+# so singleton processing is irrelevant for us, just (un)comment the next line
+# rm /srv/http/.config/chromium/Singleton*
 #
 # make sure that all files are unix format and have the correct ownerships and protections
 # the 'final' option also removes the dos2unix package

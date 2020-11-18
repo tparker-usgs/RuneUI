@@ -32,6 +32,10 @@
 #         but deprecated because the ARM/VC assignments differ between board
 #         revisions. The same board-specific mapping applies to i2c_baudrate,
 #         and the other i2c baudrate parameters.
+#
+# Conditional filters in config.txt
+#   See: https://www.raspberrypi.org/documentation/configuration/config-txt/conditional.md
+#
 
 #dtparam=i2c_arm=on
 #dtparam=i2c_vc=on

@@ -2417,7 +2417,8 @@ function wrk_audioOutput($redis, $action, $args = null)
             // $redis->save();
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ']' -f 1");
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ':' -f 2");
-            $acards = sysCmd("cat /proc/asound/cards | grep : | cut -b 1-3,21-");
+            // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -b 1-3,21-");
+            $acards = sysCmd('grep : /proc/asound/cards | cut -b 1-3,21-');
             $i2smodule = $redis->Get('i2smodule');
             // check if i2smodule is enabled and read card details
             if ($i2smodule !== 'none') {

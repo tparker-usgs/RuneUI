@@ -1,5 +1,5 @@
 [Unit]
-Description=Local Browser
+Description=Local Chromium Browser Kiosk mode
 After=network.target
 
 [Service]
