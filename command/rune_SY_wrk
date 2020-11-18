@@ -172,6 +172,8 @@ if ($playerid_db === '') {
     sysCmd('/srv/http/command/switch_systemd_time_on.sh');
     wrk_avahiconfig($redis, strtolower(trim($redis->get('hostname'))));
     runelog('--- RUNEAUDIO FIRST RUN PROCESS');
+    // display the first boot message
+    sysCmd("ply-image '/usr/share/bootsplash/runeaudio_first_time.png'");
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl daemon-reload');
     sysCmd('systemctl restart rune_SY_wrk');
