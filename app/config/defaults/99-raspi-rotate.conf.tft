@@ -1,19 +1,17 @@
 Section "Device"
         Identifier "RpiFB"
-        Driver "fbdev"
-        Option "rotate" "ROTATION_SETTING"
-EndSection
-
-Section "InputClass"
-        Identifier "Touchscreen"
-        Driver "libinput"
-        MatchIsTouchscreen "on"
-        MatchDevicePath "/dev/input/event*"
-        Option "calibrationmatrix" "MATRIX_SETTING"
+# regular fb settings
+#        Driver "fbdev"
+#        Option "fbdev" "/dev/fb1"
+# fbturbo settings
+        Driver "fbturbo"
+        Option "fbdev" "/dev/fb1"
+        Option "SwapbuffersWait" "true"
 EndSection
 
 Section "Monitor"
         Identifier "generic"
+        DisplaySize 127 85    # In millimeters
 EndSection
 
 Section "Screen"
