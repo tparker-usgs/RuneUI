@@ -258,7 +258,7 @@ function redisDatastore($redis,$action) {
             $redis->set('mpd_playback_lastnumber', '');
             $redis->set('last_pl_randomfile', 'exists');
             $redis->hSet('local_browser', 'enable', 0);
-            $redis->hSet('local_browser', 'zoomfactor', '1.8');
+            $redis->hSet('local_browser', 'zoomfactor', '1');
             $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hSet('local_browser', 'mouse_cursor', 0);
             $redis->hSet('local_browser', 'enable-splash', 0);
@@ -581,7 +581,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
             $redis->exists('local_browser') || $redis->set('local_browser', 0);
             $redis->hExists('local_browser', 'enable') || $redis->hSet('local_browser', 'enable', 0);
-            $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', '1.8');
+            $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', '1');
             $redis->hExists('local_browser', 'rotate') || $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hExists('local_browser', 'mouse_cursor') || $redis->hSet('local_browser', 'mouse_cursor', 0);
             $redis->hExists('local_browser', 'enable-splash') || $redis->hSet('local_browser', 'enable-splash', 0);
