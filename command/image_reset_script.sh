@@ -82,7 +82,7 @@ do
    systemctl mask "$i"
 done
 # unmask specified services
-for i in "${mask_arr[@]}"
+for i in "${unmask_arr[@]}"
 do
    systemctl unmask "$i"
 done
