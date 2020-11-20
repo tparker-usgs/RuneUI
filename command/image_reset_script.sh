@@ -361,7 +361,7 @@ cat /etc/motd
 #
 # set timezone to -11 hours before GMT - any user adjustment will always go forward
 timedatectl set-timezone Pacific/Pago_Pago
-redis-cli set timezone "Pacific/Pago_Pago"
+redis-cli set timezone 'Pacific/Pago_Pago'
 #
 # shutdown redis and force a write all in-memory keys to disk (purges any cached values)
 sync
