@@ -5239,7 +5239,7 @@ function autoset_timezone($redis) {
                 'timeout' => 5
             )
         );
-        $context  = stream_context_create($opts); 
+        $context  = stream_context_create($opts);
         $result = file_get_contents('https://ipsidekick.com/json', false, $context);
         // debug
         // $redis->set('wrk_autoset_timezone', $result);
