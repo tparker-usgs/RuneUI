@@ -44,7 +44,7 @@ $savecpuAvd = 86400;
 $savecpuFixdnssec = 20;
 $savecpuRefreshNics = 10;
 $savecpuMpdLog = 600;
-$savecpuIwdConnman = 360;
+$savecpuTimezone = 60;
 $allmounted = 0;
 $retriesmounting = 100;
 ini_set('display_errors', '1');
@@ -1489,6 +1489,15 @@ while (1) {
         // run the tests and disable/enable the artistinfo & lyrics asynchronously
         sysCmdAsync('nice --adjustment=2 /srv/http/command/internet_available_async.sh');
         $savecpuInc = 1750 + rand(0, 100);
+    }
+    // Automatically determine the timezone
+    // Test first after 60 cycles (+/-30 seconds), then every +/-14400 cycles (= every +/-2 hours)
+    if ($savecpuTimezone-- <= 0) {
+        // run the routine, it is here (and not in the startup routines) because internet needs to be up be detected
+        // it will only change the timezone when it is set to the initial default value and internet is available
+        // it normally does nothing
+        autoset_timezone($redis);
+        $savecpuTimezone = 14200 + rand(0, 400);
     }
     // S.M.A.R.T. monitoring tools
     // will test each attached hard disk and tape unit

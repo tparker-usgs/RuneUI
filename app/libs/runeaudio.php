@@ -5232,6 +5232,35 @@ function ui_timezone() {
   return $zones_array;
 }
 
+function autoset_timezone($redis) {
+    if ($redis->hget('service', 'internet') && $redis->get('timezone') === 'Pacific/Pago_Pago') {
+        $opts = array('http' =>
+            array(
+                'timeout' => 5
+            )
+        );
+        $context  = stream_context_create($opts); 
+        $result = file_get_contents('https://ipsidekick.com/json', false, $context);
+        // debug
+        // $redis->set('wrk_autoset_timezone', $result);
+        if ($result) {
+            $result = json_decode($result, true);
+            if (isset($result['timeZone']['name']) && strlen($result['timeZone']['name'])) {
+                runelog('autoset_timezone :', $result['timeZone']['name']);
+                $timeZone =$result['timeZone']['name'];
+                $result = sysCmd('timedatectl set-timezone '."'".$timeZone."'")[0];
+                $result = ' '.strtolower($restult);
+                if (strpos($result, 'failed') || strpos($result, 'invalid')) {
+                    sysCmd("timedatectl set-timezone 'Pacific/Pago_Pago'");
+                } else {
+                    $redis->set('timezone', $timeZone);
+                    ui_notify('Timezone', 'Timezone updated.<br>Current timezone: '.$timeZone);
+                }
+            }
+        }
+    }
+}
+
 function ui_update($redis, $sock, $clientUUID=null)
 {
     ui_libraryHome($redis, $clientUUID);
