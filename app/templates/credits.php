@@ -7,7 +7,7 @@
             </div>
             <h2>RuneAudio team</h2><h3>Version 0.6</h3>
             <div class="alert alert-info">
-                <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, kernel patch for alsa 384kHz audio, 64bit version, migration to PHP V7</span><br>
+                <a href="https://github.com/gearhead" target="_blank" rel="nofollow"><strong>Gearhead</strong></a>  <span class="help-block">- RuneOS - Full kernel and package upgrade, 64bit version, migration to PHP V7</span><br>
                 <a href="https://github.com/janui" target="_blank" rel="nofollow"><strong>janui</strong></a> <span class="help-block">- RuneUI - migration to PHP V7, connman based network UI</span><br>
                 <span class="help-block"><i>A special thanks to our test team: ...</i></span><br>
             </div>
@@ -82,6 +82,7 @@
     <p><strong>BlueZ</strong> by Official Linux Bluetooth protocol stack<br><a href="http://www.bluez.org/" target="_blank" rel="nofollow">http://www.bluez.org/</a></p>
     <p><strong>Bootstrap Context Menu</strong> by <a href="https://github.com/sydcanem" target="_blank" rel="nofollow">@sydcanem</a><br><a href="https://github.com/sydcanem/bootstrap-contextmenu" target="_blank" rel="nofollow">https://github.com/sydcanem/bootstrap-contextmenu</a></p>
     <p><strong>Bootstrap-select</strong> by <a href="https://github.com/caseyjhol" target="_blank" rel="nofollow">caseyjhol</a><br><a href="http://silviomoreto.github.io/bootstrap-select/" target="_blank" rel="nofollow">http://silviomoreto.github.io/bootstrap-select</a></p>
+    <p><strong>Connman</strong> by ...<!-- <a href="https://github.com/jh3y" target="_blank" rel="nofollow">jhey tompkins</a><br><a href="http://jh3y.github.io/-cs-spinner/" target="_blank" rel="nofollow">http://jh3y.github.io/-cs-spinner/</a> --></p>
     <p><strong>(cs)spinner</strong> by <a href="https://github.com/jh3y" target="_blank" rel="nofollow">jhey tompkins</a><br><a href="http://jh3y.github.io/-cs-spinner/" target="_blank" rel="nofollow">http://jh3y.github.io/-cs-spinner/</a></p>
     <p><strong>CSS Toggle Switch</strong> by <a href="http://ghinda.net/" target="_blank" rel="nofollow">Ionuț Colceriu</a><br><a href="https://github.com/ghinda/css-toggle-switch" target="_blank" rel="nofollow">https://github.com/ghinda/css-toggle-switch</a></p>
     <p><strong>Example ArchLinux patch for ALSA 384kHz audio support</strong> by RoPieee<br><a href="https://github.com/RoPieee/ropieee-kernel" target="_blank" rel="nofollow">https://github.com/RoPieee/ropieee-kernel</a>, <a href="https://ropieee.org/" target="_blank" rel="nofollow">https://ropieee.org/</a></p>
@@ -91,6 +92,7 @@
     <p><strong>getID3</strong> class by <a href="https://github.com/JamesHeinrich" target="_blank" rel="nofollow">by James Heinrich</a><br><a title="getID3" href="http://www.getid3.org" target="_blank" rel="nofollow">http://www.getid3.org</a></p>
     <p><strong>Hfsprogs</strong> by Apple Open Source<br><a href="http://www.opensource.apple.com/" target="_blank" rel="nofollow">http://www.opensource.apple.com/</a></p>
     <p><strong>Hfsutils</strong> by Apple Open Source<br><a href="http://www.opensource.apple.com/" target="_blank" rel="nofollow">http://www.opensource.apple.com/</a></p>
+    <p><strong>IP Sidekick</strong> by <a href="http://hboon.com/" target="_blank" rel="nofollow">Hwee-Boon Yar</a><br><a href="https://ipsidekick.com/" target="_blank" rel="nofollow">https://ipsidekick.com/</a></p>
     <p><strong>jQuery Countdown</strong> by <a href="http://keith-wood.name/" target="_blank" rel="nofollow">Keith Wood</a><br><a href="http://keith-wood.name/countdown.html" target="_blank" rel="nofollow">http://keith-wood.name/countdown.html</a></p>
     <p><strong>jQuery Knob</strong> by <a href="http://anthonyterrien.com/" target="_blank" rel="nofollow">Anthony Terrien</a><br><a href="https://github.com/aterrien/jQuery-Knob" target="_blank" rel="nofollow">https://github.com/aterrien/jQuery-Knob</a></p>
     <p><strong>jQuery scrollTo</strong> by <a href="http://flesler.blogspot.com/" target="_blank" rel="nofollow">Ariel Flesler</a><br><a href="http://flesler.blogspot.it/2007/10/jqueryscrollto.html" target="_blank" rel="nofollow">http://flesler.blogspot.it/2007/10/jqueryscrollto.html</a></p>
