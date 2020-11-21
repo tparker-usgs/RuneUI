@@ -2431,7 +2431,7 @@ function wrk_audioOutput($redis, $action, $args = null)
                 $card_index = explode(' : ', $card, 2);
                 $card_index = trim($card_index[0]);
                 // ignore the card if  no Simple mixer controls are returned by amixer scontents -c 2 | grep -ic "Simple mixer control"
-                if (!sysCmd('amixer scontents -c 2 | grep -ic "Simple mixer control"')[0]) {
+                if (!sysCmd('amixer scontents -c '.$card_index.' | grep -ic "Simple mixer control"')[0]) {
                     // a zero value is returned so skip the card
                     continue;
                 }
