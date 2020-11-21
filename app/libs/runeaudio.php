@@ -5247,18 +5247,42 @@ function autoset_timezone($redis) {
             $result = json_decode($result, true);
             if (isset($result['timeZone']['name']) && strlen($result['timeZone']['name'])) {
                 runelog('autoset_timezone :', $result['timeZone']['name']);
-                $timeZone =$result['timeZone']['name'];
+                $timeZone = $result['timeZone']['name'];
+                $countryCode = $result['country']['code'];
                 $result = sysCmd('timedatectl set-timezone '."'".$timeZone."'")[0];
                 $result = ' '.strtolower($restult);
                 if (strpos($result, 'failed') || strpos($result, 'invalid')) {
                     sysCmd("timedatectl set-timezone 'Pacific/Pago_Pago'");
                 } else {
                     $redis->set('timezone', $timeZone);
+                    // set the Wi-Fi regulatory domain, the standard is 00 and is compatible with most countries
+                    // setting it will could allow more Wi-Fi power to be used (never less) and sometimes improve the usable frequency ranges
+                    // if it fails, set to the default (00)
+                    sysCmd('iw reg set '.$countryCode.' || iw reg set 00');
                     ui_notify('Timezone', 'Timezone updated.<br>Current timezone: '.$timeZone);
                 }
             }
         }
     }
+}
+
+function wrk_setTimezone($redis, $timeZone) {
+    $result = sysCmd('timedatectl set-timezone '."'".$timeZone."'")[0];
+    $result = ' '.strtolower($restult);
+    if (strpos($result, 'failed') || strpos($result, 'invalid')) {
+        $retval = false;
+    } else {
+        $redis->set('timezone', $timeZone);
+        // determine the country code from the timezone
+        $tz = new DateTimeZone($timeZone);
+        $countryCode = timezone_location_get($tz)['country_code'];
+        // set the Wi-Fi regulatory domain, the standard is 00 and is compatible with most countries
+        // setting it will could allow more Wi-Fi power to be used (never less) and sometimes improve the usable frequency ranges
+        // if it fails, set to the default (00)
+        sysCmd('iw reg set '.$countryCode.' || iw reg set 00');
+        $retval = true;
+    }
+    return $retval;
 }
 
 function ui_update($redis, $sock, $clientUUID=null)

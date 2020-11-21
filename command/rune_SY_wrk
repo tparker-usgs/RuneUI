@@ -1342,9 +1342,11 @@ while (1) {
                 case 'timezone':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    sysCmd('timedatectl set-timezone '.$job->args);
-                    $redis->set('timezone', $job->args);
-                    ui_notify_async('Timezone', 'Timezone updated.<br>Current timezone: '.$job->args, $jobID);
+                    if (wrk_setTimezone($redis, $job->args)) {
+                        ui_notify_async('Timezone', 'Timezone updated.<br>Current timezone: '.$job->args, $jobID);
+                    } else {
+                        ui_notify_async('Error', 'Timezone update failed.<br>Timezone unchanged', $jobID);
+                    }
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'udevil':
