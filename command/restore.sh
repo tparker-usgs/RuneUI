@@ -40,7 +40,7 @@ systemctl stop redis udevil ashuffle upmpdcli mpdscribble mpd spotifyd shairport
 bsdtar -xpf $1 -C /
 systemctl daemon-reload
 systemctl start redis mpd
-/srv/http/command/convert_dos_files_to_unix_script.sh
+/srv/http/command/convert_dos_files_to_unix_script.sh fast
 hostnm=$( redis-cli get hostname )
 hostnm=${hostnm,,}
 hostnamectl set-hostname $hostnm
