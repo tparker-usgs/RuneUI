@@ -5289,7 +5289,7 @@ function autoset_timezone($redis) {
                     // setting it will could allow more Wi-Fi power to be used (never less) and sometimes improve the usable frequency ranges
                     // not all country codes have a specificity specified regulatory domain profile, so if it fails, set to the default (00)
                     sysCmd('iw reg set '.$countryCode.' || iw reg set 00');
-                    ui_notify('Timezone', 'Timezone updated.<br>Current timezone: '.$timeZone);
+                    ui_notify('Timezone', 'Timezone automatically updated.<br>Current timezone: '.$timeZone);
                 }
             }
         }
