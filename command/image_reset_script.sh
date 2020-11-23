@@ -177,6 +177,7 @@ cd /srv/http/
 git config --global core.editor "nano"
 git config user.email "any@body.com"
 git config user.name "anybody"
+git config pull.rebase false
 git stash
 git stash
 git add .

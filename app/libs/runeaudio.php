@@ -4642,7 +4642,7 @@ function wrk_playerID($arch)
 
 function wrk_sysAcl()
 {
-    sysCmd('/srv/http/command/convert_dos_files_to_unix_script.sh final');
+    sysCmd('/srv/http/command/convert_dos_files_to_unix_script.sh fast');
 }
 
 function wrk_NTPsync($ntpserver)
