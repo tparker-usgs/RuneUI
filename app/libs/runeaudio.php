@@ -2688,6 +2688,8 @@ function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
         case 'reset':
             // default MPD config
             sysCmd('/srv/http/db/redis_datastore_setup mpdreset');
+            sysCmd('/srv/http/db/redis_acards_details');
+            wrk_audioOutput($redis, 'refresh');
             unset($retval);
             $retval = sysCmd("mpd --version | grep -o 'Music Player Daemon.*' | cut -f4 -d' '");
             $redis->hSet('mpdconf', 'version', trim(reset($retval)));
