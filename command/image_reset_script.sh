@@ -363,6 +363,9 @@ cat /etc/motd
 timedatectl set-timezone Pacific/Pago_Pago
 redis-cli set timezone 'Pacific/Pago_Pago'
 #
+# set the Wi-Fi regulatory domain to 00
+iw reg set 00
+#
 # shutdown redis and force a write all in-memory keys to disk (purges any cached values)
 sync
 redis-cli save

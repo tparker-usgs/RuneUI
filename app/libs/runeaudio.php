@@ -5233,22 +5233,51 @@ function ui_timezone() {
 }
 
 function autoset_timezone($redis) {
-    if ($redis->hget('service', 'internet') && $redis->get('timezone') === 'Pacific/Pago_Pago') {
+    // this function uses a one of the many internet services which return the timezone and the country code
+    // it uses the external IP-address of the connected network to determine the location
+    // is used to automatically set the timezone and the Wi-Fi regulatory domain
+    // the timezone will only be changed when the current timezone is set to the
+    //      distribution default timezone (Pacific/Pago_Pago) the Wi-Fi regulatory domain = 00 and internet is available
+    // https://ipsidekick.com/ and https://ipapi.co/ were found to be unreliable, currently using https://timezoneapi.io
+    //
+    $wifiRegDom00 = sysCmd('iw reg get | grep -ic 00')[0];
+    if ($redis->hget('service', 'internet') && ($redis->get('timezone') === 'Pacific/Pago_Pago') && $wifiRegDom00) {
+        // make sure that file_get_contents() times out when nothing is returned
         $opts = array('http' =>
             array(
+                // timeout in seconds
+                // 5 seconds is a little on the high side, 2 or 3 is probably better.
+                // its not really problem because this will only be run once per installation!
                 'timeout' => 5
             )
         );
         $context  = stream_context_create($opts);
-        $result = file_get_contents('https://ipsidekick.com/json', false, $context);
+        // https://ipsidekick.com/
+        // $result = file_get_contents('https://ipsidekick.com/json', false, $context);
+        // https://ipapi.co/
+        // $result = file_get_contents('https://ipapi.co/json', false, $context);
+        // https://timezoneapi.io
+        $timezoneapiToken = $redis->hGet('TimezoneAPI', 'apikey');
+        $result = file_get_contents('https://timezoneapi.io/api/ip/?token='.$timezoneapiToken, false, $context);
         // debug
-        // $redis->set('wrk_autoset_timezone', $result);
+        $redis->set('wrk_autoset_timezone', $result);
         if ($result) {
             $result = json_decode($result, true);
-            if (isset($result['timeZone']['name']) && strlen($result['timeZone']['name'])) {
-                runelog('autoset_timezone :', $result['timeZone']['name']);
-                $timeZone = $result['timeZone']['name'];
-                $countryCode = $result['country']['code'];
+            // https://ipsidekick.com/
+            // if (isset($result['timeZone']['name']) && strlen($result['timeZone']['name'])) {
+                // runelog('autoset_timezone :', $result['timeZone']['name']);
+                // $timeZone = $result['timeZone']['name'];
+                // $countryCode = $result['country']['code'];
+            // https://ipapi.co/
+            // if (isset($result['timezone']) && strlen($result['timezone'])) {
+                // runelog('autoset_timezone :', $result['timezone']);
+                // $timeZone = $result['timezone'];
+                // $countryCode = $result['country_code'];
+            // https://timezoneapi.io
+            if (isset($result['data']['timezone']['id']) && strlen($result['data']['timezone']['id'])) {
+                runelog('autoset_timezone :', $result['data']['timezone']['id']);
+                $timeZone = $result['data']['timezone']['id'];
+                $countryCode = $result['data']['country_code'];
                 $result = sysCmd('timedatectl set-timezone '."'".$timeZone."'")[0];
                 $result = ' '.strtolower($restult);
                 if (strpos($result, 'failed') || strpos($result, 'invalid')) {
