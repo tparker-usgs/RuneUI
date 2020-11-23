@@ -5222,6 +5222,7 @@ function ui_render($channel, $data)
 }
 
 function ui_timezone() {
+    // used to provide a list of valid timezones for the UI
     $zones_array = array();
     $timestamp = time();
     foreach(timezone_identifiers_list() as $key => $zone) {
@@ -5286,7 +5287,7 @@ function autoset_timezone($redis) {
                     $redis->set('timezone', $timeZone);
                     // set the Wi-Fi regulatory domain, the standard is 00 and is compatible with most countries
                     // setting it will could allow more Wi-Fi power to be used (never less) and sometimes improve the usable frequency ranges
-                    // if it fails, set to the default (00)
+                    // not all country codes have a specificity specified regulatory domain profile, so if it fails, set to the default (00)
                     sysCmd('iw reg set '.$countryCode.' || iw reg set 00');
                     ui_notify('Timezone', 'Timezone updated.<br>Current timezone: '.$timeZone);
                 }
@@ -5296,6 +5297,8 @@ function autoset_timezone($redis) {
 }
 
 function wrk_setTimezone($redis, $timeZone) {
+    // the timezone and the Wi-Fi regulatory domain from the UI
+    // return true when successful, false on error
     $result = sysCmd('timedatectl set-timezone '."'".$timeZone."'")[0];
     $result = ' '.strtolower($restult);
     if (strpos($result, 'failed') || strpos($result, 'invalid')) {
@@ -5307,7 +5310,7 @@ function wrk_setTimezone($redis, $timeZone) {
         $countryCode = timezone_location_get($tz)['country_code'];
         // set the Wi-Fi regulatory domain, the standard is 00 and is compatible with most countries
         // setting it will could allow more Wi-Fi power to be used (never less) and sometimes improve the usable frequency ranges
-        // if it fails, set to the default (00)
+        // not all country codes have a specificity specified regulatory domain profile, so if it fails, set to the default (00)
         sysCmd('iw reg set '.$countryCode.' || iw reg set 00');
         $retval = true;
     }
