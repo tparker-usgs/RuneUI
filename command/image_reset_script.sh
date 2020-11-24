@@ -294,11 +294,10 @@ else
 fi
 #
 # it is possible that the following line is required to correct a bug in the chromium singelton set up
-# the problem seems to occur after changing the hostname
 # singleton processing is used to control multiple windows within a session, we always use a single window
 # in full screen mode
 # so singleton processing is irrelevant for us, just (un)comment the next line
-# rm /srv/http/.config/chromium/Singleton*
+rm /srv/http/.config/chromium/Singleton*
 #
 # make sure that all files are unix format and have the correct ownerships and protections
 # the 'final' option also removes the dos2unix package
