@@ -68,9 +68,9 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             $redis->hSet('mpdconf', 'version', '0.21.25');
-            $redis->hSet('mpdconf', 'webstreaming', '0');
-            $redis->hSet('mpdconf', 'brutefir', '0');
-            $redis->hSet('mpdconf', 'snapcast', '0');
+            $redis->hSet('mpdconf', 'webstreaming', 0);
+            $redis->hSet('mpdconf', 'brutefir', 0);
+            $redis->hSet('mpdconf', 'snapcast', 0);
             break;
         case 'mpdcheck':
             $redis->hExists('mpdconf', 'zeroconf_enabled') || $redis->hSet('mpdconf', 'zeroconf_enabled', 'yes');
@@ -101,9 +101,9 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'ffmpeg') || $redis->hSet('mpdconf', 'ffmpeg', 'yes');
             $redis->hExists('mpdconf', 'log_file') || $redis->hSet('mpdconf', 'log_file', '/var/log/runeaudio/mpd.log');
             $redis->hExists('mpdconf', 'version') || $redis->hSet('mpdconf', 'version', '0.21.25');
-            $redis->hExists('mpdconf', 'webstreaming') || $redis->hSet('mpdconf', 'webstreaming', '0');
-            $redis->hExists('mpdconf', 'brutefir') || $redis->hSet('mpdconf', 'brutefir', '0');
-            $redis->hExists('mpdconf', 'snapcast') || $redis->hSet('mpdconf', 'snapcast', '0');
+            $redis->hExists('mpdconf', 'webstreaming') || $redis->hSet('mpdconf', 'webstreaming', 0);
+            $redis->hExists('mpdconf', 'brutefir') || $redis->hSet('mpdconf', 'brutefir', 0);
+            $redis->hExists('mpdconf', 'snapcast') || $redis->hSet('mpdconf', 'snapcast', 0);
             break;
         case 'reset':
             // kernel
@@ -118,7 +118,7 @@ function redisDatastore($redis,$action) {
             $redis->set('kernel', trim(sysCmd('uname -sr')[0]).$bit);
             $redis->set('i2smodule', 'none');
             $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
-            $redis->set('audio_on_off', '1');
+            $redis->set('audio_on_off', 1);
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
             // UI login password
@@ -228,7 +228,7 @@ function redisDatastore($redis,$action) {
             $redis->set('mpd_start_volume', -1);
             $redis->set('lastmpdvolume', 100);
             $redis->set('mpd_autoplay', 0);
-            $redis->set('dynVolumeKnob', '0');
+            $redis->set('dynVolumeKnob', 0);
             $redis->set('cmediafix', 0);
             $redis->set('mpdconfchange', 0);
             $redis->set('sssconfchange', 0);
@@ -261,7 +261,7 @@ function redisDatastore($redis,$action) {
             $redis->set('mpd_playback_lastnumber', '');
             $redis->set('last_pl_randomfile', 'exists');
             $redis->hSet('local_browser', 'enable', 0);
-            $redis->hSet('local_browser', 'zoomfactor', '1');
+            $redis->hSet('local_browser', 'zoomfactor', 1);
             $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hSet('local_browser', 'mouse_cursor', 0);
             $redis->hSet('local_browser', 'enable-splash', 0);
@@ -313,7 +313,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hSet('resolvconf', 'timeout', '0.3');
-            $redis->hSet('resolvconf', 'attempts', '1');
+            $redis->hSet('resolvconf', 'attempts', 1);
             $redis->set('network_autoOptimiseWifi', 1);
             $redis->set('network_info', json_encode(array()));
             $redis->set('translate_mac_nic', json_encode(array()));
@@ -348,7 +348,7 @@ function redisDatastore($redis,$action) {
                 $redis->del($key);
             }
             // pre-installed Rern's add-ons
-            $redis->hSet('addons', 'update', '0');
+            $redis->hSet('addons', 'update', 0);
             $redis->hSet('addons', 'font', '20220901');
             // PHP precache (prime) scripts
             $redis->del('php_opcache_prime');
@@ -564,7 +564,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('lyrics', 'currentalbum') || $redis->hSet('lyrics', 'currentalbum', '');
             $redis->hExists('lyrics', 'art') || $redis->hSet('lyrics', 'art', '');
             $redis->hExists('lyrics', 'arturl') || $redis->hSet('lyrics', 'arturl', '');
-            $redis->hExists('lyrics', 'audio') || $redis->hSet('lyrics', 'audio', '');
+            $redis->hExists('lyrics', 'audio') || $redis->hSet('lyrics', 'audio', ''); 
             $redis->hExists('lyrics', 'time') || $redis->hSet('lyrics', 'time', '');
             $redis->hExists('lyrics', 'artist') || $redis->hSet('lyrics', 'artist', '');
             $redis->hExists('lyrics', 'album') || $redis->hSet('lyrics', 'album', '');
@@ -581,13 +581,13 @@ function redisDatastore($redis,$action) {
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
             $redis->exists('stoppedPlayer') || $redis->set('stoppedPlayer', '');
             $redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
-            $redis->exists('audio_on_off') || $redis->set('audio_on_off', '1');
+            $redis->exists('audio_on_off') || $redis->set('audio_on_off', 1);
             $redis->exists('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
             $redis->exists('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
             $redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
             $redis->exists('local_browser') || $redis->set('local_browser', 0);
             $redis->hExists('local_browser', 'enable') || $redis->hSet('local_browser', 'enable', 0);
-            $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', '1');
+            $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', 1);
             $redis->hExists('local_browser', 'rotate') || $redis->hSet('local_browser', 'rotate', 'NORMAL');
             $redis->hExists('local_browser', 'mouse_cursor') || $redis->hSet('local_browser', 'mouse_cursor', 0);
             $redis->hExists('local_browser', 'enable-splash') || $redis->hSet('local_browser', 'enable-splash', 0);
@@ -641,7 +641,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('samba', 'readwrite') || $redis->hSet('samba', 'readwrite', 0);
             // network parameters
             $redis->hExists('resolvconf', 'timeout') || $redis->hSet('resolvconf', 'timeout', '0.3');
-            $redis->hExists('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', '1');
+            $redis->hExists('resolvconf', 'attempts') || $redis->hSet('resolvconf', 'attempts', 1);
             $redis->exists('network_autoOptimiseWifi') || $redis->set('network_autoOptimiseWifi', 1);
             $redis->exists('network_info') || $redis->set('network_info', json_encode(array()));
             $redis->exists('translate_mac_nic') || $redis->set('translate_mac_nic', json_encode(array()));
@@ -649,7 +649,6 @@ function redisDatastore($redis,$action) {
             $redis->exists('network_storedProfiles') || $redis->set('network_storedProfiles', json_encode(array()));
             $redis->exists('network_mac_spoof') || $redis->set('network_mac_spoof', json_encode(array('00:e0:4c:53:44:58', '')));
             // lock keys
-            $redis->exists('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             $redis->exists('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);
             $redis->exists('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
             // env settings
@@ -660,7 +659,7 @@ function redisDatastore($redis,$action) {
             // the 'backup_dir' path must contain a directory called 'tmp' or 'backup', otherwise it will be set to '/home/backup'
             $redis->exists('backup_dir') || $redis->set('backup_dir', '/home/backup');
             // pre-installed Rern's add-ons
-            $redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', '0');
+            $redis->hExists('addons', 'update') || $redis->hSet('addons', 'update', 0);
             $redis->hExists('addons', 'font') || $redis->hSet('addons', 'font', '20220901');
             break;
     }

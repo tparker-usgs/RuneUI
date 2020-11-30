@@ -43,6 +43,7 @@ $savecpuSps = 43200;
 $savecpuAvd = 86400;
 $savecpuFixdnssec = 20;
 $savecpuRefreshNics = 10;
+$savecpuRefreshNicsPrev = $savecpuRefreshNics;
 $savecpuMpdLog = 600;
 $savecpuTimezone = 60;
 $allmounted = 0;
@@ -237,7 +238,7 @@ if ($playerid_db === '') {
     //
     // refresh nics, check redis datastore status, check if an active internet connection is available
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
-    sysCmdAsync('nice --adjustment=2 /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; /var/www/command/refresh_nics');
+    sysCmdAsync('nice --adjustment=2 php -f /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; php -f /var/www/command/refresh_nics');
     //
     // create the directory used to hold the configuration backup work file, set the correct privileges and delete any content
     if (!$redis->Exists('backup_dir')) {
@@ -413,7 +414,7 @@ if ($playerid_db === '') {
     $redis->close();
     //
     // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
-    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; /var/www/command/set_mpd_volume.php ; /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
     runelog('--- NORMAL STARTUP');
     // --- NORMAL STARTUP //
 }
@@ -480,14 +481,14 @@ while (1) {
                         }
                         $redis->hSet('airplay', 'enable', 1);
                         // send notfy to UI
-                        ui_notify('AirPlay', 'AirPlay feature enabled', $jobID);
+                        ui_notify_async('AirPlay', 'AirPlay feature enabled', $jobID);
                     } elseif ($job->action === 'stop') {
                         // stop shairport-sync
                         runelog('service: SHAIRPORT stop');
                         sysCmd('systemctl stop shairport-sync');
                         $redis->hSet('airplay', 'enable', 0);
                         // send notfy to UI
-                        ui_notify('AirPlay', 'AirPlay feature disabled', $jobID);
+                        ui_notify_async('AirPlay', 'AirPlay feature disabled', $jobID);
                     }
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -605,8 +606,8 @@ while (1) {
                     // Clean IMG
                     runelog('Clean IMG');
                     // send notfy to UI
-                    //ui_notify_async('Clean IMG', 'Started, this can take a while to complete', $jobID);
-                    ui_notify('Clean IMG', 'Started, this can take a while to complete');
+                    ui_notify_async('Clean IMG', 'Started, this can take a while to complete', $jobID);
+                    // ui_notify('Clean IMG', 'Started, this can take a while to complete');
                     // enable OPcache
                     wrk_opcache('enable');
                     wrk_cleanDistro();
@@ -659,7 +660,7 @@ while (1) {
                     $retval = sysCmd('cd /srv/http/ ; git pull --no-edit');
                     //sysCmd("curl -s -X GET 'http://localhost/clear'");
                     // send notfy to UI
-                    ui_notify('Update RuneUI', 'RuneUI update message<br>'.implode('<br>', $retval));
+                    ui_notify_async('Update RuneUI', 'RuneUI update message<br>'.implode('<br>', $retval), $jobID);
                     sysCmd('cd /srv/http/ && git stash; git stash');
                     $gitupdated = 1;
                     foreach($retval as $line) {
@@ -668,7 +669,7 @@ while (1) {
                         }
                     }
                     if ($gitupdated) {
-                        ui_notify('Update RuneUI', 'Rebooting');
+                        ui_notify_async('Update RuneUI', 'Rebooting', $jobID);
                         wrk_sysAcl();
                         $playernamemenu = $redis->get('playernamemenu');
                         wrk_playernamemenu($playernamemenu);
@@ -677,7 +678,7 @@ while (1) {
                         sysCmd('systemctl reload-or-restart php-fpm || systemctl start php-fpm');
                         wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
                     } else {
-                        ui_notify('Update RuneUI', 'Wait for the screen to refresh...');
+                        ui_notify_async('Update RuneUI', 'Wait for the screen to refresh...', $jobID);
                     }
                     unset($retval, $gitupdated, $playernamemenu);
                     $redis->sRem('w_lock', $jobID);
@@ -685,7 +686,7 @@ while (1) {
                 case 'hostname':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
-                    ui_notify('Settings - Change Hostname', 'it takes some time .....');
+                    ui_notify_async('Settings - Change Hostname', 'it takes some time .....', $jobID);
                     wrk_changeHostname($redis, $job->args);
                     $retval = sysCmd('hostname');
                     $hn = trim($retval[0]);
@@ -699,8 +700,8 @@ while (1) {
                     $hash = md5_file('/etc/mpd.conf');
                     $redis->set('mpdconfhash', $hash);
                     // send notfy to UI
-                    //ui_notify_async('Hostname', 'Hostname changed to:'.$hn, $jobID);
-                    ui_notify('Hostname', 'Hostname changed to:'.$hn);
+                    ui_notify_async('Hostname', 'Hostname changed to:'.$hn, $jobID);
+                    //ui_notify('Hostname', 'Hostname changed to:'.$hn);
                     sleep(3);
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -862,7 +863,7 @@ while (1) {
                     // $job>args contains the playlist name
                     // run the job async with a lower priority
                     sysCmdAsync('nice --adjustment=2 /var/www/command/remove_playlist_duplicates.sh '."'".$job->args."'");
-                    ui_notify('Remove duplicates started for playlist:', $job->args);
+                    ui_notify_async('Remove duplicates started for playlist:', $job->args, $jobID);
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'ashufflecheckCF':
@@ -888,9 +889,9 @@ while (1) {
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
                     // save the number of files to add
-                    $redis->set('addrandom', $job->args);
+                    $redis->hSet('globalrandom', 'addrandom', $job->args);
                     // call ashuffle to add the specified number of tracks to the queue
-                    ui_notify('Add random tracks', implode("\n", sysCmd('ashuffle -o '.$job->args)));
+                    ui_notify_async('Add random tracks', implode("\n", sysCmd('ashuffle -o '.$job->args)), $jobID);
                     sleep(3);
                     $redis->sRem('w_lock', $jobID);
                     break;
@@ -915,7 +916,7 @@ while (1) {
                     break;
                 case 'rerninstall':
                     runelog('wrk_SY: ', $job->wrkcmd);
-                    ui_notify("Install Rern's Addons", 'It takes some time .....');
+                    ui_notify_async("Install Rern's Addons", 'It takes some time .....', $jobID);
                     $redis->sAdd('w_lock', $jobID);
                     sysCmd('systemctl stop addons cronie');
                     sysCmd('systemctl disable addons cronie');
@@ -935,9 +936,9 @@ while (1) {
                     sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
                     sysCmd('sed -i "s,\x1B\[[0-9;]*[a-zA-Z],,g" /home/rern/Rern_Addons.log');
                     $retval = sysCmd('grep -i -E "installed|please" /home/rern/Rern_Addons.log');
-                    ui_notify("Rern's Addons", trim(preg_replace('/[^A-Za-z0-9 ]/', '', implode('\n', $retval))));
+                    ui_notify_async("Rern's Addons", trim(preg_replace('/[^A-Za-z0-9 ]/', '', implode('\n', $retval))), $jobID);
                     sleep(3);
-                    ui_notify("Rern's Addons", 'You may need to reboot...');
+                    ui_notify_async("Rern's Addons", 'You may need to reboot...', $jobID);
                     sleep(3);
                     unset($retval);
                     $redis->hSet('addons', 'update', '0');
@@ -947,7 +948,7 @@ while (1) {
                     break;
                 case 'rernremove':
                     runelog('wrk_SY: ', $job->wrkcmd);
-                    ui_notify("Remove Rern's Addons", 'It takes some time .....');
+                    ui_notify_async("Remove Rern's Addons", 'It takes some time .....', $jobID);
                     $redis->sAdd('w_lock', $jobID);
                     sysCmd('systemctl stop addons cronie');
                     sysCmd('systemctl disable addons cronie');
@@ -961,7 +962,7 @@ while (1) {
                     sysCmd('rm -f /usr/local/bin/uninstall_enha.sh');
                     $redis->del('addons');
                     $redis->del('addo');
-                    ui_notify("Remove Rern's Addons", 'You may need to reboot...');
+                    ui_notify_async("Remove Rern's Addons", 'You may need to reboot...', $jobID);
                     sleep(3);
                     $redis->hSet('addons', 'update', '0');
                     $redis->hSet('addons', 'font', '20170901');
@@ -974,7 +975,7 @@ while (1) {
                     $retval = sysCmd("echo -e 'd\n2\nn\np\n2\n\n\nt\n2\n83\np\nw' | fdisk /dev/mmcblk0 | grep -i mmcblk0p2");
                     sysCmd('partprobe /dev/mmcblk0');
                     sysCmd('resize2fs /dev/mmcblk0p2');
-                    ui_notify("Extend Linux Partition", implode("\n", $retval));
+                    ui_notify_async("Extend Linux Partition", implode("\n", $retval), $jobID);
                     sleep(3);
                     unset($retval);
                     $redis->sRem('w_lock', $jobID);
@@ -1282,7 +1283,7 @@ while (1) {
                         runelog('service: SPOTIFYD start');
                         // start or re-start spotifyd service
                         // send notfy to UI
-                        ui_notify('Spotify Connect', 'Spotify Connect client configured', $jobID);
+                        ui_notify_async('Spotify Connect', 'Spotify Connect client configured', $jobID);
                         sysCmd('pgrep spotifyd || systemctl start spotifyd');
                         $redis->hSet('spotifyconnect', 'track_id', '');
                         $redis->hSet('spotifyconnect', 'last_track_id', '');
@@ -1292,7 +1293,7 @@ while (1) {
                     } elseif ($job->action === 'stop') {
                         runelog('service: SPOTIFYD stop');
                         // send notfy to UI
-                        ui_notify('Spotify Connect', 'Spotify Connect client stopped', $jobID);
+                        ui_notify_async('Spotify Connect', 'Spotify Connect client stopped', $jobID);
                         sysCmd('pgrep spotifyd && systemctl stop spotifyd');
                         $redis->hSet('spotifyconnect', 'track_id', '');
                         $redis->hSet('spotifyconnect', 'last_track_id', '');
@@ -1448,20 +1449,21 @@ while (1) {
         if ($retriesmounting-- >= 0) {
             runelog('wrk_SY: error mounting shares, trying it again! Count: '.$retriesmounting);
             // run asynchronous mount script
-            sysCmdAsync('nice --adjustment=2 /var/www/command/mount_async.php');
+            sysCmdAsync('nice --adjustment=2 php -f /var/www/command/mount_async.php');
         }
         $savecpuMnt = 1750 + rand(0, 100);
     }
-    // Run refresh_nics periodically, run it first after 10 cycles (+/-5 seconds), and increase the repeat cycle time 50%
+    // Run refresh_nics periodically, run it first after 10 cycles (+/-5 seconds), and increase the repeat cycle time by 50%
     // it should run at least once per hour
     // connman works (should work) in this exponential way of detecting WiFi networks and nics
     if ($savecpuRefreshNics-- <= 0) {
         wrk_netconfig($redis, 'refreshAsync');
         // increase the repeat cycle time by 100% with a maximum of 7200 (= 1 hour, 60 x 60 x 2)
-        $savecpuRefreshNics = min(7200, intval($savecpuRefreshNics*2));
+        $savecpuRefreshNics = min(7200, intval($savecpuRefreshNicsPrev*1,5));
         // calculate the randomiser @5% of the repeat cycle, minimum value of 2, maximum value of 100
         $random = min(100,max(2, intval($savecpuRefreshNics/20)));
         $savecpuRefreshNics = $savecpuRefreshNics - $random + rand(0, $random*2);
+        $savecpuRefreshNicsPrev = $savecpuRefreshNics;
         unset($random);
     }
     // Random play auto start and stop, run first after 12 cycles (+/-6 seconds), then only on every +/-30th cycle (= every +/-15 seconds)

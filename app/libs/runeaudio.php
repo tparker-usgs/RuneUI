@@ -6276,6 +6276,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             }
     }
 }
+
 // work function to check the MPD logfile size
 function wrk_mpdLog($redis, $logMax = null)
 // get the location and name of the MPD logfile from redis
