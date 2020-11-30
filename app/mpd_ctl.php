@@ -64,16 +64,16 @@
             sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
         }
         if ((isset($_POST['mpd']['globalrandom'])) && ($_POST['mpd']['globalrandom'])) {
-            if ($redis->get('globalrandom') != 1) {
-                $redis->set('globalrandom', 1);
+            if ($redis->hGet('globalrandom', 'enable') != 1) {
+                $redis->hSet('globalrandom', 'enable', 1);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
             } else {
                 // check that crossfade is set up correctly
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         } else {
-            if ($redis->get('globalrandom') != 0) {
-                $redis->set('globalrandom', 0);
+            if ($redis->hGet('globalrandom', 'enable') != 0) {
+                $redis->hSet('globalrandom', 'enable', 0);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
             } else {
                 // check that crossfade is set up correctly
@@ -81,16 +81,16 @@
             }
         }
         if ((isset($_POST['mpd']['random_album'])) && ($_POST['mpd']['random_album'])) {
-            if ($redis->get('random_album') != 1) {
-                $redis->set('random_album', 1);
+            if ($redis->hGet('globalrandom', 'random_album') != 1) {
+                $redis->hSet('globalrandom', 'random_album', 1);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
             } else {
                 // check that crossfade is set up correctly
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         } else {
-            if ($redis->get('random_album') != 0) {
-                $redis->set('random_album', 0);
+            if ($redis->hGet('globalrandom', 'random_album') != 0) {
+                $redis->hSet('globalrandom', 'random_album', 0);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
             } else {
                 // check that crossfade is set up correctly
@@ -98,7 +98,7 @@
             }
         }
         if ((isset($_POST['mpd']['addrandom'])) && (is_numeric($_POST['mpd']['addrandom']))) {
-            $redis->get('addrandom') == $_POST['mpd']['addrandom'] || $redis->set('addrandom', $_POST['mpd']['addrandom']);
+            $redis->hGet('globalrandom', 'addrandom') == $_POST['mpd']['addrandom'] || $redis->hSet('globalrandom', 'addrandom', $_POST['mpd']['addrandom']);
         }
         if ((isset($_POST['mpd']['mpd_autoplay'])) && ($_POST['mpd']['mpd_autoplay'])) {
             $redis->get('mpd_autoplay') == 1 || $redis->set('mpd_autoplay', 1);
@@ -117,26 +117,15 @@ $template->hwplatformid = $redis->get('hwplatformid');
 $template->realtime_volume = $redis->get('dynVolumeKnob');
 $template->mpd['start_volume'] = $redis->get('mpd_start_volume');
 $template->mpd['mpd_autoplay'] = $redis->get('mpd_autoplay');
-$template->mpd['globalrandom'] = $redis->get('globalrandom');
-$template->mpd['random_album'] = $redis->get('random_album');
-$template->mpd['addrandom'] = $redis->get('addrandom');
+$template->mpd['globalrandom'] = $redis->hGet('globalrandom', 'enable');
+$template->mpd['random_album'] = $redis->hGet('globalrandom', 'random_album');
+$template->mpd['addrandom'] = $redis->hGet('globalrandom', 'addrandom');
 $template->hostname = $redis->get('hostname');
 $crossfade = explode(": ", sysCmd('mpc crossfade')[0]);
 $template->mpd['crossfade'] = $crossfade[1];
-// clear the cache otherwise file_exists() returns incorrect values
-$playlistSymlink = $redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u';
-clearstatcache(true, $playlistSymlink);
-if (file_exists($playlistSymlink)) {
-    // random source is a playlist
-    $playlist = readlink($redis->hget('mpdconf', 'playlist_directory').'/RandomPlayPlaylist.m3u');
-    $first_pl = strripos($playlist, '/') + 1;
-    $length_pl = stripos($playlist, '.m3u') - $first_pl;
-    $playlist = trim(substr($playlist, $first_pl, $length_pl));
-    if ($playlist != '') {
-        $template->ramdomsource = "Playlist '".$playlist."' is selected as random source";
-    } else {
-        $template->ramdomsource = 'Full MPD library is selected as random source';
-    }
+$playlist = $redis->hGet('globalrandom', 'playlist');
+if ($playlist != '') {
+    $template->ramdomsource = "Playlist '".$playlist."' is selected as random source";
 } else {
     $template->ramdomsource = 'Full MPD library is selected as random source';
 }

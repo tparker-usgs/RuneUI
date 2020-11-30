@@ -2557,6 +2557,21 @@ if ($('#section-index').length) {
                 });
         });
 
+        // playlist start ashuffle
+        $('#pl-ashuffle-start-button').click(function(){
+            $.post('/db/?cmd=pl-ashuffle-start', '');
+        });
+
+        // playlist stop ashuffle
+        $('#pl-ashuffle-stop-button').click(function(){
+            $.post('/db/?cmd=pl-ashuffle-stop', '');
+        });
+
+        // playlist reset ashuffle
+        $('#pl-ashuffle-reset-button').click(function(){
+            $.post('/db/?cmd=pl-ashuffle-reset', '');
+        });
+
         // playlist delete played songs action
         $('#pl-clear-played-button').click(function(){
             $.post('/db/?cmd=pl-clear-played', '');

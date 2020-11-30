@@ -208,7 +208,8 @@
             </div>
             <div id="pl-currentpath" class="hide">
                 <i class="fa fa-folder-open"></i>
-                <span>Playlists</span>
+                <span>Playlists&nbsp;&nbsp;</span>
+                <button id="pl-manage-random" class="btn btn-default" type="button" title="Manage Global Random" data-toggle="modal" data-target="#modal-pl-ashuffle"><i class="fa fa-random"></i></button>
             </div>
         </div>
         <div id="spinner-pl" class="csspinner duo hide"></div>
@@ -343,6 +344,27 @@
                 <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
                 <button id="pl-crop-button"type="button" class="btn btn-primary btn-lg btn-cmd" title="Clear the queue except the current song" data-dismiss="modal">Crop</button>
                 <button type="button" class="btn btn-primary btn-lg btn-cmd" title="Clear all songs from queue" data-cmd="clear" data-dismiss="modal">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modal-pl-ashuffle" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-pl-stop-random" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title" id="modal-pl-clear-label">Manage Global Random</h3>
+            </div>
+            <div class="modal-body">
+                The Global Random function randomly adds songs to the Queue when it is empty. Songs can be added from a saved Playlist or from your full song collection.<br>
+                Here you can <strong>Start</strong> or <strong>Stop</strong> Global Random. You can also switch off adding songs from a previously selected playlist by <strong>adding songs from your full collection</strong>.<br>
+                In the MPD menu that are more options.
+            </div>
+            <div class="modal-footer">
+                <button id="pl-ashuffle-reset-button" type="button" class="btn btn-primary btn-lg btn-cmd" title="Stop adding songs from a playlist" data-dismiss="modal">Add from full collection</button><br><br>
+                <button type="button" class="btn btn-default btn-lg" title="Cancel and close this layer" data-dismiss="modal">Cancel</button>
+                <button id="pl-ashuffle-start-button" type="button" class="btn btn-primary btn-lg btn-cmd" title="Start Global Random" data-dismiss="modal">Start</button>
+                <button id="pl-ashuffle-stop-button" type="button" class="btn btn-primary btn-lg btn-cmd" title="Stop Global Random" data-dismiss="modal">Stop</button>
             </div>
         </div>
     </div>

@@ -510,7 +510,9 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
                         // delete all broken symbolic links in the playlist directory
                         sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-                        if (file_exists($playlistDirectory.'/'.$playlist.'.m3u')) {
+                        $playlistFileName = $playlistDirectory.'/'.$playlist.'.m3u'
+                        clearstatcache(true, $playlistFileName);
+                        if (file_exists($playlistFileName)) {
                             // Note: file_exists() will not detect a broken symlink
                             // file exists
                             ui_notifyError('Error', 'Playlist name already in use: '.$playlist);
@@ -542,9 +544,11 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
                         // delete all broken symbolic links in the playlist directory
                         sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-                        if ($oldname === 'RandomPlayPlaylist') {
-                            ui_notifyError('Error', 'This playlist is used for random play and cannot be renamed (it can be safely deleted): '.$oldname);
-                        } else if (file_exists($playlistDirectory.'/'.$newname.'.m3u')) {
+                        $newPlaylistFileName = $playlistDirectory.'/'.$playlist.'.m3u'
+                        clearstatcache(true, $newPlaylistFileName);
+                        if ($oldname === $redis->hGet('globalrandom', 'playlist')) {
+                            ui_notifyError('Error', 'This playlist is currently used for Random Play and cannot be renamed: '.$oldname);
+                        } else if (file_exists($newPlaylistFileName)) {
                             // Note: file_exists() will not detect a broken symlink
                             // file exists
                             ui_notifyError('Error', 'New playlist name already in use: '.$newname);
@@ -572,29 +576,38 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                 }
             }
             break;
+        case 'pl-ashuffle-start':
+            if ($activePlayer === 'MPD') {
+                $redis->hSet('globalrandom', 'enable', 1);
+                ui_notify('Global Random', 'Started');
+            }
+            break;
+        case 'pl-ashuffle-stop':
+            if ($activePlayer === 'MPD') {
+                $redis->hSet('globalrandom', 'enable', 0);
+                ui_notify('Global Random', 'Stopped');
+            }
+            break;
+        case 'pl-ashuffle-reset':
+            if ($activePlayer === 'MPD') {
+                $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset', 'args' => $playlist));
+                ui_notify('Global Random', 'Adding songs from your full collection');
+                $redis->hSet('globalrandom', 'enable', 1);
+                waitSyWrk($redis, $jobID);
+                unset($jobID);
+            }
+            break;
         case 'pl-ashuffle':
             if ($activePlayer === 'MPD') {
                 if (isset($_POST['playlist'])) {
                     $playlist = trim($_POST['playlist']);
-                    // delete all broken symbolic links in the playlist directory
-                    sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-                    if ($playlist == 'RandomPlayPlaylist') {
-                        ui_notifyError('Error', 'This playlist is already being used for random play and cannot be used as a source: '.$playlist);
-                    } else {
-                        $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $playlist));
-                        ui_notify('Started Playlist Random Play from:', $playlist);
-                        waitSyWrk($redis, $jobID);
-                        ui_notify('To switch to Global Random Play, delete the playlist:', 'RandomPlayPlaylist');
-                    }
+                    $jobID = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'pl_ashuffle', 'args' => $playlist));
+                    ui_notify('Global Random', 'Adding songs from playlist: '.$playlist);
+                    waitSyWrk($redis, $jobID);
+                    ui_notify('Global Random', 'To add songs from your full collection, reset Random Play in the MPD menu or in the playlist UI');
                 }
                 unset($jobID);
             }
-            break;
-        // case 'pl-ashuffle-stop':
-            // if ($activePlayer === 'MPD') {
-                // // sysCmdAsync('/usr/bin/killall ashuffle &');
-                // ui_notify('Use the MPD menu to switch Random Play off', '');
-            // }
             break;
     }
 } else {
@@ -602,7 +615,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
   echo 'INTERNAL USE ONLY<br>';
   echo 'hosted on runeaudio.local:81';
 }
-// close palyer backend connection
+// close player backend connection
 if ($activePlayer === 'MPD') {
     // close MPD connection
     closeMpdSocket($mpd);
