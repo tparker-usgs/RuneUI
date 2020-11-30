@@ -235,7 +235,7 @@ function redisDatastore($redis,$action) {
             $redis->set('libaoconfchange', 0);
             $redis->set('avahiconfchange', 0);
             $redis->set('mpd_max_logsize', 200000);
-            // ashuffle global random 
+            // ashuffle global random
             $redis->hSet('globalrandom', 'enable', 0);
             $redis->hSet('globalrandom', 'playlist', '');
             $redis->hSet('globalrandom', 'playlist_filename', '');
@@ -549,7 +549,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('spotify', 'pass') || $redis->hSet('spotify', 'pass', 'pass');
             $redis->hExists('spotify', 'plversion') || $redis->hSet('spotify', 'plversion', 1);
             $redis->hExists('spotify', 'lastcmd') || $redis->hSet('spotify', 'lastcmd', '');
-            // ashuffle global random 
+            // ashuffle global random
             $redis->hExists('globalrandom', 'enable') || $redis->hSet('globalrandom', 'enable', 0);
             $redis->hExists('globalrandom', 'playlist') || $redis->hSet('globalrandom', 'playlist', '');
             $redis->hExists('globalrandom', 'playlist_filename') || $redis->hSet('globalrandom', 'playlist_filename', '');
@@ -564,7 +564,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('lyrics', 'currentalbum') || $redis->hSet('lyrics', 'currentalbum', '');
             $redis->hExists('lyrics', 'art') || $redis->hSet('lyrics', 'art', '');
             $redis->hExists('lyrics', 'arturl') || $redis->hSet('lyrics', 'arturl', '');
-            $redis->hExists('lyrics', 'audio') || $redis->hSet('lyrics', 'audio', ''); 
+            $redis->hExists('lyrics', 'audio') || $redis->hSet('lyrics', 'audio', '');
             $redis->hExists('lyrics', 'time') || $redis->hSet('lyrics', 'time', '');
             $redis->hExists('lyrics', 'artist') || $redis->hSet('lyrics', 'artist', '');
             $redis->hExists('lyrics', 'album') || $redis->hSet('lyrics', 'album', '');
