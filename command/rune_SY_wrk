@@ -1092,21 +1092,16 @@ while (1) {
                         // Need to test the following
                         $redis->Del('AccessPoint');
                         sysCmd('/srv/http/db/redis_datastore_setup check');
-                        ui_notify('AccessPoint configuration reset, a reboot is required to activate the settings');
+                        ui_notify_async('AccessPoint', 'Configuration reset, a reboot is required to activate the settings', $jobID);
                     }
                     // write network configuration
                     if ($job->action === 'config') {
                         // send notfy to UI
-                        ui_notify('AccessPoint configuration', 'it takes some time .....');
                         $retval = wrk_apconfig($redis, 'writecfg', $job->args);
+                        ui_notify_async('AccessPoint', 'Configuration changed', $jobID);
                         // reboot if needed !!!
                         if ($retval === 'reboot') {
-                            $notification = new stdClass();
-                            $notification->title = 'AccessPoint config';
-                            $notification->text = 'Config changed successfully, reboot reqired';
-                            wrk_notify($redis, 'kernelswitch', $notification, $jobID);
-                            sysCmd('/var/www/command/rune_shutdown reboot');
-                            sysCmdAsync('systemctl reboot');
+                            wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'reboot'));
                         }
                         unset($retval);
                     }

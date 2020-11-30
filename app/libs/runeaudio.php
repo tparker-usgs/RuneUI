@@ -1818,10 +1818,10 @@ function wrk_apconfig($redis, $action, $args = null)
     runelog('wrk_apconfig args = ', $args);
     switch ($action) {
         case 'writecfg':
-            if (isset($args->{'enabled'})) {
-                $redis->hSet('AccessPoint', 'enabled', $args->{'enabled'});
+            if (isset($args->{'enable'})) {
+                $redis->hSet('AccessPoint', 'enable', $args->{'enable'});
             } else {
-                $redis->hSet('AccessPoint', 'enabled', 0);
+                $redis->hSet('AccessPoint', 'enable', 0);
             }
             $redis->hSet('AccessPoint', 'ssid', $args->{'ssid'});
             $redis->hSet('AccessPoint', 'passphrase', $args->{'passphrase'});
@@ -4028,7 +4028,7 @@ function wrk_getHwPlatform($redis)
                 $redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                 $redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
                 $redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
-                $redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
+                $redis->hExists('AccessPoint', 'enable') || $redis->hSet('AccessPoint', 'enable', 0);
             }
             else {
                 $model = trim(substr($revision, -3, 2));
@@ -4043,7 +4043,7 @@ function wrk_getHwPlatform($redis)
                         $redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         $redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
                         $redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
-                        $redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
+                        $redis->hExists('AccessPoint', 'enable') || $redis->hSet('AccessPoint', 'enable', 0);
                         break;
                     case "01":
                         // 01 = PiB+, PiA+ or PiCompute module 1
@@ -4079,7 +4079,7 @@ function wrk_getHwPlatform($redis)
                         $redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
                         $redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
                         $redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 1);
-                        $redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
+                        $redis->hExists('AccessPoint', 'enable') || $redis->hSet('AccessPoint', 'enable', 0);
                         break;
                     case "08":
                         // 08 = Pi3B,
@@ -4113,7 +4113,7 @@ function wrk_getHwPlatform($redis)
                         $redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 1);
                         $redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'yes');
                         $redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 1);
-                        $redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 1);
+                        $redis->hExists('AccessPoint', 'enable') || $redis->hSet('AccessPoint', 'enable', 1);
                         break;
                     case "05":
                         // 05 = PiAlpha prototype,
@@ -4142,7 +4142,7 @@ function wrk_getHwPlatform($redis)
                         $redis->hExists('airplay', 'enable') || $redis->hSet('airplay', 'enable', 0);
                         $redis->hExists('airplay', 'metadata_enabled') || $redis->hSet('airplay', 'metadata_enabled', 'no');
                         $redis->hExists('spotifyconnect', 'metadata_enabled') || $redis->hSet('spotifyconnect', 'metadata_enabled', 0);
-                        $redis->hExists('AccessPoint', 'enabled') || $redis->hSet('AccessPoint', 'enabled', 0);
+                        $redis->hExists('AccessPoint', 'enable') || $redis->hSet('AccessPoint', 'enable', 0);
                         break;
                 }
             }
@@ -5745,7 +5745,7 @@ function refresh_nics($redis)
     // always clear the optimise wifi array
     $optimiseWifi = array();
     $accessPoint = $redis->hGet('AccessPoint', 'ssid');
-    $accessPointEnabled = $redis->hGet('AccessPoint', 'enabled');
+    $accessPointEnabled = $redis->hGet('AccessPoint', 'enable');
     $hiddenCount = 0;
     $networkInterfacesModified = false;
     // get the services

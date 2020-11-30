@@ -34,15 +34,17 @@
 
 // inspect POST
 if (isset($_POST)) {
-    if (isset($_POST['settings'])) {
-        //ui_notify_async("'wrkcmd' => 'apcfg', 'action' => 'config'", $_POST['settings']);
+    if (isset($_POST['reset'])) {
+        $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'apcfg', 'action' => 'reset', 'args' => $_POST['settings']));
+    }
+    if (isset($_POST['save'])) {
         $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'apcfg', 'action' => 'config', 'args' => $_POST['settings']));
     }
 }
 
 waitSyWrk($redis,$jobID);
 
-$template->enabled = $redis->hGet('AccessPoint', 'enabled');
+$template->enable = $redis->hGet('AccessPoint', 'enable');
 $template->accesspoint = $redis->hGetAll('AccessPoint');
 $template->hostname = $redis->get('hostname');
 $nics = json_decode($redis->Get('network_interfaces'), true);

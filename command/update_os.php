@@ -180,7 +180,7 @@ function updateOS($redis) {
         if ($redis->get('patchlevel') == 8) {
             // 9th update - lots of small changes since the last patch level increment
             // just increment the patch level, no other actions, do it only when /srv/http/db/redis_datastore_setup has been updated
-            $retval = sysCmd("grep -i 'AccessPoint' /srv/http/db/redis_datastore_setup | grep -i 'enabled' | grep -i 'redis' | grep -c -i 'hDel'");
+            $retval = sysCmd("grep -i 'AccessPoint' /srv/http/db/redis_datastore_setup | grep -i 'enable' | grep -i 'redis' | grep -c -i 'hDel'");
             if ($retval[0] == 1) {
                 // set the patch level
                 $redis->set('patchlevel', 9);

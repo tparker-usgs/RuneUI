@@ -22,19 +22,19 @@
         </div>
         &nbsp;<br>
     <?php endif ?>
-    <div <?php if($this->enabled === '1'): ?>class="boxed-group"<?php endif ?> id="accesspointBox">
+    <div <?php if($this->enable): ?>class="boxed-group"<?php endif ?> id="accesspointBox">
         <form class="form-horizontal" action="" method="post" role="form" data-parsley-validate>
             <div class="form-group">
                 <label for="accesspoint" class="control-label col-sm-2">AccessPoint</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input id="accesspoint" name="settings[enabled]" type="checkbox" value="1"<?php if((isset($this->enabled)) && ($this->enabled)): ?> checked="checked" <?php endif ?>>
+                        <input id="accesspoint" name="settings[enable]" type="checkbox" value="1"<?php if((isset($this->enable)) && ($this->enable)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
                     <span class="help-block">Toggle starting a wireless AccessPoint on start<br>
                         <i>Note: The Access Point will start only when a normal Wi-Fi network cannot be connected</i></span>
                 </div>
-                <div class="<?php if($this->enabled !== '1'): ?>hide<?php endif ?>" id="accesspointSettings">
+                <div class="<?php if(!$this->enable): ?>hide<?php endif ?>" id="accesspointSettings">
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="settings[ssid]">SSID</label>
                         <div class="col-sm-10">
@@ -88,7 +88,7 @@
                         <label class="col-sm-2 control-label">enable NAT</label>
                         <div class="col-sm-10">
                             <label class="switch-light well" onclick="">
-                                <input id="enable-NAT" name="settings[enable-NAT]" type="checkbox" value="1"<?php if($this->accesspoint['enable-NAT'] === '1'): ?> checked="checked" <?php endif ?>>
+                                <input id="enable-NAT" name="settings[enable-NAT]" type="checkbox" value="1"<?php if($this->accesspoint['enable-NAT']): ?> checked="checked" <?php endif ?>>
                                     <span><span>NO</span><span>YES</span></span><a class="btn btn-primary"></a>
                                 </label>
                             <span class="help-block">If you like to share your ethernet connection over wifi set this to <strong>YES</strong>.</span>
@@ -100,6 +100,7 @@
                 <div class="col-sm-offset-2 col-sm-10">
                     <a href="/network" class="btn btn-default btn-lg">Cancel</a>
                     <button type="submit" class="btn btn-primary btn-lg" name="save" value="save">Save and apply</button>
+                    <button type="submit" class="btn btn-primary btn-lg" name="reset" value="reset">Reset to defaults</button>
                     <div class="checkbox">
                         <br>
                         <label>
@@ -118,7 +119,7 @@
         <div class="boxed">
             <table id="current-settings" class="info-table">
                 <tbody>
-                    <tr><th>Enabled:</th><td><?php if($this->accesspoint['enabled'] === '1'): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <tr><th>Enabled:</th><td><?php if($this->accesspoint['enable']): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
                     <tr><th>IP-Address:</th><td><?=$this->accesspoint['ip-address'] ?></td></tr>
                     <tr><th>Broadcast:</th><td><?=$this->accesspoint['broadcast'] ?></td></tr>
                     <tr><th>SSID:</th><td><?=$this->accesspoint['ssid'] ?></td></tr>
@@ -126,14 +127,14 @@
                     <tr><th>DHCP-Range:</th><td><?=$this->accesspoint['dhcp-range'] ?></td></tr>
                     <tr><th>DNS server:</th><td><?=$this->accesspoint['dhcp-option-dns'] ?></td></tr>
                     <tr><th>DNS router:</th><td><?=$this->accesspoint['dhcp-option-router'] ?></td></tr>
-                    <tr><th>Enable-NAT:</th><td><?php if($this->accesspoint['enable-NAT'] === '1'): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                    <tr><th>Wi-Fi is available:</th><td><?php if($this->wifiavailable === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                    <tr><th>Wi-Fi is AP capable:</th><td><?php if($this->wififeatureAP === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                    <tr><th>AP has full function:</th><td><?php if($this->wififullfunction === 1): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
-                    <?php if ($this->accesspoint['ip-address'] == '192.168.5.1'):?>
-                        <tr><th>Connect to AP:</th><td><?php if($this->wififeatureAP === 1): ?><img src="/img/RuneAudioAP.png" style="width: 300px"><?php else: ?><?php endif; ?></td></tr>
+                    <tr><th>Enable-NAT:</th><td><?php if($this->accesspoint['enable-NAT']): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <tr><th>Wi-Fi is available:</th><td><?php if($this->wifiavailable): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <tr><th>Wi-Fi is AP capable:</th><td><?php if($this->wififeatureAP): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <tr><th>AP has full function:</th><td><?php if($this->wififullfunction): ?>Yes<?php else: ?>No<?php endif; ?></td></tr>
+                    <?php if ($this->accesspoint['ip-address'] === '192.168.5.1'):?>
+                        <tr><th>Connect to AP:</th><td><?php if($this->wififeatureAP): ?><img src="/img/RuneAudioAP.png" style="width: 200px"><?php else: ?><?php endif; ?></td></tr>
                         <tr><th>&nbsp;</td></tr>
-                        <tr><th>Connect to RuneAudio:</th><td><?php if($this->wififeatureAP === 1): ?><img src="/img/RuneAudioURL.png" style="width: 300px"><?php else: ?><?php endif; ?></td></tr>
+                        <tr><th>Connect to RuneAudio:</th><td><?php if($this->wififeatureAP): ?><img src="/img/RuneAudioURL.png" style="width: 200px"><?php else: ?><?php endif; ?></td></tr>
                     <?php endif;?>
                 </tbody>
             </table>
