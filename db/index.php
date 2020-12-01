@@ -510,7 +510,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
                         // delete all broken symbolic links in the playlist directory
                         sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-                        $playlistFileName = $playlistDirectory.'/'.$playlist.'.m3u'
+                        $playlistFileName = $playlistDirectory.'/'.$playlist.'.m3u';
                         clearstatcache(true, $playlistFileName);
                         if (file_exists($playlistFileName)) {
                             // Note: file_exists() will not detect a broken symlink
@@ -544,7 +544,7 @@ if (isset($_GET['cmd']) && !empty($_GET['cmd'])) {
                         $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
                         // delete all broken symbolic links in the playlist directory
                         sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
-                        $newPlaylistFileName = $playlistDirectory.'/'.$playlist.'.m3u'
+                        $newPlaylistFileName = $playlistDirectory.'/'.$playlist.'.m3u';
                         clearstatcache(true, $newPlaylistFileName);
                         if ($oldname === $redis->hGet('globalrandom', 'playlist')) {
                             ui_notifyError('Error', 'This playlist is currently used for Random Play and cannot be renamed: '.$oldname);
