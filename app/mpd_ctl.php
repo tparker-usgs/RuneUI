@@ -61,7 +61,10 @@
     }
     if (isset($_POST['mpd'])) {
         if (isset($_POST['mpd']['crossfade'])) {
-            sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
+            if ($_POST['mpd']['crossfade'] != explode(": ", sysCmd('mpc crossfade')[0])) {
+                sysCmd('mpc crossfade '.$_POST['mpd']['crossfade']);
+                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
+            }
         }
         if ((isset($_POST['mpd']['globalrandom'])) && ($_POST['mpd']['globalrandom'])) {
             if ($redis->hGet('globalrandom', 'enable') != 1) {

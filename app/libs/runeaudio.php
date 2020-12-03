@@ -6063,16 +6063,16 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
         case 'checkcrossfade':
             // $action = 'checkcrossfade'
             //
-            $file = '/etc/systemd/system/ashuffle.service';
+            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
             // get the current crossfade value
             $retval = sysCmd('mpc crossfade');
             $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
             if ($retval == 0) {
                 // crossfade = 0 so the number of extra queued songs should be 0
-                if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$file."'")[0]) {
+                if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$ashuffleUnitFilename."'")[0]) {
                     // incorrect value in the ashuffle service file
                     // find the line beginning with 'ExecStart' and in that line replace '-q 1'' with -q 0'
-                    sysCmd("sed -i '/^ExecStart/s/-q 1/-q 0/' ".$file);
+                    sysCmd("sed -i '/^ExecStart/s/-q 1/-q 0/' ".$ashuffleUnitFilename);
                     // reload the service file
                     sysCmd('systemctl daemon-reload');
                     // stop ashuffle if it is running
@@ -6080,10 +6080,10 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 }
             } else {
                 // crossfade != 0 so the number of extra queued songs should be 1
-                if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$file."'")[0]) {
+                if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
                     // incorrect value in the ashuffle service file
                     // find the line beginning with 'ExecStart' and in that line replace '-q 0'' with -q 1'
-                    sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$file);
+                    sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$ashuffleUnitFilename);
                     // reload the service file
                     sysCmd('systemctl daemon-reload');
                     // stop ashuffle if it is running
@@ -6116,9 +6116,9 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $queuedSongs = 1;
             }
             // the ashuffle systemd service file needs to explicitly reference the playlist symlink
-            $file = '/etc/systemd/system/ashuffle.service';
-            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '."'".$playlistFilename."'");
-            $fp = fopen($file, 'w');
+            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
+            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '."'".$playlistFilename."'");
+            $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);
             unset($newArray);
@@ -6171,9 +6171,9 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $queuedSongs = 1;
             }
             // the ashuffle systemd service file needs to explicitly exclude the reference the deleted playlist symlink
-            $file = '/etc/systemd/system/ashuffle.service';
-            $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$randomExclude.$ashuffleAlbum);
-            $fp = fopen($file, 'w');
+            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
+            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$randomExclude.$ashuffleAlbum);
+            $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);
             unset($newArray);
@@ -6195,18 +6195,18 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 //  the playlist file no longer exits, reset ashuffle
                 wrk_ashuffle($redis, 'reset');
             }
-            $file = '/etc/systemd/system/ashuffle.service';
-            if ($playlistFilename != '') {
-                // ashuffle should have a play from file in its systemd unit file
-                if (!sysCmd('grep -ic '."'".' -f '."' '".$file."'")[0]) {
-                    // play from file present, reset ashuffle
-                    wrk_ashuffle($redis, 'set', $playlistFilename);
-                }
-            } else {
+            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
+            if ($playlistFilename === '') {
                 // ashuffle should not have a playlist filename in its systemd unit file
-                if (sysCmd('grep -ic '."'".$playlistFilename."' '".$file."'")[0]) {
+                if (sysCmd('grep -ic '."'".' -f '."' '".$ashuffleUnitFilename."'")[0]) {
                     // play from file present, reset ashuffle
                     wrk_ashuffle($redis, 'reset');
+                }
+            } else {
+                // ashuffle should have a play from file in its systemd unit file
+                if (!sysCmd('grep -ic '."'".$playlistFilename."' '".$ashuffleUnitFilename."'")[0]) {
+                    // play from file present, reset ashuffle
+                    wrk_ashuffle($redis, 'set', $playlistFilename);
                 }
             }
             // start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
@@ -6272,6 +6272,8 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                         if ($mpd_uptime > intval($redis->hGet('globalrandom', 'start_delay'))) {
                             // remove any invalid symlinks in the playlist directory
                             sysCmd('find '."'".$playlistDirectory."'".' -xtype l -delete');
+                            // check that the queued songs based on crossfade is set correctly
+                            wrk_ashuffle($redis, 'checkcrossfade');
                             sysCmd('pgrep -x ashuffle || systemctl start ashuffle');
                             sysCmdAsync('nice --adjustment=2 /var/www/command/rune_prio nice');
                         }
