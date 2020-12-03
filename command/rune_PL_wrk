@@ -126,7 +126,6 @@ while (1) {
                 if (!$status) {
                     break;
                 }
-
                 // store next songid
                 $redis->set('nextsongid', $status['nextsongid']);
                 // store "lastsongid"

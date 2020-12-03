@@ -2400,17 +2400,15 @@ function wrk_audioOutput($redis, $action, $args = null)
                 // debug
                 runelog('wrk_audioOutput card string: ', $card);
                 $description = sysCmd("aplay -l -v | grep \"\[".$card."\]\"");
-                $desc = array();
                 $subdeviceid = explode(':', $description[0]);
                 $subdeviceid = explode(',', trim($subdeviceid[1]));
                 $subdeviceid = explode(' ', trim($subdeviceid[1]));
                 $data['device'] = 'hw:'.$card_index.','.$subdeviceid[1];
-                    if ($i2smodule !== 'none' && isset($i2smodule_details->sysname) && $i2smodule_details->sysname === $card) {
-                        $acards_details = $i2smodule_details;
-                    } else {
-                        unset($acards_details);
-                        $acards_details = $redis->hGet('acards_details', $card);
-                    }
+                if ($i2smodule !== 'none' && isset($i2smodule_details->sysname) && $i2smodule_details->sysname === $card) {
+                    $acards_details = $i2smodule_details;
+                } else {
+                    $acards_details = $redis->hGet('acards_details', $card);
+                }
                 if ($acards_details !== '') {
                     // debug
                     runelog('wrk_audioOutput: in loop: acards_details for: '.$card, $acards_details);
@@ -2434,12 +2432,12 @@ function wrk_audioOutput($redis, $action, $args = null)
                         if ($details->type === 'integrated_sub') {
                             $sub_interfaces = $redis->sMembers($card);
                             // debug
-                            runelog('line 2458: (sub_interfaces loop) card: '.$card, $sub_interfaces);
+                            runelog('line 2444: (sub_interfaces loop) card: '.$card, $sub_interfaces);
                             foreach ($sub_interfaces as $sub_interface) {
-                                runelog('line 2460: (sub_interfaces foreach) card: '.$card, $sub_interface);
+                                runelog('line 2446: (sub_interfaces foreach) card: '.$card, $sub_interface);
                                 $sub_int_details = new stdClass();
                                 $sub_int_details = json_decode($sub_interface);
-                                runelog('line 1405: (sub_interfaces foreach json_decode) card: '.$card, $sub_int_details);
+                                runelog('line 2449: (sub_interfaces foreach json_decode) card: '.$card, $sub_int_details);
                                 $sub_int_details->device = $data['device'];
                                 $sub_int_details->name = $card.'_'.$sub_int_details->id;
                                 $sub_int_details->type = 'alsa';
