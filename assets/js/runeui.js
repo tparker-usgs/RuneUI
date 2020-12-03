@@ -1266,7 +1266,7 @@ function parseResponse(options) {
                     // files
                         content += inputArr.file;
                         content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                        content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + '</span></span>';
+                        content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' - ' + inputArr.fileext + '</span></span>';
                         content += ' <span class="bl">';
                         content +=  inputArr.Artist;
                         content += ' - ';
@@ -1319,7 +1319,7 @@ function parseResponse(options) {
                     content = '<li id="db-' + (i + 1) + '" data-path="';
                     content += inputArr.file;
                     content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + '</span></span>';
+                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' - ' + inputArr.fileext + '</span></span>';
                     content += ' <span class="bl">';
                     content +=  inputArr.Artist;
                     content += ' - ';
@@ -1353,7 +1353,7 @@ function parseResponse(options) {
                     content = '<li id="db-' + (i + 1) + '" data-path="';
                     content += inputArr.file;
                     content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + '</span></span>';
+                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' - ' + inputArr.fileext + '</span></span>';
                     content += ' <span class="bl">';
                     content +=  inputArr.Artist;
                     content += ' - ';
