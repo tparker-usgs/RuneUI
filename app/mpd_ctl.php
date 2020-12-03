@@ -66,35 +66,21 @@
         if ((isset($_POST['mpd']['globalrandom'])) && ($_POST['mpd']['globalrandom'])) {
             if ($redis->hGet('globalrandom', 'enable') != 1) {
                 $redis->hSet('globalrandom', 'enable', 1);
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-            } else {
-                // check that crossfade is set up correctly
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         } else {
             if ($redis->hGet('globalrandom', 'enable') != 0) {
                 $redis->hSet('globalrandom', 'enable', 0);
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-            } else {
-                // check that crossfade is set up correctly
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         }
         if ((isset($_POST['mpd']['random_album'])) && ($_POST['mpd']['random_album'])) {
             if ($redis->hGet('globalrandom', 'random_album') != 1) {
                 $redis->hSet('globalrandom', 'random_album', 1);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-            } else {
-                // check that crossfade is set up correctly
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         } else {
             if ($redis->hGet('globalrandom', 'random_album') != 0) {
                 $redis->hSet('globalrandom', 'random_album', 0);
                 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflereset'));
-            } else {
-                // check that crossfade is set up correctly
-                $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'ashufflecheckCF'));
             }
         }
         if ((isset($_POST['mpd']['addrandom'])) && (is_numeric($_POST['mpd']['addrandom']))) {

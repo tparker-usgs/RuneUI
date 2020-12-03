@@ -6224,24 +6224,38 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $localstoragefiles = count(scandir("/mnt/MPD/LocalStorage"))-2;
                 // get the active player
                 $activePlayer = $redis->get('activePlayer');
-                // check if MPD is playing a single song, repeating a song or randomly playing the current playlist
+                // check if MPD is not playing, playing a single song, repeating a song or randomly playing the current playlist
                 if ($activePlayer != 'MPD') {
-                    $mpdSingleRepeatRandom = 0;
+                    $mpdSingleRepeatRandomStopped = false;
                 } else {
-                    $retval = sysCmd('mpc status | grep -ciE "repeat: on|random: on|single: on"');
-                    $mpdSingleRepeatRandom = $retval[0];
-                    unset($retval);
+                    $mpcStatus = ' '.trim(strtolower(preg_replace('!\s+!', ' ', sysCmd('mpc status | xargs')[0])));
+                    if (!strpos($mpcStatus, 'playing')) {
+                        // not playing
+                        $mpdSingleRepeatRandomStopped = true;
+                    } else if (strpos($mpcStatus, 'repeat: on')) {
+                        // repeat on
+                        $mpdSingleRepeatRandomStopped = true;
+                    } else if (strpos($mpcStatus, 'random: on')) {
+                        // random on
+                        $mpdSingleRepeatRandomStopped = true;
+                    } else if (strpos($mpcStatus, 'single: on')) {
+                        // single on
+                        $mpdSingleRepeatRandomStopped = true;
+                    } else {
+                        $mpdSingleRepeatRandomStopped = false;
+                    }
+                    unset($mpcStatus);
                 }
                 $retval = sysCmd('systemctl is-active ashuffle');
                 if ($retval[0] == 'active') {
                     // ashuffle already started
-                    if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandom)) {
+                    if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandomStopped)) {
                         // nothing to play or active player is not MPD or MPD single, repeat or random is set, so stop ashuffle
                         sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
                     }
                 } else {
                     // ashuffle not started
-                    if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandom)) {
+                    if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandomStopped)) {
                         // nothing to play or active player is not MPD or MPD single, repeat or random is set, do nothing
                     } else {
                         // start ashuffle
