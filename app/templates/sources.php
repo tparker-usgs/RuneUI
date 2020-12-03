@@ -61,10 +61,10 @@
                 <label for="db_autorebuild" class="control-label col-sm-2">Auto Rebuild</label>
                 <div class="col-sm-10">
                     <label class="switch-light well" onclick="">
-                        <input id="db_autorebuild" name="sources[db_autorebuild]" type="checkbox" value="1"<?php if ((isset($this->db_autorebuild)) && ($this->db_autorebuild)): ?> checked="checked" <?php endif ?>>
+                        <input id="db_autorebuild" name="db_autorebuild" type="checkbox" value="1"<?php if ((isset($this->db_autorebuild)) && ($this->db_autorebuild)): ?> checked="checked" <?php endif ?>>
                         <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
                     </label>
-                    <span class="help-block">Autorebuild MPD library for USB devices on startup and when a USB device is plugged in.<br>
+                    <span class="help-block">Auto rebuild the MPD library for USB devices on startup and when a USB device is plugged in.<br>
                         <i>Note: The MPD library for network mounts is automatically (re)built on mounting, but never on startup.
                         Automatic updates can be set in the <a href="/mpd">MPD</a> settings (see: General Music Daemon Options > Auto Update)</i></span>
                 </div>
