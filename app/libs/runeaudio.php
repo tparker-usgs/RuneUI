@@ -6059,35 +6059,40 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
 {
     // get the playlist directory
     $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
+    $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
     switch ($action) {
         case 'checkcrossfade':
             // $action = 'checkcrossfade'
             //
-            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
             // get the current crossfade value
             $retval = sysCmd('mpc crossfade');
-            $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
-            if ($retval == 0) {
-                // crossfade = 0 so the number of extra queued songs should be 0
-                if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$ashuffleUnitFilename."'")[0]) {
-                    // incorrect value in the ashuffle service file
-                    // find the line beginning with 'ExecStart' and in that line replace '-q 1'' with -q 0'
-                    sysCmd("sed -i '/^ExecStart/s/-q 1/-q 0/' ".$ashuffleUnitFilename);
-                    // reload the service file
-                    sysCmd('systemctl daemon-reload');
-                    // stop ashuffle if it is running
-                    sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
-                }
-            } else {
-                // crossfade != 0 so the number of extra queued songs should be 1
-                if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
-                    // incorrect value in the ashuffle service file
-                    // find the line beginning with 'ExecStart' and in that line replace '-q 0'' with -q 1'
-                    sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$ashuffleUnitFilename);
-                    // reload the service file
-                    sysCmd('systemctl daemon-reload');
-                    // stop ashuffle if it is running
-                    sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+            // when MPD is not running crossfade returns a non-numeric value
+            // strip non-numeric values from the the return string
+            $retval = trim(preg_replace('/[^0-9]/', '', $retval[0]));
+            if (strlen($retval)) {
+                $retval = intval($retval);
+                if ($retval === 0) {
+                    // crossfade = 0 so the number of extra queued songs should be 0
+                    if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$ashuffleUnitFilename."'")[0]) {
+                        // incorrect value in the ashuffle service file
+                        // find the line beginning with 'ExecStart' and in that line replace '-q 1'' with -q 0'
+                        sysCmd("sed -i '/^ExecStart/s/-q 1/-q 0/' ".$ashuffleUnitFilename);
+                        // reload the service file
+                        sysCmd('systemctl daemon-reload');
+                        // stop ashuffle if it is running
+                        sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+                    }
+                } else if ($retval > 0) {
+                    // crossfade > 0 so the number of extra queued songs should be 1
+                    if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
+                        // incorrect value in the ashuffle service file
+                        // find the line beginning with 'ExecStart' and in that line replace '-q 0'' with -q 1'
+                        sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$ashuffleUnitFilename);
+                        // reload the service file
+                        sysCmd('systemctl daemon-reload');
+                        // stop ashuffle if it is running
+                        sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
+                    }
                 }
             }
             break;
@@ -6116,7 +6121,6 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $queuedSongs = 1;
             }
             // the ashuffle systemd service file needs to explicitly reference the playlist symlink
-            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
             $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '."'".$playlistFilename."'");
             $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
@@ -6171,7 +6175,6 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $queuedSongs = 1;
             }
             // the ashuffle systemd service file needs to explicitly exclude the reference the deleted playlist symlink
-            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
             $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$randomExclude.$ashuffleAlbum);
             $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
@@ -6195,7 +6198,6 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 //  the playlist file no longer exits, reset ashuffle
                 wrk_ashuffle($redis, 'reset');
             }
-            $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
             if ($playlistFilename === '') {
                 // ashuffle should not have a playlist filename in its systemd unit file
                 if (sysCmd('grep -ic '."'".' -f '."' '".$ashuffleUnitFilename."'")[0]) {
@@ -6203,14 +6205,15 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                     wrk_ashuffle($redis, 'reset');
                 }
             } else {
-                // ashuffle should have a play from file in its systemd unit file
+                // ashuffle should play from the file in its systemd unit file
                 if (!sysCmd('grep -ic '."'".$playlistFilename."' '".$ashuffleUnitFilename."'")[0]) {
-                    // play from file present, reset ashuffle
+                    // play from the filename not present, set ashuffle to play from the filename
                     wrk_ashuffle($redis, 'set', $playlistFilename);
                 }
             }
             // start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
             // stop Global Random if disabled - there are also other conditions when ashuffle must be stopped
+            // ashuffle also seems to be a little bit unstable, it occasionally unpredictably crashes
             // this is the only place where ashuffle it is started
             // first check that it is enabled, not waiting for auto play to initialise and there are some songs to play
             if (($redis->hGet('globalrandom', 'enable')) && (!$redis->hGet('globalrandom', 'wait_for_play'))) {
@@ -6224,37 +6227,49 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 $activePlayer = $redis->get('activePlayer');
                 // check if MPD is not playing, playing a single song, repeating a song or randomly playing the current playlist
                 if ($activePlayer != 'MPD') {
+                    // active player not MPD, ashuffle should not be running
                     $mpdSingleRepeatRandomStopped = false;
                 } else {
                     $mpcStatus = ' '.trim(strtolower(preg_replace('!\s+!', ' ', sysCmd('mpc status | xargs')[0])));
                     if (!strpos($mpcStatus, 'playing')) {
                         // not playing
-                        $mpdSingleRepeatRandomStopped = true;
+                        $queueEmpty = trim(sysCmd('mpc move 1 1 || echo 1')[0]);
+                        // note: 'mpc move 1 1 || echo 1' will do nothing and will also return nothing if the first position in the
+                        //  queue contains a song, so returning nothing is false > songs in the queue, otherwise true > queue empty
+                        if ($queueEmpty) {
+                            // there is nothing in the queue, so ashuffle should be running to add the first songs
+                            // sometimes ashuffle crashes after clearing the queue, this should restart it
+                            $mpdSingleRepeatRandomStopped = false;
+                        } else {
+                            // there are songs in the queue, the the user has just pressed stop or pause, ashuffle should not be running
+                            $mpdSingleRepeatRandomStopped = true;
+                        }
                     } else if (strpos($mpcStatus, 'repeat: on')) {
-                        // repeat on
+                        // repeat on, ashuffle should not be running
                         $mpdSingleRepeatRandomStopped = true;
                     } else if (strpos($mpcStatus, 'random: on')) {
-                        // random on
+                        // random on, ashuffle should not be running
                         $mpdSingleRepeatRandomStopped = true;
                     } else if (strpos($mpcStatus, 'single: on')) {
-                        // single on
+                        // single on, ashuffle should not be running
                         $mpdSingleRepeatRandomStopped = true;
                     } else {
+                        // ashuffle should be running
                         $mpdSingleRepeatRandomStopped = false;
                     }
-                    unset($mpcStatus);
+                    unset($mpcStatus, $queueEmpty);
                 }
                 $retval = sysCmd('systemctl is-active ashuffle');
                 if ($retval[0] == 'active') {
                     // ashuffle already started
                     if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandomStopped)) {
-                        // nothing to play or active player is not MPD or MPD single, repeat or random is set, so stop ashuffle
+                        // nothing to play or active player is not MPD or MPS stopped, MPD single, repeat or random is set, so stop ashuffle
                         sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
                     }
                 } else {
                     // ashuffle not started
                     if ((($nasmounts == 0) && ($usbmounts == 0) && ($localstoragefiles == 0)) || ($activePlayer != 'MPD') || ($mpdSingleRepeatRandomStopped)) {
-                        // nothing to play or active player is not MPD or MPD single, repeat or random is set, do nothing
+                        // nothing to play or active player is not MPD or MPS stopped, MPD single, repeat or random is set, do nothing
                     } else {
                         // start ashuffle
                         // seems to be a bug somewhere in MPD
