@@ -170,6 +170,16 @@ if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ] || [ "$3" == "cleanfiles
 fi
 set -x # echo all commands to cli
 #
+# When requested, use uglifyjs to compress and mangle runeui.js
+#
+if [ "$1" == "cleanfiles" ] || [ "$2" == "cleanfiles" ] || [ "$3" == "cleanfiles" ]; then
+    # Install uglify-js if required
+    pacman -Q uglify-js || pacman -Sy uglify-js --noconfirm
+    cd /srv/http/
+    uglifyjs --verbose --mangle --warn --validate --webkit --ie8 assets/js/runeui.js --output assets/js/runeui.min.js
+    cd /home
+fi
+#
 # Check file protections and ownership
 #
 chown -R http.http /srv/http/
@@ -195,7 +205,7 @@ chown -R mpd.audio /var/lib/mpd
 #
 if [ "$1" == "final" ] || [ "$2" == "final" ] || [ "$3" == "final" ]; then
     echo "Removing dos2unix package"
-    pacman -Rs dos2unix --noconfirm
+    pacman -Q dos2unix && pacman -Rs dos2unix --noconfirm
 fi
 #---
 #End script

@@ -49,9 +49,6 @@ fi
 # Reset the image using the following commands, some commands may fail (e.g. local-browser not installed), no problem
 #
 #
-# Install uglify-js if required
-pacman -Q uglify-js || pacman -Sy uglify-js --noconfirm
-#
 # clean up any no longer valid mounts
 udevil clean
 #
@@ -283,11 +280,6 @@ ln -s /etc/samba/smb-prod.conf /etc/samba/smb.conf
 cp /srv/http/assets/img/favicon-64x64.png /usr/share/upmpdcli/runeaudio.png
 chgmod 644 /usr/share/upmpdcli/runeaudio.png
 #
-# use uglifyjs to minimise and mangle the runeui.js file
-cd /srv/http/
-uglifyjs --verbose --mangle --warn --validate --webkit --ie8 assets/js/runeui.js --output assets/js/runeui.min.js
-cd /home
-#
 # modify all standard .service files which specify the wrong PIDFile location
 sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/*.service
 # sed -i 's|.*PIDFile=/var/run.*/|PIDFile=/run/|g' /usr/lib/systemd/system/nmb.service
@@ -319,8 +311,10 @@ fi
 #
 # for a distribution image remove the pacman history. It makes a lot of space free, but that history is useful when developing
 if [ "$1" == "full" ]; then
-    # remove uglify-js
-    pacman -Rs uglify-js --noconfirm
+    # remove uglify-js if required
+    pacman -Q uglify-js && pacman -Rs uglify-js --noconfirm
+    # removing dos2unix if required
+    pacman -Q dos2unix && pacman -Rs dos2unix --noconfirm
     # remove pacman history and no longer installed packages from the package database
     pacman -Sc --noconfirm
     # remove ALL files from the package cache
