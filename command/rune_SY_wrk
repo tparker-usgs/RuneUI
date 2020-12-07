@@ -44,6 +44,7 @@ $savecpuAvd = 86400;
 $savecpuFixdnssec = 20;
 $savecpuRefreshNics = 10;
 $savecpuRefreshNicsPrev = $savecpuRefreshNics;
+$savecpuOneTimeActions = 30;
 $savecpuMpdLog = 600;
 $savecpuTimezone = 60;
 $allmounted = 0;
@@ -232,9 +233,6 @@ if ($playerid_db === '') {
     //runelog('NTP sync', $redis->get('ntpserver'));
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
-    //
-    // run boot-initialise for Wi-Fi networks
-    wrk_netconfig($redis, 'boot-initialise');
     //
     // refresh nics, check redis datastore status, check if an active internet connection is available
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
@@ -1385,6 +1383,11 @@ while (1) {
                             ui_notify_async('Webradio', $job->args->label.' deleted', $jobID);
                         }
                     }
+                    if ($job->action === 'rebuild') {
+                        runelog('service: WEBRADIO rebuild', $job->args);
+                        sysCmd('/var/www/command/webradiodb.sh');
+                        ui_notify_async('Webradio', 'Library rebuilt', $jobID);
+                    }
                     ui_libraryHome($redis);
                     closeMpdSocket($mpd);
                     $redis->sRem('w_lock', $jobID);
@@ -1465,6 +1468,22 @@ while (1) {
         $savecpuRefreshNics = $savecpuRefreshNics - $random + rand(0, $random*2);
         $savecpuRefreshNicsPrev = $savecpuRefreshNics;
         unset($random);
+    }
+    // One time actions, run first after 30 cycles (+/-15 seconds), then only on every +/-10th cycle (= every +/-5 seconds) until everything is done when it repeats after 10,000,000 cycles (58 days)
+    // Several one time actions are managed here, they are run one at a time, one on each cycle
+    if ($savecpuOneTimeActions-- <= 0) {
+        if (is_firstTime($redis, 'WiFi-boot-initialise')) {
+            // run boot-initialise for Wi-Fi networks
+            wrk_netconfig($redis, 'boot-initialise');
+            $savecpuOneTimeActions = 5 + rand(0, 10);
+        } else if (is_firstTime($redis, 'Webradio-boot-import')) {
+            if (sysCmd('find /boot/webradios -name *.pls | wc -l | xargs')[0]) {
+                sysCmdAsync('nice --adjustment=2 /var/www/command/webradiodb.sh');
+            }
+            $savecpuOneTimeActions = 5 + rand(0, 10);
+        } else {
+            $savecpuOneTimeActions = 10000000;
+        }
     }
     // Random play auto start and stop, run first after 12 cycles (+/-6 seconds), then only on every +/-30th cycle (= every +/-15 seconds)
     // Detect deletion of playlist random file and restart if applicable

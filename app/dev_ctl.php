@@ -158,6 +158,8 @@ if (isset($_POST)) {
         if ($_POST['syscmd'] === 'airplayconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'airplayconfreset'));
         // ----- RESET SAMBA CONFIG -----
         if ($_POST['syscmd'] === 'sambaconfreset') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sambaconfreset'));
+        // ----- REBUILD WEBRADIO DATABASE -----
+        if ($_POST['syscmd'] === 'webradiorebuild') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'webradio', 'action' => 'rebuild'));
     }
 }
 if (isset($jobID)) {

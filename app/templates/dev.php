@@ -205,6 +205,18 @@
                     </div>
                 </div>
             </div>
+            <legend>Library - Advanced settings</legend>
+            <div class="boxed-group">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Rebuild Webradio Library</label>
+                    <div class="col-sm-10">
+                        <input class="btn btn-default btn-lg" type="submit" name="syscmd" value="webradiorebuild" id="syscmd-webradiorebuild" <?php if((!isset($this->dev)) || (!$this->dev)): ?> disabled <?php endif ?>>
+                        <span class="help-block">This will rebuild your Webradio Library cross-checking the database and the files present in the Webradio directory /mnt/MPD/Webradio.
+                                            <i>The Webradio directory is accessible via a Samba connection from your PC. See the Settings menu for switching Samba on and off.<br>
+                                            For those with access to the command line, there are other Webradio import features, see /boot/webradios/readme </i></span>
+                    </div>
+                </div>
+            </div>
             <legend>Network - Advanced settings</legend>
             <div class="boxed-group">
                 <div class="form-group">

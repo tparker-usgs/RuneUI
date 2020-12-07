@@ -35,6 +35,7 @@ set -x # echo commands
 set +e # continue on errors
 
 /srv/http/command/ui_notify.php 'Working' 'It takes a while, please wait...' 'simplemessage'
+/srv/http/command/webradiodb.sh
 redis-cli shutdown save
 systemctl stop redis udevil ashuffle upmpdcli mpdscribble mpd spotifyd shairport-sync spopd smbd smb nmbd nmb rune_PL_wrk rune_SSM_wrk
 bsdtar -xpf $1 -C /
@@ -64,7 +65,7 @@ else
 fi
 redis-cli set dev '0'
 redis-cli set debug '0'
-mpc update Webradio
+/srv/http/command/webradiodb.sh
 /srv/http/command/ui_notify.php 'Restarting now' 'Please wait...' 'simplemessage'
 /srv/http/command/rune_shutdown
 reboot
