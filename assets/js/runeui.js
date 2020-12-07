@@ -1262,14 +1262,20 @@ function parseResponse(options) {
                     // console.log('inputArr.Artist: ', inputArr.Artist);
                     // console.log('inputArr.Album: ', inputArr.Album);
                     content = '<li id="db-' + (i + 1) + '" data-path="';
-                    if (inputArr.fileext === undefined && inputArr.file !== undefined) {
-                        inputArr.fileext = inputArr.file.split(".").pop();
+                    if (inputArr.fileext === undefined) {
+                        if (inputArr.file !== undefined) {
+                            inputArr.fileext = inputArr.file.split(".").pop().toLowerCase();
+                        } else {
+                            inputArr.fileext = '';
+                        }
+                    } else {
+                        inputArr.fileext = inputArr.fileext.toLowerCase();
                     }
                     if (inputArr.Title !== undefined) {
                     // files
                         content += inputArr.file;
                         content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                        content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext.toLowerCase() + '</span></span>';
+                        content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext + '</span></span>';
                         content += ' <span class="bl">';
                         content +=  inputArr.Artist;
                         content += ' - ';
@@ -1279,7 +1285,7 @@ function parseResponse(options) {
                         // files with no tags
                             content += inputArr.file;
                             content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                            content += inputArr.file.replace(inpath + '/', '') + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext.toLowerCase() + '</span></span>';
+                            content += inputArr.file.replace(inpath + '/', '') + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext + '</span></span>';
                             content += '<span class="bl">';
                             content += ' path: ';
                             content += inpath;
@@ -1322,7 +1328,7 @@ function parseResponse(options) {
                     content = '<li id="db-' + (i + 1) + '" data-path="';
                     content += inputArr.file;
                     content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext.toLowerCase() + '</span></span>';
+                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext + '</span></span>';
                     content += ' <span class="bl">';
                     content +=  inputArr.Artist;
                     content += ' - ';
@@ -1356,7 +1362,7 @@ function parseResponse(options) {
                     content = '<li id="db-' + (i + 1) + '" data-path="';
                     content += inputArr.file;
                     content += '"><i class="fa fa-bars db-action" title="Actions" data-toggle="context" data-target="#context-menu-file"></i><i class="fa fa-music db-icon"></i><span class="sn">';
-                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext.toLowerCase() + '</span></span>';
+                    content += inputArr.Title + ' <span>' + timeConvert(inputArr.Time) + ' <span>' + inputArr.fileext + '</span></span>';
                     content += ' <span class="bl">';
                     content +=  inputArr.Artist;
                     content += ' - ';
