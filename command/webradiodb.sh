@@ -37,9 +37,9 @@ for file in $webradiodir/*.pls; do
     name=$( basename "$file" )
     name=${name%.*}
     url=$( grep 'File1' "$file" | cut -d '=' -f2 )
-    if [ "$name" ne "" ] && [ "$url" ne "" ]; then
+    if [ "$name" != "" ] && [ "$url" != "" ]; then
         redis-cli hset webradios "$name" "$url" &> /dev/null
-        echo "Name: $name, URL: $nurl added"
+        echo "Added - Name: $name, URL: $url"
     else
         echo "Invalid content in file: $webradiodir/$name.pls"
     fi
