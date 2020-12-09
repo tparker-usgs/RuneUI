@@ -80,6 +80,8 @@ class Handler(Flask):
             card_number = i.split(" [")[0].strip()
             card_detail = Popen(["amixer", "-c", card_number, "info"], stdout=PIPE).communicate()[0]
             cards[card_number] = self.__decode_string(card_detail).split("\n")[1].split(":")[1].replace("'", "").strip()
+            # experimental: next line added to show the correct card name
+            cards[card_number] = Popen("grep -m 1 -i id /proc/asound/card"+card_number+"/*/info | cut -d : -f 2 | xargs", shell=True, stdout=PIPE).communicate()[0].strip().decode("utf-8")
             if cards[card_number] == '':
                 with open("/proc/asound/card"+card_number+"/id", 'rt') as f:
                     cards[card_number] = f.readlines()[0].strip()
