@@ -79,11 +79,11 @@ class Handler(Flask):
         for i in system_cards:
             card_number = i.split(" [")[0].strip()
             card_detail = Popen(["amixer", "-c", card_number, "info"], stdout=PIPE).communicate()[0]
-            cards[card_number] = self.__decode_string(card_detail).split("\n")[1].split(":")[1].replace("'", "").strip()
-            # experimental: next 3 lines line added to show the correct card name
-            cards[card_number] = Popen("grep -m 1 -i '^name' /proc/asound/card"+card_number+"/*/info | cut -d ':' -f 2 | xargs", shell=True, stdout=PIPE).communicate()[0].strip().decode("utf-8")
-            if len(cards[card_number]) <= 8:
-                cards[card_number] = Popen("grep -m 1 '^[[:space:]]"+card_number+"[[:space:]]\[' /proc/asound/cards | cut -d ':' -f 2 | cut -d '-' -f 2 | xargs", shell=True, stdout=PIPE).communicate()[0].strip().decode("utf-8")
+            # cards[card_number] = self.__decode_string(card_detail).split("\n")[1].split(":")[1].replace("'", "").strip()
+            # experimental: next 3 lines line added to show the correct card name. The line above is also commented out
+            cards[card_number] = Popen("grep -m 1 -ih '^[[:space:]]*name' /proc/asound/card"+card_number+"/*/info | head -n 1 | sed -n 's/.*name://p' | xargs", shell=True, stdout=PIPE).communicate()[0].decode("utf-8")
+            if len(cards[card_number]) <= 10:
+                cards[card_number] = Popen("grep -h -m 1 '^[[:space:]]*"+card_number+"[[:space:]]*\[' /proc/asound/cards | sed -n 's/.*]://p' | sed -n 's/.* - //p' | xargs", shell=True, stdout=PIPE).communicate()[0].decode("utf-8")
             if cards[card_number] == '':
                 with open("/proc/asound/card"+card_number+"/id", 'rt') as f:
                     cards[card_number] = f.readlines()[0].strip()
