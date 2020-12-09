@@ -47,9 +47,9 @@
 			<header class="mdl-layout__header-row">
 				<div class="mdl-layout-title">
 					<h1>
-						ALSA Mixer WebUI
+						ALSA Mixer WebUI<br>
+                        {$hostname}
 					</h1>
-					<div>{$hostname}</div>
 				</div>
 				<div class="mdl-layout-spacer"></div>
 			</header>
