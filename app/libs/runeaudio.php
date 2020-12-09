@@ -6060,18 +6060,29 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
     // get the playlist directory
     $playlistDirectory = rtrim(trim($redis->hget('mpdconf', 'playlist_directory')),'/');
     $ashuffleUnitFilename = '/etc/systemd/system/ashuffle.service';
+    // to allow crossfade to work with ashuffle, when crossfade is set the queue needs to always have one extra song in the queue
+    $retval = sysCmd('mpc crossfade');
+    $retval = trim(preg_replace('/[^0-9]/', '', $retval[0]));
+    if (strlen($retval)) {
+        if ($retval == 0) {
+            $queuedSongs = 0;
+        } else {
+            $queuedSongs = 1;
+        }
+    } else {
+        $queuedSongs = '';
+    }
+    unset($retval);
+    // set up ashuffle tweaks to randomise the ashuffle window size (default = 7) to enhance the randomness and set
+    //  the suspend timeout to its redis value (nominally 20ms) to prevent crashes after clearing the queue
+    $tweaks = ' -t window-size='.rand(7, 20).' -t suspend-timeout='.$redis->hGet('globalrandom', 'suspend_timeout');
     switch ($action) {
         case 'checkcrossfade':
             // $action = 'checkcrossfade'
             //
-            // get the current crossfade value
-            $retval = sysCmd('mpc crossfade');
-            // when MPD is not running crossfade returns a non-numeric value
-            // strip non-numeric values from the the return string
-            $retval = trim(preg_replace('/[^0-9]/', '', $retval[0]));
-            if (strlen($retval)) {
-                $retval = intval($retval);
-                if ($retval === 0) {
+            // don't do anything if $queuedSongs has no value, MPD is probably not running, wait until the next time
+            if (strlen($queuedSongs)) {
+                if ($queuedSongs === 0) {
                     // crossfade = 0 so the number of extra queued songs should be 0
                     if (sysCmd('grep -ic -- '."'".'-q 1'."' '".$ashuffleUnitFilename."'")[0]) {
                         // incorrect value in the ashuffle service file
@@ -6082,7 +6093,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                         // stop ashuffle if it is running
                         sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
                     }
-                } else if ($retval > 0) {
+                } else if ($queuedSongs > 0) {
                     // crossfade > 0 so the number of extra queued songs should be 1
                     if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
                         // incorrect value in the ashuffle service file
@@ -6103,6 +6114,9 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 // no playlist name has been supplied, just exit
                 break;
             }
+            if (!strlen($queuedSongs)) {
+                $queuedSongs = 0;
+            }
             // stop ashuffle and set redis globalrandom to false/off, otherwise it may be restarted automatically
             $redis->hSet('globalrandom', 'enable', '0');
             sysCmd('pgrep -x ashuffle && systemctl stop ashuffle');
@@ -6112,16 +6126,8 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             // save the playlist and playlist filename
             $redis->hSet('globalrandom', 'playlist', $playlistName);
             $redis->hSet('globalrandom', 'playlist_filename', $playlistFilename);
-            // to allow crossfade to work with ashuffle: when crossfade is set the queue needs to always have one extra song in the queue
-            $retval = sysCmd('mpc crossfade');
-            $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
-            if ($retval == 0) {
-                $queuedSongs = 0;
-            } else {
-                $queuedSongs = 1;
-            }
-            // the ashuffle systemd service file needs to explicitly reference the playlist symlink
-            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '."'".$playlistFilename."'");
+            // the ashuffle systemd service file needs to explicitly reference the playlist file
+            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.' -f '."'".$playlistFilename."'".$tweaks);
             $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);
@@ -6135,6 +6141,9 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
         case 'reset':
             // $action = 'reset'
             //
+            if (!strlen($queuedSongs)) {
+                $queuedSongs = 0;
+            }
             // save current value of redis globalrandom and set it to false/off, otherwise it may be restarted automatically
             $saveGlobalrandom = $redis->hGet('globalrandom', 'enable');
             $redis->hSet('globalrandom', 'enable', '0');
@@ -6165,17 +6174,9 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             } else {
                 $ashuffleAlbum = '';
             }
-            // to allow crossfade to work with ashuffle, when crossfade is set the queue needs to always have one extra song in the queue
             unset($retval);
-            $retval = sysCmd('mpc crossfade');
-            $retval = intval(preg_replace('/[^0-9]/', '', $retval[0]));
-            if ($retval == 0) {
-                $queuedSongs = 0;
-            } else {
-                $queuedSongs = 1;
-            }
-            // the ashuffle systemd service file needs to explicitly exclude the reference the deleted playlist symlink
-            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$randomExclude.$ashuffleAlbum);
+            // the ashuffle systemd service file needs to explicitly exclude the reference the deleted playlist
+            $newArray = wrk_replaceTextLine($ashuffleUnitFilename, '', 'ExecStart=', 'ExecStart=/usr/bin/ashuffle -q '.$queuedSongs.$tweaks.$ashuffleAlbum.$randomExclude);
             $fp = fopen($ashuffleUnitFilename, 'w');
             $paramReturn = fwrite($fp, implode("", $newArray));
             fclose($fp);
@@ -6197,7 +6198,11 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
             if (($playlistFilename != '') && !file_exists($playlistFilename)) {
                 //  the playlist file no longer exits, reset ashuffle
                 wrk_ashuffle($redis, 'reset');
+                // it will reset the playlist filename
+                $playlistFilename = $redis->hGet('globalrandom', 'playlist_filename');
             }
+            // get the playlist name, it is not normally passed to the check function
+            $playlistName = $redis->hGet('globalrandom', 'playlist');
             if ($playlistFilename === '') {
                 // ashuffle should not have a playlist filename in its systemd unit file
                 if (sysCmd('grep -ic '."'".' -f '."' '".$ashuffleUnitFilename."'")[0]) {
@@ -6208,9 +6213,13 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 // ashuffle should play from the file in its systemd unit file
                 if (!sysCmd('grep -ic '."'".$playlistFilename."' '".$ashuffleUnitFilename."'")[0]) {
                     // play from the filename not present, set ashuffle to play from the filename
-                    wrk_ashuffle($redis, 'set', $playlistFilename);
+                    wrk_ashuffle($redis, 'set', $playlistName);
                 }
             }
+            if (!strlen($queuedSongs)) {
+                $queuedSongs = 0;
+            }
+            $moveNr = $queuedSongs + 1;
             // start Global Random if enabled - check continually, ashuffle get stopped for lots of reasons
             // stop Global Random if disabled - there are also other conditions when ashuffle must be stopped
             // ashuffle also seems to be a little bit unstable, it occasionally unpredictably crashes
@@ -6233,9 +6242,11 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                     $mpcStatus = ' '.trim(strtolower(preg_replace('!\s+!', ' ', sysCmd('mpc status | xargs')[0])));
                     if (!strpos($mpcStatus, 'playing')) {
                         // not playing
-                        $queueEmpty = trim(sysCmd('mpc move 1 1 || echo 1')[0]);
-                        // note: 'mpc move 1 1 || echo 1' will do nothing and will also return nothing if the first position in the
-                        //  queue contains a song, so returning nothing is false > songs in the queue, otherwise true > queue empty
+                        $queueEmpty = trim(sysCmd('mpc move '.$moveNr.' '.$moveNr.' || echo 1')[0]);
+                        // note: 'mpc move 1 1 || echo 1' (or 'mpc move 2 2 || echo 1') will do nothing and will also return 
+                        // nothing when the first/second position in the queue contains a song, so:
+                        //  returning nothing is false >> songs in the queue
+                        //  otherwise true >> queue empty
                         if ($queueEmpty) {
                             // there is nothing in the queue, so ashuffle should be running to add the first songs
                             // sometimes ashuffle crashes after clearing the queue, this should restart it
