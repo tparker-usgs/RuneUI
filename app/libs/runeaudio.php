@@ -6243,7 +6243,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                     if (!strpos($mpcStatus, 'playing')) {
                         // not playing
                         $queueEmpty = trim(sysCmd('mpc move '.$moveNr.' '.$moveNr.' || echo 1')[0]);
-                        // note: 'mpc move 1 1 || echo 1' (or 'mpc move 2 2 || echo 1') will do nothing and will also return 
+                        // note: 'mpc move 1 1 || echo 1' (or 'mpc move 2 2 || echo 1') will do nothing and will also return
                         // nothing when the first/second position in the queue contains a song, so:
                         //  returning nothing is false >> songs in the queue
                         //  otherwise true >> queue empty

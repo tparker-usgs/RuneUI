@@ -21,7 +21,7 @@ $redis->connect('/run/redis/socket');
 //        UUID: Headset AG                (00001112-0000-1000-8000-00805f9b34fb)
 //        UUID: Handsfree Audio Gateway   (0000111f-0000-1000-8000-00805f9b34fb)
 // we get to this script when  bt device connects/disconnects. We need to see what is connected
-// bluetoothctl is useless for this as it only shows some devices. 
+// bluetoothctl is useless for this as it only shows some devices.
 // need to use btmgt and bluetoothctl to actually query the bt 'bus' to see what
 // is connected and see if it is 'new'
 sleep (5);
@@ -31,16 +31,16 @@ sleep (5);
 // F8:1F:32:39:FE:31
 // 08:B7:38:11:A6:C2
 
-// then parse each device to determine its capabilities by using 
+// then parse each device to determine its capabilities by using
 // 'bluetoothctl info MAC' then parse the mac to determine it if is a source or a sink
 // as we only care about audio devices...
 // bluetoothctl info F8:1F:32:39:FE:31 | grep "0000110a"
 //        UUID: Audio Source              (0000110a-0000-1000-8000-00805f9b34fb)
 
 // need to keep track with a redis array of device macs, check when one is added
-// only deal with audio devices. 
+// only deal with audio devices.
 
-//$knownBT = $redis->Get('BT_interfaces'); 
+//$knownBT = $redis->Get('BT_interfaces');
 // array each element is MAC may be empty or already have a connected desvice sound or not
 $knownBT = ["08:B7:38:11:A6:C2"]; // this is my keyboard
 
@@ -52,40 +52,40 @@ case "start":
 // connect
 foreach($attachedBT as &$value){
       //is it already connected?
-	  foreach($knownBT as &$value1) {
-			if ($value != $value1) {
-				// $redis-> add to list knownBT...
-			    $bt_source=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
-				// test to see if it is an audio source or a sink or not of interest
-				if ($bt_serv) { // we have an Audio Source
-				sysCmd ('mpc stop');
-				// since we know the MAC, we can put this into the /etc/default/bluealsa
-				// and restart, but it is 00:00:00:00:00:00 so it will play 
-				// everthing from anything
-				sysCmd ('systemctl start bluealsa-aplay');
-				// add to the list of attached BTs
-				// $redis-> add to list...
-				}
-				$bt_sink=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
-				if ($bt_sink) { // we have an Audio Sink
-				// set up as synthetic alsa device for MPD et al
-				}
-				else {
-				// nothing
-				}
-			}
-		}
+      foreach($knownBT as &$value1) {
+            if ($value != $value1) {
+                // $redis-> add to list knownBT...
+                $bt_source=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
+                // test to see if it is an audio source or a sink or not of interest
+                if ($bt_serv) { // we have an Audio Source
+                sysCmd ('mpc stop');
+                // since we know the MAC, we can put this into the /etc/default/bluealsa
+                // and restart, but it is 00:00:00:00:00:00 so it will play
+                // everthing from anything
+                sysCmd ('systemctl start bluealsa-aplay');
+                // add to the list of attached BTs
+                // $redis-> add to list...
+                }
+                $bt_sink=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
+                if ($bt_sink) { // we have an Audio Sink
+                // set up as synthetic alsa device for MPD et al
+                }
+                else {
+                // nothing
+                }
+            }
+        }
     }
-	break;;
+    break;;
 case "stop":
 // disconnect
 foreach($attachedBT as &$value){
       //check connected against known. Is it still showing in redis?
-	  foreach($knownBT as &$value1) {
-			if ($value != $value1) {
-			//redis-> remove from list...
-			}
-		}
-	}
+      foreach($knownBT as &$value1) {
+            if ($value != $value1) {
+            //redis-> remove from list...
+            }
+        }
+    }
 }
 ?>
