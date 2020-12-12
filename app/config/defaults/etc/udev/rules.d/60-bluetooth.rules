@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEM=="bluetooth", RUN+="/srv/http/command/bt-info.sh start"
+ACTION=="remove", SUBSYSTEM=="bluetooth", RUN+="/srv/http/command/bt-info.sh stop"
