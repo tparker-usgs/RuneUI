@@ -58,7 +58,7 @@ foreach($attachedBT as &$value){
       foreach($knownBT as &$value1) {
             if ($value != $value1) {
                 // $redis-> add to list knownBT...
-                $bt_source=sysCmd('bluetoothctl info', $value, ' | grep "0000110a"');
+                $bt_source=sysCmd("bluetoothctl info".$value." | grep '0000110a'");
 				print_r($bt_source);
                 // test to see if it is an audio source or a sink or not of interest
                 if (!empty($bt_source) ) { // we have an Audio Source
@@ -71,7 +71,7 @@ foreach($attachedBT as &$value){
                 // add to the list of attached BTs
                 // $redis-> add to list...
                 }
-                $bt_sink=sysCmd('bluetoothctl info ', $value, ' | grep "0000110a"');
+                $bt_sink=sysCmd('bluetoothctl info '.$value.' | grep "0000110a"');
                 if (!empty($bt_sink)) { // we have an Audio Sink
 				print_r("New Sink\n");
                 // set up as synthetic alsa device for MPD et al
