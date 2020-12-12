@@ -75,7 +75,7 @@ function updateOS($redis) {
         if ($redis->get('patchlevel') == 1) {
             // 2nd update - settings for the justboom dac - run the new version of /srv/http/db/redis_acards_details after it has been delivered by git pull
             // count then number of lines with the active justboom dac string in /srv/http/db/redis_acards_details
-            $count = sysCmd("grep 'snd_rpi_justboom_dac' /srv/http/db/redis_acards_details | grep -c '^\$redis->hSet('");
+            $count = sysCmd("grep -h 'snd_rpi_justboom_dac' /srv/http/db/redis_acards_details | grep -c '^\$redis->hSet('");
             if ($count[0] == 1) {
                 // the just boom dac entry is active in the file, so run the script
                 sysCmd("/srv/http/db/redis_acards_details");
@@ -133,7 +133,7 @@ function updateOS($redis) {
             // 6th update - reassign local browser redis variables & initialise a few new redis variables
             // activate fix for Allo Piano 2.0 & activate some shairport-sync options
             // install raspi-rotate
-            $retval = sysCmd("grep -c 'Allo Piano 2.0' /srv/http/app/templates/settings.php");
+            $retval = sysCmd("grep -hc 'Allo Piano 2.0' /srv/http/app/templates/settings.php");
             if ($retval[0] != 0) {
                 $local_browser = $redis->get('local_browser');
                 $redis->del('local_browser');
@@ -141,7 +141,7 @@ function updateOS($redis) {
                 // clear the cache otherwise file_exists() returns incorrect values
                 clearstatcache(true, '/usr/bin/xinit');
                 if (file_exists('/usr/bin/xinit')) {
-                    $zoomfactor = sysCmd("grep -i 'force-device-scale-factor=' /etc/X11/xinit/start_chromium.sh | cut -d'=' -f3");
+                    $zoomfactor = sysCmd("grep -hi 'force-device-scale-factor=' /etc/X11/xinit/start_chromium.sh | cut -d'=' -f3");
                     $redis->hSet('local_browser', 'zoomfactor', $zoomfactor[0]);
                     unset($zoomfactor);
                 }
@@ -162,7 +162,7 @@ function updateOS($redis) {
             clearstatcache(true, '/var/www/app/config/defaults/i2s_table.txt');
             if (file_exists('/var/www/app/config/defaults/i2s_table.txt')) {
                 $retval = $redis->get('i2smodule');
-                $retval = sysCmd("grep -i '".$retval."' /var/www/app/config/defaults/i2s_table.txt");
+                $retval = sysCmd("grep -hi '".$retval."' /var/www/app/config/defaults/i2s_table.txt");
                 $redis->set('i2smodule_select', $retval[0]);
                 unset($retval);
                 // set the patch level
@@ -180,7 +180,7 @@ function updateOS($redis) {
         if ($redis->get('patchlevel') == 8) {
             // 9th update - lots of small changes since the last patch level increment
             // just increment the patch level, no other actions, do it only when /srv/http/db/redis_datastore_setup has been updated
-            $retval = sysCmd("grep -i 'AccessPoint' /srv/http/db/redis_datastore_setup | grep -i 'enable' | grep -i 'redis' | grep -c -i 'hDel'");
+            $retval = sysCmd("grep -hi 'AccessPoint' /srv/http/db/redis_datastore_setup | grep -i 'enable' | grep -i 'redis' | grep -c -i 'hDel'");
             if ($retval[0] == 1) {
                 // set the patch level
                 $redis->set('patchlevel', 9);
@@ -190,7 +190,7 @@ function updateOS($redis) {
         if ($redis->get('patchlevel') == 9) {
             // 10th update - change the MPD Log level to 'default' and replace the exitsing /usr/lib/systemd/system/rune_SY_wrk.service with the latest version
             // change the redis value when /srv/http/db/redis_datastore_setup has been updated
-            $retval = sysCmd("grep -i 'mpdconf' /srv/http/db/redis_datastore_setup | grep -i 'log_level' | grep -i 'redis' | grep -c -i 'default'");
+            $retval = sysCmd("grep -hi 'mpdconf' /srv/http/db/redis_datastore_setup | grep -i 'log_level' | grep -i 'redis' | grep -c -i 'default'");
             if ($retval[0] == 2) {
                 // set the actual redis variable mpdconf log_level to 'default'
                 $redis->hSet('mpdconf', 'log_level', 'default');

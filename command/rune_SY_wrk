@@ -933,7 +933,7 @@ while (1) {
                     sysCmd('chmod +x -v ./install.sh  >> /home/rern/Rern_Addons.log');
                     sysCmd('./install.sh >> /home/rern/Rern_Addons.log');
                     sysCmd('sed -i "s,\x1B\[[0-9;]*[a-zA-Z],,g" /home/rern/Rern_Addons.log');
-                    $retval = sysCmd('grep -i -E "installed|please" /home/rern/Rern_Addons.log');
+                    $retval = sysCmd('grep -hi -E "installed|please" /home/rern/Rern_Addons.log');
                     ui_notify_async("Rern's Addons", trim(preg_replace('/[^A-Za-z0-9 ]/', '', implode('\n', $retval))), $jobID);
                     sleep(3);
                     ui_notify_async("Rern's Addons", 'You may need to reboot...', $jobID);
@@ -1527,7 +1527,7 @@ while (1) {
     //  a) someone needs see the error messages and
     //  b) most hard disks will be usb drives which go to sleep when not in use, let them sleep
     if ($savecpuSmt-- <= 0) {
-        $retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep -v closed');
+        $retval = sysCmd('grep -vh closed /proc/asound/card?/pcm?p/sub?/hw_params');
         if (!empty(trim($retval[0]))) {
             // something is playing
             // clear the cache otherwise file_exists() returns incorrect values

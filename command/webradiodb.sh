@@ -36,7 +36,7 @@ redis-cli del webradios &> /dev/null
 for file in $webradiodir/*.pls; do
     name=$( basename "$file" )
     name=${name%.*}
-    url=$( grep 'File1' "$file" | cut -d '=' -f2 )
+    url=$( grep -h 'File1' "$file" | cut -d '=' -f2 )
     if [ "$name" != "" ] && [ "$url" != "" ]; then
         redis-cli hset webradios "$name" "$url" &> /dev/null
         echo "Added - Name: $name, URL: $url"

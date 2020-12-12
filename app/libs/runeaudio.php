@@ -957,7 +957,7 @@ function _parseStatusResponse($redis, $resp)
          // "audio format" output
          if (isset($plistArray['audio'])) {
             $audio_format = explode(":", $plistArray['audio']);
-            $retval = sysCmd('cat /proc/asound/card?/pcm?p/sub?/hw_params | grep "rate: "');
+            $retval = sysCmd('grep -hi "rate: " /proc/asound/card?/pcm?p/sub?/hw_params');
             switch (strtoupper($audio_format[0])) {
                 case 'DSD64':
                 case 'DSD128':
@@ -1395,7 +1395,7 @@ function hashCFG($action, $redis)
             // --- CODE REWORK NEEDED ---
             //$hash = md5_file('/etc/netctl/eth0');
             // have to find the settings file by MAC address in connman
-            $eth0MAC = sysCmd("ip link show dev eth0 |grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
+            $eth0MAC = sysCmd("ip link show dev eth0 | grep 'link/ether' | sed 's/^[ \t]*//' |cut -d ' ' -f 2 | tr -d ':'");
             $hash = md5_file('/var/lib/connman/ethernet_'.$eth0MAC[0].'_cable/settings');
             if ($redis->get('netconfhash') !== $hash) {
                 $redis->set('netconf_advanced', 1);
@@ -2337,7 +2337,7 @@ function wrk_checkStrSysfile($sysfile, $searchstr)
 
 function wrk_checkMount($mpname)
 {
-    $check_mp = sysCmd('cat /proc/mounts | grep "/mnt/MPD/NAS/'.$mpname.'"');
+    $check_mp = sysCmd('grep -h "/mnt/MPD/NAS/'.$mpname.'"' /proc/mounts);
     if (!empty($check_mp)) {
         return true;
     } else {
@@ -2380,7 +2380,7 @@ function wrk_audioOutput($redis, $action, $args = null)
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ']' -f 1");
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -d '[' -f 2 | cut -d ':' -f 2");
             // $acards = sysCmd("cat /proc/asound/cards | grep : | cut -b 1-3,21-");
-            $acards = sysCmd('grep : /proc/asound/cards | cut -b 1-3,21-');
+            $acards = sysCmd('grep -h ":" /proc/asound/cards | cut -b 1-3,21-');
             $i2smodule = $redis->Get('i2smodule');
             // check if i2smodule is enabled and read card details
             if ($i2smodule !== 'none') {
@@ -2396,7 +2396,7 @@ function wrk_audioOutput($redis, $action, $args = null)
                 runelog('>>--------------------------- card: '.$card.' index: '.$card_index.' (start) --------------------------->>');
                 $card = explode(' - ', $card, 2);
                 $card = trim($card[1]);
-                // $description = sysCmd("cat /proc/asound/cards | grep : | cut -d ':' -f 2 | cut -d ' ' -f 4-20");
+                // $description = sysCmd("grep -h ':' /proc/asound/cards | cut -d ':' -f 2 | cut -d ' ' -f 4-20");
                 // debug
                 runelog('wrk_audioOutput card string: ', $card);
                 $description = sysCmd("aplay -l -v | grep \"\[".$card."\]\"");
@@ -2657,7 +2657,7 @@ function wrk_mpdconf($redis, $action, $args = null, $jobID = null)
                 $count = sysCmd('mpd --version | grep -c "soxr"');
             } elseif ($redis->hGet('mpdconf', 'version') >= '0.19.00') {
                 // MPD version is higher than 0.19 but lower than 0.20
-                $count = sysCmd('grep -c "soxr" /usr/bin/mpd');
+                $count = sysCmd('grep -hc "soxr" /usr/bin/mpd');
             } else {
                 // MPD version is lower than 0.19
                 $count[0] = 0;
@@ -3513,7 +3513,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 $mp['charset'] = '';
             }
             // check that it is not already mounted
-            $retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+            $retval = sysCmd('grep -h "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
             if ($retval[0]) {
                 // already mounted, do nothing and return
                 return 1;
@@ -3666,7 +3666,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                 return 1;
             } else {
                 unset($retval);
-                $retval = sysCmd('grep "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+                $retval = sysCmd('grep -h "'.$mp['address'].'" /proc/mounts | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
                 if ($retval[0]) {
                     // mounted OK
                     $mp['error'] = '';
@@ -3795,7 +3795,7 @@ function wrk_sourcemount($redis, $action, $id = null, $quiet = false, $quick = f
                             return 1;
                         } else {
                             unset($retval);
-                            $retval = sysCmd('grep "'.$mp['address'].'" /proc/self/mountinfo | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
+                            $retval = sysCmd('grep -h "'.$mp['address'].'" /proc/self/mountinfo | grep "'.$mp['remotedir'].'" | grep "'.$type.'" | grep -c "/mnt/MPD/NAS/'.$mp['name'].'"');
                             if ($retval[0]) {
                                 // mounted OK
                                 $mp['error'] = '';
@@ -4542,7 +4542,7 @@ function wrk_playerID($arch)
     }
     // And just in case a normal Pi Zero boots the first time without any network interface use the CPU serial number
     if (trim($playerid) === $arch) {
-        $retval = sysCmd('grep -Po "^Serial\s*:\s*\K[[:xdigit:]]{16}" /proc/cpuinfo');
+        $retval = sysCmd('grep -hPo "^Serial\s*:\s*\K[[:xdigit:]]{16}" /proc/cpuinfo');
         $playerid = $arch.'CPU'.$retval[0];
         unset($retval);
     }
@@ -6005,7 +6005,7 @@ function fix_mac($redis, $nic)
     $file = '/etc/systemd/system/macfix_'.$nic.'.service';
     // clear the cache otherwise file_exists() returns incorrect values
     clearstatcache(true, $file);
-    if ((!file_exists($file)) || (!sysCmd('grep -ic '.$macNew.' '.$file)[0])) {
+    if ((!file_exists($file)) || (!sysCmd('grep -ihc '.$macNew.' '.$file)[0])) {
         // create the systemd unit file only when it needs to be created
         $fileContent = '# file '.$file."\n"
             .'# some cheap network cards have an identical MAC address for all cards (00:e0:4c:53:44:58)'."\n"
@@ -6095,7 +6095,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                     }
                 } else if ($queuedSongs > 0) {
                     // crossfade > 0 so the number of extra queued songs should be 1
-                    if (sysCmd('grep -ic -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
+                    if (sysCmd('grep -ihc -- '."'".'-q 0'."' '".$ashuffleUnitFilename."'")[0]) {
                         // incorrect value in the ashuffle service file
                         // find the line beginning with 'ExecStart' and in that line replace '-q 0'' with -q 1'
                         sysCmd("sed -i '/^ExecStart/s/-q 0/-q 1/' ".$ashuffleUnitFilename);
@@ -6211,7 +6211,7 @@ function wrk_ashuffle($redis, $action = 'check', $playlistName = null)
                 }
             } else {
                 // ashuffle should play from the file in its systemd unit file
-                if (!sysCmd('grep -ic '."'".$playlistFilename."' '".$ashuffleUnitFilename."'")[0]) {
+                if (!sysCmd('grep -ihc '."'".$playlistFilename."' '".$ashuffleUnitFilename."'")[0]) {
                     // play from the filename not present, set ashuffle to play from the filename
                     wrk_ashuffle($redis, 'set', $playlistName);
                 }
