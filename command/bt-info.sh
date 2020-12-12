@@ -73,7 +73,7 @@ foreach($attachedBT as &$value){
                 }
                 $bt_sink=sysCmd('bluetoothctl info ', $value, ' | grep "0000110a"');
                 if (!empty($bt_sink)) { // we have an Audio Sink
-				print_r('New Sink');
+				print_r("New Sink\n");
                 // set up as synthetic alsa device for MPD et al
                 }
                 else {
