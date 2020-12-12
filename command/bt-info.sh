@@ -7,7 +7,7 @@ ini_set('error_log', '/var/log/runeaudio/refresh_bt.log');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->connect('/run/redis/socket');
-//require_once('/var/www/app/libs/runeaudio.php');
+require_once('/srv/http/app/libs/runeaudio.php');
 
 // interesting BT profie UUIDs:
 // bluetoothctl info
@@ -43,21 +43,26 @@ sleep (5);
 //$knownBT = $redis->Get('BT_interfaces');
 // array each element is MAC may be empty or already have a connected desvice sound or not
 $knownBT = ["08:B7:38:11:A6:C2"]; // this is my keyboard
-
+print_r($knownBT);
 // this generates an array of attached BT devices
 $attachedBT = sysCmd('btmgmt con | cut -d " " -f 1');
-
-switch ($argv) {// passed from udev rule as parameter
+print_r($attachedBT);
+switch ($argv[1]) {// passed from udev rule as parameter
 case "start":
 // connect
+print_r("Checking newly connected BT\n");
 foreach($attachedBT as &$value){
+      print_r($value);
+	  print_r("\n");
       //is it already connected?
       foreach($knownBT as &$value1) {
             if ($value != $value1) {
                 // $redis-> add to list knownBT...
-                $bt_source=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
+                $bt_source=sysCmd('bluetoothctl info', $value, ' | grep "0000110a"');
+				print_r($bt_source);
                 // test to see if it is an audio source or a sink or not of interest
-                if ($bt_serv) { // we have an Audio Source
+                if (!empty($bt_source) ) { // we have an Audio Source
+				//print_r("New Source\n");
                 sysCmd ('mpc stop');
                 // since we know the MAC, we can put this into the /etc/default/bluealsa
                 // and restart, but it is 00:00:00:00:00:00 so it will play
@@ -66,14 +71,19 @@ foreach($attachedBT as &$value){
                 // add to the list of attached BTs
                 // $redis-> add to list...
                 }
-                $bt_sink=sysCmd('bluetoothctl info $value | grep -q "0000110a"');
-                if ($bt_sink) { // we have an Audio Sink
+                $bt_sink=sysCmd('bluetoothctl info ', $value, ' | grep "0000110a"');
+                if (!empty($bt_sink)) { // we have an Audio Sink
+				print_r('New Sink');
                 // set up as synthetic alsa device for MPD et al
                 }
                 else {
                 // nothing
+				print_r("Not Audio\n");
                 }
             }
+			else {
+			print_r("Already Known\n");
+			}
         }
     }
     break;;
