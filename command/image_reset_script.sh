@@ -156,7 +156,7 @@ rm -rf /var/lib/bluetooth/*
 rm -f /var/lib/connman/*.service
 rm -rf /var/lib/connman/ethernet_*
 rm -rf /var/lib/connman/wifi_*
-rm -rf /var/lib/iwd/*.psk
+rm -rf /var/lib/iwd/*
 rm -rf /var/lib/connman/bluetooth_*
 #
 # remove mac spoofing scripts

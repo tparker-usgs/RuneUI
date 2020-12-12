@@ -54,7 +54,6 @@ rm -f $1
 /srv/http/command/ui_notify.php 'Working' 'Please wait...' 'simplemessage'
 /srv/http/command/refresh_ao
 /srv/http/command/ui_notify.php 'Working' 'Almost done...' 'simplemessage'
-/srv/http/command/refresh_nics
 set +e
 count=$( cat /srv/http/app/templates/header.php | grep -c '$this->hostname' )
 if [ $count -gt 2 ]
@@ -66,6 +65,10 @@ fi
 redis-cli set dev '0'
 redis-cli set debug '0'
 /srv/http/command/webradiodb.sh
+systemctl stop connman
+# clean up the connman files, these will be recreated with restart
+find /var/lib/connman/* -type d -exec rm -R '{}' \;
+rm -r /var/lib/iwd/*
 /srv/http/command/ui_notify.php 'Restarting now' 'Please wait...' 'simplemessage'
 /srv/http/command/rune_shutdown
 reboot
