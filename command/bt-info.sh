@@ -53,16 +53,16 @@ case "start":
 print_r("Checking newly connected BT\n");
 foreach($attachedBT as &$value){
       print_r($value);
-	  print_r("\n");
+      print_r("\n");
       //is it already connected?
       foreach($knownBT as &$value1) {
             if ($value != $value1) {
                 // $redis-> add to list knownBT...
                 $bt_source=sysCmd("bluetoothctl info".$value." | grep '0000110a'");
-				print_r($bt_source);
+                print_r($bt_source);
                 // test to see if it is an audio source or a sink or not of interest
                 if (!empty($bt_source) ) { // we have an Audio Source
-				//print_r("New Source\n");
+                //print_r("New Source\n");
                 sysCmd ('mpc stop');
                 // since we know the MAC, we can put this into the /etc/default/bluealsa
                 // and restart, but it is 00:00:00:00:00:00 so it will play
@@ -73,17 +73,17 @@ foreach($attachedBT as &$value){
                 }
                 $bt_sink=sysCmd('bluetoothctl info '.$value.' | grep "0000110a"');
                 if (!empty($bt_sink)) { // we have an Audio Sink
-				print_r("New Sink\n");
+                print_r("New Sink\n");
                 // set up as synthetic alsa device for MPD et al
                 }
                 else {
                 // nothing
-				print_r("Not Audio\n");
+                print_r("Not Audio\n");
                 }
             }
-			else {
-			print_r("Already Known\n");
-			}
+            else {
+            print_r("Already Known\n");
+            }
         }
     }
     break;;
