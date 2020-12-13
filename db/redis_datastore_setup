@@ -245,7 +245,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('globalrandom', 'wait_for_play', 0);
             $redis->hSet('globalrandom', 'addrandom', 0);
             $redis->hSet('globalrandom', 'random_album', 0);
-            $redis->hSet('globalrandom', 'suspend_timeout', '20ms');
+            $redis->hSet('globalrandom', 'suspend_timeout', '1s');
             // default lyrics and info
             $redis->hSet('lyrics', 'currentartist', '');
             $redis->hSet('lyrics', 'currentsong', '');
@@ -561,7 +561,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('globalrandom', 'wait_for_play') || $redis->hSet('globalrandom', 'wait_for_play', 0);
             $redis->hExists('globalrandom', 'addrandom') || $redis->hSet('globalrandom', 'addrandom', 0);
             $redis->hExists('globalrandom', 'random_album') || $redis->hSet('globalrandom', 'random_album', 0);
-            $redis->hExists('globalrandom', 'suspend_timeout') || $redis->hSet('globalrandom', 'suspend_timeout', '20ms');
+            $redis->hExists('globalrandom', 'suspend_timeout') || $redis->hSet('globalrandom', 'suspend_timeout', '1s');
             // default lyrics and info
             $redis->hExists('lyrics', 'currentartist') || $redis->hSet('lyrics', 'currentartist', '');
             $redis->hExists('lyrics', 'currentsong') || $redis->hSet('lyrics', 'currentsong', '');

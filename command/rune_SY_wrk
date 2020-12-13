@@ -1392,11 +1392,6 @@ while (1) {
                     closeMpdSocket($mpd);
                     $redis->sRem('w_lock', $jobID);
                     break;
-                case 'wificfg':
-                    runelog('wrk_SY: ', $job->wrkcmd);
-                    $redis->sAdd('w_lock', $jobID);
-                    $redis->sRem('w_lock', $jobID);
-                    break;
                 case 'wrkrestart':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
@@ -1405,6 +1400,7 @@ while (1) {
                     $redis->sRem('w_lock', $jobID);
                     break;
                 case 'ui_notify':
+                    $redis->sAdd('w_lock', $jobID);
                     runelog('wrk_SY: ', $job->wrkcmd);
                     // TODO: rework needed (fix bug in /var/www/index.php)
                     if (!isset($job->delay_us)) {
@@ -1416,7 +1412,8 @@ while (1) {
                     foreach ($job->args as $raw_notification) {
                         wrk_notify($redis, 'raw', $raw_notification);
                     }
-                    // $redis->sRem('w_lock', $jobID); ???
+                    $redis->sRem('w_lock', $jobID);
+                    break;
                 case 'underclocking':
                     runelog('wrk_SY: ', $job->wrkcmd);
                     $redis->sAdd('w_lock', $jobID);
