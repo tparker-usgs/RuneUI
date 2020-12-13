@@ -121,6 +121,7 @@ function redisDatastore($redis,$action) {
             $redis->set('audio_on_off', 1);
             $redis->set('orionprofile', 'RuneAudio');
             $redis->set('activePlayer', 'MPD');
+            $redis->set('underclocking', 0);
             // UI login password
             $redis->set('pwd_protection', 0);
             $option = array('cost' => 12);
@@ -459,6 +460,7 @@ function redisDatastore($redis,$action) {
             $redis->exists('i2smodule_select') || $redis->set('i2smodule_select', 'none|I&#178;S disabled (default)');
             $redis->exists('orionprofile') || $redis->set('orionprofile', 'RuneAudio');
             $redis->exists('activePlayer') || $redis->set('activePlayer', 'MPD');
+            $redis->exists('underclocking') || $redis->set('underclocking', 0);
             // UI login password
             if ((!empty(trim($redis->get('pwd_protection')))) && (!empty(trim($redis->get('password'))))){
                 // do nothing

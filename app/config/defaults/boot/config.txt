@@ -136,7 +136,8 @@ gpu_mem=16
 ## The values below are valid for the B+ model
 ## Overclocking should not be needed for the 2B, 3B, 3B+ and 4B models
 ## See internet for documentation on overclocking options for A, B and Zero models, be careful, check 2 independent sources!
-
+[pi1]
+# Conditional for Model A, Model B, Compute Module
 ## None
 #arm_freq=700
 #core_freq=250
@@ -166,6 +167,10 @@ gpu_mem=16
 #core_freq=500
 #sdram_freq=500
 #over_voltage=6
+[all]
+# Conditional end
+
+## Underclocking placeholder
 
 ## General CPU settings
 # Setting the governor to force turbo on (=1) can invalidates warranty in combination with some (higher) overclocking settings for some models

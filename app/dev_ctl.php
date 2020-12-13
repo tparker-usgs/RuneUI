@@ -113,6 +113,14 @@ if (isset($_POST)) {
         } else {
             !$redis->get('network_autoOptimiseWifi') || $redis->set('network_autoOptimiseWifi', 0);
         }
+    // ----- Underclocking -----
+        if ((isset($_POST['mode']['underclocking']['enable'])) && ($_POST['mode']['underclocking']['enable'])) {
+            // create worker job (set on)
+            $redis->get('underclocking') == 1 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'underclocking', 'action' => 1));
+        } else {
+            // create worker job (set off)
+            $redis->get('underclocking') == 0 || $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'underclocking', 'action' => 0));
+        }
     }
     // ----- OPCACHE -----
     if (isset($_POST['opcache'])) {
@@ -182,6 +190,7 @@ $template->hostname = $redis->get('hostname');
 $template->airplayof = $redis->hGet('airplay', 'alsa_output_format');
 $template->airplayor = $redis->hGet('airplay', 'alsa_output_rate');
 $template->optwifionof = $redis->get('network_autoOptimiseWifi');
+$template->underclocking = $redis->get('underclocking');
 // debug
 // var_dump($template->dev);
 // var_dump($template->debug);

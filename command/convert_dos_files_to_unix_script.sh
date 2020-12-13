@@ -48,10 +48,12 @@ if [ "$1" != "fast" ] && [ "$2" != "fast" ] && [ "$3" != "fast" ]; then
     # all files in the directory /var/www/app/config/defaults/ inclusive subdirectories
     # exceptions are /boot/config.txt and /boot/wifi/* these stay in ms-dos format
     cp /var/www/app/config/defaults/boot/config.txt /tmp/config.txt
+    cp /var/www/app/config/defaults/boot/archimago_underclocking.txt /tmp/archimago_underclocking.txt
     cp -r /var/www/app/config/defaults/boot/wifi /tmp
     cd /var/www/app/config/defaults
     find /var/www/app/config/defaults/ -type f -exec dos2unix -k -s -o {} \;
     cp /tmp/config.txt /var/www/app/config/defaults/boot/config.txt
+    cp /tmp/archimago_underclocking.txt /var/www/app/config/defaults/boot/archimago_underclocking.txt
     cp -r /tmp/wifi /var/www/app/config/defaults/boot
     rm /tmp/config.txt
     rm -r /tmp/wifi

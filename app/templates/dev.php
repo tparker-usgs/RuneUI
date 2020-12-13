@@ -217,6 +217,24 @@
                     </div>
                 </div>
             </div>
+            <legend>CPU Speed - Advanced settings</legend>
+            <div class="boxed-group">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Underclocking</label>
+                    <div class="col-sm-10">
+                            <label class="switch-light well" onclick="">
+                                <input id="underclocking" name="mode[underclocking][enable]" type="checkbox" value="1"<?php if((isset($this->underclocking)) && ($this->underclocking)): ?> checked="checked" <?php endif ?>>
+                                <span><span>OFF</span><span>ON</span></span><a class="btn btn-primary"></a>
+                            </label>
+                        <span class="help-block">These underclocking settings are switched <strong>OFF</strong> by default. They only have an effect on the Raspberry Pi models 3A+, 3B+ and B4.<br>
+                       <i>Please read these articles before switching underclocking ON: <a href="http://www.archimago.blogspot.com/2018/11/musings-raspberry-pi-3-b-touch.html" target="_blank" rel="nofollow">MUSINGS: Raspberry Pi 3 B+ "Touch" Optimizations; CRAAP Settings, and the "Extremus" Filter Setting</a> and
+                       <a href="http://www.archimago.blogspot.com/2020/10/musingshow-to-raspberry-pi-4-touch.html "target="_blank" rel="nofollow">MUSINGS/HOW-TO: Raspberry Pi 4 "Touch" Audio Streamer, and CRAAP settings! ;-) The decline of public feedback, virtual showrooms, value-added content and Darko Audio?</a><br>
+                       While we have not encountered any problems using these settings, use them at your own risk.<br>
+                       <strong>Why bother?</strong> Well, your Raspberry Pi will run slower and therefore cooler, this should reduce (audio) noise. Additionally the Raspberry Pi B4 model may
+                       be able to run using passive cooling using heatsinks, so without using a cooling fan. But this really depends on many factors like the case design, operation location, etc.</i></span>
+                    </div>
+                </div>
+            </div>
             <legend>Network - Advanced settings</legend>
             <div class="boxed-group">
                 <div class="form-group">

@@ -1417,6 +1417,27 @@ while (1) {
                         wrk_notify($redis, 'raw', $raw_notification);
                     }
                     // $redis->sRem('w_lock', $jobID); ???
+                case 'underclocking':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    if ($job->action === 1) {
+                        // switch underclocking on
+                        if (sysCmd('grep -hi "Underclocking placeholder" /boot/config.txt')[0]) {
+                            if (!sysCmd('grep -hi "Underclocking start" /boot/config.txt')[0]) {
+                                sysCmd("sed -i -e '/Underclocking placeholder/r /boot/Archimago_underclocking.txt' /boot/config.txt");
+                            }
+                            $redis->set('underclocking', 1);
+                            ui_notify_async('Underclocking', 'Enabled.', $jobID);
+                        } else {
+                            ui_notify_async('Failed', 'An image reset is required.', $jobID);
+                        }
+                    } else {
+                        // switch underclocking off
+                        sysCmd("sed -i '/Underclocking start/,/Underclocking end/d' /boot/config.txt");
+                        $redis->set('underclocking', 0);
+                        ui_notify_async('Underclocking', 'Disabled.', $jobID);
+                    }
+                    $redis->sRem('w_lock', $jobID);
                     break;
             } // end switch
             // delete processed job from the w_queue
