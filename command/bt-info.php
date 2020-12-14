@@ -1,8 +1,8 @@
 #!/usr/bin/php
 <?php
 // script which runs when a BT device is 'connected' to the systemctl
-// bluetoothctl connect MAC will cause this to run as it is triggerd by 
-// udev rule 60-bluetooth.rules 
+// bluetoothctl connect MAC will cause this to run as it is triggerd by
+// udev rule 60-bluetooth.rules
 // Keith Grider 12/2020
 
 // common include
@@ -68,7 +68,7 @@ foreach($attachedBT as &$value){
             // test to see if it is an audio source or a sink or not of interest
             // we look for a source first and assume that the device is a phone
             // being used as a source to Rune secondarily we look for a sink
-            if (preg_grep("/0000110a/s",$bt_capability)) { 
+            if (preg_grep("/0000110a/s",$bt_capability)) {
             // we have an Audio Source
             //print_r("New Source\n");
             sysCmd ('mpc stop');
