@@ -234,22 +234,10 @@ if ($playerid_db === '') {
     //wrk_NTPsync($redis->get('ntpserver'));
     $start3 = microtime(true);
     //
-    // refresh nics, check redis datastore status, check if an active internet connection is available
+    // create the directory structure for backup, shairport sysnc, spotifyd and PMD (this part is vital and must be run first)
+    // then refresh nics, check redis datastore status, check if an active internet connection is available
     // mostly these commands should do nothing or very little, they are also not essential for the startup sequence
-    sysCmdAsync('nice --adjustment=2 php -f /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; php -f /var/www/command/refresh_nics');
-    //
-    // create the directory used to hold the configuration backup work file, set the correct privileges and delete any content
-    if (!$redis->Exists('backup_dir')) {
-        // normally the redis variable exists
-        $redis->set('backup_dir', '/home/backup');
-    }
-    $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
-    if (!strpos($fileDestDir, 'backup') && !strpos($fileDestDir, 'tmp')) {
-        // backup_dir must contain 'tmp' or 'backup', it should then never interfere with the Linux or RuneAudio
-        $redis->set('backup_dir', '/home/backup');
-        $fileDestDir = '/'.trim($redis->get('backup_dir'), "/ \t\n\r\0\x0B");
-    }
-    sysCmd('mkdir -p '."'".$fileDestDir."'".' ; chown -R http.http '."'".$fileDestDir."'".' ; chmod -R 755 '."'".$fileDestDir."'".' ; rm -fR '."'".$fileDestDir.'/*'."'");
+    sysCmdAsync('nice --adjustment=2 /srv/http/command/create_work_dirs.sh ; php -f /srv/http/db/redis_datastore_setup check ; /srv/http/command/internet_available_async.sh ; php -f /var/www/command/refresh_nics');
     //
     // check HOSTNAME << TODO: integrate in wrk_sysEnvCheck >>
     $retval = sysCmd('hostname');
@@ -301,6 +289,7 @@ if ($playerid_db === '') {
     }
     //
     // check that MPD only has one output enabled and if not correct
+    // todo: maybe make this an async action to speed up startup
     wrk_check_MPD_outputs($redis);
     //
     $kernel = $redis->get('kernel');
@@ -319,38 +308,14 @@ if ($playerid_db === '') {
     //
     // start shairport-sync
     if ($redis->hGet('airplay', 'enable')) {
-        runelog('service: SHAIRPORT-SYNC start','');
-        // create a directory to use for airplay metadata artwork
-        // the location /srv/http/tmp is a tmpfs, see /etc/fstab
-        sysCmd('mkdir -p /srv/http/tmp/airplay');
-        sysCmd('cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png');
-        sysCmd('chown -R http.http /srv/http/tmp');
-        sysCmd('chmod 755 /srv/http/tmp/airplay');
-        sysCmd('chmod -R 644 /srv/http/tmp/airplay/*');
         // start shairport-sync if it is not already started
+        runelog('service: SHAIRPORT-SYNC start','');
         sysCmd('pgrep -x shairport-sync || systemctl start shairport-sync');
     }
     //
     // start spotifyd
     if ($redis->hGet('spotifyconnect', 'enable')) {
         runelog('service: SPOTIFYD start','');
-        // create a directory to use for spotifyd artwork
-        // the location /srv/http/tmp is a tmpfs, see /etc/fstab
-        sysCmd('mkdir -p /srv/http/tmp/spotify-connect');
-        sysCmd('cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png');
-        sysCmd('chown -R http.http /srv/http/tmp');
-        sysCmd('chmod 755 /srv/http/tmp/spotify-connect');
-        sysCmd('chmod -R 644 /srv/http/tmp/spotify-connect/*');
-        // create a directory to use for spotifyd cache
-        // the location /tmp is a tmpfs, see /etc/fstab
-        // default location is '/tmp/spotifyConnectCache'
-        $spotifyConnectCache = $redis->hGet('spotifyconnect', 'cache_path');
-        if (!empty($spotifyConnectCache)) {
-            sysCmd('mkdir -p '.$spotifyConnectCache);
-            sysCmd('chown -R spotifyd.spotifyd '.$spotifyConnectCache);
-            sysCmd('chmod 755 '.$spotifyConnectCache);
-            sysCmd('chmod -R 644 '.$spotifyConnectCache.'/*');
-        }
         // start spotifyd if it is not already started
         sysCmd('pgrep -x spotifyd || systemctl start spotifyd');
         $redis->hSet('spotifyconnect', 'track_id', '');
@@ -412,7 +377,7 @@ if ($playerid_db === '') {
     $redis->close();
     //
     // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
-    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php -f /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
     runelog('--- NORMAL STARTUP');
     // --- NORMAL STARTUP //
 }
