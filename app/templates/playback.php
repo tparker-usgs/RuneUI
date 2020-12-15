@@ -36,7 +36,6 @@
             </div>
             <div style="height: auto">
                 <div class="col-sm-4 coverart">
-                    <div id="addinfo-ss"><i>Additional Info:</i></div>
                     <div id="addinfo-text-ss"><pre class="fa fa-spinner fa-spin"></pre></div>
                 </div>
             </div>
