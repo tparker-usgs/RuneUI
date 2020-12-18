@@ -73,7 +73,7 @@
         <div class="form-group form-actions">
             <div class="col-sm-offset-2 col-sm-10">
                 <a href="/sources/" class="btn btn-default btn-lg">Cancel</a>
-                <button class="btn btn-primary btn-lg" value="1" name="sources[submit]" type="submit">Save and apply</button>
+                <button class="btn btn-primary btn-lg" value="1" name="save" type="submit" value="save">Save and apply</button>
             </div>
         </div>
     </form>

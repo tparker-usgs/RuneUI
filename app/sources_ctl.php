@@ -47,7 +47,7 @@ if (isset($_POST)) {
         }
         if ((!isset($_POST['mount']['rsize'])) || (trim($_POST['mount']['rsize']) == "") || (empty($_POST['mount']['rsize']))) $_POST['mount']['rsize'] = 8192;
         if ((!isset($_POST['mount']['wsize'])) || (trim($_POST['mount']['wsize']) == "") || (empty($_POST['mount']['rsize']))) $_POST['mount']['wsize'] = 16384;
-        If (isset($_POST['action'])) {
+        if (isset($_POST['action'])) {
             if ($_POST['action'] == 'add') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'add', 'args' => $_POST['mount']));
             if ($_POST['action'] == 'edit') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'edit', 'args' => $_POST['mount']));
             if ($_POST['action'] == 'delete') $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'sourcecfg', 'action' => 'delete', 'args' => $_POST['mount']));
@@ -55,14 +55,12 @@ if (isset($_POST)) {
         }
     }
     // ----- FEATURES -----
-    if (isset($_POST['db_autorebuild'])) {
-        if ($_POST['db_autorebuild']) {
-            $redis->get('usb_db_autorebuild') === 1 || $redis->set('usb_db_autorebuild', 1);
+    if (isset($_POST['save']) && ($_POST['save'])) {
+        if (isset($_POST['db_autorebuild']) && ($_POST['db_autorebuild'])) {
+            $redis->get('usb_db_autorebuild') || $redis->set('usb_db_autorebuild', 1);
         } else {
-            $redis->get('usb_db_autorebuild') === 0 || $redis->set('usb_db_autorebuild', 0);
+            !$redis->get('usb_db_autorebuild') || $redis->set('usb_db_autorebuild', 0);
         }
-    } else {
-        $redis->get('usb_db_autorebuild') === 0 || $redis->set('usb_db_autorebuild', 0);
     }
 }
 if (isset($jobID)) {
