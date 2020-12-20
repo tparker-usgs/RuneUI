@@ -45,16 +45,31 @@ sleep (5);
 // need to keep track with a redis array of device macs, check when one is added
 // only deal with audio devices.
 
-$knownBT = array_keys($redis->Hgetall('bt-known'));
-//print_r("Known BT\n");
-//print_r($knownBT);
-// this generates an array of attached BT devices
-$attachedBT = sysCmd('btmgmt con | cut -d " " -f 1');
-//print_r("Attached BT\n");
-//print_r($attachedBT);
+// log file
+$myfile = fopen("/srv/http/command/bt-diag.txt", "w") or die("Unable to open file!");
+
+// these are devices we know that have been connected
+$knownBT = array_keys($redis->Hgetall("bt-known"));
+print_r("Known BT\n");
+
+fwrite($myfile, "Known BTs\n");
+    foreach ($knownBT as &$value){
+    fwrite($myfile, $value."\n");
+    print_r($value."\n");
+}
+// this generates an array of currently attached BT devices
+$attachedBT = sysCmd("btmgmt con | cut -d ' ' -f 1");
+print_r("Attached BT\n");
+fwrite($myfile, "Attached BTs\n");
+    foreach ($attachedBT as &$value){
+    fwrite($myfile, $value."\n");
+    print_r($value."\n");
+}
+fwrite($myfile, $argv[1]."\n");
+print_r($argv[1]."\n");
 switch ($argv[1]) {// passed from udev rule as parameter
 case "start":
-sleep(10);
+//sleep(10);
 // connect
 //print_r("Checking newly connected BT\n");
 foreach($attachedBT as &$value){
@@ -62,15 +77,16 @@ foreach($attachedBT as &$value){
       //print_r("\n");
       //is it already connected?
       if (!preg_grep("/$value/",$knownBT)) {
+        fwrite($myfile, "\n found new BT MAC \n");
             $found_source = 0;
             $bt_capability=sysCmd('bluetoothctl info '.$value);
             //print_r($bt_capability);
             // test to see if it is an audio source or a sink or not of interest
             // we look for a source first and assume that the device is a phone
             // being used as a source to Rune secondarily we look for a sink
-            if (preg_grep("/0000110a/s",$bt_capability)) { 
+            if (preg_grep("/0000110a/s",$bt_capability)) {
             // we have an Audio Source
-            //print_r("New Source\n");
+            fwrite($myfile," New Audio Source\n");
             sysCmd ('mpc stop');
             // since we know the MAC, we can put this into the /etc/default/bluealsa
             // and restart, but it is 00:00:00:00:00:00 so it will play
@@ -84,7 +100,7 @@ foreach($attachedBT as &$value){
             if (preg_grep("/0000110b/s",$bt_capability) && !$found_source) {
             // only set up a sink if we did not find a source. Maybe not the best way
             // but since bluealsa cannot do both simultaneously...
-            //print_r("New Sink\n");
+            fwrite($myfile," New Audio Sink\n");
             // set up as an alsa device for MPD
             //Need to send this line by line to mpd.conf
             //"audio_output {"
@@ -101,6 +117,7 @@ foreach($attachedBT as &$value){
             elseif (!$found_source){
             // nothing
             //print_r("Not Audio\n");
+            fwrite($myfile, " Keyboard\n");
             $redis->hset("bt-known", $value, 2);
             }
         }
@@ -108,10 +125,12 @@ foreach($attachedBT as &$value){
         print_r("Already Known\n");
         }
     }
+    fclose($myfile);
 break;;
 case "stop":
 // disconnect
-//print_r("Checking newly removed BT\n");
+fwrite($myfile, "\n Checking newly removed BT MAC\n");
+print_r("Checking newly removed BT MAC\n");
 foreach($knownBT as &$value){
       //print_r($value);
       //print_r("\n");
@@ -119,26 +138,30 @@ foreach($knownBT as &$value){
       if (!preg_grep("/$value/",$attachedBT)) {
           // this is the removed device
           $type = $redis->Hmget("bt-known", [$value]);
-          //print_r("type of device removed ");
-          //print_r($type[$value]);
-          //print_r("\n");
           switch ($type[$value]) {
           case 0:
             // sink
-            //print_r("sink removed\n");
+            print_r("sink removed\n");
+            fwrite($myfile, "sink removed\n");
             // remove the lines from mpd.conf
             // remove from mpd.conf and change AO to something else
           break;;
           case 1:
             // source
-            //print_r("source removed\n");
+            print_r('source removed\n');
+            fwrite($myfile, "source removed\n");
             sysCmd ('systemctl stop bluealsa-aplay');
+          break;;
           case 2:
+             print_r('not Audio\n');
+             fwrite($myfile, "other removed\n");
             // not audio
           break;;
           }
         $redis->Hdel("bt-known", $value);
         }
     }
+    fclose($myfile);
+break;;
 }
 ?>
