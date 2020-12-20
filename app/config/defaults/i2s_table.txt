@@ -53,7 +53,7 @@ hifiberry-digi|HiFiBerry Digi Plus
 hifiberry-digi-pro|HiFiBerry Digi Plus Pro
 hifiberry-digi-pro|HiFiBerry Digi Pro
 merus-amp|Infineon MERUS merus-amp audio card
-hifiberry-dacplus|Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122
+allo-boss-dac-pcm512x-audio|Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122
 iqaudio-dacplus|IQaudIO Amp
 iqaudio-dacplus,auto_mute_amp|IQaudIO Amp - with auto mute
 iqaudio-dacplus,unmute_amp|IQaudIO Amp - with unmute
@@ -111,11 +111,12 @@ i-sabre-q2m|Generic ES90x8  (Alternative 2)
 rpi-dac|Generic ES90x8  (Alternative 3)
 rpi-dac|Generic PCM1794
 hifiberry-dac,384k|Generic PCM510x
-hifiberry-dacplus|Generic PCM512x
-hifiberry-amp|Generic tas5713
-hifiberry-amp|Generic tas5756M (Alternative 1)
-justboom-dac|Generic tas5756M (Alternative 2)
-iqaudio-dacplus|Generic tas5756M (Alternative 3)
+hifiberry-dacplus|Generic PCM512x (Alternative 1)
+allo-boss-dac-pcm512x-audio|Generic PCM512x (Alternative 2)
+hifiberry-amp|Generic TAS5713
+hifiberry-amp|Generic TAS5756M (Alternative 1)
+justboom-dac|Generic TAS5756M (Alternative 2)
+iqaudio-dacplus|Generic TAS5756M (Alternative 3)
 hifiberry-dac|Generic TDA1387
 hifiberry-dac|Generic TDA1541
 hifiberry-dac|Generic TDA1543
