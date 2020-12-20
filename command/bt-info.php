@@ -1,8 +1,8 @@
 #!/usr/bin/php
 <?php
 // script which runs when a BT device is 'connected' to the systemctl
-// bluetoothctl connect MAC will cause this to run as it is triggerd by
-// udev rule 60-bluetooth.rules
+// bluetoothctl connect MAC will cause this to run as it is triggerd by 
+// udev rule 60-bluetooth.rules 
 // Keith Grider 12/2020
 
 // common include
@@ -73,8 +73,7 @@ case "start":
 // connect
 //print_r("Checking newly connected BT\n");
 foreach($attachedBT as &$value){
-      //print_r($value);
-      //print_r("\n");
+      //print_r($value."\n");
       //is it already connected?
       if (!preg_grep("/$value/",$knownBT)) {
         fwrite($myfile, "\n found new BT MAC \n");
@@ -122,15 +121,15 @@ foreach($attachedBT as &$value){
             }
         }
         else {
-        print_r("Already Known\n");
+        print_r(" Already Known\n");
         }
     }
     fclose($myfile);
 break;;
 case "stop":
 // disconnect
-fwrite($myfile, "\n Checking newly removed BT MAC\n");
-print_r("Checking newly removed BT MAC\n");
+fwrite($myfile, " Checking newly removed BT MAC\n");
+print_r(" Checking newly removed BT MAC\n");
 foreach($knownBT as &$value){
       //print_r($value);
       //print_r("\n");
@@ -141,20 +140,20 @@ foreach($knownBT as &$value){
           switch ($type[$value]) {
           case 0:
             // sink
-            print_r("sink removed\n");
-            fwrite($myfile, "sink removed\n");
+            print_r(" sink removed\n");
+            fwrite($myfile, " sink removed\n");
             // remove the lines from mpd.conf
             // remove from mpd.conf and change AO to something else
           break;;
           case 1:
             // source
-            print_r('source removed\n');
-            fwrite($myfile, "source removed\n");
+            print_r(" source removed\n");
+            fwrite($myfile, " source removed\n");
             sysCmd ('systemctl stop bluealsa-aplay');
           break;;
           case 2:
-             print_r('not Audio\n');
-             fwrite($myfile, "other removed\n");
+             print_r(" not Audio\n");
+             fwrite($myfile, " other removed\n");
             // not audio
           break;;
           }
