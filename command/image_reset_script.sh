@@ -122,12 +122,6 @@ rm -f /etc/resolv.conf
 # link it to connman's dynamically created resolv.conf
 ln -s /run/connman/resolv.conf /etc/resolv.conf
 #
-# install raspi-rotate
-/var/www/command/raspi-rotate-install.sh
-#
-# install spotifyd
-/var/www/command/spotifyd-install.sh
-#
 # remove rerns addons menu (if installed)
 systemctl stop addons cronie
 systemctl disable addons cronie
@@ -172,7 +166,9 @@ rm -R "$dirName"
 ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
 #
 # update local git and clean up any stashes
-md5before=$( md5sum $0 | xargs | cut -f 1 -d " " )
+md5beforeThis=$( md5sum $0 | xargs | cut -f 1 -d " " )
+md5beforeRotate=$( md5sum /var/www/command/raspi-rotate-install.sh | xargs | cut -f 1 -d " " )
+md5beforeSpotifyd=$( md5sum /var/www/command/spotifyd-install.sh | xargs | cut -f 1 -d " " )
 rm -f /var/www/command/mpd-watchdog
 cd /srv/http/
 git config --global core.editor "nano"
@@ -196,14 +192,16 @@ if [ "$1" == "full" ]; then
     git clean -f
 fi
 cd /home
-md5after=$( md5sum $0 | xargs | cut -f 1 -d " " )
-if [ "$md5before" != "$md5after" ] ; then
+md5afterThis=$( md5sum $0 | xargs | cut -f 1 -d " " )
+md5afterRotate=$( md5sum /var/www/command/raspi-rotate-install.sh | xargs | cut -f 1 -d " " )
+md5afterSpotifyd=$( md5sum /var/www/command/spotifyd-install.sh | xargs | cut -f 1 -d " " )
+if [ "$md5beforeThis" != "$md5afterThis" ] || [ "$md5beforeRotate" != "$md5afterRotate" ] || [ "$md5beforeSpotifyd" != "$md5afterSpotifyd" ]; then
     set +x
-    echo "#############################################################"
-    echo "## This script has been changed during the git pull update ##"
-    echo "##    Exiting! - You need to run this script again!!       ##"
-    echo "##               -----------------------------------       ##"
-    echo "#############################################################"
+    echo "########################################################################"
+    echo "## This or another script has been changed during the git pull update ##"
+    echo "##         Exiting! - You need to run this script again!!             ##"
+    echo "##                    -----------------------------------             ##"
+    echo "########################################################################"
     exit
 fi
 #
@@ -242,6 +240,12 @@ php -f /srv/http/db/redis_acards_details
 # always clear player ID and hardware platform ID
 redis-cli set playerid ""
 redis-cli set hwplatformid ""
+#
+# install raspi-rotate
+/var/www/command/raspi-rotate-install.sh
+#
+# install spotifyd
+/var/www/command/spotifyd-install.sh
 #
 # remove any samba passwords
 pdbedit -L | grep -o ^[^:]* | smbpasswd -x
