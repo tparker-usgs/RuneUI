@@ -53,6 +53,7 @@ function redisDatastore($redis,$action) {
             $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hSet('mpdconf', 'state_file_interval', '1');
             $redis->hSet('mpdconf', 'dsd_usb', 'no');
             $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
             $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
