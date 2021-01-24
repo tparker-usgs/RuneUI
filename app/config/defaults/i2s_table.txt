@@ -35,7 +35,7 @@ dionaudio-loco-v2|Dionaudio Loco V2 DAC-AMP
 fe-pi-audio|Fe-Pi Audio Sound Card
 hifiberry-amp|HiFiBerry Amp
 hifiberry-amp|HiFiBerry Amp+
-hifiberry-amp|HiFiBerry Amp2
+hifiberry-dacplus|HiFiBerry Amp2
 hifiberry-dac,384k|HiFiBerry DAC
 hifiberry-dacplus|HiFiBerry DAC Plus
 hifiberry-dacplusadc|HiFiBerry DAC Plus ADC
@@ -53,6 +53,7 @@ hifiberry-digi|HiFiBerry Digi Plus
 hifiberry-digi-pro|HiFiBerry Digi Plus Pro
 hifiberry-digi-pro|HiFiBerry Digi Pro
 merus-amp|Infineon MERUS merus-amp audio card
+hifiberry-amp|Inno-Maker Raspberry Pi HiFi AMP HAT TAS5713
 allo-boss-dac-pcm512x-audio|Inno-Maker Raspberry Pi HiFi DAC HAT PCM5122
 iqaudio-dacplus|IQaudIO Amp
 iqaudio-dacplus,auto_mute_amp|IQaudIO Amp - with auto mute
@@ -114,7 +115,7 @@ hifiberry-dac,384k|Generic PCM510x
 hifiberry-dacplus|Generic PCM512x (Alternative 1)
 allo-boss-dac-pcm512x-audio|Generic PCM512x (Alternative 2)
 hifiberry-amp|Generic TAS5713
-hifiberry-amp|Generic TAS5756M (Alternative 1)
+hifiberry-dacplus|Generic TAS5756M (Alternative 1)
 justboom-dac|Generic TAS5756M (Alternative 2)
 iqaudio-dacplus|Generic TAS5756M (Alternative 3)
 hifiberry-dac|Generic TDA1387
