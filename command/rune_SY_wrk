@@ -288,9 +288,8 @@ if ($playerid_db === '') {
         // ashuffle gets started automatically
     }
     //
-    // check that MPD only has one output enabled and if not correct
-    // todo: maybe make this an async action to speed up startup
-    wrk_check_MPD_outputs($redis);
+    // check that MPD only has one output enabled and if not correct it
+    sysCmdAsync('nice --adjustment=2 /srv/http/command/check_MPD_outputs_async.php');
     //
     $kernel = $redis->get('kernel');
     // load i2smodule
