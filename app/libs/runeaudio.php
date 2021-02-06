@@ -5132,7 +5132,7 @@ function ui_lastFM_coverart($redis, $artist, $album, $lastfm_apikey, $proxy)
 }
 
 // populate queue with similiar tracks suggested by Last.fm
-function ui_lastFM_similar($redis, $artist, $track, $lastfm_apikey, $proxy)
+function ui_lastFM_similar($redis, $artist, $track, $lastfmApikey, $proxy)
 {
     if (!$redis->hGet('service', 'lastfm')) {
         return false;
@@ -5342,8 +5342,10 @@ function curlGet($url, $proxy = null)
     curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     if (isset($proxy)) {
-        if ($proxy['enable'] === '1') {
-            $proxy['user'] === '' || curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
+        if (isset($proxy['enable']) && $proxy['enable'] === '1' && isset($proxy['host']) && $proxy['host']) {
+            if (isset($proxy['user']) && $proxy['user'] && isset($proxy['pass'])) {
+                curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxy['user'].':'.$proxy['pass']);
+            }
             curl_setopt($ch, CURLOPT_PROXY, $proxy['host']);
             // runelog('cURL proxy HOST: ',$proxy['host']);
             // runelog('cURL proxy USER: ',$proxy['user']);

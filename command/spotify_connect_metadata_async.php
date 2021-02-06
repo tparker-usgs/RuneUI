@@ -46,7 +46,7 @@ runelog('spotify_connect_metadata_async START');
 
 // Connect to Redis backend
 $redis = new Redis();
-$redis->connect('/run/redis/socket');
+$redis->pconnect('/run/redis/socket');
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
 // $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
@@ -184,10 +184,10 @@ if ($track_id == $last_track_id) {
     }
     unset($retval, $line);
     // get the album name
-    runelog('spotify_connect_metadata_async ALBUM_URL:', $album_url);
     if ($album_url == '') {
         runelog('spotify_connect_metadata_async ALBUM_URL:', 'Empty');
     } else {
+        runelog('spotify_connect_metadata_async ALBUM_URL:', $album_url);
         // curl -s <ALBUM_URL> | sed 's/<meta/\n<meta/g' | grep -i 'og:title'
         $command = 'curl -s -f --connect-timeout 5 -m 10 --retry 2 '.$album_url.' | sed '."'".'s/<meta/\n<meta/g'."'".' | grep -i '."'".'og:title'."'";
         runelog('spotify_connect_metadata_async album command:', $command);

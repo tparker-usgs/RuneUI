@@ -760,11 +760,6 @@ function refreshState() {
             $('#countdown-display-ss').countdown('destroy');
             $('#countdown-display-sss').countdown('destroy');
         }
-        // if (GUI.stream === 'radio') {
-            // $('#elapsed').html('&infin;');
-        // } else {
-            // $('#elapsed').html('00:00');
-        // }
         if (GUI.stream === 'radio') {
             $('#total').html('<span>&infin;</span>');
             $('#total-ss').html('<span>&infin;</span>');
@@ -994,24 +989,7 @@ function updateGUI() {
                     },
                     cache: false
                 });
-            // } else {
-                // var covercachenum = Math.floor(Math.random()*1001);
-                // $.ajax({
-                    // url: '/artist_info/',
-                    // success: function(data){
-                        // var info = jQuery.parseJSON(data);
-                        // if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
-                            // $('#artist-bio-ss').html(info.artist.bio.content.substring(0,1000) + ' ... ');
-                            // //$('#artist-bio-ss').html(info.artist.bio.summary);
-                            // $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
-                            // $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
-                        // }
-                    // },
-                    // cache: false
-                // });
-                // $('#cover-art').css('background-image','url("assets/img/cover-radio.jpg")');
-                // $('#cover-art-ss').css('background-image','url("assets/img/cover-radio.jpg")');
-            // }
+            }
         }
         GUI.currentalbum = currentalbumstring;
     }

@@ -333,6 +333,7 @@ function redisDatastore($redis,$action) {
             // lock keys
             $redis->set('lock_refresh_ao', 0);
             $redis->set('lock_wifiscan', 0);
+            $redis->set('lock_globalrandom', 0);
             // env settings
             $mounted = $redis->keys('mount_*');
             foreach ($mounted as $key) {
@@ -656,6 +657,7 @@ function redisDatastore($redis,$action) {
             // lock keys
             $redis->exists('lock_refresh_ao') || $redis->set('lock_refresh_ao', 0);
             $redis->exists('lock_wifiscan') || $redis->set('lock_wifiscan', 0);
+            $redis->exists('lock_globalrandom') || $redis->set('lock_globalrandom', 0);
             // env settings
             $redis->exists('wlans') || $redis->set('wlans', '');
             $redis->exists('mountidx') || $redis->set('mountidx', 1);

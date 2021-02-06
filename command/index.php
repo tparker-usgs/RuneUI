@@ -57,7 +57,7 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
     } else {
         ui_notify('Spotify not enabled', 'Enable and configure it under the Settings screen');
     }
-} elseif (isset($_GET['cmd']) && $_GET['cmd'] !== '') {
+} elseif (isset($_GET['cmd']) && $_GET['cmd']) {
     // debug
     // runelog('MPD command: ',$_GET['cmd']);
     if ($_GET['cmd'] === 'renderui') {
@@ -80,17 +80,17 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
                 $_GET['cmd'] = 'qclear';
                 $redis->hIncrBy('spotify', 'plversion', 1);
             }
-            if (strpos($_GET['cmd'], 'repeat') === 0) $_GET['cmd'] = 'repeat';
-            if (strpos($_GET['cmd'], 'random') === 0) $_GET['cmd'] = 'shuffle';
-            if (strpos($_GET['cmd'], 'seek') === 0) {
+            if (strpos(' '.$_GET['cmd'], 'repeat')) $_GET['cmd'] = 'repeat';
+            if (strpos(' '. $_GET['cmd'], 'random')) $_GET['cmd'] = 'shuffle';
+            if (strpos(' '.$_GET['cmd'], 'seek')) {
                 $seek = explode(" ", $_GET['cmd']);
                 $_GET['cmd'] = 'seek '.($seek[2] * 1000);
             }
-            if (strpos($_GET['cmd'], 'play') === 0 && strpos($_GET['cmd'], ' ') === 4) {
+            if (strpos(' '.$_GET['cmd'], 'play') && strpos($_GET['cmd'], ' ') === 4) {
                 $play_track = explode(" ", $_GET['cmd']);
                 $_GET['cmd'] = 'goto '.($play_track[1] + 1);
             }
-            if (strpos($_GET['cmd'], 'deleteid') === 0) {
+            if (strpos(' '.$_GET['cmd'], 'deleteid')) {
                 $remove_track = explode(" ", $_GET['cmd']);
                 $_GET['cmd'] = 'qrm '.$remove_track[1];
                 $redis->hIncrBy('spotify', 'plversion', 1);

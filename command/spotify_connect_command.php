@@ -74,7 +74,6 @@ $redis->hSet('spotifyconnect', 'event_time_stamp', $event_time_stamp);
 
 // pass the command to the back-end to process the information, it needs to run as root to start and stop systemd services
 $jobID[] = wrk_control($redis, 'newjob', $data = array('wrkcmd' => 'spotifyconnectmsg', 'action' => $player_event, 'args' => $track_id));
-waitSyWrk($redis, $jobID);
 
 // return true
 return 1;
