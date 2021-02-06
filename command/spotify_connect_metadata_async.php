@@ -50,6 +50,11 @@ $redis->pconnect('/run/redis/socket');
 // get the album art directory and url dir
 $artDir = rtrim(trim($redis->get('albumart_image_dir')), '/');
 $artUrl = trim($redis->get('albumart_image_url_dir'), " \n\r\t\v\0/");
+if ($redis->get('remoteSSbigart') === 'album') {
+    $bigartIsAlbum = true;
+} else {
+    $bigartIsAlbum = false;
+}
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
 // $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
@@ -155,7 +160,6 @@ if ($track_id == $last_track_id) {
     $status['elapsed'] = "0";
     $status['song_percent'] = "0";
     // delete any existing cover art
-    sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
     // curl -s https://open.spotify.com/track/<TRACK_ID> | sed 's/<meta/\n<meta/g' | grep -i -E 'og:title|og:image|music:duration|music:album|music:musician'
     $command = 'curl -s -f --connect-timeout 5 -m 10 --retry 2 https://open.spotify.com/track/'.$track_id.' | sed '."'".'s/<meta/\n<meta/g'."'".' | grep -i -E '."'".'og:title|og:image|music:duration|music:album|music:musician'."'";
     runelog('spotify_connect_metadata_async track command:', $command);
@@ -254,36 +258,34 @@ if ($track_id == $last_track_id) {
         $spotifyFileName = 'spotify-connect-cover';
         $fileName = $artDir.'/'.$spotifyFileName;
         // wget -nv -F -T 10 -t 2 -O /srv/http/tmp/spotify-connect/spotify-connect-cover https://i.scdn.co/image/<ALBUMART_URL>
-        $command = 'wget -nv -F -T 10 -t 2 -O /srv/http/tmp/spotify-connect/spotify-connect-cover '.$albumart_url;
+        $command = 'wget -nv -F -T 10 -t 2 -O "'.$fileName.'" '.$albumart_url;
         runelog('spotify_connect_metadata_async album art:', $command);
         $retval = sysCmd($command);
         // clear the cache otherwise filesize() returns incorrect values
-        clearstatcache(true, '/srv/http/tmp/spotify-connect/spotify-connect-cover');
-        if (filesize('/srv/http/tmp/spotify-connect/spotify-connect-cover') <= 100) {
+        clearstatcache(true, $fileName);
+        if (filesize($fileName) <= 100) {
             runelog('spotify_connect_metadata_async ALBUMART FILE:', 'Empty');
-            $redis->hSet('lyrics', 'art', '/srv/http/tmp/spotify-connect/spotify-connect-default.png');
-            sysCmd('rm -f /srv/http/tmp/spotify-connect/spotify-connect-cover.*');
         } else {
             // extract the first 32 characters from the album art file
-            $fp = fopen('/srv/http/tmp/spotify-connect/spotify-connect-cover', 'r');
+            $fp = fopen($fileName, 'r');
             $data_32 = fread($fp, 32);
             fclose($fp);
             // determine the album art file type
             if (strpos(' '.$data_32, 'PNG')) {
-                $imgtype = 'png';
+                $imgtype = '.png';
             } else if (strpos(' '.$data_32, 'JFIF')) {
-                $imgtype = 'jpg';
+                $imgtype = '.jpg';
             } else {
-                $imgtype = 'jpg';
+                $imgtype = '.jpg';
             }
-            rename("/srv/http/tmp/spotify-connect/spotify-connect-cover", "/srv/http/tmp/spotify-connect/spotify-connect-cover.".$imgtype);
-            $redis->hSet('lyrics', 'art', '/srv/http/tmp/spotify-connect/spotify-connect-cover.'.$imgtype);
-            runelog('spotify_connect_metadata_async image filename:', '/srv/http/tmp/spotify-connect/spotify-connect-cover.'.$imgtype);
+            rename($fileName, $fileName.$imgtype);
+            runelog('spotify_connect_metadata_async image filename:', $fileName.$imgtype);
         }
         unset($retval);
     }
     $status['time'] = abs(round(floatval($duration_in_sec)));
     $status['currentartist'] = $artist;
+    $status['currentalbumartist'] = $artist;
     $status['currentalbum'] = $album;
     $status['currentsong'] = $title;
     $status['mainArtURL'] = $artDir.'/'.$spotifyFileName.$imgtype;
@@ -303,13 +305,6 @@ if ($track_id == $last_track_id) {
         $status['song_percent'] = 0;
     }
 }
-$redis->hSet('lyrics', 'time', $status['time']);
-$redis->hSet('lyrics', 'artist', $status['currentartist']);
-$redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
-$redis->hSet('lyrics', 'album', $status['currentalbum']);
-$redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
-$redis->hSet('lyrics', 'song', $status['currentsong']);
-$redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
 // save JSON response for extensions
 $redis->set('act_player_info', json_encode($status));
 ui_render('playback', json_encode($status));

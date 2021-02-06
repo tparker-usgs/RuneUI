@@ -118,31 +118,26 @@ sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
 sysCmdAsync('/var/www/command/ui_update_async');
 // --- WORKER MAIN LOOP --- //
 while (1) {
-    // Connect to Redis backend
-    $redis = new Redis();
-    $redis->pconnect('/run/redis/socket');
-    sleep(3);
-    $activePlayer = $redis->get('activePlayer');
     if ($activePlayer !== "Airplay") {
         sleep(3);
     } else {
         do {
             // Open the FiFo metadata file if closed
             if ($airplay_handle == FALSE) {
-                runelog('rune_SSM_wrk: Open Airplay metadata file: ', $redis->hGet('airplay', 'metadata_pipe_name'));
-                if ($airplay_handle = fopen($redis->hGet('airplay', 'metadata_pipe_name'), 'r')) {
-                    runelog('rune_SSM_wrk: Airplay metadata file opened: ', $redis->hGet('airplay', 'metadata_pipe_name'));
+                runelog('rune_SSM_wrk: Open Airplay metadata file: ', $airplayMetadataPipeName);
+                if ($airplay_handle = fopen($airplayMetadataPipeName, 'r')) {
+                    runelog('rune_SSM_wrk: Airplay metadata file opened: ', $airplayMetadataPipeName);
                     // set stream set blocking to true, fgets will now wait for data
                     stream_set_blocking($airplay_handle, TRUE);
                     sleep(1);
                 } else {
-                    runelog('rune_SSM_wrk: Airplay metadata file open failed: ', $redis->hGet('airplay', 'metadata_pipe_name'));
+                    runelog('rune_SSM_wrk: Airplay metadata file open failed: ', $airplayMetadataPipeName);
                     $airplay_handle = FALSE;
                     sleep(2);
                     break;
                 }
             } else {
-                runelog('rune_SSM_wrk: Airplay metadata file is already open: ', $redis->hGet('airplay', 'metadata_pipe_name'));
+                runelog('rune_SSM_wrk: Airplay metadata file is already open: ', $airplayMetadataPipeName);
             }
             // read the metadata file
             // fgets() will wait for data
@@ -229,9 +224,6 @@ while (1) {
                         $status['currentalbumartist'] = empty($buf) ? 'Unknown' : trim($buf);
                         $status['currentartist'] = $status['currentalbumartist'];
                         runelog('rune_SSM_wrk: Currentartist: ', $status['currentartist']);
-                        // store information for lyrics and info
-                        $redis->hSet('lyrics', 'artist', $status['currentartist']);
-                        $redis->hSet('lyrics', 'currentartist', lyricsStringClean($status['currentartist'], 'artist'));
                         break;
                     case 'core astm':
                         // song time in milliseconds - do not use this, song time is derived from 'ssnc prgr' progress
@@ -241,17 +233,11 @@ while (1) {
                         // album
                         $status['currentalbum'] = empty($buf) ? 'Unknown' : trim($buf);
                         runelog('rune_SSM_wrk: Currentalbum: ', $status['currentalbum']);
-                        // store information for lyrics and info
-                        $redis->hSet('lyrics', 'album', $status['currentalbum']);
-                        $redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
                         break;
                     case 'core minm':
                         // song
                         $status['currentsong'] = empty($buf) ? 'Unknown' : trim($buf);
                         runelog('rune_SSM_wrk: Currentsong: ', $status['currentsong']);
-                        // store information for lyrics and info
-                        $redis->hSet('lyrics', 'song', $status['currentsong']);
-                        $redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
                         break;
                     case 'core asgn':
                         // genre
@@ -327,6 +313,7 @@ while (1) {
                             $status['elapsed'] = "0";
                             $status['song_percent'] = "100";
                         }
+                        $status['currentalbumartist'] = "Airplay";
                         $status['currentartist'] = "Airplay";
                         $status['currentalbum'] = "-----";
                         $status['currentsong'] = "Switching";
@@ -353,7 +340,6 @@ while (1) {
                             $status['volume'] = $redis->get('lastmpdvolume');
                         }
                         $status['audio'] = "44100:16:2";
-                        $redis->hSet('lyrics', 'audio', $status['audio']);
                         $status['audio_sample_rate'] = "44.1";
                         $status['audio_sample_depth'] = "16";
                         $status['bitrate'] = "1411";
@@ -367,6 +353,7 @@ while (1) {
                         $status['time'] = "0";
                         $status['elapsed'] = "0";
                         $status['song_percent'] = "100";
+                        $status['currentalbumartist'] = "Airplay";
                         $status['currentartist'] = "Airplay";
                         $status['currentalbum'] = "-----";
                         $status['currentsong'] = " ----- ";
@@ -518,7 +505,7 @@ while (1) {
         } while (($redis->get('activePlayer') === 'Airplay') && ($airplay_handle != FALSE));
         sleep(1);
     }
-    // close Redis connection
-    $redis->close();
 // --- WORKER MAIN LOOP --- //
+// close Redis connection
+$redis->close();
 }

@@ -827,6 +827,15 @@ function updateGUI() {
     var currentartist = GUI.json.currentartist;
     var currentsong = ((typeof GUI.json.currentsong == 'undefined') ? '' : GUI.json.currentsong);
     var currentalbum = GUI.json.currentalbum;
+    var currentalbumartist = ((typeof GUI.json.currentalbumartist == 'undefined') ? '' : GUI.json.currentalbumartist);
+    var currentcomposer = ((typeof GUI.json.currentcomposer == 'undefined') ? '' : GUI.json.currentcomposer);
+    var radioname = ((typeof GUI.json.radioname == 'undefined') ? '' : GUI.json.radioname);
+    var mainArtURL = ((typeof GUI.json.mainArtURL == 'undefined') ? '' : GUI.json.mainArtURL);
+    var bigArtURL = ((typeof GUI.json.bigArtURL == 'undefined') ? '' : GUI.json.bigArtURL);
+    var smallArtURL = ((typeof GUI.json.smallArtURL == 'undefined') ? '' : GUI.json.smallArtURL);
+    var song_lyrics = ((typeof GUI.json.song_lyrics == 'undefined') ? '' : GUI.json.song_lyrics);
+    var artist_bio_summary = ((typeof GUI.json.artist_bio_summary == 'undefined') ? '' : GUI.json.artist_bio_summary);
+    var artist_similar = ((typeof GUI.json.artist_similar == 'undefined') ? '' : GUI.json.artist_similar);
     // set radio mode if stream is present
     GUI.stream = ((radioname !== null && radioname !== undefined && radioname !== '') ? 'radio' : '');
     // check MPD status and refresh the UI info
@@ -846,72 +855,57 @@ function updateGUI() {
             $('#volume').val((volume === '-1') ? 100 : volume, false).trigger('update');
         }
         // console.log('currentartist = ', GUI.json.currentartist);
-        // if (GUI.stream !== 'radio') {
-            if (currentartist === null || currentartist.length > 55) {
-                $('#currentartist-ss')[0].style.fontSize = "18px";
-                $('#currentartist-sss')[0].style.fontSize = "28px";
-            } else if (currentartist.length > 45) {
-                $('#currentartist-ss')[0].style.fontSize = "20px";
-                $('#currentartist-sss')[0].style.fontSize = "30px";
-            } else if (currentartist.length > 30) {
-                $('#currentartist-ss')[0].style.fontSize = "22px";
-                $('#currentartist-sss')[0].style.fontSize = "32px";
-            } else {
-                $('#currentartist-ss')[0].style.fontSize = "28px";
-                $('#currentartist-sss')[0].style.fontSize = "34px";
-            }
-            $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
-            $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
-            $('#currentartist-sss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
-            if (currentsong === null || currentsong.length > 55) {
-                $('#currentsong-ss')[0].style.fontSize = "18px";
-                $('#currentsong-sss')[0].style.fontSize = "28px";
-            } else if (currentsong.length > 45) {
-                $('#currentsong-ss')[0].style.fontSize = "20px";
-                $('#currentsong-sss')[0].style.fontSize = "30px";
-            } else if (currentsong.length > 35) {
-                $('#currentsong-ss')[0].style.fontSize = "26px";
-                $('#currentsong-sss')[0].style.fontSize = "32px";
-            } else if (currentsong.length > 25) {
-                $('#currentsong-ss')[0].style.fontSize = "32px";
-                $('#currentsong-sss')[0].style.fontSize = "36px";
-            } else {
-                $('#currentsong-ss')[0].style.fontSize = "40px";
-                $('#currentsong-sss')[0].style.fontSize = "40px";
-            }
-            $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
-            $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
-            $('#currentsong-sss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
-            if (currentalbum === null || currentalbum.length > 55) {
-                $('#currentalbum-ss')[0].style.fontSize = "18px";
-                $('#currentalbum-sss')[0].style.fontSize = "28px";
-            } else if (currentalbum.length > 45) {
-                $('#currentalbum-ss')[0].style.fontSize = "20px";
-                $('#currentalbum-sss')[0].style.fontSize = "30px";
-            } else if (currentalbum.length > 30) {
-                $('#currentalbum-ss')[0].style.fontSize = "22px";
-                $('#currentalbum-sss')[0].style.fontSize = "32px";
-            } else {
-                $('#currentalbum-ss')[0].style.fontSize = "24px";
-                $('#currentalbum-sss')[0].style.fontSize = "34px";
-            }
-            $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
-            $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
-            $('#currentalbum-sss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
-        // } else {
-            // $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
-            // $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
-            // $('#currentartist-sss').html((currentartist === null || currentartist === undefined || currentartist === '') ? radioname : currentartist);
-            // $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
-            // $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
-            // $('#currentsong-sss').html((currentsong === null || currentsong === undefined || currentsong === '') ? radioname : currentsong);
-            // $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
-            // $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
-            // $('#currentalbum-sss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? radioname : currentalbum);
-            // // $('#currentalbum').html('<span class="notag">streaming</span>');
-            // // $('#currentalbum-ss').html('<span class="notag">streaming</span>');
-            // // $('#currentalbum-sss').html('<span class="notag">streaming</span>');
-        // }
+        if (currentartist === null || currentartist.length > 55) {
+            $('#currentartist-ss')[0].style.fontSize = "18px";
+            $('#currentartist-sss')[0].style.fontSize = "28px";
+        } else if (currentartist.length > 45) {
+            $('#currentartist-ss')[0].style.fontSize = "20px";
+            $('#currentartist-sss')[0].style.fontSize = "30px";
+        } else if (currentartist.length > 30) {
+            $('#currentartist-ss')[0].style.fontSize = "22px";
+            $('#currentartist-sss')[0].style.fontSize = "32px";
+        } else {
+            $('#currentartist-ss')[0].style.fontSize = "28px";
+            $('#currentartist-sss')[0].style.fontSize = "34px";
+        }
+        $('#currentartist').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+        $('#currentartist-ss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+        $('#currentartist-sss').html((currentartist === null || currentartist === undefined || currentartist === '') ? '<span class="notag">[no artist]</span>' : currentartist);
+        if (currentsong === null || currentsong.length > 55) {
+            $('#currentsong-ss')[0].style.fontSize = "18px";
+            $('#currentsong-sss')[0].style.fontSize = "28px";
+        } else if (currentsong.length > 45) {
+            $('#currentsong-ss')[0].style.fontSize = "20px";
+            $('#currentsong-sss')[0].style.fontSize = "30px";
+        } else if (currentsong.length > 35) {
+            $('#currentsong-ss')[0].style.fontSize = "26px";
+            $('#currentsong-sss')[0].style.fontSize = "32px";
+        } else if (currentsong.length > 25) {
+            $('#currentsong-ss')[0].style.fontSize = "32px";
+            $('#currentsong-sss')[0].style.fontSize = "36px";
+        } else {
+            $('#currentsong-ss')[0].style.fontSize = "40px";
+            $('#currentsong-sss')[0].style.fontSize = "40px";
+        }
+        $('#currentsong').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+        $('#currentsong-ss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+        $('#currentsong-sss').html((currentsong === null || currentsong === undefined || currentsong === '') ? '<span class="notag">[no title]</span>' : currentsong);
+        if (currentalbum === null || currentalbum.length > 55) {
+            $('#currentalbum-ss')[0].style.fontSize = "18px";
+            $('#currentalbum-sss')[0].style.fontSize = "28px";
+        } else if (currentalbum.length > 45) {
+            $('#currentalbum-ss')[0].style.fontSize = "20px";
+            $('#currentalbum-sss')[0].style.fontSize = "30px";
+        } else if (currentalbum.length > 30) {
+            $('#currentalbum-ss')[0].style.fontSize = "22px";
+            $('#currentalbum-sss')[0].style.fontSize = "32px";
+        } else {
+            $('#currentalbum-ss')[0].style.fontSize = "24px";
+            $('#currentalbum-sss')[0].style.fontSize = "34px";
+        }
+        $('#currentalbum').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
+        $('#currentalbum-ss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
+        $('#currentalbum-sss').html((currentalbum === null || currentalbum === undefined || currentalbum === '') ? '<span class="notag">[no album]</span>' : currentalbum);
         if (GUI.json.repeat === '1') {
             $('#repeat').addClass('btn-primary');
         } else {
@@ -942,19 +936,35 @@ function updateGUI() {
                     },
                     cache: false
                 });
+            } else {
+                $('#lyric-text-overlay').html(song_lyrics);
             }
         }
         GUI.currentsong = currentsong;
         var currentalbumstring = currentartist + ' - ' + currentalbum;
         if (GUI.old_state !== GUI.state || GUI.currentalbum !== currentalbumstring) {
             GUI.old_state = GUI.state;
-            $('#artist-bio-ss').html('');
-            $('#artist-image-ss').css('background-image', '');
-            $('#addinfo-text-ss').html('');
-            $('#artist-bio-overlay').html('');
-            $('#artist-image-overlay').css('background-image', '');
-            $('#addinfo-text-overlay').html('');
-            // if (GUI.stream !== 'radio') {
+            if (GUI.stream === 'radio') {
+                // $('#cover-art').css( "opacity", 0);
+                // $('#cover-art').fadeOut();
+                $('#artist-bio-ss').html(artist_bio_summary);
+                $('#artist-bio-overlay').html(artist_bio_summary);
+                // $('#artist-bio-full-overlay').html(artist_bio_summary);
+                $('#addinfo-text-ss').html(artist_similar);
+                $('#addinfo-text-overlay').html(artist_similar);
+                $('#artist-image-ss').css('background-image', 'url("' + smallArtURL + '")');
+                $('#artist-image-overlay').css('background-image', 'url("' + smallArtURL + '")');
+                $('#cover-art').css('background-image', 'url("' + mainArtURL + '")');
+                $('#cover-art-ss').css('background-image', 'url("' + bigArtURL + '")');
+                $('#cover-art-sss').css('background-image', 'url("' + mainArtURL + '")');
+                // $('#cover-art').fadeIn();
+            } else {
+                $('#artist-bio-ss').html('');
+                $('#artist-image-ss').css('background-image', '');
+                $('#addinfo-text-ss').html('');
+                $('#artist-bio-overlay').html('');
+                $('#artist-image-overlay').css('background-image', '');
+                $('#addinfo-text-overlay').html('');
                 var covercachenum = Math.floor(Math.random()*1001);
                 $('#cover-art').css('background-image','url("/coverart/?v=' + covercachenum + '")');
                 $('#cover-art-ss').css('background-image','url("/coverart/?v=' + covercachenum + '")');
@@ -963,29 +973,25 @@ function updateGUI() {
                     url: '/artist_info/',
                     success: function(data){
                         var info = jQuery.parseJSON(data);
-                        if (typeof info.artist !== 'undefined' && info.artist.bio.content !== '') {
-                            $('#artist-bio-ss').html(info.artist.bio.content.substring(0, Math.min(info.artist.bio.content.indexOf("<a href"), 550)) + '... ');
-                            $('#artist-bio-overlay').html(info.artist.bio.summary.replace('">Read more on Last.fm', '/+wiki" target="_blank" rel="nofollow">Read more on Last.fm'));
-                            $('#artist-bio-full-overlay').html(info.artist.bio.content);
-                        } else {
-                            $('#artist-bio-ss').html(currentartist + ', sorry, no details available ');
-                            $('#artist-bio-overlay').html(currentartist + ', sorry, no details available ');
-                            $('#artist-bio-full-overlay').html(currentartist + ', sorry, no details available ');
+                        if (typeof info.artist !== 'undefined' && info.content !== '') {
+                            $('#artist-bio-ss').html(info.content.substring(0, Math.min(info.artist.bio.content.indexOf("<a href"), 550)) + '... ');
+                            $('#artist-bio-overlay').html(info.summary);
+                            $('#artist-bio-full-overlay').html(info.content);
                         }
-                        if (typeof info.artist !== 'undefined' && info.artist.similar.artist[0].name !== '') {
-                            $('#addinfo-text-ss').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name);
-                            $('#addinfo-text-overlay').html('Similar Artists:<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[0].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[1].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[2].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[3].name + '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + info.artist.similar.artist[4].name + '<br>&nbsp;<br>&nbsp;');
+                        if (typeof info.artist !== 'undefined' && info.similar !== '') {
+                            $('#addinfo-text-ss').html(info.similar);
+                            $('#addinfo-text-overlay').html(info.similar);
                         } else {
                             $('#addinfo-text-ss').html('');
                             $('#addinfo-text-overlay').html('');
                         }
-                        if (typeof info.artist !== 'undefined' && info.artist.image[2] !== '') {
-                            $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
-                            $('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
-                        } else {
-                            $('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
-                            $('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
-                        }
+                        // if (typeof info.artist !== 'undefined' && info.artist.image[2] !== '') {
+                            // $('#artist-image-ss').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                            // $('#artist-image-overlay').css('background-image', 'url("' + info.artist.image[2]["#text"] + '")');
+                        // } else {
+                            // $('#artist-image-ss').css('background-image','url("assets/img/unkown.png")');
+                            // $('#artist-image-overlay').css('background-image','url("assets/img/unkown.png")');
+                        // }
                     },
                     cache: false
                 });
