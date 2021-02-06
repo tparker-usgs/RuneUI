@@ -1030,13 +1030,16 @@ function _parseStatusResponse($redis, $resp)
         // clear the cache otherwise file_exists() returns incorrect values
         clearstatcache(true, '/usr/bin/mediainfo');
         if ((($plistArray['bitrate'] == '0') || ($plistArray['bitrate'] == '')) && (count($status) == 3) && (file_exists('/usr/bin/mediainfo'))) {
-            $retval = sysCmd('mpc -f "[%file%]"');
-            $retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.trim($retval[0]).'" | grep "Overall bit rate  "');
-            $bitrate = trim(preg_replace('/[^0-9]/', '', $retval[0]));
-            If (!empty($bitrate)) {
-                $plistArray['bitrate'] = intval($bitrate);
+            $fileName = trim(sysCmd('mpc -f "[%file%]"')[0]);
+            if (isset($fileName) && !is_radioUrl($redis, $fileName)) {
+                // it's not a radio stream, mediainfo should work on all other files and url's
+                $retval = sysCmd('mediainfo "'.trim($redis->hGet('mpdconf', 'music_directory')).'/'.$fileName.'" | grep "Overall bit rate  "');
+                $bitrate = trim(preg_replace('/[^0-9]/', '', $retval[0]));
+                If (!empty($bitrate)) {
+                    $plistArray['bitrate'] = intval($bitrate);
+                }
+                unset($retval, $bitrate, $fileName);
             }
-            unset($retval);
         }
         // sample rate
         if ((($plistArray['audio_sample_rate'] == '0') || ($plistArray['audio_sample_rate'] == '')) && (count($status) == 3)) {
@@ -6363,6 +6366,7 @@ function wrk_mpdLog($redis, $logMax = null)
         // sysCmd('pkill -HUP mpd');
     }
 }
+
 // function to check if a request about a subject is the first one since reboot
 function is_firstTime($redis, $subject)
 // returns true or false
@@ -6389,6 +6393,7 @@ function is_firstTime($redis, $subject)
     }
     return $returnVal;
 }
+
 // function to check and correct the number of active MPD outputs
 function wrk_check_MPD_outputs($redis)
 // check that MPD only has one output enabled

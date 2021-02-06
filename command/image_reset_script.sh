@@ -153,13 +153,15 @@ rm -rf /var/lib/connman/wifi_*
 rm -rf /var/lib/iwd/*
 rm -rf /var/lib/connman/bluetooth_*
 #
+# remove backup work directory and any contents
+dirName=$( redis-cli get backup_dir | tr -s / | xargs )
+# remove a trailing / if it exists
+dirName="${dirName%/}"
+rm -rf "$dirName"
+#
 # remove mac spoofing scripts
 rm /etc/systemd/system/macfix_*.service
 rm /etc/systemd/system/multi-user.target.wants/macfix_*.service
-#
-# remove backup work directory and any contents
-dirName=$( redis-cli get backup_dir | xargs )
-rm -R "$dirName"
 #
 # keep the old nic name format (e.g. eth0, eth1, wlan0, wlan1, etc.)
 # remove this symlink to enable the new 'predictable' format
@@ -217,6 +219,7 @@ redis-cli del airplay
 redis-cli del debugdata
 redis-cli del dirble
 redis-cli del dlna
+redis-cli del first_time
 redis-cli del fix_mac
 redis-cli del jamendo
 redis-cli del local_browser
@@ -225,12 +228,11 @@ redis-cli del mpdconf
 redis-cli del samba
 redis-cli del spotify
 redis-cli del spotifyconnect
-redis-cli del first_time
+redis-cli del webradios
 # remove the redis variables used for:
 #   debug (wrk), network configuration (net, mac & nic), usb mounts (usb), disk mounts (mou), random play (random|ashuffle)
 redisvars=$( redis-cli --scan | grep -iE 'wrk|net|mac|nic|usb|mou|random|ashuffle' | xargs )
-for redisvar in $redisvars
-do
+for redisvar in $redisvars ; do
     redis-cli del $redisvar
 done
 # run the setup script with parameter reset
