@@ -374,6 +374,8 @@ if ($playerid_db === '') {
     //
     // turn wifi power saving off
     sysCmd('iwconfig wlan0 power off');
+    // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
+    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php -f /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
     //
     // close startup Redis connection
     $redis->close();

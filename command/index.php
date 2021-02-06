@@ -73,7 +73,32 @@ if (isset($_GET['switchplayer']) && $_GET['switchplayer'] !== '') {
             // debug
             // runelog('--- [command/index.php] --- CLOSE MPD SOCKET <<< (1) ---','');
             if (!$response) $response = readMpdResponse($mpd);
-        } elseif ($activePlayer === 'Spotify') {
+            if (strpos(' '.$_GET['cmd'], 'setvol')) {
+                // volume has been set via the UI, save the resulting volume in redis
+                // request the MPD status
+                sendMpdCommand($mpd, 'status');
+                // get the response from MPD as an array of response lines
+                $statusLines = explode("\n", readMpdResponse($mpd));
+                // walk through the array to find the element containing the volume
+                foreach ($statusLines as $status) {
+                    // clean up the status line, replace whitespace with singe space and trim
+                    $status = trim(preg_replace('!\s+!', ' ', $status));
+                    if (strpos(' '.$status, 'volume:')) {
+                        // found the volume, extract it from the line
+                        $volume = explode(': ', $status);
+                        if (isset($volume[1]) && trim($volume[1])) {
+                            // the volume level has a value, make it an integer
+                            $volume = intval(trim($volume[1]));
+                            // set the redis variable
+                            $redis->set('lastmpdvolume', $volume);
+                        }
+                        // exit the loop after the volume has been found
+                        break;
+                    }
+                }
+                unset($statusLines, $status, $volume);
+            }
+        } else if ($activePlayer === 'Spotify') {
             // MPD -> SPOP command conversion
             if ($_GET['cmd'] === 'pause') $_GET['cmd'] = 'toggle';
             if ($_GET['cmd'] === 'clear') {

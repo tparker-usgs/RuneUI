@@ -93,31 +93,9 @@ while (1) {
             // store "lastsongid"
             $redis->set('lastsongid', $status['songid']);
             $redis->set('pl_length', $status['playlistlength']);
-            // set the mpd volume if a value is available
-            if ((!empty($redis->get('lastmpdvolume'))) && ($redis->hGet('mpdconf', 'mixer_type') != 'disabled')) {
-                $lastmpdvolume = $redis->get('lastmpdvolume');
-                $retries_volume = 20;
-                do {
-                    sleep(2);
-                    // retry until MPD is up and returns the requested volume
-                    $retval = sysCmd('mpc volume | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-                    $mpdvolume = trim($retval[0]);
-                    unset($retval);
-                    if ($lastmpdvolume == $mpdvolume) {
-                        // make sure the UI has the correct value
-                        sysCmd('mpc volume '.$mpdvolume);
-                    } else if ($mpdvolume == 'n/a') {
-                        // something wrong, mismatch between redis and mpd 'disabled' values
-                        $retries_volume = 0;
-                    } else {
-                        // set the mpd volume, do a soft increase/decrease
-                        $setvolume = $mpdvolume-round((($mpdvolume-$lastmpdvolume)/2), 0, PHP_ROUND_HALF_UP);
-                        $retval = sysCmd('mpc volume '.$setvolume.' | grep "volume:" | cut -d ":" -f 2 | cut -d "%" -f 1');
-                        $mpdvolume = trim($retval[0]);
-                        unset($retval);
-                    }
-                } while (($lastmpdvolume != $mpdvolume) && (--$retries_volume > 0));
-            }
+            // set the mpd volume to the last value set via the UI, if a value is available and volume control is enabled
+            // the streaming services can change the alsa volume, we want to change it back to the last set value
+            set_last_mpd_volume($redis);
             do {
                 // idle LOOP
                 runelog('rune_PL_wrk: enter idle loop');
@@ -193,7 +171,6 @@ while (1) {
                     $redis->hSet('lyrics', 'currentsong', lyricsStringClean($status['currentsong']));
                     $redis->hSet('lyrics', 'currentalbum', lyricsStringClean($status['currentalbum']));
                 }
-
                 if ($status['changed'] === 'mixer') {
                     //$redis->set('current_volume', $status['volume']);
                     if ($redis->get('ao') === 'PianoDACPlus' && $redis->hget('mpdconf', 'mixer_type') === 'hardware') {

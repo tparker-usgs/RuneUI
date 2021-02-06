@@ -6467,3 +6467,67 @@ function wrk_check_MPD_outputs($redis)
         }
     }
 }
+
+
+// function to set the mpd volume to the last volume set via the UI
+function set_last_mpd_volume($redis)
+// set the mpd volume to the last value set via the UI, if a value is available and volume control is enabled
+// the streaming services can change the alsa volume, we want to change it back to the last set value
+{
+    if (($redis->exists('lastmpdvolume')) && ($redis->hGet('mpdconf', 'mixer_type') != 'disabled')) {
+        $lastmpdvolume = $redis->get('lastmpdvolume');
+        if ($lastmpdvolume && is_numeric($lastmpdvolume) && ($lastmpdvolume >= 0) && ($lastmpdvolume <= 100)) {
+            $retries_volume = 20;
+            do {
+                // retry getting the volume until MPD is up and returns a valid entry
+                $retval = sysCmd('mpc volume | grep "volume:" | xargs');
+                if (!$retval[0]) {
+                    // no response
+                    sleep(2);
+                    continue;
+                }
+                $retval = explode(' ',trim(preg_replace('!\s+!', ' ', $retval[0])));
+                if (!isset($retval[1])) {
+                    // invalid response
+                    sleep(2);
+                    continue;
+                }
+                if ($retval[1] === 'n/a') {
+                    // something wrong, mismatch between redis and mpd volume 'disabled' values, give up
+                    $retries_volume = 0;
+                    continue;
+                }
+                // strip any non-numeric values from the string
+                $mpdvolume = trim(preg_replace('/[^0-9]/', '', $retval[1]));
+                // careful: the volume control works in steps so the return value after stetting it may not be exactly the
+                //  same as the requested value
+                // use a soft increase/decrease when the difference is more than 4%, otherwise directly set the last saved value
+                if ($mpdvolume && is_numeric($mpdvolume) && ($mpdvolume >= 0) && ($mpdvolume <= 100)) {
+                    // a valid current volume has been returned
+                    if (abs($mpdvolume - $lastmpdvolume) > 4) {
+                        // set the mpd volume, do a soft increase/decrease
+                        $setvolume = $mpdvolume - round((($mpdvolume-$lastmpdvolume)/2), 0, PHP_ROUND_HALF_UP);
+                        $retval = sysCmd('mpc volume '.$setvolume);
+                        // sleep 1 second before looping
+                        sleep(1);
+                    } else {
+                        // set the mpd volume directly
+                        $retval = sysCmd('mpc volume '.$lastmpdvolume.' | grep "volume:" | xargs');
+                        $retval = explode(' ',trim(preg_replace('!\s+!', ' ', $retval[0])));
+                        $mpdvolume = trim(preg_replace('/[^0-9]/', '', $retval[1]));
+                        if ($mpdvolume && is_numeric($mpdvolume) && ($mpdvolume >= 0) && ($mpdvolume <= 100)) {
+                            // when $mpdvolume has a valid value we are finished
+                            $retries_volume = 0;
+                        } else {
+                            // sleep 1 second before looping
+                            sleep(1);
+                        }
+                    }
+                } else {
+                    // no valid current volume returned
+                    sleep(2);
+                }
+            } while (--$retries_volume > 0);
+        }
+    }
+}
