@@ -87,6 +87,7 @@ function redisDatastore($redis,$action) {
             $redis->hExists('mpdconf', 'music_directory') || $redis->hSet('mpdconf', 'music_directory', '/mnt/MPD');
             $redis->hExists('mpdconf', 'playlist_directory') || $redis->hSet('mpdconf', 'playlist_directory', '/var/lib/mpd/playlists');
             $redis->hExists('mpdconf', 'state_file') || $redis->hSet('mpdconf', 'state_file', '/var/lib/mpd/mpdstate');
+            $redis->hExists('mpdconf', 'state_file_interval') || $redis->hSet('mpdconf', 'state_file_interval', '1');
             $redis->hExists('mpdconf', 'dsd_usb') || $redis->hSet('mpdconf', 'dsd_usb', 'no');
             $redis->hExists('mpdconf', 'follow_outside_symlinks') || $redis->hSet('mpdconf', 'follow_outside_symlinks', 'yes');
             $redis->hExists('mpdconf', 'follow_inside_symlinks') || $redis->hSet('mpdconf', 'follow_inside_symlinks', 'yes');
