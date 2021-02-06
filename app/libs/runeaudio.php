@@ -2341,7 +2341,7 @@ function wrk_checkStrSysfile($sysfile, $searchstr)
 function wrk_checkMount($mpname)
 {
     $check_mp = sysCmd('grep -hc "/mnt/MPD/NAS/'.$mpname.'" /proc/mounts')[0];
-    if ($check_mp)) {
+    if ($check_mp) {
         return true;
     } else {
         return false;
