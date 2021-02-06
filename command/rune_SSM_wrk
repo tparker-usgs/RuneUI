@@ -102,6 +102,7 @@ $status['state'] = "play";
 $status['time'] = "0";
 $status['elapsed'] = "0";
 $status['song_percent'] = "100";
+$status['currentalbumartist'] = "Airplay";
 $status['currentartist'] = "Airplay";
 $status['currentalbum'] = "-----";
 $status['currentsong'] = "Switching";
@@ -225,7 +226,8 @@ while (1) {
                         break;
                     case 'core asar':
                         // artist
-                        $status['currentartist'] = empty($buf) ? 'Unknown' : trim($buf);
+                        $status['currentalbumartist'] = empty($buf) ? 'Unknown' : trim($buf);
+                        $status['currentartist'] = $status['currentalbumartist'];
                         runelog('rune_SSM_wrk: Currentartist: ', $status['currentartist']);
                         // store information for lyrics and info
                         $redis->hSet('lyrics', 'artist', $status['currentartist']);

@@ -5019,8 +5019,14 @@ function ui_status($mpd, $status)
 {
     $curTrack = getTrackInfo($mpd, $status['song']);
     if (isset($curTrack[0]['Title'])) {
+        // $status['currentalbumartist'] = htmlentities($curTrack[0]['AlbumArtist'], ENT_XML1, 'UTF-8');
+        // $status['currentartist'] = htmlentities($curTrack[0]['Artist'], ENT_XML1, 'UTF-8');
+        // $status['currentsong'] = htmlentities($curTrack[0]['Title'], ENT_XML1, 'UTF-8');
+        // $status['currentalbum'] = htmlentities($curTrack[0]['Album'], ENT_XML1, 'UTF-8');
+        // $status['currentcomposer'] = htmlentities($curTrack[0]['Composer'], ENT_XML1, 'UTF-8');
+        $status['currentalbumartist'] = $curTrack[0]['AlbumArtist'];
         $status['currentartist'] = $curTrack[0]['Artist'];
-        $status['currentsong'] = htmlentities($curTrack[0]['Title'], ENT_XML1, 'UTF-8');
+        $status['currentsong'] = $curTrack[0]['Title'];
         $status['currentalbum'] = $curTrack[0]['Album'];
         $status['currentcomposer'] = $curTrack[0]['Composer'];
         $status['fileext'] = parseFileStr($curTrack[0]['file'], '.');

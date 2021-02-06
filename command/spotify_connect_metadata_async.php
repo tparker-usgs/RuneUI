@@ -103,6 +103,7 @@ if ($last_track_id == '') {
     $status['time'] = "0";
     $status['elapsed'] = "0";
     $status['song_percent'] = "100";
+    $status['currentalbumartist'] = "SpotifyConnect";
     $status['currentartist'] = "SpotifyConnect";
     $status['currentalbum'] = "-----";
     $status['currentsong'] = "Switching";
