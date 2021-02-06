@@ -56,40 +56,47 @@ chown -R http.http "$backupDir"
 chmod -R 755 "$backupDir"
 rm -fR "$backupDir/*"
 #
-# create and initialise the shairport-sync Airplay art directory
+# create and initialise the albumart directory
 #
-mkdir -p /srv/http/tmp/airplay
-cp /srv/http/assets/img/airplay-default.png /srv/http/tmp/airplay/airplay-default.png
-cp /srv/http/assets/img/cover-default-runeaudio.png /srv/http/tmp/airplay/airplay-none.png
-cp /srv/http/assets/img/black.png /srv/http/tmp/airplay/black.png
-chown -R http.http /srv/http/tmp
-chmod 755 /srv/http/tmp/airplay
-chmod -R 444 /srv/http/tmp/airplay/*
+# get the directory name from redis
+artDir=$( redis-cli get albumart_image_dir | tr -s / | xargs )
+# remove a trailing / if it exists
+artDir="${artDir%/}"
+mkdir -p "$artDir"
+cp "/srv/http/assets/img/cover-default-runeaudio.png" "$artDir/none.png"
+cp "/srv/http/assets/img/black.png" "$artDir/black.png"
+cp "/srv/http/assets/img/airplay-default.png" "$artDir/airplay.png"
+cp "/srv/http/assets/img/spotify-connect-default.png" "$artDir/spotify-connect.png"
+cp "/srv/http/assets/img/cover-radio.jpg" "$artDir/radio.png"
+chown -R http.http "$artDir"
+chmod 755 "$artDir"
+chmod -R 644 "$artDir/*"
 #
-# create and initialise the shairport-sync Airplay art directory
-#
-mkdir -p /srv/http/tmp/spotify-connect
-cp /srv/http/assets/img/spotify-connect-default.png /srv/http/tmp/spotify-connect/spotify-connect-default.png
-cp /srv/http/assets/img/cover-default-runeaudio.png /srv/http/tmp/spotify-connect/spotify-connect-none.png
-cp /srv/http/assets/img/black.png /srv/http/tmp/spotify-connect/black.png
-chown -R http.http /srv/http/tmp
-chmod 755 /srv/http/tmp/spotify-connect
-chmod -R 444 /srv/http/tmp/spotify-connect/*
 # if the spotify connect cache is defined create the directory
-spotifyConnectCache=$( redis-cli hget spotifyconnect cache_path )
+#
+spotifyConnectCache=$( redis-cli hget spotifyconnect cache_path | tr -s / | xargs )
 if [ "$spotifyConnectCache" != "" ]; then
+    # remove a trailing / if it exists
+    spotifyConnectCache="${spotifyConnectCache%/}"
     mkdir -p "$spotifyConnectCache"
-    chown -R \spotifyd.spotifyd "$spotifyConnectCache"
+    chown -R spotifyd.spotifyd "$spotifyConnectCache"
     chmod 755 "$spotifyConnectCache"
     chmod -R 644 "$spotifyConnectCache/*"
 fi
 #
-# create and initialise the MPD art directory
+# determine whether album art directory is a tmpfs file system
 #
-mkdir -p /srv/http/tmp/mpd
-cp /srv/http/assets/img/cover-default-runeaudio.png /srv/http/tmp/mpd/mpd-default.png
-cp /srv/http/assets/img/cover-default-runeaudio.png /srv/http/tmp/mpd/mpd-none.png
-cp /srv/http/assets/img/black.png /srv/http/tmp/mpd/black.png
-chown -R http.http /srv/http/tmp
-chmod 755 /srv/http/tmp/mpd
-chmod -R 444 /srv/http/tmp/mpd/*
+# convert any symlinks to the actual path
+artDir=$( readlink -f "$artDir" )
+# get all the tmpfs mount points
+tmpfsAll=$( df -t tmpfs --output=target | grep '^/' | xargs )
+# set the tmpfs switch to false
+redis-cli set albumart_image_tmpfs 0
+for tmpfs in $tmpfsAll ; do
+    # convert any symlinks to the actual path
+    tmpfs=$( readlink -f "$tmpfs" )
+    if [[ "$artDir" == "$tmpfs"* ]] ; then
+        # a tmpfs file path is the first part of the art directory, set the switch to true
+        redis-cli set albumart_image_tmpfs 1
+    fi
+done

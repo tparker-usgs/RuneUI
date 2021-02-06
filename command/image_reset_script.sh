@@ -153,6 +153,12 @@ rm -rf /var/lib/connman/wifi_*
 rm -rf /var/lib/iwd/*
 rm -rf /var/lib/connman/bluetooth_*
 #
+# remove the art directory
+dirName=$( redis-cli get albumart_image_dir | tr -s / | xargs )
+# remove a trailing / if it exists
+dirName="${dirName%/}"
+rm -rf "$dirName"
+#
 # remove backup work directory and any contents
 dirName=$( redis-cli get backup_dir | tr -s / | xargs )
 # remove a trailing / if it exists

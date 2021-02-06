@@ -68,8 +68,24 @@ runelog('WORKER rune_SSM_wrk START');
 // reset state
 $airplay_handle = FALSE;
 $mode = 'any';
-// delete any existing cover art
-sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+// Connect to Redis backend
+$redis = new Redis();
+$redis->pconnect('/run/redis/socket');
+// get the album art directory and url dir
+$artDir = rtrim(trim($redis->get('albumart_image_dir')), '/');
+$artUrl = trim($redis->get('albumart_image_url_dir'), " \n\r\t\v\0/");
+if ($redis->hget('airplay', 'metadata_include_cover_art') == 'yes') {
+    $metadataIncludeCoverArt = true;
+} else {
+    $metadataIncludeCoverArt = false;
+}
+if ($redis->get('remoteSSbigart') === 'album') {
+    $albumBig = true;
+} else {
+    $albumBig = false;
+}
+$airplayMetadataPipeName =  $redis->hGet('airplay', 'metadata_pipe_name');
+$activePlayer = $redis->get('activePlayer');
 // initialise the status array
 $status = array();
 $status['audio'] = "44100:16:2";
@@ -92,6 +108,9 @@ $status['currentsong'] = "Switching";
 $status['actPlayer'] = "Airplay";
 $status['radioname'] = null;
 $status['OK'] = null;
+$status['mainArtURL'] = $artUrl.'/airplay.png';
+$status['smallArtURL'] = $artUrl.'/black.png';
+$status['bigArtURL'] = $artUrl.'/black.png';
 // save JSON response for extensions
 ui_render('playback', json_encode($status));
 sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
@@ -352,6 +371,11 @@ while (1) {
                         $status['actPlayer'] = "Airplay";
                         $status['radioname'] = null;
                         $status['OK'] = null;
+                        if ($metadataIncludeCoverArt) {
+                            $status['mainArtURL'] = $artUrl.'/black.png';
+                            $status['smallArtURL'] = $artUrl.'/black.png';
+                            $status['bigArtURL'] = $artUrl.'/black.png';
+                        }
                         // save JSON response for extensions
                         ui_render('playback', json_encode($status));
                         $redis->set('act_player_info', json_encode($status));
@@ -413,47 +437,52 @@ while (1) {
                         $status['currentsong'] = ' '.$status['currentsong'].' ';
                         ui_render('playback', json_encode($status));
                         $redis->set('act_player_info', json_encode($status));
-                        if ($redis->hget('airplay', 'metadata_include_cover_art') != 'yes') {
-                            //sysCmdAsync('/var/www/command/ui_update_async');
-                            //sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
-                        }
-                        $redis->hSet('lyrics', 'time', $status['time']);
+                        // if ($metadataIncludeCoverArt) {
+                            // sysCmdAsync('/var/www/command/ui_update_async');
+                            // sysCmd('curl -s -X GET http://localhost/command/?cmd=renderui');
+                        // }
                         break;
                     case 'ssnc PICT':
                         // artwork
                         // skip this section if cover art is not set, should never get here
-                        if ($redis->hget('airplay', 'metadata_include_cover_art') == 'yes') {
-                            // first determine the image file type
-                            $tmp = ' '.substr($buf, 0, 32);
-                            if (strpos($tmp, 'PNG') !== false) {
-                                $imgtype = 'png';
-                            } else if (strpos($tmp, 'JFIF') !== false) {
-                                $imgtype = 'jpg';
-                            } else {
-                                $imgtype = 'jpg';
-                            }
-                            // delete the last image file
-                            //sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
-                            // create a new image file
+                        if ($metadataIncludeCoverArt) {
                             if (strlen($buf)>128) {
-                                if (file_put_contents('/srv/http/tmp/airplay/airplay-cover.'.$imgtype, $buf) === false) {
-                                    runelog('rune_SSM_wrk: Image file create failed, name: ', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
+                                // first determine the image file type
+                                $tmp = ' '.substr($buf, 0, 32);
+                                if (strpos($tmp, 'PNG') !== false) {
+                                    $imgtype = 'png';
+                                } else if (strpos($tmp, 'JFIF') !== false) {
+                                    $imgtype = 'jpg';
+                                } else {
+                                    $imgtype = 'jpg';
+                                }
+                                // create a new image file
+                                $formattedArtName = format_art_file_name($status['currentartist'], $status['currentalbum']);
+                                $artFileName = $artDir.'/'.$formattedArtName.'.'.$imgtype;
+                                $artFileUrl = $artUrl.'/'.$formattedArtName.'.'.$imgtype;
+                                if (!file_put_contents($artFileName, $buf)) {
+                                    runelog('rune_SSM_wrk: Image file create failed, name: ', $artFileName);
                                     runelog('rune_SSM_wrk: Image file create failed, buffer length: ', strlen($buf));
-                                    $redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-default.png');
                                     break;
                                 }
                                 else {
-                                    runelog('rune_SSM_wrk: Image file create created, name: ', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
+                                    runelog('rune_SSM_wrk: Image file create created, name: ', $artFileName);
                                     runelog('rune_SSM_wrk: Image file create created, buffer length: ', strlen($buf));
-                                    // make sure the impage file is readable for the UI (runs as user http)
-                                    sysCmd('chown -f http.http /srv/http/tmp/airplay/airplay-cover.*');
-                                    sysCmd('chmod 644 /srv/http/tmp/airplay/airplay-cover.*');
-                                    $redis->hSet('lyrics', 'art', '/srv/http/tmp/airplay/airplay-cover.'.$imgtype);
+                                    // make sure the image file is readable for the UI (runs as user http)
+                                    sysCmd('chown -f http.http "'.$artFileName.'" ; chmod 644 "'.$artFileName.'"');
+                                    $status['mainArtURL'] = $artFileUrl;
+                                    if ($albumBig) {
+                                        $status['bigArtURL'] = $artFileUrl;
+                                    } else {
+                                        $status['smallArtURL'] = $artFileUrl;
+                                    }
                                 }
                             } else {
                                 // no image file
                                 runelog('rune_SSM_wrk: No image file, buffer length: ', strlen($buf));
-                                //sysCmd('rm -f /srv/http/tmp/airplay/airplay-cover.*');
+                                $status['mainArtURL'] = $artUrl.'/none.png';
+                                $status['smallArtURL'] = $artUrl.'/none.png';
+                                $status['bigArtURL'] = $artUrl.'/none.png';
                             }
                             // (save and) post the playback data to the UI
                             sleep(1);

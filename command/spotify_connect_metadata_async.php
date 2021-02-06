@@ -47,6 +47,9 @@ runelog('spotify_connect_metadata_async START');
 // Connect to Redis backend
 $redis = new Redis();
 $redis->pconnect('/run/redis/socket');
+// get the album art directory and url dir
+$artDir = rtrim(trim($redis->get('albumart_image_dir')), '/');
+$artUrl = trim($redis->get('albumart_image_url_dir'), " \n\r\t\v\0/");
 
 // read the parameters - this is the PLAYER_EVENT and TRACK_ID
 // $event = trim($argv[1]); // PLAYER_EVENT: stop, start or change (connect= stop)
@@ -106,6 +109,9 @@ if ($last_track_id == '') {
     $status['actPlayer'] = "SpotifyConnect";
     $status['radioname'] = null;
     $status['OK'] = null;
+    $status['mainArtURL'] = $artUrl.'/spotify-connect.png';
+    $status['smallArtURL'] = $artUrl.'/black.png';
+    $status['bigArtURL'] = $artUrl.'/black.png';
     if ($event == 'stop') {
         // save JSON response for extensions
         $redis->set('act_player_info', json_encode($status));
@@ -244,6 +250,8 @@ if ($track_id == $last_track_id) {
     if ($albumart_url == '') {
         runelog('spotify_connect_metadata_async ALBUMART_URL:', 'Empty - Terminating');
     } else {
+        $spotifyFileName = 'spotify-connect-cover';
+        $fileName = $artDir.'/'.$spotifyFileName;
         // wget -nv -F -T 10 -t 2 -O /srv/http/tmp/spotify-connect/spotify-connect-cover https://i.scdn.co/image/<ALBUMART_URL>
         $command = 'wget -nv -F -T 10 -t 2 -O /srv/http/tmp/spotify-connect/spotify-connect-cover '.$albumart_url;
         runelog('spotify_connect_metadata_async album art:', $command);
@@ -277,6 +285,12 @@ if ($track_id == $last_track_id) {
     $status['currentartist'] = $artist;
     $status['currentalbum'] = $album;
     $status['currentsong'] = $title;
+    $status['mainArtURL'] = $artDir.'/'.$spotifyFileName.$imgtype;
+    if ($albumBig) {
+        $status['bigArtURL'] = $artDir.'/'.$spotifyFileName.$imgtype;
+    } else {
+        $status['smallArtURL'] = $artDir.'/'.$spotifyFileName.$imgtype;
+    }
     // calculate elapsed time and song percentage
     // compensate because this routine runs async and is therefore late, event_time_stamp contains the real start time
     $time_stamp = time();

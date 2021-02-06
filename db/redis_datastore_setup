@@ -262,9 +262,15 @@ function redisDatastore($redis,$action) {
             $redis->hSet('lyrics', 'song', '');
             $redis->del('soxrmpdonoff');
             $redis->set('remoteSStime', -1);
+            // album and artist art
+            $redis->set('remoteSSbigart', 'album');
+            $redis->set('albumart_image_dir', '/srv/http/tmp/art');
+            $redis->set('albumart_image_url_dir', 'tmp/art');
+            $redis->set('albumart_image_tmpfs', 1);
             $redis->set('mpd_playback_laststate', '');
             $redis->set('mpd_playback_lastnumber', '');
             $redis->set('last_pl_randomfile', 'exists');
+            // local browser
             $redis->hSet('local_browser', 'enable', 0);
             $redis->hSet('local_browser', 'zoomfactor', 1);
             $redis->hSet('local_browser', 'rotate', 'NORMAL');
@@ -593,10 +599,16 @@ function redisDatastore($redis,$action) {
             $redis->exists('cmediafix') || $redis->set('cmediafix', 0);
             $redis->exists('stoppedPlayer') || $redis->set('stoppedPlayer', '');
             $redis->exists('remoteSStime') || $redis->set('remoteSStime', -1);
+            // album and artist art
+            $redis->exists('remoteSSbigart') || $redis->set('remoteSSbigart', 'album');
             $redis->exists('audio_on_off') || $redis->set('audio_on_off', 1);
+            $redis->exists('albumart_image_dir') || $redis->set('albumart_image_dir', '/srv/http/tmp/art');
+            $redis->exists('albumart_image_url_dir') || $redis->set('albumart_image_url_dir', 'tmp/art');
+            $redis->exists('albumart_image_tmpfs') || $redis->set('albumart_image_tmpfs', 1);
             $redis->exists('mpd_playback_laststate') || $redis->set('mpd_playback_laststate', '');
             $redis->exists('mpd_playback_lastnumber') || $redis->set('mpd_playback_lastnumber', '');
             $redis->exists('last_pl_randomfile') || $redis->set('last_pl_randomfile', 'exists');
+            // local browser
             $redis->exists('local_browser') || $redis->set('local_browser', 0);
             $redis->hExists('local_browser', 'enable') || $redis->hSet('local_browser', 'enable', 0);
             $redis->hExists('local_browser', 'zoomfactor') || $redis->hSet('local_browser', 'zoomfactor', 1);
