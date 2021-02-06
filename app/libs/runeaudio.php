@@ -4789,13 +4789,17 @@ function wrk_upmpdcli($redis, $name = null, $queueowner = null)
     if ($queueowner != 1) {
         $queueowner = '0';
     }
+    $logFile = $redis->hGet('dlna', 'logfile');
+    $logLevel = $redis->hGet('dlna', 'loglevel');
     $file = '/usr/lib/systemd/system/upmpdcli.service';
-    $newArray = wrk_replaceTextLine($file, '', 'ExecStart=', 'ExecStart=/usr/bin/upmpdcli -c /etc/upmpdcli.conf -q '.$queueowner.' -d '.$redis->hGet('dlna', 'logfile').' -l '.$redis->hGet('dlna', 'loglevel').' -f "'.$name.'"');
-    runelog('upmpdcli.service :', $newArray);
-    // Commit changes to /usr/lib/systemd/system/upmpdcli.service
-    $fp = fopen($file, 'w');
-    fwrite($fp, implode("", $newArray));
-    fclose($fp);
+    sysCmd('sed -i '."'".'/^ExecStart/ s|.*|ExecStart=/usr/bin/upmpdcli -c /etc/upmpdcli.conf -q '.$queueowner.' -d "'.$logFile.'" -l '.$logLevel.' -f "'.$name.'"|'."'".' /usr/lib/systemd/system/upmpdcli.service');
+    // the modifications above should work, but the parameter file seems to override the parameters on the ExecStart unit file line line
+    // modify them all
+    sysCmd('sed -i '."'".'/^friendlyname/ s|.*|friendlyname = '.$name.'|'."'".' /etc/upmpdcli.conf');
+    sysCmd('sed -i '."'".'/^ohproductroom/ s|.*|ohproductroom = '.$name.'|'."'".' /etc/upmpdcli.conf');
+    sysCmd('sed -i '."'".'/^ownqueue/ s|.*|ownqueue = '.$queueowner.'|'."'".' /etc/upmpdcli.conf');
+    sysCmd('sed -i '."'".'/^logfilename/ s|.*|logfilename = '.$logFile.'|'."'".' /etc/upmpdcli.conf');
+    sysCmd('sed -i '."'".'/^loglevel/ s|.*/|loglevel = '.$logLevel.'|'."'".' /etc/upmpdcli.conf');
     if ($redis->hGet('dlna','enable') === '1') {
         // update systemd
         sysCmd('systemctl daemon-reload');
