@@ -181,6 +181,13 @@ if ($playerid_db === '') {
     }
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl daemon-reload');
+    // // reboot - for some reason (probably connman or nginx) a connection to the UI cannot be made without a reboot
+    // sysCmd('/var/www/command/rune_shutdown reboot');
+    // sysCmd('reboot');
+    // // should never get here
+    // set first time boot to true
+    $redis->set('first_time_boot', 1);
+    runelog('--- RUNEAUDIO FIRST RUN PROCESS');
     sysCmd('systemctl restart rune_SY_wrk');
     // --- RUNEAUDIO FIRST RUN PROCESS //
 } else if ($redis->hGet('mpdconf', 'version') != $mpdversion) {
@@ -344,8 +351,10 @@ if ($playerid_db === '') {
         // do nothing
     } else {
         sysCmd('systemctl start php-fpm');
-        // // workaround for nginx needing restart with php7.x (it now seems to work fine without)
-        // sysCmd('systemctl restart nginx');
+        if ($redis->get('first_time_boot')) {
+            // workaround for nginx needing restart with php7.x (normally it now seems to work fine without, but not the first time boot)
+            sysCmd('systemctl restart nginx');
+        }
     }
     unset($retval);
     //
@@ -358,10 +367,6 @@ if ($playerid_db === '') {
     //
     // start rune_PL_wrk
     sysCmd('pgrep -x rune_PL_wrk || systemctl start rune_PL_wrk');
-    $start4 = microtime(true);
-    $starttime = ($start4-$start3)+$firstlap;
-    runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
-    ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
     //
     // start the local browser
     // clear the cache otherwise file_exists() returns incorrect values
@@ -376,12 +381,21 @@ if ($playerid_db === '') {
     sysCmd('iwconfig wlan0 power off');
     // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
     sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php -f /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+    if ($redis->get('first_time_boot')) {
+        // display the first boot message
+        sysCmd("ply-image '/usr/share/bootsplash/runeaudio_first_time.png'");
+        $redis->set('first_time_boot', 0);
+    }
     //
     // close startup Redis connection
+    $redis->bgsave();
     $redis->close();
     //
-    // reset usb storage (also starts samba), set the mpd volume, collect debug data, set process priority (to nice)
-    sysCmdAsync('nice --adjustment=1 /var/www/command/usbmount ; php -f /var/www/command/set_mpd_volume.php ; php -f /var/www/command/debug_collector ; /srv/http/command/rune_prio nice');
+    $start4 = microtime(true);
+    $starttime = ($start4-$start3)+$firstlap;
+    runelog('WORKER rune_SY_wrk.php STARTED in '.$starttime.' seconds.');
+    // noid ui_notify_async('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
+    ui_notify('system worker', 'rune_SY_wrk started in '.$starttime.' seconds.');
     runelog('--- NORMAL STARTUP');
     // --- NORMAL STARTUP //
 }
