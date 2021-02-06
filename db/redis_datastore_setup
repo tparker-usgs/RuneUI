@@ -325,6 +325,7 @@ function redisDatastore($redis,$action) {
             $redis->set('network_storedProfiles', json_encode(array()));
             $redis->set('network_mac_spoof', json_encode(array('00:e0:4c:53:44:58', '')));
             $redis->del('fix_mac');
+            $redis->del('bluetooth_on');
             // proxy settings
             $redis->hSet('proxy', 'enable', 0);
             $redis->hSet('proxy', 'host', '');

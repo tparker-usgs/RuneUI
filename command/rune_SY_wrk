@@ -173,9 +173,12 @@ if ($playerid_db === '') {
     // ensure that systemd-time is on
     sysCmd('/srv/http/command/switch_systemd_time_on.sh');
     wrk_avahiconfig($redis, strtolower(trim($redis->get('hostname'))));
-    runelog('--- RUNEAUDIO FIRST RUN PROCESS');
-    // display the first boot message
-    sysCmd("ply-image '/usr/share/bootsplash/runeaudio_first_time.png'");
+    // disable/enable Bluetooth, bluetooth_on is set depending on the Pi model on-board Bluetooth support
+    if ($redis->get('bluetooth_on')) {
+        sysCmd('/var/www/command/bluetooth_on.sh');
+    } else {
+        sysCmd('/var/www/command/bluetooth_off.sh');
+    }
     // invoke rune_SY_wrk respawn
     sysCmd('systemctl daemon-reload');
     sysCmd('systemctl restart rune_SY_wrk');
@@ -1493,6 +1496,22 @@ while (1) {
                         //ui_notify_async('Underclocking', 'Disabled.', $jobID);
                         // noid ui_notify_async('Underclocking', 'Disabled.');
                         ui_notify('Underclocking', 'Disabled.');
+                    }
+                    $redis->sRem('w_lock', $jobID);
+                    break;
+                case 'bluetooth_toggle':
+                    runelog('wrk_SY: ', $job->wrkcmd);
+                    $redis->sAdd('w_lock', $jobID);
+                    if ($job->action === 1) {
+                        sysCmd('/var/www/command/bluetooth_on.sh');
+                        //ui_notify_async('Bluetooth', 'Enabled.', $jobID);
+                        // noid ui_notify_async('Bluetooth', 'Enabled.');
+                        ui_notify('Bluetooth', 'Enabled.');
+                    } else {
+                        sysCmd('/var/www/command/bluetooth_on.sh');
+                        //ui_notify_async('Bluetooth', 'Disabled.', $jobID);
+                        // noid ui_notify_async('Bluetooth', 'Disabled.');
+                        ui_notify('Bluetooth', 'Disabled.');
                     }
                     $redis->sRem('w_lock', $jobID);
                     break;
