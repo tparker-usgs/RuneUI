@@ -6695,3 +6695,240 @@ function set_last_mpd_volume($redis)
         }
     }
 }
+
+
+// function to get information from last.fm
+function get_lastFm($redis, $url)
+// returns false or the response from last.fm as an array
+// the $url parameter must contain the authorisation token
+{
+    $lastfmUp = $redis->hGet('service', 'lastfm');
+    $proxy = $redis->hGetall('proxy');
+    $lastfmDownErrors = array(8, 11, 16, 29);
+    // for error codes see: https://www.last.fm/api/errorcodes
+    if (!$lastfmUp) {
+        // last.fm is down
+        return 0;
+    }
+    $retval = json_decode(curlGet($url, $proxy), true);
+    if (isset($retval['error'])) {
+        if (in_array($retval['error'], $lastfmDownErrors)) {
+            // last.fm is down, or has other problems, for error codes see: https://www.last.fm/api/errorcodes
+            // disable last.fm
+            $redis->hSet('service', 'lastfm', 0);
+            // this will be reset each 15 minutes, if the last.fm site is up
+        }
+        // an error has been returned, 
+        return 0;
+    } else if (!is_array($retval)) {
+        // response is not an array
+        return 0;
+    }
+    return $retval;
+}
+
+// function to get information from musicbrainz
+function get_musicBrainz($redis, $url)
+// returns false or the response from musicbrainz as an array
+// no authorisation token is required in the $url parameter
+{
+    $musicbrainzUp = $redis->hGet('service', 'musicbrainz');
+    $MusicBrainzUserAgent = 'RuneAudio/'.$redis->hGet('git', 'branch').'.'.$redis->get('buildversion').' ( https://www.runeaudio.com/forum/member857.html )';
+    // $proxy = $redis->hGetall('proxy');
+    // proxy currently not implemented
+    if (!$musicbrainzUp) {
+        // musicbrainz is down
+        return 0;
+    }
+    $opts = array('http' =>
+        array(
+            // timeout in seconds
+            // 3 seconds is a little on the high side, 1 or 2 is probably better
+            // setting it higher results in less failures, but causes musicbrainz to search for more obscure and more false matches
+            // but this part of the code is attempted only when musicbrainz is up, so it should not be a problem
+            'timeout' => 3,
+            // ignore any errors, we check the returned value for errors
+            'ignore_errors' => '1',
+            // set up the user agent ! this is very important !
+            'user_agent' => $MusicBrainzUserAgent
+        )
+    );
+    // proxy is something like this - untested
+    // if (isset($proxy['enable']) && $proxy['enable']) {
+        // if (isset($proxy['host']) && $proxy['host']) {
+            // $opts['http']['proxy'] = $proxy['host'];
+            // if (isset($proxy['user']) && $proxy['user'] && isset($proxy['pass'])) {
+                // $opts['http']['header'] = array("Proxy-Authorization: Basic $proxy['user']:$proxy['pass']");
+            // }
+        // }
+    // }
+    $context  = stream_context_create($opts);
+    $retval = json_decode(file_get_contents($url, false, $context), true);
+    if (isset($retval['error'])) {
+        // error response, some are ok, I cannot fine a full list, so it is trial and error
+        if (strpos(strtolower(' '.$retval['error']),'do not match')) {
+            // no match error, it can happen, return false, don't disable musicbrainz
+            return 0;
+        } else {
+            // unknown error response, save the details and disable musicbrainz
+            $redis->hSet('musicbrainz', 'url', $url);
+            $redis->hSet('musicbrainz', 'error', $retval['error']);
+            $redis->hSet('musicbrainz', 'retval', json_encode($retval));
+            $redis->hSet('service', 'musicbrainz', 0);
+            // this will be reset each 15 minutes, if the musicbrainz site is up
+            return 0;
+        }
+    } else if (!is_array($retval)) {
+        // response is not an array, probably timed out, this is OK most of the time (see note above about false matches), don't disable musicbrainz
+        return 0;
+    }
+    return $retval;
+}
+
+// function to get information from fanart.tv
+function get_fanartTv($redis, $url)
+// returns false or the response from fanart.tv as an array
+// the $url parameter must contain the authorisation token
+{
+    $fanarttvUp = $redis->hGet('service', 'fanarttv');
+    // $proxy = $redis->hGetall('proxy');
+    // using a proxy is possible but not implemented
+    if (!$fanarttvUp) {
+        // fanart.tv is down
+        return 0;
+    }
+    $opts = array('http' =>
+        array(
+            // timeout in seconds
+            // 3 seconds is a little on the high side, 1 or 2 is probably better.
+            // but this part of the code is attempted only when fanart.tv is up, so it should not be a problem
+            'timeout' => 3,
+            // ignore any errors, we check the returned value for errors
+            'ignore_errors' => '1'
+        )
+    );
+    // proxy is something like this - untested
+    // if (isset($proxy['enable']) && $proxy['enable']) {
+        // if (isset($proxy['host']) && $proxy['host']) {
+            // $opts['http']['proxy'] = $proxy['host'];
+            // if (isset($proxy['user']) && $proxy['user'] && isset($proxy['pass'])) {
+                // $opts['http']['header'] = array("Proxy-Authorization: Basic $proxy['user']:$proxy['pass']");
+            // }
+        // }
+    // }
+    $context  = stream_context_create($opts);
+    $retval = json_decode(file_get_contents($url, false, $context), true);
+    // json_decode returns null when it cannot decode the string
+    if (isset($retval['status']) && $retval['status'] === 'error') {
+        // an error has been returned, valid response but no results
+        return 0;
+    } else if (!is_array($retval)) {
+        // unexpected response, disable fanarttv
+        $redis->hSet('service', 'fanarttv', 0);
+        // this will be reset each 15 minutes, if the fanarttv site is up
+        return 0;
+    }
+    return $retval;
+}
+
+// function to get information from discogs
+function get_discogs($redis, $url)
+// returns false or the response from discogs as an array
+// the $url parameter must contain the authorisation token
+{
+    $discogsUp = $redis->hGet('service', 'discogs');
+    if (!$discogsUp) {
+        // discogs is down
+        return 0;
+    }
+    // $proxy = $redis->hGetall('proxy');
+    // using a proxy is possible but not implemented
+    $retval = json_decode(sysCmd('curl -s -f --connect-timeout 3 -m 7 --retry 2 "'.$url.'"')[0], true);
+    if (!isset($retval['pagination']['items'])) {
+        // unexpected response, disable discogs, items should always be set
+        $redis->hSet('service', 'discogs', 0);
+        // this will be reset each 15 minutes, if the discogs site is up
+        return 0;
+    } else if (!$retval['pagination']['items']) {
+        // a zero number of items has been returned, valid response but no results
+        return 0;
+    } else if (!is_array($retval)) {
+        // response is not an array
+        return 0;
+    }
+    return $retval;
+}
+
+// function to get information from makeitpersonal
+function get_makeitpersonal($redis, $url)
+// returns false or the response from makeitpersonal as an array
+// no authorisation token required
+{
+    $makeitpersonalUp = $redis->hGet('service', 'makeitpersonal');
+    if (!$makeitpersonalUp) {
+        // makeitpersonal is down
+        return 0;
+    }
+    // $proxy = $redis->hGetall('proxy');
+    // using a proxy is possible but not implemented
+    $retval = sysCmd('curl -s -f --connect-timeout 3 -m 7 --retry 2 "'.$url.'"');
+    $retval = preg_replace('!\s+!', ' ', implode('<br>', $retval));
+    if (!$retval) {
+        // nothing returned, disable makeitpersonal, it should always return something, disable makeitpersonal
+        $redis->hSet('service', 'makeitpersonal', 0);
+        // this will be reset each 15 minutes, if the makeitpersonal site is up
+        return 0;
+    } else if (strpos(strtolower(' '.$retval), 'something went wrong')) {
+        // 'something went wrong' returned, error condition, disable makeitpersonal
+        $redis->hSet('service', 'makeitpersonal', 0);
+        // this will be reset each 15 minutes, if the makeitpersonal site is up
+        return 0;
+    }
+    $return = array();
+    $return['song_lyrics'] = $retval;
+    return $return;
+}
+
+// function to get information from coverartarchive.org
+function get_coverartarchiveorg($redis, $url)
+// returns false or the response from coverartarchiveorg as an array
+// the $url parameter must contain the authorisation token
+{
+    $coverartarchiveorgUp = $redis->hGet('service', 'coverartarchiveorg');
+    $MusicBrainzUserAgent = 'RuneAudio/'.$redis->hGet('git', 'branch').'.'.$redis->get('buildversion').' ( https://www.runeaudio.com/forum/member857.html )';
+    if (!$coverartarchiveorgUp) {
+        // coverartarchiveorg is down
+        return 0;
+    }
+    // $proxy = $redis->hGetall('proxy');
+    // using a proxy is possible but not implemented
+    $opts = array('http' =>
+        array(
+            // timeout in seconds
+            // 3 seconds is a little on the high side, 1 or 2 is probably better.
+            // but this part of the code is attempted only when musicbrainz is up, so it should not be a problem
+            'timeout' => 3,
+            // ignore any errors, we check the returned value for errors
+            'ignore_errors' => '1',
+            // set up the user agent ! this is important !
+            'user_agent' => $MusicBrainzUserAgent
+        )
+    );
+    // proxy is something like this - untested
+    // if (isset($proxy['enable']) && $proxy['enable']) {
+        // if (isset($proxy['host']) && $proxy['host']) {
+            // $opts['http']['proxy'] = $proxy['host'];
+            // if (isset($proxy['user']) && $proxy['user'] && isset($proxy['pass'])) {
+                // $opts['http']['header'] = array("Proxy-Authorization: Basic $proxy['user']:$proxy['pass']");
+            // }
+        // }
+    // }
+    $context  = stream_context_create($opts);
+    $retval = json_decode(file_get_contents($url, false, $context), true);
+    // json_decode returns null when it cannot decode the string
+    if (!$retval || !is_array($retval)) {
+        // nothing has been returned
+        return 0;
+    }
+    return $retval;
+}
